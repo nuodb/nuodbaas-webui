@@ -5,6 +5,7 @@ import FieldHidden from "./FieldHidden";
 import FieldPassword from "./FieldPassword";
 import FieldBoolean from "./FieldBoolean";
 import FieldObject from "./FieldObject";
+import FieldMap from "./FieldMap";
 import FieldArray from "./FieldArray";
 import FieldInteger from "./FieldInteger";
 
@@ -14,11 +15,10 @@ import FieldInteger from "./FieldInteger";
  * @param parameter - schema definition for this field
  * @param values - contains object with ALL values (and field names) of this form (not just this field).
  *                 the key is the field name (name is separated by period if the field is hierarchical)
- * @param onChange - callback to update field value
+ * @param setValues - callback to update field values
  * @returns
  */
-export default function Field({ prefix, parameter, values, onChange }) {
-
+export default function Field({ prefix, parameter, values, setValues }) {
     let leftOvers = JSON.parse(JSON.stringify(parameter));
     if (!("schema" in leftOvers)) {
         leftOvers["schema"] = {};
@@ -65,24 +65,33 @@ export default function Field({ prefix, parameter, values, onChange }) {
             return <FieldHidden prefix={prefix} values={values} />;
         }
         else if (prefix.toLowerCase().includes("password")) {
-            return <FieldPassword prefix={prefix} values={values} required={required} onChange={onChange} />;
+            return <FieldPassword prefix={prefix} values={values} required={required} setValues={setValues} />;
         }
         else {
-            return <FieldString prefix={prefix} values={values} required={required} onChange={onChange} />;
+            return <FieldString prefix={prefix} values={values} required={required} setValues={setValues} />;
         }
     }
     else if (type === "boolean") {
-        return <FieldBoolean prefix={prefix} values={values} required={required} onChange={onChange} />;
+        return <FieldBoolean prefix={prefix} values={values} required={required} setValues={setValues} />;
     }
     else if (type === "object") {
         let childParameter = parameter["properties"] || { additionalProperties: parameter["additionalProperties"] };
-        return <FieldObject prefix={prefix} parameter={childParameter} values={values} onChange={onChange} />;
+        if (parameter["properties"]) {
+            return <FieldObject prefix={prefix} parameter={parameter["properties"]} values={values} setValues={setValues} />;
+        }
+        else if (parameter["additionalProperties"]) {
+            return <FieldMap prefix={prefix} parameter={parameter["additionalProperties"]} values={values} setValues={setValues} />;
+        }
+        else {
+            console.log("ERROR: Invalid object", prefix, parameter);
+            return <h1>ERROR: Invalid object</h1>;
+        }
     }
     else if (type === "array") {
-        return <FieldArray prefix={prefix} parameter={parameter} values={values} onChange={onChange} />;
+        return <FieldArray prefix={prefix} parameter={parameter} values={values} setValues={setValues} />;
     }
     else if (type === "integer") {
-        return <FieldInteger prefix={prefix} values={values} required={required} onChange={onChange} />;
+        return <FieldInteger prefix={prefix} values={values} required={required} setValues={setValues} />;
     }
     else {
         return <h3>Invalid type {String(type)} {JSON.stringify(parameter)} {JSON.stringify(leftOvers)}</h3>;

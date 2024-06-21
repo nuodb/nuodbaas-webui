@@ -5,6 +5,7 @@ import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultVa
 import Container from '@mui/material/Container'
 import Button from '@mui/material/Button'
 import Auth from "../../../utils/auth";
+import { setValue, getValue } from "../../fields/utils";
 
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
@@ -20,14 +21,24 @@ export default function CreateEditEntry ({schema, path, data}) {
     const [ message, setMessage ] = useState("");
 
     useEffect(() => {
+        function setDefaultValues(values, fullKey, params, data) {
+            Object.keys(params).forEach(key => {
+                let defaultValue = getDefaultValue(params[key], data && data[key]);
+                if(defaultValue !== null) {
+                    if(params[key].type === "object" && params[key].properties) {
+                        setDefaultValues(values, fullKey ? (fullKey + "." + key) : key, params[key].properties, data[key]);
+                    }
+                    else {
+                        setValue(values, fullKey ? (fullKey + "." + key) : key, defaultValue);
+                    }
+                }
+            });
+        }
+
         let createPath = data ? path : getCreatePath(schema, path);
         let putResource = getResourceByPath(schema, createPath)["put"];
 
         let urlParams = arrayToObject(putResource["parameters"], "name");
-        let v = {};
-        Object.keys(urlParams).forEach(key => {
-            v[key] = getDefaultValue(urlParams[key], data && data[key])
-        })
         setUrlParameters(urlParams);
 
         let formParams = getChild(putResource, ["requestBody", "content", "application/json", "schema", "properties"])
@@ -36,12 +47,9 @@ export default function CreateEditEntry ({schema, path, data}) {
         required.forEach(req => {
             formParams[req].required = true;
         })
-        Object.keys(formParams).forEach(key => {
-            let defaultValue = getDefaultValue(formParams[key], data && data[key]);
-            if(defaultValue !== null) {
-                v[key] = defaultValue;
-            }
-        });
+
+        let v = {};
+        setDefaultValues(v, null, formParams, data);
         setValues(v);
         setFormParameters(formParams);
     }, [schema, path, data]);
@@ -60,27 +68,18 @@ export default function CreateEditEntry ({schema, path, data}) {
     <form>
         <h1>{(data && "Edit") || "Create"} entry for {path}</h1>
         <div className="fields">
-        {urlParameters && Object.keys(urlParameters).map(key => {
+        {urlParameters && Object.keys(urlParameters)
+        .filter(key => urlParameters[key]["in"] === "query")
+        .map(key => {
             let urlParameter = {...urlParameters[key]};
-            return <Field key={key} prefix={key} parameter={urlParameter} values={values} onChange={({target: input}) => {
-                let v = { ...values };
-                v[input.name] = input.value;
-                setValues(v);
-            }
-            }/>
+            return <Field key={key} prefix={key} parameter={urlParameter} values={values} setValues={setValues}/>
         }
         )}
-        <hr/>
         {formParameters && Object.keys(formParameters)
                 .filter(key => formParameters[key].readOnly !== true)
                 .map(key => {
                     let formParameter = {...formParameters[key]};
-                    return <Field key={key} prefix={key} parameter={formParameter} values={values} onChange={({target: input}) => {
-                        let v = { ...values };
-                        v[input.name] = input.value;
-                        setValues(v);
-                    }
-                    }/>
+                    return <Field key={key} prefix={key} parameter={formParameter} values={values} setValues={setValues}/>
                 }
         )}
         {error && <h3 style={{color: "red"}}>{error}</h3>}
