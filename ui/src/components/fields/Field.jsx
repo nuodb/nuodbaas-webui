@@ -75,7 +75,6 @@ export default function Field({ prefix, parameter, values, setValues }) {
         return <FieldBoolean prefix={prefix} values={values} required={required} setValues={setValues} />;
     }
     else if (type === "object") {
-        let childParameter = parameter["properties"] || { additionalProperties: parameter["additionalProperties"] };
         if (parameter["properties"]) {
             return <FieldObject prefix={prefix} parameter={parameter["properties"]} values={values} setValues={setValues} />;
         }

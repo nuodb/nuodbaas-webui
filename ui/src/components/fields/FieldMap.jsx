@@ -1,19 +1,14 @@
 import React, { useState } from "react";
-import Field from "./Field";
-import { getDefaultValue } from "../../utils/schema";
 import { setValue, getValue } from "./utils";
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardHeader from '@mui/material/CardHeader';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
 
 /**
  * show Field of type Object using the values and schema definition

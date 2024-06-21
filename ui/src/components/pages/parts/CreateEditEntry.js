@@ -5,7 +5,7 @@ import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultVa
 import Container from '@mui/material/Container'
 import Button from '@mui/material/Button'
 import Auth from "../../../utils/auth";
-import { setValue, getValue } from "../../fields/utils";
+import { setValue } from "../../fields/utils";
 
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
