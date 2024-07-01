@@ -13,7 +13,7 @@ import { getValue, setValue } from "./utils"
  */
 export default function FieldString({ prefix, values, required, setValues }) {
     let value = String(getValue(values, prefix) || "");
-    return <TextField required={required} id={prefix} name={prefix} label={prefix} value={value} onChange={({ currentTarget: input }) => {
+    return <TextField fullWidth={true} required={required} id={prefix} name={prefix} label={prefix} value={value} onChange={({ currentTarget: input }) => {
         let v = { ...values };
         setValue(v, prefix, input.value);
         setValues(v);

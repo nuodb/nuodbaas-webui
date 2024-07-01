@@ -1,7 +1,14 @@
 import React from "react";
-import Field from "./Field";
-import { getDefaultValue } from "../../utils/schema";
+import Button from '@mui/material/Button'
 import { setValue, getValue } from "./utils";
+import Card from '@mui/material/Card';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import TextField from '@mui/material/TextField'
 
 /**
  * show Field of type Array using the values and schema definition
@@ -14,13 +21,53 @@ import { setValue, getValue } from "./utils";
  */
 export default function FieldArray({ prefix, parameter, values, setValues }) {
     let ret = [];
-    for (let i = 0; i < values.length; i++) {
+    let value = getValue(values, prefix);
+    for (let i = 0; i < value.length; i++) {
         let prefixKey = prefix + "." + i;
-        ret.push(<Field key={prefixKey} name={prefixKey} parameter={parameter["items"]} values={values} setValues={setValues} />);
+        ret.push(<TableRow key={prefixKey}>
+            <TableCell>
+                <TextField
+                    fullWidth={true}
+                    id={prefixKey}
+                    name={prefixKey}
+                    label={prefixKey}
+                    value={getValue(values, prefix)[i]}
+                    onChange={({ currentTarget: input }) => {
+                        let v = { ...values };
+                        setValue(v, prefixKey, input.value === "" ? null : input.value);
+                        setValues(v)
+                    }} />
+            </TableCell>
+        </TableRow>);
     }
-    let prefixKey = prefix + "." + getValue(values, prefix).length;
-    values = { ...values }
-    setValue(values, prefixKey, getDefaultValue(parameter, getValue(values, prefixKey)));
-    ret.push(<Field key={prefixKey} prefix={prefixKey} parameter={parameter["items"]} values={values} setValues={setValues} />);
-    return ret;
+
+    let prefixKey = prefix + "." + value.length;
+    ret.push(<TableRow key={prefixKey}>
+        <TableCell>
+            <TextField
+                fullWidth={true}
+                id={prefixKey}
+                name={prefixKey}
+                label={prefixKey}
+                value=""
+                onChange={({ currentTarget: input }) => {
+                    let v = { ...values };
+                    setValue(v, prefixKey, input.value);
+                    setValues(v)
+                }} />
+        </TableCell>
+    </TableRow>);
+
+    return <TableContainer component={Card}>
+        <Table>
+            <TableHead>
+                <TableRow>
+                    <TableCell>{prefix.split(".").slice(-1)[0]}</TableCell>
+                </TableRow>
+            </TableHead>
+            <TableBody>
+                {ret}
+            </TableBody>
+        </Table>
+    </TableContainer>;
 }

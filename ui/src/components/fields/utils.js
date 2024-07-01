@@ -38,7 +38,15 @@ export function setValue(values, prefix, value) {
         values_ = values_[parts[i]];
     }
     if(value === null || value === undefined) {
-        delete values_[parts[parts.length-1]];
+        if(isNaN(parts[parts.length-1])) {
+            // remove object property
+            delete values_[parts[parts.length-1]];
+        }
+        else {
+            // remove array element
+            let index = parseInt(parts[parts.length-1]);
+            values_.splice(index, 1);
+        }
     }
     else {
         values_[parts[parts.length-1]] = value;
