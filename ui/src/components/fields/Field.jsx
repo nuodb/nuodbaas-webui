@@ -83,7 +83,12 @@ export default function Field({ prefix, parameter, values, setValues }) {
         }
         else {
             console.log("ERROR: Invalid object", prefix, parameter);
-            return <h1>ERROR: Invalid object</h1>;
+            if (process && process.env && process.env.NODE_ENV === "development") {
+                return <h1>ERROR: Invalid object</h1>;
+            }
+            else {
+                return null;
+            }
         }
     }
     else if (type === "array") {

@@ -38,7 +38,8 @@ export function setValue(values, prefix, value) {
         values_ = values_[parts[i]];
     }
     if(value === null || value === undefined) {
-        if(isNaN(parts[parts.length-1])) {
+        const lastPart = parts[parts.length-1];
+        if(lastPart === "" || isNaN(lastPart)) {
             // remove object property
             delete values_[parts[parts.length-1]];
         }

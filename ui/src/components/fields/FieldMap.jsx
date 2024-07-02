@@ -21,6 +21,7 @@ import TableRow from '@mui/material/TableRow';
  */
 export default function FieldMap({ prefix, parameter, values, setValues }) {
     const [newKey, setNewKey] = useState("");
+    const [newValue, setNewValue] = useState("");
 
     let valueKeys = Object.keys(getValue(values, prefix) || {});
     let rows = [];
@@ -62,33 +63,45 @@ export default function FieldMap({ prefix, parameter, values, setValues }) {
     let prefixParts = prefix.split(".");
     let lastPrefix = prefixParts[prefixParts.length - 1];
 
-    let prefixKeyLabel = prefix + ".new";
+    let prefixKeyLabel = prefix + ".key";
+    let prefixValueLabel = prefix + ".value"
     rows.push(<TableRow key={prefixKeyLabel}>
         <TableCell>
             <TextField
                 fullWidth={true}
                 id={prefixKeyLabel}
                 name={prefixKeyLabel}
-                label={"new item"}
+                label={"new key"}
                 value={newKey}
                 onChange={({ currentTarget: input }) => {
                     setNewKey(input.value);
                 }} />
         </TableCell>
         <TableCell>
-            <Button onClick={() => {
+            <TextField
+                fullWidth={true}
+                id={prefixValueLabel}
+                name={prefixValueLabel}
+                label={"new value"}
+                value={newValue}
+                onChange={({ currentTarget: input }) => {
+                    setNewValue(input.value);
+                }} />
+        </TableCell>
+        <TableCell>
+            <Button disabled={newKey === "" || valueKeys.includes(newKey)} onClick={() => {
                 let value = getValue(values, prefix);
                 if (value === null) {
                     value = {};
                 }
                 value = { ...value };
-                value[newKey] = "";
+                value[newKey] = newValue;
                 setNewKey("");
+                setNewValue("");
                 setValue(values, prefix, value);
                 setValues(values);
             }}>Add</Button>
         </TableCell>
-        <TableCell></TableCell>
     </TableRow>);
 
     return (

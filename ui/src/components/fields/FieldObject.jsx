@@ -16,7 +16,7 @@ import CardContent from '@mui/material/CardContent';
  */
 export default function FieldObject({ prefix, parameter, values, setValues }) {
     return <Card>
-        <CardContent>
+        <CardContent className="fields">
             <h3>{prefix}</h3>
             {Object.keys(parameter).map(key => {
                 let prefixKey = prefix ? (prefix + "." + key) : key;
