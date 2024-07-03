@@ -327,8 +327,14 @@ export async function submitForm(urlParameters, formParameters, path, values) {
         }
         fullPath += encodeURIComponent(query) + "={" + query + "}";
     })
+
+    values = {...values};
     Object.keys(values).forEach(key => {
         fullPath = fullPath.replace("{" + key + "}", String(values[key]));
+        if(!(key in formParameters)) {
+            //remove fields which are not used as form parameter
+            delete values[key];
+        }
     });
 
     return new Promise((resolve, reject) => {
