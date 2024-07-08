@@ -22,8 +22,6 @@ jobs:
       - image: cimg/base:2023.05
     steps:
       - checkout
-      - setup_publish:
-          requires_release_tag: false
       - aws-cli/setup
       - run:
           name: Check that AWS environment variables were supplied
@@ -48,3 +46,10 @@ jobs:
           name: Push Helm charts to ECR
           command: |
             helm push charts/dbaas-cockpit "oci://$ECR_ACCOUNT_URL/"
+workflows:
+  version: 2
+  continuous:
+    jobs:
+      # run test jobs in parallel
+      - build_and_deploy:
+          name: "Build and deploy"
