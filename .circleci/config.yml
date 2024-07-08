@@ -23,6 +23,8 @@ jobs:
     steps:
       - checkout
       - aws-cli/setup
+      - helm/install-helm-client
+      - setup_remote_docker
       - run:
           name: Check that AWS environment variables were supplied
           command: |
@@ -30,7 +32,6 @@ jobs:
             AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account | sed 's/^"\(.*\)"$/\1/g')"
             ECR_ACCOUNT_URL="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
             echo "export ECR_ACCOUNT_URL=\"$ECR_ACCOUNT_URL\"" >> "$BASH_ENV"
-      - helm/install-helm-client
       - run:
           name: Login to ECR for Docker and Helm
           command: |
