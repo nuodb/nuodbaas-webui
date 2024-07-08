@@ -41,7 +41,7 @@ jobs:
           name: Build and deploy Docker image to ECR
           command: PUSH_REPO="$ECR_ACCOUNT_URL/$IMG_REPO" make deploy-image
           environment:
-            IMG_REPO: nuodb/dbaas-cockpit
+            IMG_REPO: dbaas-cockpit
             IMG_TAG: latest
       - run:
           name: Push Helm charts to ECR

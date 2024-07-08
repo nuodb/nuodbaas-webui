@@ -4,7 +4,7 @@ all:
 	@echo "make deploy-image"
 	@echo "make build-ui"
 
-IMG_REPO ?= nuodb/dbaas-cockpit
+IMG_REPO ?= dbaas-cockpit
 IMG_TAG ?= latest
 
 .PHONY: check-dev-services
