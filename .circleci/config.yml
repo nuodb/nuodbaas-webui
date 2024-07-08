@@ -1,0 +1,54 @@
+# CircleCI 2.1 configuration file
+#
+version: 2.1
+
+orbs:
+  # Check https://circleci.com/developer/orbs/orb/circleci/node for more details
+  node: circleci/node@5.2.0
+
+  # Check https://circleci.com/developer/orbs/orb/circleci/github-cli for more details
+  github-cli: circleci/github-cli@2.2.0
+
+  # Check https://circleci.com/developer/orbs/orb/circleci/aws-cli for more details
+  aws-cli: circleci/aws-cli@4.0.0
+
+  # Check https://circleci.com/developer/orbs/orb/circleci/helm for more details
+  helm: circleci/helm@2.0.1
+
+jobs:
+  build_and_deploy:
+    # Check https://circleci.com/developer/images/image/cimg/base for more details
+    docker:
+      - image: cimg/base:2023.05
+    steps:
+      - checkout
+      - run:
+          name: Create Docker Image
+          command: |
+            	docker build -t dbaas-cockpit -f docker/production/Dockerfile .
+      - setup_publish:
+          requires_release_tag: false
+      - aws-cli/setup
+      - run:
+          name: Check that AWS environment variables were supplied
+          command: |
+            : ${AWS_REGION:?"Must specify AWS region"}
+            AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account | sed 's/^"\(.*\)"$/\1/g')"
+            ECR_ACCOUNT_URL="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
+            echo "export ECR_ACCOUNT_URL=\"$ECR_ACCOUNT_URL\"" >> "$BASH_ENV"
+      - run:
+          name: Login to ECR for Docker and Helm
+          command: |
+            aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
+            aws ecr get-login-password --region "$AWS_REGION" | helm registry login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
+      - run:
+          name: Push all tags for Docker image to ECR
+          command: PUSH_REPO="$ECR_ACCOUNT_URL/$IMG_REPO" make deploy-image
+          environment:
+            IMG_REPO: nuodb/dbaas-cockpit
+            IMG_TAG: latest
+      - helm/install-helm-client
+      - run:
+          name: Push Helm charts to ECR
+          command: |
+            helm push charts/dbaas-cockpit "oci://$ECR_ACCOUNT_URL/"

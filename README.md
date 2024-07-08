@@ -35,7 +35,7 @@ make deploy
 kubectl port-forward svc/nuodb-cp-rest 8080 &
 ```
 
-### Setup UI
+### Setup and run UI
 
 ```
 cd dbaas-cockpit
