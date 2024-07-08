@@ -30,6 +30,7 @@ jobs:
             AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account | sed 's/^"\(.*\)"$/\1/g')"
             ECR_ACCOUNT_URL="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
             echo "export ECR_ACCOUNT_URL=\"$ECR_ACCOUNT_URL\"" >> "$BASH_ENV"
+      - helm/install-helm-client
       - run:
           name: Login to ECR for Docker and Helm
           command: |
@@ -41,7 +42,6 @@ jobs:
           environment:
             IMG_REPO: nuodb/dbaas-cockpit
             IMG_TAG: latest
-      - helm/install-helm-client
       - run:
           name: Push Helm charts to ECR
           command: |
