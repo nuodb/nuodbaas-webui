@@ -46,7 +46,7 @@ jobs:
       - run:
           name: Push Helm charts to ECR
           command: |
-            tar -czf dbaas-cockpit.tgz -C charts/dbaas-cockpit .
+            helm package charts/dbaas-cockpit
             helm push dbaas-cockpit.tgz "oci://$ECR_ACCOUNT_URL/"
 workflows:
   version: 2
