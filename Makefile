@@ -27,7 +27,7 @@ build-image:
 	@docker build -t ${IMG_REPO} -f docker/production/Dockerfile .
 
 .PHONY: deploy-image
-deploy-image:
+deploy-image: build-image
 	@if [ "${PUSH_REPO}" != "" ] ; then \
 		docker tag "${IMG_REPO}:${IMG_TAG}" "${PUSH_REPO}:${IMG_TAG}" && \
 		docker push "${PUSH_REPO}:${IMG_TAG}"; \
