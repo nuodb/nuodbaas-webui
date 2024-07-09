@@ -1,10 +1,10 @@
 # Default values for dbaas-cockpit.
 replicaCount: 1
 image:
-  repository: nginx
+  repository: 253548315642.dkr.ecr.us-east-1.amazonaws.com/dbaas-cockpit
   pullPolicy: IfNotPresent
   pullSecrets: []
-  # tag: "1.25"
+  tag: latest
 resources:
   limits:
     cpu: 100m

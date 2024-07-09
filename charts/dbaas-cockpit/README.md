@@ -15,9 +15,9 @@ All configurable parameters for each top-level scope are detailed below, organiz
 | Parameter | Description | Default |
 | ----- | ----------- | ------ |
 | `replicaCount` | Number of replicas | `1` |
-| `image.repository` | NuoDB Control Plane container image repository |`ghcr.io/nuodb/nuodb-cp-images`|
-| `image.tag` | NuoDB Control Plane container image tag | `""` |
-| `image.pullPolicy` | NuoDB Control Plane container pull policy |`IfNotPresent`|
+| `image.repository` | NuoDB Cockpit UI container image repository |`ghcr.io/nuodb/nuodb-cp-images`|
+| `image.tag` | NuoDB Cockpit UI container image tag | `""` |
+| `image.pullPolicy` | NuoDB Cockpit UI container pull policy |`IfNotPresent`|
 | `image.pullSecrets` | Specify docker-registry secret names as an array | `[]` |
 | `resources.limits.cpu` | Specify cpu limit | `100m` |
 | `resources.limits.memory` | Specify memory limit | `128Mi` |
