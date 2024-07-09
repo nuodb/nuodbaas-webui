@@ -10,4 +10,4 @@ FROM nginx:alpine
 COPY --from=build-ui /app/build /usr/share/nginx/html
 COPY docker/production/files/ /
 EXPOSE 80
-CMD [ "nginx", "-g", "daemon off;" ]
+ENTRYPOINT [ "/entrypoint.sh" ]

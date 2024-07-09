@@ -5,6 +5,7 @@ image:
   pullPolicy: IfNotPresent
   pullSecrets: []
   tag: latest
+nuodbCpRestPrefix: /api
 resources:
   limits:
     cpu: 100m
