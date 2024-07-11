@@ -10,7 +10,7 @@ let schema;
 export async function getSchema() {
     if(!schema) {
         try {
-            schema = (await axios.get("/api/openapi", { headers: Auth.getHeaders() })).data;
+            schema = (await axios.get(Auth.getNuodbCpRestPrefix() + "/openapi", { headers: Auth.getHeaders() })).data;
             parseSchema(schema, schema, []);
             schema = schema["paths"];
         }
@@ -209,7 +209,7 @@ export function getFilterField(rootSchema, path) {
  * @returns
  */
 export async function getResource(path) {
-    let fullPath = "/api" + path;
+    let fullPath = Auth.getNuodbCpRestPrefix() + path;
     return new Promise((resolve, reject) => {
         axios.get(fullPath, { headers: Auth.getHeaders() })
             .then(response => resolve(response.data))
@@ -224,7 +224,7 @@ export async function getResource(path) {
  */
 export async function deleteResource(path) {
     return new Promise((resolve, reject) => {
-        axios.delete("/api/" + path, { headers: Auth.getHeaders() }).then(response => resolve(response.data)).catch(reason => reject(reason));
+        axios.delete(Auth.getNuodbCpRestPrefix() + "/" + path, { headers: Auth.getHeaders() }).then(response => resolve(response.data)).catch(reason => reject(reason));
     })
 }
 
@@ -308,7 +308,7 @@ export function getDefaultValue(parameter, value) {
  */
 export async function submitForm(urlParameters, formParameters, path, values) {
     let queryParameters = Object.keys(urlParameters).filter(key => urlParameters[key]["in"] === "query");
-    let fullPath = "/api" + path;
+    let fullPath = Auth.getNuodbCpRestPrefix() + path;
 
     // the last URL parameter has the name of the resource, while the form parameter always has "name"
     // rename last URL parameter to "name"
