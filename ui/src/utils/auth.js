@@ -11,18 +11,18 @@ export default class Auth {
     }
 
     static getNuodbCpRestPrefix() {
-        // The default for the NuoDB REST Control Plane prefix is "/api", which can be overwritten by the
-        // environment variable NUODB_CP_REST_PREFIX in the Docker container or Helm Chart config.
+        // The default for the NuoDB REST Control Plane prefix is "/nuodb-cp", which can be overwritten by the
+        // environment variable NUODB_CP_REST_PATH_PREFIX in the Docker container or Helm Chart config.
         //
-        // When the Docker container starts up, it will replace "___NUODB_CP_REST_PREFIX___" in the
+        // When the Docker container starts up, it will replace "___NUODB_CP_REST_PATH_PREFIX___" in the
         // built client with the custom URL using string replacement. I had to prevent the JavaScript
         // optimizer / webpack to optimize the next line, that's why I split the constant and made it
         // dependent on the current time (it will always be after January 1, 1970)
-        if("___NUODB_CP_REST_PREFIX___" !== "___NUODB_CP" + (Date.now() > 0 ? "_REST_PREFIX___" : "")) {
-            return "___NUODB_CP_REST_PREFIX___";
+        if("___NUODB_CP_REST_PATH_PREFIX___" !== "___NUODB_CP" + (Date.now() > 0 ? "_REST_PATH_PREFIX___" : "")) {
+            return "/___NUODB_CP_REST_PATH_PREFIX___";
         }
         else {
-            return "/api";
+            return "/nuodb-cp";
         }
     }
 

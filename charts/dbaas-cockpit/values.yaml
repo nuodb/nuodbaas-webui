@@ -1,17 +1,21 @@
 # Default values for dbaas-cockpit.
-replicaCount: 1
-image:
-  repository: 253548315642.dkr.ecr.us-east-1.amazonaws.com/dbaas-cockpit
-  pullPolicy: IfNotPresent
-  pullSecrets: []
-  tag: latest
-nuodbCpRestPrefix: /api
-resources:
-  limits:
-    cpu: 100m
-    memory: 128Mi
-  requests:
-    cpu: 100m
-    memory: 128Mi
-service:
-  type: ClusterIP
+cpRest:
+  ingress:
+    pathPrefix: nuodb-cp
+
+dbaasCockpit:
+  replicaCount: 1
+  image:
+    repository: 253548315642.dkr.ecr.us-east-1.amazonaws.com/dbaas-cockpit
+    pullPolicy: IfNotPresent
+    pullSecrets: []
+    tag: latest
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  service:
+    type: ClusterIP

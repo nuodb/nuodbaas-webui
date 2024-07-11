@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "dbaas-cockpit.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ .Values.dbaasCockpit.service.type }}
   ports:
     - port: 80
       targetPort: http
