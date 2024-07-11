@@ -1,0 +1,57 @@
+# CircleCI 2.1 configuration file
+#
+version: 2.1
+
+orbs:
+  # Check https://circleci.com/developer/orbs/orb/circleci/node for more details
+  node: circleci/node@5.2.0
+
+  # Check https://circleci.com/developer/orbs/orb/circleci/github-cli for more details
+  github-cli: circleci/github-cli@2.2.0
+
+  # Check https://circleci.com/developer/orbs/orb/circleci/aws-cli for more details
+  aws-cli: circleci/aws-cli@4.0.0
+
+  # Check https://circleci.com/developer/orbs/orb/circleci/helm for more details
+  helm: circleci/helm@2.0.1
+
+jobs:
+  build_and_deploy:
+    # Check https://circleci.com/developer/images/image/cimg/base for more details
+    docker:
+      - image: cimg/base:2023.05
+    steps:
+      - checkout
+      - aws-cli/setup
+      - helm/install-helm-client
+      - setup_remote_docker
+      - run:
+          name: Check that AWS environment variables were supplied
+          command: |
+            : ${AWS_REGION:?"Must specify AWS region"}
+            AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account | sed 's/^"\(.*\)"$/\1/g')"
+            ECR_ACCOUNT_URL="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
+            echo "export ECR_ACCOUNT_URL=\"$ECR_ACCOUNT_URL\"" >> "$BASH_ENV"
+      - run:
+          name: Login to ECR for Docker and Helm
+          command: |
+            aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
+            aws ecr get-login-password --region "$AWS_REGION" | helm registry login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
+      - run:
+          name: Build and deploy Docker image to ECR
+          command: PUSH_REPO="$ECR_ACCOUNT_URL/$IMG_REPO" make deploy-image
+          environment:
+            IMG_REPO: dbaas-cockpit
+            IMG_TAG: latest
+      - run:
+          name: Push Helm charts to ECR
+          command: |
+            helm package charts/dbaas-cockpit
+            helm push dbaas-cockpit-*.tgz "oci://$ECR_ACCOUNT_URL/"
+workflows:
+  version: 2
+  continuous:
+    jobs:
+      # run test jobs in parallel
+      - build_and_deploy:
+          name: "Build and deploy"
