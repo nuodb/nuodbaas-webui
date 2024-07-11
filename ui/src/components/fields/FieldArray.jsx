@@ -7,7 +7,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import TextField from '@mui/material/TextField'
+import Field from './Field'
 
 /**
  * show Field of type Array using the values and schema definition
@@ -21,39 +21,33 @@ import TextField from '@mui/material/TextField'
 export default function FieldArray({ prefix, parameter, values, setValues }) {
     let ret = [];
     let value = getValue(values, prefix);
-    for (let i = 0; i < value.length; i++) {
-        let prefixKey = prefix + "." + i;
-        ret.push(<TableRow key={prefixKey}>
-            <TableCell>
-                <TextField
-                    fullWidth={true}
-                    id={prefixKey}
-                    name={prefixKey}
-                    label={prefixKey}
-                    value={getValue(values, prefix)[i]}
-                    onChange={({ currentTarget: input }) => {
-                        let v = { ...values };
-                        setValue(v, prefixKey, input.value === "" ? null : input.value);
-                        setValues(v)
+    if (value !== null) {
+        for (let i = 0; i < value.length; i++) {
+            let prefixKey = prefix + "." + i;
+            ret.push(<TableRow key={prefixKey}>
+                <TableCell>
+                    <Field key={prefixKey} prefix={prefixKey} parameter={parameter.items} values={values} setValues={(vs) => {
+                        vs = { ...vs };
+                        let v = getValue(values, prefixKey);
+                        setValue(vs, prefixKey, v === "" ? null : v);
+                        setValues(vs)
                     }} />
-            </TableCell>
-        </TableRow>);
+                </TableCell>
+            </TableRow>);
+        }
     }
 
-    let prefixKey = prefix + "." + value.length;
+    let nextIndex = value === null ? 0 : value.length;
+    let prefixKey = prefix + "." + nextIndex;
+    console.log("parameter", parameter);
     ret.push(<TableRow key={prefixKey}>
         <TableCell>
-            <TextField
-                fullWidth={true}
-                id={prefixKey}
-                name={prefixKey}
-                label={prefixKey}
-                value=""
-                onChange={({ currentTarget: input }) => {
-                    let v = { ...values };
-                    setValue(v, prefixKey, input.value);
-                    setValues(v)
-                }} />
+            <Field key={prefixKey} prefix={prefixKey} parameter={parameter.items} values={values} setValues={(vs) => {
+                vs = { ...vs };
+                let v = getValue(values, prefixKey);
+                setValue(vs, prefixKey, v === "" ? null : v);
+                setValues(vs);
+            }} />
         </TableCell>
     </TableRow>);
 
