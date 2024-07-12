@@ -38,8 +38,8 @@ jobs:
             aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
             aws ecr get-login-password --region "$AWS_REGION" | helm registry login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
       - run:
-          name: Build and deploy Docker image to ECR
-          command: PUSH_REPO="$ECR_ACCOUNT_URL/$IMG_REPO" make deploy-image
+          name: Build, Test and deploy Docker image to ECR
+          command: PUSH_REPO="$ECR_ACCOUNT_URL/$IMG_REPO" make all
           environment:
             IMG_REPO: dbaas-cockpit
             IMG_TAG: latest

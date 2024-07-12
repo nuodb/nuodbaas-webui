@@ -1,12 +1,12 @@
-all:
-	@echo "make run-dev"
-	@echo "make run-integration-tests"
-	@echo "make setup-integration-tests"
-	@echo "make run-integration-tests-only"
-	@echo "make teardown-integration-tests"
-	@echo "make build-image"
-	@echo "make deploy-image"
-	@echo "make build-ui"
+help:
+	@echo "make all                        - build, test + deploy everything"
+	@echo "make build-image                - build UI and create Docker image"
+	@echo "make deploy-image               - deploy Docker image to AWS"
+	@echo "make run-integration-tests      - run integration tests (+setup)"
+	@echo "make setup-integration-tests    - setup containers before running integration tests"
+	@echo "make run-integration-tests-only - integration tests without setup/teardown"
+	@echo "make teardown-integration-tests - clean up containers used by integration tests"
+	@echo "make run-dev                    - launch nginx reverse proxy for development of /ui/ and /nuodb-cp/"
 
 OS := $(shell go env GOOS)
 ARCH := $(shell go env GOARCH)
@@ -16,9 +16,12 @@ KWOKCTL := bin/kwokctl
 IMG_REPO ?= dbaas-cockpit
 IMG_TAG ?= latest
 
-.PHONY: build-production
-build-production:
-	docker build -t dbaas-cockpit -f docker/production/Dockerfile .
+.PHONY: all
+all: build-image run-integration-tests deploy-image
+
+.PHONY: build-image
+build-image:
+	@docker build -t ${IMG_REPO} -f docker/production/Dockerfile .
 
 .PHONY: check-dev-services
 check-dev-services:
@@ -30,14 +33,6 @@ check-dev-services:
 		echo "NuoDB control plane is not running on port 8080"; \
 		exit 1; \
 	fi
-
-.PHONY: build-ui
-build-ui:
-	@cd ui && npm run build && cd ..
-
-.PHONY: build-image
-build-image:
-	@docker build -t ${IMG_REPO} -f docker/production/Dockerfile .
 
 .PHONY: deploy-image
 deploy-image: build-image
@@ -59,13 +54,15 @@ run-dev: check-dev-services
 setup-integration-tests:
 	@bin/kwokctl create cluster --wait 60s
 	@bin/kwokctl get kubeconfig | sed "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kwok-kwok-kube-apiserver:6443/g" > selenium-tests/files/kubeconfig
-	@kubectl apply -f selenium-tests/files/kubectl-apply.yaml --context kwok-kwok -n default
+	@kubectl apply -f selenium-tests/files/nuodb-cp-runtime-config.yaml --context kwok-kwok -n default
+	@curl -L https://github.com/nuodb/nuodb-cp-releases/releases/download/v2.6.0/nuodb-cp-crd-2.6.0.tgz | \
+		tar -axzOf - --wildcards nuodb-cp-crd/templates/*.yaml | kubectl apply -f - --context kwok-kwok -n default
 	@docker compose -f selenium-tests/compose.yaml up --wait
-	@docker exec -it selenium-tests-nuodb-cp-1 bash -c "curl \
+	@docker exec -it selenium-tests-nuodb-cp-1 bash -c "curl --fail \
 		http://localhost:8080/users/acme/user1?allowCrossOrganizationAccess=true \
 		--data-binary \
             '{\"password\":\"passw0rd\", \"name\":\"user1\", \"organization\": \"acme\", \"accessRule\":{\"allow\": \"all:*\"}}' \
-		-X PUT -H \"Content-Type: application/json\""
+		-X PUT -H \"Content-Type: application/json\" > /dev/null"
 
 .PHONY: teardown-integration-tests
 teardown-integration-tests:
@@ -77,7 +74,7 @@ run-integration-tests-only:
 	@cd selenium-tests && mvn test && cd ..
 
 .PHONY: run-integration-tests
-run-integration-tests: build-production setup-integration-tests run-integration-tests-only teardown-integration-tests
+run-integration-tests: build-image setup-integration-tests run-integration-tests-only teardown-integration-tests
 
 $(KWOKCTL):
 	mkdir -p bin

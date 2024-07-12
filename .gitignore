@@ -4,3 +4,5 @@ ui/build
 selenium-tests/files/kubeconfig
 bin/
 selenium-tests/target
+.project
+.classpath

@@ -66,6 +66,6 @@ make run-integration-tests-only
 make teardown-integration-tests
 ```
 
-The Integration tests are regular JUnit tests going against the Selenium container, which can be run in debug mode in your IDE as well. Location: ```selenium-tests/src/test/java/com/nuodb/selenium```. Make sure you run ```make setup-integration-tests``` beforehand.
+The Integration tests are regular JUnit tests going against the Selenium container, which can be run in debug mode in your IDE as well. Location: `selenium-tests/src/test/java/com/nuodb/selenium`. Make sure you run `make setup-integration-tests` beforehand.
 
-To monitor the UI while the tests are running, go to this URL: ```http://localhost:7900/?autoconnect=1&resize=scale&password=secret⁠```
+To monitor the UI while the tests are running, go to this URL: `http://localhost:7900/?autoconnect=1&resize=scale&password=secret⁠`

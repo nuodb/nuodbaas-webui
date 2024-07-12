@@ -37,7 +37,7 @@ services:
     volumes:
       - ./files/kubeconfig:/home/nuodb/.kube/config
     healthcheck:
-      test: curl http://nuodb-cp:8080/ || exit 1
+      test: curl --fail http://nuodb-cp:8080/healthz
       interval: 40s
       timeout: 30s
       retries: 3

@@ -33,9 +33,9 @@ public class SeleniumTestHelper {
 
     @BeforeEach
     public void before() {
-        if(driver instanceof JavascriptExecutor) {
+        if(driver instanceof JavascriptExecutor jsDriver) {
             get("/ui/");
-            ((JavascriptExecutor)driver).executeScript("localStorage.clear();");
+            jsDriver.executeScript("localStorage.clear();");
         }
         else {
             throw new RuntimeException("unable to clear local storage");
