@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    {{- include "dbaas-cockpit.labels" . | nindent 4 }}
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /ui
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Chart.Name }}
+                port:
+                  number: 80

@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dbaas-cockpit
+  labels:
+    {{- include "dbaas-cockpit.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.dbaasCockpit.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "dbaas-cockpit.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "dbaas-cockpit.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.dbaasCockpit.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.dbaasCockpit.image.repository }}:{{ .Values.dbaasCockpit.image.tag | default (printf "v%s" .Chart.AppVersion) }}"
+          imagePullPolicy: {{ .Values.dbaasCockpit.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.dbaasCockpit.resources | nindent 12 }}
+          env:
+            - name: NUODB_CP_REST_PATH_PREFIX
+              value: {{ .Values.cpRest.ingress.pathPrefix }}

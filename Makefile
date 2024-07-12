@@ -1,18 +1,20 @@
 all:
-	@echo "make build-production"
 	@echo "make run-dev"
 	@echo "make run-integration-tests"
 	@echo "make setup-integration-tests"
 	@echo "make run-integration-tests-only"
 	@echo "make teardown-integration-tests"
+	@echo "make build-image"
+	@echo "make deploy-image"
+	@echo "make build-ui"
 
 OS := $(shell go env GOOS)
 ARCH := $(shell go env GOARCH)
 
 KWOKCTL_VERSION ?= 0.5.1
-
-KWOKCTL_VERSION ?= 0.5.1
 KWOKCTL := bin/kwokctl
+IMG_REPO ?= dbaas-cockpit
+IMG_TAG ?= latest
 
 .PHONY: build-production
 build-production:
@@ -26,6 +28,24 @@ check-dev-services:
 	fi
 	@if [ "`netstat -a -n | grep ":8080 "`" = "" ] ; then \
 		echo "NuoDB control plane is not running on port 8080"; \
+		exit 1; \
+	fi
+
+.PHONY: build-ui
+build-ui:
+	@cd ui && npm run build && cd ..
+
+.PHONY: build-image
+build-image:
+	@docker build -t ${IMG_REPO} -f docker/production/Dockerfile .
+
+.PHONY: deploy-image
+deploy-image: build-image
+	@if [ "${PUSH_REPO}" != "" ] ; then \
+		docker tag "${IMG_REPO}:${IMG_TAG}" "${PUSH_REPO}:${IMG_TAG}" && \
+		docker push "${PUSH_REPO}:${IMG_TAG}"; \
+	else \
+		echo "PUSH_REPO environment variable must be set" && \
 		exit 1; \
 	fi
 
