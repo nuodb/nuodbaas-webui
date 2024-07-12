@@ -51,23 +51,23 @@ run-dev: check-dev-services
 	docker run -v `pwd`/docker/development/default.conf:/etc/nginx/conf.d/default.conf --network=host -it nginx:stable-alpine
 
 .PHONY: setup-integration-tests
-setup-integration-tests:
-	@bin/kwokctl create cluster --wait 60s
-	@bin/kwokctl get kubeconfig | sed "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kwok-kwok-kube-apiserver:6443/g" > selenium-tests/files/kubeconfig
+setup-integration-tests: $(KWOKCTL)
+	@$(KWOKCTL) create cluster --wait 60s
+	@$(KWOKCTL) get kubeconfig | sed "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kwok-kwok-kube-apiserver:6443/g" > selenium-tests/files/kubeconfig
 	@kubectl apply -f selenium-tests/files/nuodb-cp-runtime-config.yaml --context kwok-kwok -n default
 	@curl -L https://github.com/nuodb/nuodb-cp-releases/releases/download/v2.6.0/nuodb-cp-crd-2.6.0.tgz | \
 		tar -axzOf - --wildcards nuodb-cp-crd/templates/*.yaml | kubectl apply -f - --context kwok-kwok -n default
 	@docker compose -f selenium-tests/compose.yaml up --wait
-	@docker exec -it selenium-tests-nuodb-cp-1 bash -c "curl --fail \
+	@docker exec -it selenium-tests-nuodb-cp-1 bash -c "curl \
 		http://localhost:8080/users/acme/user1?allowCrossOrganizationAccess=true \
 		--data-binary \
             '{\"password\":\"passw0rd\", \"name\":\"user1\", \"organization\": \"acme\", \"accessRule\":{\"allow\": \"all:*\"}}' \
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
 
 .PHONY: teardown-integration-tests
-teardown-integration-tests:
+teardown-integration-tests: $(KWOKCTL)
 	@docker compose -f selenium-tests/compose.yaml down
-	@bin/kwokctl delete cluster
+	@$(KWOKCTL) delete cluster
 
 .PHONY: run-integration-tests-only
 run-integration-tests-only:
