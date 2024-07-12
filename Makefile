@@ -57,7 +57,7 @@ run-dev: check-dev-services
 
 .PHONY: setup-integration-tests
 setup-integration-tests:
-	@bin/kwokctl create cluster
+	@bin/kwokctl create cluster --wait 60s
 	@bin/kwokctl get kubeconfig | sed "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kwok-kwok-kube-apiserver:6443/g" > selenium-tests/files/kubeconfig
 	@kubectl apply -f selenium-tests/files/kubectl-apply.yaml --context kwok-kwok -n default
 	@docker compose -f selenium-tests/compose.yaml up --wait

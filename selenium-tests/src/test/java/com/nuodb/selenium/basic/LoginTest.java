@@ -31,6 +31,6 @@ public class LoginTest extends SeleniumTestHelper {
         sendKeys("username", "acme/user1");
         sendKeys("password", "passw0rd");
         click("login_button");
-        assertEquals("Home", getText("title", 10));
+        assertEquals("Home", getText("title"));
     }
 }

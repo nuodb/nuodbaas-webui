@@ -18,6 +18,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class SeleniumTestHelper {
     private static WebDriver driver = null;
     private static String URL_BASE = "http://selenium-tests-nginx-1";
+    private static long DEFAULT_TIMEOUT_SECONDS = 10;
 
     @BeforeAll
     public static void beforeAll() throws IOException, InterruptedException {
@@ -37,7 +38,7 @@ public class SeleniumTestHelper {
             ((JavascriptExecutor)driver).executeScript("localStorage.clear();");
         }
         else {
-            System.out.println("STEP2");
+            throw new RuntimeException("unable to clear local storage");
         }
     }
 
@@ -49,7 +50,6 @@ public class SeleniumTestHelper {
             url = URL_BASE + url;
         }
 
-        System.out.println("URL " + url);
         driver.get(url);
     }
 
@@ -66,12 +66,19 @@ public class SeleniumTestHelper {
     }
 
     public String getText(String id) {
-        return driver.findElement(By.id(id)).getText();
+        return getText(id, DEFAULT_TIMEOUT_SECONDS);
+    }
+
+    public WebElement waitElement(String id) {
+        return waitElement(id, DEFAULT_TIMEOUT_SECONDS);
+    }
+
+    public WebElement waitElement(String id, long timeoutSeconds) {
+        WebDriverWait wait = new WebDriverWait(driver, timeoutSeconds);
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(id)));
     }
 
     public String getText(String id, long timeoutSeconds) {
-        WebDriverWait wait = new WebDriverWait(driver, timeoutSeconds);
-        WebElement errorElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(id)));
-        return errorElement.getText();
+        return waitElement(id, timeoutSeconds).getText();
     }
 }
