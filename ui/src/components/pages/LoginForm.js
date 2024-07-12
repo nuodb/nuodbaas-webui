@@ -36,8 +36,8 @@ export default function LoginForm({setIsLoggedIn}) {
                 <div className="fields">
                     <TextField required id="username" label="Username" value={username} onChange={(event) => setUsername(event.target.value)}/>
                     <TextField required id="password" type="password" label="password" value={password} onChange={(event) => setPassword(event.target.value)}/>
-                    {error && <h3 style={{color: "red"}}>{error}</h3>}
-                    <Button variant="contained" type="submit" onClick={handleLogin}>Login</Button>
+                    {error && <h3 id="error_message" style={{color: "red"}}>{error}</h3>}
+                    <Button id="login_button" variant="contained" type="submit" onClick={handleLogin}>Login</Button>
                 </div>
             </form>
         </Container>
