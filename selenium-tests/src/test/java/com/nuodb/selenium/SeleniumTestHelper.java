@@ -66,10 +66,6 @@ public class SeleniumTestHelper {
         waitInputElement(id).sendKeys(keys);
     }
 
-    private static By getTestIdXPath(String id) {
-        return By.xpath("//*[@data-testid='" + id + "']");
-    }
-
     private WebElement waitInputElement(String id) {
         WebElement element = waitElement(id);
         if(element.getTagName().equals("input")) {
@@ -83,8 +79,9 @@ public class SeleniumTestHelper {
     }
 
     public WebElement waitElement(String id) {
+        By testId = By.xpath("//*[@data-testid='" + id + "']");
         WebDriverWait wait = new WebDriverWait(driver, waitTimeout);
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(getTestIdXPath(id)));
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(testId));
     }
 
     public String getText(String id) {
