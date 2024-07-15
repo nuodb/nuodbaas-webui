@@ -285,7 +285,7 @@ export function getDefaultValue(parameter, value) {
         return null;
     }
     else if(type === "boolean") {
-        return (parameter["schema"] && parameter["schema"]["default"]) || false;
+        return (parameter["schema"] && parameter["schema"]["default"]) || null;
     }
     else if(type === "array") {
         return [];
@@ -294,57 +294,8 @@ export function getDefaultValue(parameter, value) {
         return "";
     }
     else {
-        return "";
+        return null;
     }
-}
-
-/**
- * Set value into object structure with specified key (period separated)
- * It creates non-existent objects
- * @param {*} values
- * @param {*} key
- * @param {*} value
- */
-function setValue(values, key, value) {
-    let keyParts = key.split(".");
-    let tmp = values;
-    for(let i=0; i<keyParts.length; i++) {
-        if(i === keyParts.length-1) {
-            tmp[keyParts[i]] = value;
-        }
-        else if(!(keyParts[i] in tmp)) {
-            tmp[keyParts[i]] = {};
-        }
-        tmp = tmp[keyParts[i]];
-    }
-}
-
-/**
- * Create JSON payload to send to the server for PUT requests
- * @param {*} formParameters field definition
- * @param {*} values an object containing fieldnames (hierarchical fields a re separated by a period) and their values
- * @returns
- */
-function createBody(formParameters, values) {
-    let ret = {};
-    Object.keys(values).forEach(key => {
-        let keyParts = key.split(".");
-        let tmpParameters = formParameters;
-        for(let i=0; i<keyParts.length; i++) {
-            if(keyParts[i] in tmpParameters) {
-                if(i === keyParts.length-1) {
-                    if(values[key] || tmpParameters.required) {
-                        setValue(ret, key, values[key]);
-                    }
-                }
-                tmpParameters = tmpParameters[keyParts[i]];
-                if(tmpParameters.type === "object" && ("properties" in tmpParameters)) {
-                    tmpParameters = tmpParameters.properties;
-                }
-            }
-        }
-    })
-    return ret;
 }
 
 /**
@@ -358,6 +309,15 @@ function createBody(formParameters, values) {
 export async function submitForm(urlParameters, formParameters, path, values) {
     let queryParameters = Object.keys(urlParameters).filter(key => urlParameters[key]["in"] === "query");
     let fullPath = Auth.getNuodbCpRestPrefix() + path;
+
+    // the last URL parameter has the name of the resource, while the form parameter always has "name"
+    // rename last URL parameter to "name"
+    let posBracketStart = fullPath.lastIndexOf("{");
+    let posBracketEnd = fullPath.lastIndexOf("}");
+    if(posBracketStart >= 0 && posBracketEnd > posBracketStart) {
+        fullPath = fullPath.substring(0, posBracketStart+1) + "name" + fullPath.substring(posBracketEnd);
+    }
+
     queryParameters.forEach((query, index) => {
         if(index === 0) {
             fullPath += "?";
@@ -367,13 +327,18 @@ export async function submitForm(urlParameters, formParameters, path, values) {
         }
         fullPath += encodeURIComponent(query) + "={" + query + "}";
     })
+
+    values = {...values};
     Object.keys(values).forEach(key => {
         fullPath = fullPath.replace("{" + key + "}", String(values[key]));
+        if(!(key in formParameters)) {
+            //remove fields which are not used as form parameter
+            delete values[key];
+        }
     });
 
-    let body = createBody(formParameters, values);
     return new Promise((resolve, reject) => {
-        axios.put(fullPath, body, { headers: Auth.getHeaders() })
+        axios.put(fullPath, values, { headers: Auth.getHeaders() })
             .then(response => resolve(response.data))
             .catch(error => { return reject(error)})
     });

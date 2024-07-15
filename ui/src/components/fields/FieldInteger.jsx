@@ -1,5 +1,6 @@
 import React from "react";
 import TextField from '@mui/material/TextField'
+import { getValue, setValue } from "./utils"
 
 /**
  * show Field of type Integer using the values and schema definition
@@ -7,17 +8,15 @@ import TextField from '@mui/material/TextField'
  * @param parameter - schema definition for this field
  * @param values - contains object with ALL values (and field names) of this form (not just this field).
  *                 the key is the field name (name is separated by period if the field is hierarchical)
- * @param onChange - callback to update field value
+ * @param setValues - callback to update field values
  * @returns
  */
-export default function FieldInteger({ prefix, values, required, onChange }) {
-    return <TextField required={required} id={prefix} name={prefix} label={prefix} value={String(values[prefix])} onChange={({ target }) => {
-        target = { name: target.name, value: target.value };
-        if (target.value === "") {
-            onChange({ target });
-        } else if (!isNaN(target.value)) {
-            target.value = parseInt(target.value);
-            onChange({ target })
-        }
+export default function FieldInteger({ prefix, values, required, setValues }) {
+    let value = String(getValue(values, prefix) || "");
+
+    return <TextField required={required} id={prefix} name={prefix} label={prefix} value={value} onChange={({ currentTarget: input }) => {
+        let v = { ...values };
+        setValue(values, prefix, input.value);
+        setValues(v);
     }} />
 }
