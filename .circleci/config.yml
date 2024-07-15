@@ -26,7 +26,6 @@ jobs:
       - checkout
       - aws-cli/setup
       - helm/install-helm-client
-      - setup_remote_docker
       - run:
           name: Check that AWS environment variables were supplied
           command: |
