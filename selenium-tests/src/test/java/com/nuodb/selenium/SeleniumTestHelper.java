@@ -2,6 +2,7 @@ package com.nuodb.selenium;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -10,7 +11,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -18,12 +19,12 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class SeleniumTestHelper {
     private static WebDriver driver = null;
     private static String URL_BASE = "http://selenium-tests-nginx-1";
-    private static long DEFAULT_TIMEOUT_SECONDS = 10;
+    private static Duration DEFAULT_TIMEOUT = Duration.ofSeconds(10);
 
     @BeforeAll
     public static void beforeAll() throws IOException, InterruptedException {
         URL hubUrl = new URL("http://localhost:4444/wd/hub");
-        driver = new RemoteWebDriver(hubUrl, DesiredCapabilities.chrome());
+        driver = new RemoteWebDriver(hubUrl, new ChromeOptions());
     }
 
     @AfterAll
@@ -66,19 +67,19 @@ public class SeleniumTestHelper {
     }
 
     public String getText(String id) {
-        return getText(id, DEFAULT_TIMEOUT_SECONDS);
+        return getText(id, DEFAULT_TIMEOUT);
     }
 
     public WebElement waitElement(String id) {
-        return waitElement(id, DEFAULT_TIMEOUT_SECONDS);
+        return waitElement(id, DEFAULT_TIMEOUT);
     }
 
-    public WebElement waitElement(String id, long timeoutSeconds) {
+    public WebElement waitElement(String id, Duration timeoutSeconds) {
         WebDriverWait wait = new WebDriverWait(driver, timeoutSeconds);
         return wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(id)));
     }
 
-    public String getText(String id, long timeoutSeconds) {
-        return waitElement(id, timeoutSeconds).getText();
+    public String getText(String id, Duration timeout) {
+        return waitElement(id, timeout).getText();
     }
 }

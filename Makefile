@@ -8,8 +8,8 @@ help:
 	@echo "make teardown-integration-tests - clean up containers used by integration tests"
 	@echo "make run-dev                    - launch nginx reverse proxy for development of /ui/ and /nuodb-cp/"
 
-OS := $(shell go env GOOS)
-ARCH := $(shell go env GOARCH)
+OS := $(uname -s | tr '[:upper:]' '[:lower:]')
+ARCH := $(uname -m | sed "s/x86_64/amd64/g")
 
 KWOKCTL_VERSION ?= 0.5.1
 KWOKCTL := bin/kwokctl
