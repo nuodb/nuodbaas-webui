@@ -18,13 +18,14 @@ orbs:
 jobs:
   build_and_deploy:
     # Check https://circleci.com/developer/images/image/cimg/base for more details
-    docker:
-      - image: cimg/base:2023.05
+    machine:
+      image: ubuntu-2204:2023.10.1
+    resource_class: medium
+
     steps:
       - checkout
       - aws-cli/setup
       - helm/install-helm-client
-      - setup_remote_docker
       - run:
           name: Check that AWS environment variables were supplied
           command: |
@@ -38,8 +39,8 @@ jobs:
             aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
             aws ecr get-login-password --region "$AWS_REGION" | helm registry login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
       - run:
-          name: Build and deploy Docker image to ECR
-          command: PUSH_REPO="$ECR_ACCOUNT_URL/$IMG_REPO" make deploy-image
+          name: Build, Test and deploy Docker image to ECR
+          command: PUSH_REPO="$ECR_ACCOUNT_URL/$IMG_REPO" make all
           environment:
             IMG_REPO: dbaas-cockpit
             IMG_TAG: latest
