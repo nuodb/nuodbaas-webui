@@ -63,6 +63,7 @@ deploy-image: build-image ## deploy Docker image to AWS
 .PHONY: setup-integration-tests
 setup-integration-tests: build-image $(KWOKCTL) ## setup containers before running integration tests
 	@$(KWOKCTL) create cluster --wait 60s
+	@docker ps
 	@$(KWOKCTL) get kubeconfig | sed "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kwok-kwok-kube-apiserver:6443/g" > selenium-tests/files/kubeconfig
 	@$(KUBECTL) apply -f selenium-tests/files/nuodb-cp-runtime-config.yaml --context kwok-kwok -n default
 	@curl -L https://github.com/nuodb/nuodb-cp-releases/releases/download/v$(NUODB_CP_VERSION)/nuodb-cp-crd-$(NUODB_CP_VERSION).tgz | \
