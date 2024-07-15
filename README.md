@@ -46,7 +46,7 @@ make run-dev
 
 ```
 Open in the browser at http://localhost:81/
-Username: acme/user1
+Username: acme/admin
 Password: passw0rd
 ```
 

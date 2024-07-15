@@ -19,7 +19,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class SeleniumTestHelper {
     private static WebDriver driver = null;
     private static String URL_BASE = "http://selenium-tests-nginx-1";
-    private static Duration DEFAULT_TIMEOUT = Duration.ofSeconds(10);
+    private static Duration waitTimeout = Duration.ofSeconds(10);
 
     @BeforeAll
     public static void beforeAll() throws IOException, InterruptedException {
@@ -43,6 +43,10 @@ public class SeleniumTestHelper {
         }
     }
 
+    public static void setWaitTimeout(Duration duration) {
+        waitTimeout = duration;
+    }
+
     public void get(String url) {
         if(url == null) {
             url = "/ui/";
@@ -59,27 +63,31 @@ public class SeleniumTestHelper {
     }
 
     public void sendKeys(String id, String keys) {
-        driver.findElement(By.id(id)).sendKeys(keys);
+        waitInputElement(id).sendKeys(keys);
+    }
+
+    private static By getTestIdXPath(String id) {
+        return By.xpath("//*[@data-testid='" + id + "']");
+    }
+
+    private WebElement waitInputElement(String id) {
+        WebElement element = waitElement(id);
+        if(element.getTagName().equals("input")) {
+            return element;
+        }
+        return element.findElement(By.tagName("input"));
     }
 
     public void click(String id) {
-        driver.findElement(By.id(id)).click();
-    }
-
-    public String getText(String id) {
-        return getText(id, DEFAULT_TIMEOUT);
+        waitElement(id).click();
     }
 
     public WebElement waitElement(String id) {
-        return waitElement(id, DEFAULT_TIMEOUT);
+        WebDriverWait wait = new WebDriverWait(driver, waitTimeout);
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(getTestIdXPath(id)));
     }
 
-    public WebElement waitElement(String id, Duration timeoutSeconds) {
-        WebDriverWait wait = new WebDriverWait(driver, timeoutSeconds);
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(id)));
-    }
-
-    public String getText(String id, Duration timeout) {
-        return waitElement(id, timeout).getText();
+    public String getText(String id) {
+        return waitElement(id).getText();
     }
 }
