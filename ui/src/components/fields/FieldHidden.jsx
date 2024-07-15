@@ -1,4 +1,5 @@
 import React from "react";
+import { getValue } from "./utils"
 
 /**
  * show Field of type String using the values and schema definition
@@ -8,5 +9,9 @@ import React from "react";
  * @returns
  */
 export default function FieldHidden({ prefix, values }) {
-    return <input type="hidden" id={prefix} name={prefix} value={values[prefix]} />
+    let value = getValue(values, prefix);
+    if (value === null) {
+        return null;
+    }
+    return <input type="hidden" id={prefix} name={prefix} value={String(value)} />
 }
