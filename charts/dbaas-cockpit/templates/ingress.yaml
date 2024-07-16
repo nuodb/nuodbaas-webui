@@ -8,7 +8,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: /ui
+          - path: "/{{ .Values.dbaasCockpit.pathPrefix }}"
             pathType: Prefix
             backend:
               service:
