@@ -39,3 +39,5 @@ spec:
           env:
             - name: NUODB_CP_REST_PATH_PREFIX
               value: {{ .Values.cpRest.ingress.pathPrefix }}
+            - name: NUODB_COCKPIT_PATH_PREFIX
+              value: {{ .Values.dbaasCockpit.pathPrefix }}

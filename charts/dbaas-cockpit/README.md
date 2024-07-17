@@ -24,6 +24,7 @@ All configurable parameters for each top-level scope are detailed below, organiz
 | `dbaasCockpit.resources.requests.cpu` | Specify cpu requests | `100m` |
 | `dbaasCockpit.resources.requests.memory` | Specify memory requests | `128Mi` |
 | `dbaasCockpit.service.type` | Specify service type | `ClusterIP` |
+| `dbaasCockpit.pathPrefix` | Specify Cockpit UI prefix | `ui` |
 | `cpRest.ingress.pathPrefix` | The prefix used by the Ingress controller to route requests to the Control Plane REST service | `nuodb-cp` |
 
 ## Uninstalling the Chart

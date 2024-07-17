@@ -19,3 +19,4 @@ dbaasCockpit:
       memory: 128Mi
   service:
     type: ClusterIP
+  pathPrefix: ui
