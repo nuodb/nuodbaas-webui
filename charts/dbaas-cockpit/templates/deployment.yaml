@@ -23,17 +23,17 @@ spec:
           image: "{{ .Values.dbaasCockpit.image.repository }}:{{ .Values.dbaasCockpit.image.tag | default (printf "v%s" .Chart.AppVersion) }}"
           imagePullPolicy: {{ .Values.dbaasCockpit.image.pullPolicy }}
           ports:
-            - name: http
-              containerPort: 80
+            - name: http-alt
+              containerPort: 8080
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /
-              port: http
+              port: http-alt
           readinessProbe:
             httpGet:
               path: /
-              port: http
+              port: http-alt
           resources:
             {{- toYaml .Values.dbaasCockpit.resources | nindent 12 }}
           env:
