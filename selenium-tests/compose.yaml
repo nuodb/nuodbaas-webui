@@ -10,7 +10,7 @@ services:
       - kwok-kwok
     healthcheck:
       test: curl --fail http://selenium:4444/ || exit 1
-      interval: 40s
+      interval: 5s
       timeout: 30s
       retries: 3
       start_period: 60s
@@ -19,8 +19,8 @@ services:
     networks:
       - kwok-kwok
     healthcheck:
-      test: curl --fail http://dbaas-cockpit/ || exit 1
-      interval: 40s
+      test: curl --fail http://dbaas-cockpit:8080/ || exit 1
+      interval: 5s
       timeout: 30s
       retries: 3
       start_period: 60s
@@ -34,7 +34,7 @@ services:
       - ./files/kubeconfig:/home/nuodb/.kube/config
     healthcheck:
       test: curl --fail http://nuodb-cp:8080/healthz
-      interval: 40s
+      interval: 5s
       timeout: 30s
       retries: 3
       start_period: 60s
@@ -51,7 +51,7 @@ services:
       - nuodb-cp
     healthcheck:
       test: curl --fail http://nginx/ || exit 1
-      interval: 40s
+      interval: 5s
       timeout: 30s
       retries: 3
       start_period: 60s
