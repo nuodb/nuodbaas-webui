@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Table from "./parts/Table";
-import { getResource, getCreatePath, getResourceByPath } from "../../utils/schema";
+import { getResourceEvents, getCreatePath, getResourceByPath } from "../../utils/schema";
 import Button from '@mui/material/Button'
 import Path from './parts/Path'
 import Auth from "../../utils/auth"
@@ -22,17 +22,17 @@ export default function ListResource({ schema }) {
         }
         let resourcesByPath_ = getResourceByPath(schema, path);
         if("get" in resourcesByPath_) {
-            getResource(path + "?expand=true").then((data) => {
+            getResourceEvents(path + "?expand=true", (data) => {
                 if(data.items) {
                     setData(data.items);
                 }
                 else {
                     setData([]);
                 }
-            }).catch((error) => {
+            }, (error) => {
                 Auth.handle401Error(error);
                 setData([]);
-            })
+            });
         }
         setCreatePath(getCreatePath(schema, path));
     }, [ path, schema]);

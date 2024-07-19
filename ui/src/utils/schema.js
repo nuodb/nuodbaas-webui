@@ -217,6 +217,117 @@ export async function getResource(path) {
     });
 }
 
+function concatChunks(chunk1, chunk2) {
+    let ret = new Uint8Array(chunk1.length + chunk2.length);
+    ret.set(chunk1, 0);
+    ret.set(chunk2, chunk1.length);
+    return ret;
+}
+
+/**
+ * Gets a resource by path
+ * @param {*} path
+ * @param {*} multiResolve - returns response
+ * @param {*} multiReject - returns error
+ * @returns
+ */
+export function getResourceEvents(path, multiResolve, multiReject) {
+    let fullPath = Auth.getNuodbCpRestPrefix() + "/events" + path;
+    axios({
+        headers: {...Auth.getHeaders(), 'Accept': 'text/event-stream'},
+        method: 'get',
+        url: fullPath,
+        responseType: 'stream',
+        adapter: 'fetch',
+      })
+      .then(async response => {
+        let event = null;
+        let data = null;
+        let id = null;
+        let mergedData = null;
+        let buffer = Uint8Array.of();
+        for await (let chunk of response.data) {
+            while(chunk.length > 0) {
+                let pos = chunk.indexOf(10); //new line
+                if(pos === -1) {
+                    buffer = concatChunks(buffer, chunk);
+                    break;
+                }
+                let line = new TextDecoder().decode(concatChunks(buffer, chunk.slice(0, pos)));
+                chunk = chunk.slice(pos+1);
+                if(line.startsWith("event: ")) {
+                    event = line.substring("event: ".length);
+                }
+                else if(line.startsWith("data: ")) {
+                    data = line.substring("data: ".length);
+                }
+                else if(line.startsWith("id: ")) {
+                    id = line.substring("id: ".length);
+                }
+                else if(line.length === 0) {
+                    if(event === "HEARTBEAT") {
+                        // ignore
+                    }
+                    else if(event === "RESYNC" && data !== null) {
+                        mergedData = JSON.parse(data);
+                        multiResolve(mergedData);
+                    }
+                    else if(event === "UPDATED" && id !== null && data !== null) {
+                        let newData = {...mergedData};
+                        newData.items = [...newData.items];
+                        let modified = false;
+                        for(let i=0; i<newData.items.length; i++) {
+                            if(id === newData.items[i]["$ref"]) {
+                                newData.items[i] = JSON.parse(data);
+                                newData.items[i]["$ref"] = id;
+                                modified = true;
+                                break;
+                            }
+                        }
+                        if(modified) {
+                            mergedData = newData;
+                            multiResolve(mergedData);
+                        }
+                        else {
+                            console.log("item with id " + id + " not found for merging");
+                        }
+                    }
+                    else if(event === "DELETED" && id !== null) {
+                        let newData = {...mergedData};
+                        newData.items = [...newData.items];
+                        let modified = false;
+                        for(let i=0; i<newData.items.length; i++) {
+                            if(id === newData.items[i]["$ref"]) {
+                                newData.items[i].splice(i, 1);
+                                modified = true;
+                                break;
+                            }
+                        }
+                        if(modified) {
+                            mergedData = newData;
+                            multiResolve(mergedData);
+                        }
+                    }
+                    else {
+                        console.log("Ignoring event " + event + ", data=" + data);
+                    }
+
+                    //clear out all data
+                    event = null;
+                    data = null;
+                    id = null;
+                }
+                else {
+                    console.log("Ignoring line " + line);
+                }
+            }
+        }
+      })
+      .catch(error => {
+        multiReject(error);
+      });
+}
+
 /**
  * Deletes a resource by path
  * @param {*} path
