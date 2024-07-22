@@ -1,7 +1,8 @@
 import axios from "axios";
 import Auth from "./auth";
 
-let schema;
+let schema = null;
+let eventsAbortController = null;
 
 /**
  * Pulls OpenAPI spec schema and parses it
@@ -232,6 +233,12 @@ function concatChunks(chunk1, chunk2) {
  * @returns
  */
 export function getResourceEvents(path, multiResolve, multiReject) {
+    //only one event stream is supported - close prior one if it exists.
+    if(eventsAbortController) {
+        eventsAbortController.abort();
+    }
+    eventsAbortController = new AbortController();
+
     let fullPath = Auth.getNuodbCpRestPrefix() + "/events" + path;
     axios({
         headers: {...Auth.getHeaders(), 'Accept': 'text/event-stream'},
@@ -239,6 +246,7 @@ export function getResourceEvents(path, multiResolve, multiReject) {
         url: fullPath,
         responseType: 'stream',
         adapter: 'fetch',
+        signal: eventsAbortController.signal
       })
       .then(async response => {
         let event = null;
