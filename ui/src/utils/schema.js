@@ -225,7 +225,7 @@ function concatChunks(chunk1, chunk2) {
 }
 
 /**
- * Gets a resource by path
+ * Gets event streaming resource by path (fall back to non-streaming resource on failure)
  * @param {*} path
  * @param {*} multiResolve - returns response
  * @param {*} multiReject - returns error
@@ -248,13 +248,13 @@ export function getResourceEvents(path, multiResolve, multiReject) {
         let buffer = Uint8Array.of();
         for await (let chunk of response.data) {
             while(chunk.length > 0) {
-                let pos = chunk.indexOf(10); //new line
-                if(pos === -1) {
+                let posNewline = chunk.indexOf(10);
+                if(posNewline === -1) {
                     buffer = concatChunks(buffer, chunk);
                     break;
                 }
-                let line = new TextDecoder().decode(concatChunks(buffer, chunk.slice(0, pos)));
-                chunk = chunk.slice(pos+1);
+                let line = new TextDecoder().decode(concatChunks(buffer, chunk.slice(0, posNewline)));
+                chunk = chunk.slice(posNewline+1);
                 if(line.startsWith("event: ")) {
                     event = line.substring("event: ".length);
                 }
@@ -309,7 +309,7 @@ export function getResourceEvents(path, multiResolve, multiReject) {
                         }
                     }
                     else {
-                        console.log("Ignoring event " + event + ", data=" + data);
+                        console.log("Ignoring event " + event + ", id=" + id + ", data=" + data);
                     }
 
                     //clear out all data
@@ -323,8 +323,15 @@ export function getResourceEvents(path, multiResolve, multiReject) {
             }
         }
       })
-      .catch(error => {
-        multiReject(error);
+      .catch((error) => {
+        console.log("Event streaming request failed for " + path, error);
+
+        // fall back to non-streaming request
+        getResource(path)
+            .then(data => {
+                multiResolve(data);
+      })
+            .catch(reason => multiReject(reason));
       });
 }
 
