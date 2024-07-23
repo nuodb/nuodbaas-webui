@@ -2,7 +2,6 @@ import axios from "axios";
 import Auth from "./auth";
 
 let schema = null;
-let eventsAbortController = null;
 
 /**
  * Pulls OpenAPI spec schema and parses it
@@ -230,14 +229,11 @@ function concatChunks(chunk1, chunk2) {
  * @param {*} path
  * @param {*} multiResolve - returns response
  * @param {*} multiReject - returns error
- * @returns
+ * @returns AbortController - use ret.abort() to abort
  */
 export function getResourceEvents(path, multiResolve, multiReject) {
     //only one event stream is supported - close prior one if it exists.
-    if(eventsAbortController) {
-        eventsAbortController.abort();
-    }
-    eventsAbortController = new AbortController();
+    let eventsAbortController = new AbortController();
 
     let fullPath = Auth.getNuodbCpRestPrefix() + "/events" + path;
     axios({
@@ -252,11 +248,11 @@ export function getResourceEvents(path, multiResolve, multiReject) {
         let event = null;
         let data = null;
         let id = null;
-        let mergedData = null;
+        let mergedData = {};
         let buffer = Uint8Array.of();
         for await (let chunk of response.data) {
             while(chunk.length > 0) {
-                let posNewline = chunk.indexOf(10);
+                let posNewline = chunk.indexOf("\n".charCodeAt(0));
                 if(posNewline === -1) {
                     buffer = concatChunks(buffer, chunk);
                     break;
@@ -306,7 +302,7 @@ export function getResourceEvents(path, multiResolve, multiReject) {
                         let modified = false;
                         for(let i=0; i<newData.items.length; i++) {
                             if(id === newData.items[i]["$ref"]) {
-                                newData.items[i].splice(i, 1);
+                                newData.items.splice(i, 1);
                                 modified = true;
                                 break;
                             }
@@ -315,6 +311,12 @@ export function getResourceEvents(path, multiResolve, multiReject) {
                             mergedData = newData;
                             multiResolve(mergedData);
                         }
+                    }
+                    else if(event === "CREATED" && id !== null && data !== null) {
+                        data = JSON.parse(data);
+                        data["$ref"] = id;
+                        mergedData.items.push(data);
+                        multiResolve(mergedData);
                     }
                     else {
                         console.log("Ignoring event " + event + ", id=" + id + ", data=" + data);
@@ -332,15 +334,18 @@ export function getResourceEvents(path, multiResolve, multiReject) {
         }
       })
       .catch((error) => {
+        if(error.name === "AbortError" || error.name === "CanceledError") {
+            return;
+        }
         console.log("Event streaming request failed for " + path, error);
 
         // fall back to non-streaming request
         getResource(path)
-            .then(data => {
-                multiResolve(data);
-      })
+            .then(data => multiResolve(data))
             .catch(reason => multiReject(reason));
       });
+
+      return eventsAbortController;
 }
 
 /**

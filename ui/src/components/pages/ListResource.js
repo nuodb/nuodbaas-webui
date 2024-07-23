@@ -15,6 +15,7 @@ export default function ListResource({ schema }) {
 
     const [data, setData] = useState([]);
     const [createPath, setCreatePath] = useState(null);
+    const [abortController, setAbortController] = useState(null);
 
     useEffect(() => {
         if (!schema) {
@@ -22,20 +23,30 @@ export default function ListResource({ schema }) {
         }
         let resourcesByPath_ = getResourceByPath(schema, path);
         if("get" in resourcesByPath_) {
-            getResourceEvents(path + "?expand=true", (data) => {
-                if(data.items) {
-                    setData(data.items);
-                }
-                else {
+            setAbortController(
+                getResourceEvents(path + "?expand=true", (data) => {
+                    if(data.items) {
+                        setData(data.items);
+                    }
+                    else {
+                        setData([]);
+                    }
+                }, (error) => {
+                    Auth.handle401Error(error);
                     setData([]);
-                }
-            }, (error) => {
-                Auth.handle401Error(error);
-                setData([]);
-            });
+                })
+            );
         }
         setCreatePath(getCreatePath(schema, path));
     }, [ path, schema]);
+
+    useEffect(() => {
+        return () => {
+          if(abortController) {
+            abortController.abort();
+          }
+        }
+      }, [abortController]);
 
     function handleCreate() {
         navigate("/ui/resource/create" + path);
