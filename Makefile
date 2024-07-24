@@ -67,7 +67,7 @@ deploy-image: build-image ## deploy Docker image to AWS
 		docker tag "${IMG_REPO}:latest" "${ECR_ACCOUNT_URL}/${IMG_REPO}:${VERSION_SHA}" && \
 		helm package charts/dbaas-cockpit && \
 		git checkout HEAD -- charts/dbaas-cockpit/Chart.yaml && \
-		docker push "${ECR_ACCOUNT_URL}/${IMG_REPO}:${VERSION_SHA}" && \
+		docker push "${ECR_ACCOUNT_URL}/${IMG_REPO}-docker:${VERSION_SHA}" && \
 		helm push dbaas-cockpit-*.tgz "oci://${ECR_ACCOUNT_URL}/"; \
 	fi
 
