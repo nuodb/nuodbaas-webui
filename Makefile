@@ -55,18 +55,18 @@ check-dev-services:
 
 .PHONY: deploy-image
 deploy-image: build-image ## deploy Docker image to AWS
-	if [ "${PUSH_REPO}" = "" ] ; then \
-		echo "PUSH_REPO environment variable must be set"; \
+	if [ "${ECR_ACCOUNT_URL}" = "" ] ; then \
+		echo "ECR_ACCOUNT_URL environment variable must be set"; \
 	elif [ "${UNCOMMITTED}" != "yes" ] ; then \
 		echo "Uncommitted changes in GIT. Will not push to ECR."; \
 	else \
 		sed -i "s/^version: \".*\"/version: \"${VERSION_SHA}\"/g" charts/dbaas-cockpit/Chart.yaml && \
 		sed -i "s/^appVersion: \".*\"/appVersion: \"${VERSION_SHA}\"/g" charts/dbaas-cockpit/Chart.yaml && \
-		docker tag "${IMG_REPO}:latest" "${PUSH_REPO}:${VERSION_SHA}" && \
+		docker tag "${IMG_REPO}:latest" "${ECR_ACCOUNT_RUL}/${IMG_REPO}:${VERSION_SHA}" && \
 		helm package charts/dbaas-cockpit && \
 		git checkout HEAD -- charts/dbaas-cockpit/Chart.yaml && \
-		docker push "${PUSH_REPO}:${VERSION_SHA}" && \
-		helm push dbaas-cockpit-*.tgz "oci://$ECR_ACCOUNT_URL/"; \
+		docker push "${ECR_ACCOUNT_URL}/${IMG_REPO}:${VERSION_SHA}" && \
+		helm push dbaas-cockpit-*.tgz "oci://\${ECR_ACCOUNT_URL}/"; \
 	fi
 
 .PHONY: setup-integration-tests

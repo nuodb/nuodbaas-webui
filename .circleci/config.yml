@@ -40,10 +40,7 @@ jobs:
             aws ecr get-login-password --region "$AWS_REGION" | helm registry login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
       - run:
           name: Build, Test and deploy Docker image / Helm Charts to ECR
-          command: PUSH_REPO="$ECR_ACCOUNT_URL/$IMG_REPO" make all
-          environment:
-            IMG_REPO: dbaas-cockpit
-            IMG_TAG: latest
+          command: make all
 workflows:
   version: 2
   continuous:
