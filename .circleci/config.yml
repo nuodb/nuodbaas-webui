@@ -51,7 +51,6 @@ jobs:
           name: Install python
           command: |
             apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
-      - check_version
       - add_ssh_keys:
           fingerprints: # add SSH deploy key for nuodb/nuodb-dbaas-deploy repository
             - "SHA256:xCr3Nv9p4lncWY3MzOQEU7WCXDi3d/BnIBCnIGGjfbk"
