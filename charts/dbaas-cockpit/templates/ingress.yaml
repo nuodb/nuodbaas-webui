@@ -8,10 +8,22 @@ spec:
   rules:
     - http:
         paths:
-          - path: "/{{ .Values.dbaasCockpit.pathPrefix }}"
+          - path: "/{{ .Values.dbaasCockpit.ingress.pathPrefix }}"
             pathType: Prefix
             backend:
               service:
-                name: {{ .Chart.Name }}
+                name: {{ $.Chart.Name }}
                 port:
                   number: 8080
+    {{- range .Values.dbaasCockpit.ingress.hosts }}
+    - host: {{ . | quote }}
+      http:
+        paths:
+          - path: "/{{ $.Values.dbaasCockpit.ingress.pathPrefix }}"
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $.Chart.Name }}
+                port:
+                  number: 8080
+    {{- end }}
