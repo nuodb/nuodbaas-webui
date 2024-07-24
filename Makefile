@@ -68,7 +68,7 @@ deploy-image: build-image ## deploy Docker image to AWS
 		helm package charts/dbaas-cockpit && \
 		git checkout HEAD -- charts/dbaas-cockpit/Chart.yaml && \
 		docker push "${ECR_ACCOUNT_URL}/${IMG_REPO}:${VERSION_SHA}" && \
-		helm push dbaas-cockpit-*.tgz "oci://\${ECR_ACCOUNT_URL}/"; \
+		helm push dbaas-cockpit-*.tgz "oci://${ECR_ACCOUNT_URL}/"; \
 	fi
 
 .PHONY: setup-integration-tests
