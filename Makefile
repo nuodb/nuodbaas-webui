@@ -31,7 +31,7 @@ IMG_REPO := dbaas-cockpit
 VERSION := $(shell grep -e "^appVersion:" charts/dbaas-cockpit/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
 SHA := $(shell git rev-parse --short HEAD)
 VERSION_SHA ?= ${VERSION}-dev.sha-${SHA}
-UNCOMMITTED := $(shell git status --porcelain)
+UNCOMMITTED := $(shell rm -f get_helm.sh && git status --porcelain)
 
 ##@ Production Builds
 
