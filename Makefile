@@ -31,7 +31,7 @@ IMG_REPO := dbaas-cockpit
 VERSION := $(shell grep -e "^appVersion:" charts/dbaas-cockpit/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
 SHA := $(shell git rev-parse --short HEAD)
 VERSION_SHA ?= ${VERSION}-dev.sha-${SHA}
-UNCOMMITTED := $(shell if [ "$(git status --porcelain)" == "" ] ; then echo no; else echo yes; fi)
+UNCOMMITTED := $(shell git status --porcelain)
 
 ##@ Production Builds
 
@@ -55,14 +55,16 @@ check-dev-services:
 
 .PHONY: deploy-image
 deploy-image: build-image ## deploy Docker image to AWS
-	if [ "${ECR_ACCOUNT_URL}" = "" ] ; then \
+	@if [ "${ECR_ACCOUNT_URL}" = "" ] ; then \
 		echo "ECR_ACCOUNT_URL environment variable must be set"; \
-	elif [ "${UNCOMMITTED}" != "yes" ] ; then \
-		echo "Uncommitted changes in GIT. Will not push to ECR."; \
+	elif [ "${UNCOMMITTED}" != "" ] ; then \
+		echo "Uncommitted changes in GIT. Will not push to ECR." && \
+		echo "${UNCOMMITTED}" && \
+		exit 1; \
 	else \
 		sed -i "s/^version: \".*\"/version: \"${VERSION_SHA}\"/g" charts/dbaas-cockpit/Chart.yaml && \
 		sed -i "s/^appVersion: \".*\"/appVersion: \"${VERSION_SHA}\"/g" charts/dbaas-cockpit/Chart.yaml && \
-		docker tag "${IMG_REPO}:latest" "${ECR_ACCOUNT_RUL}/${IMG_REPO}:${VERSION_SHA}" && \
+		docker tag "${IMG_REPO}:latest" "${ECR_ACCOUNT_URL}/${IMG_REPO}:${VERSION_SHA}" && \
 		helm package charts/dbaas-cockpit && \
 		git checkout HEAD -- charts/dbaas-cockpit/Chart.yaml && \
 		docker push "${ECR_ACCOUNT_URL}/${IMG_REPO}:${VERSION_SHA}" && \
