@@ -27,11 +27,11 @@ NUODB_CP_VERSION ?= 2.6.0
 KWOKCTL := bin/kwokctl
 KUBECTL := bin/kubectl
 
-IMG_REPO ?= dbaas-cockpit
-VERSION := "$(grep -e "^appVersion:" charts/dbaas-cockpit/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)"
-SHA := "$(git rev-parse --short HEAD)"
-VERSION_SHA ?= "${VERSION}-dev.sha-${SHA}"
-UNCOMMITTED := "$(git status --porcelain)"
+IMG_REPO := dbaas-cockpit
+VERSION := $(shell grep -e "^appVersion:" charts/dbaas-cockpit/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
+SHA := $(shell git rev-parse --short HEAD)
+VERSION_SHA ?= ${VERSION}-dev.sha-${SHA}
+UNCOMMITTED := $(shell if [ "$(git status --porcelain)" == "" ] ; then echo no; else echo yes; fi)
 
 ##@ Production Builds
 
@@ -55,20 +55,18 @@ check-dev-services:
 
 .PHONY: deploy-image
 deploy-image: build-image ## deploy Docker image to AWS
-	@if [ "${PUSH_REPO}" = "" ] ; then \
-		echo "PUSH_REPO environment variable must be set" && \
-		exit 1; \
-	elif [ "${UNCOMMITTED}" != "" ] ; then \
-		echo "Uncommitted changes in GIT. Will not push to ECR." && \
-		exit 1; \
+	if [ "${PUSH_REPO}" = "" ] ; then \
+		echo "PUSH_REPO environment variable must be set"; \
+	elif [ "${UNCOMMITTED}" != "yes" ] ; then \
+		echo "Uncommitted changes in GIT. Will not push to ECR."; \
 	else \
 		sed -i "s/^version: \".*\"/version: \"${VERSION_SHA}\"/g" charts/dbaas-cockpit/Chart.yaml && \
 		sed -i "s/^appVersion: \".*\"/appVersion: \"${VERSION_SHA}\"/g" charts/dbaas-cockpit/Chart.yaml && \
 		docker tag "${IMG_REPO}:latest" "${PUSH_REPO}:${VERSION_SHA}" && \
-		docker push "${PUSH_REPO}:${VERSION_SHA}" && \
 		helm package charts/dbaas-cockpit && \
-		helm push dbaas-cockpit-*.tgz "oci://$ECR_ACCOUNT_URL/" && \
-		git checkout HEAD -- charts/dbaas-cockpit/Chart.yaml; \
+		git checkout HEAD -- charts/dbaas-cockpit/Chart.yaml && \
+		docker push "${PUSH_REPO}:${VERSION_SHA}" && \
+		helm push dbaas-cockpit-*.tgz "oci://$ECR_ACCOUNT_URL/"; \
 	fi
 
 .PHONY: setup-integration-tests
