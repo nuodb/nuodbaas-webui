@@ -56,7 +56,7 @@ export default function ListResource({ schema }) {
         <React.Fragment>
             <Path schema={schema} path={path} data={data} />
             {createPath && <Button variant="outlined" onClick={handleCreate}>Create</Button>}
-            <Table schema={schema} data={data} path={path} />
+            <Table schema={schema} data={data.filter(d=> d.__deleted__ !== true)} path={path} />
         </React.Fragment>
     );
 }

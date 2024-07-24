@@ -302,7 +302,7 @@ export function getResourceEvents(path, multiResolve, multiReject) {
                         let modified = false;
                         for(let i=0; i<newData.items.length; i++) {
                             if(id === newData.items[i]["$ref"]) {
-                                newData.items.splice(i, 1);
+                                newData.items[i] = {...newData.items[i], __deleted__: true};
                                 modified = true;
                                 break;
                             }
@@ -315,7 +315,21 @@ export function getResourceEvents(path, multiResolve, multiReject) {
                     else if(event === "CREATED" && id !== null && data !== null) {
                         data = JSON.parse(data);
                         data["$ref"] = id;
-                        mergedData.items.push(data);
+                        mergedData = {...mergedData};
+                        mergedData.items = [...mergedData.items];
+
+                        let found = false;
+                        for(let i=0; i<mergedData.items.length; i++) {
+                            if(id === mergedData.items[i]["$ref"]) {
+                                mergedData.items[i] = data;
+                                delete mergedData.items[i]["__deleted__"];
+                                found = true;
+                                break;
+                            }
+                        }
+                        if(!found) {
+                            mergedData.items.push(data);
+                        }
                         multiResolve(mergedData);
                     }
                     else {
