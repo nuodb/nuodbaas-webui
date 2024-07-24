@@ -41,6 +41,53 @@ jobs:
       - run:
           name: Build, Test and deploy Docker image / Helm Charts to ECR
           command: make all
+  promote_build:
+    # Terragunt executor is needed because the promote-version.sh needs to
+    # auto-format the files after modification
+    executor: terragrunt
+    steps:
+      - checkout # check out source code to working directory
+      - check_skip_job
+      - check_skip_promotion
+      - run:
+          name: Install python
+          command: |
+            apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
+      - check_version
+      - add_ssh_keys:
+          fingerprints: # add SSH deploy key for nuodb/nuodb-dbaas-deploy repository
+            - "SHA256:xCr3Nv9p4lncWY3MzOQEU7WCXDi3d/BnIBCnIGGjfbk"
+      - run:
+          name: Promote Build to DEV
+          command: |
+            VERSION=$(grep -e "^appVersion:" charts/dbaas-cockpit/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
+            SHA=$(git rev-parse --short HEAD)
+            VERSION_SHA=${VERSION}-dev.sha-${SHA}
+
+            mkdir -p tmp/repos/$DBAAS_DEPLOY_REPO \
+              && cd tmp/repos/$DBAAS_DEPLOY_REPO
+            git clone "https://${DBAAS_DEPLOY_REPO}.git" .
+            git checkout $DBAAS_DEPLOY_BRANCH
+            COMMIT="$(echo ${CIRCLE_SHA1:0:7})"
+            if [ -n "$GIT_TAG" ]; then
+              COMMIT="$GIT_TAG"
+            fi
+            head="$(git rev-parse --short HEAD)"
+            # Update DbaaS Cockpit UI version
+            scripts/promote-version.sh nuodb-control-plane \
+              --set dbaas_cockpit_image_tag=$VERSION_SHA \
+              --set dbaas_cockpit_chart_version=$VERSION_SHA
+            # Check if the version has been promoted
+            if [ "$head" != "$(git rev-parse --short HEAD)" ]; then
+              git commit -a --amend --no-edit
+              git push --set-upstream origin "$(git rev-parse --abbrev-ref HEAD)"
+            fi
+          environment:
+            DBAAS_DEPLOY_REPO: github.com/nuodb/nuodb-dbaas-deploy
+            DBAAS_DEPLOY_BRANCH: main
+            GIT_COMMITTER_NAME: promotebot[bot]
+            GIT_COMMITTER_EMAIL: support@nuodb.com
+
 workflows:
   version: 2
   continuous:
@@ -48,3 +95,7 @@ workflows:
       # run test jobs in parallel
       - build_and_deploy:
           name: "Build and deploy"
+      - promote_build:
+          requires:
+            - "Build and deploy"
+          name: "Promote to DBaaS DEV"
