@@ -15,6 +15,19 @@ orbs:
   # Check https://circleci.com/developer/orbs/orb/circleci/helm for more details
   helm: circleci/helm@2.0.1
 
+executors:
+  terragrunt:
+    description: |
+      Docker based Terraform and Terragrunt executor.
+    docker:
+      - image: alpine/terragrunt:<< parameters.tag >>
+    parameters:
+      tag:
+        default: 1.5.7
+        description: Specify the Terragrunt Docker image tag for the executor
+        type: string
+    resource_class: small
+
 jobs:
   build_and_deploy:
     # Check https://circleci.com/developer/images/image/cimg/base for more details
