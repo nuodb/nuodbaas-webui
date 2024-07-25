@@ -60,6 +60,7 @@ jobs:
     executor: terragrunt
     steps:
       - checkout # check out source code to working directory
+      - check_skip_promotion
       - run:
           name: Install python
           command: |
@@ -76,9 +77,7 @@ jobs:
 
             mkdir -p tmp/repos/$DBAAS_DEPLOY_REPO \
               && cd tmp/repos/$DBAAS_DEPLOY_REPO
-            echo git clone "https://github.com/nuodb/${DBAAS_DEPLOY_REPO}.git" .
             git clone "https://github.com/nuodb/${DBAAS_DEPLOY_REPO}.git" .
-            echo git checkout $DBAAS_DEPLOY_BRANCH
             git checkout $DBAAS_DEPLOY_BRANCH
             COMMIT="$(echo ${CIRCLE_SHA1:0:7})"
             if [ -n "$GIT_TAG" ]; then
@@ -86,7 +85,7 @@ jobs:
             fi
             head="$(git rev-parse --short HEAD)"
             # Update DbaaS Cockpit UI version
-            scripts/promote-version.sh nuodb-control-plane \
+            scripts/promote-version.sh dbaas-cockpit \
               --set dbaas_cockpit_image_tag=$VERSION_SHA \
               --set dbaas_cockpit_chart_version=$VERSION_SHA
             # Check if the version has been promoted
@@ -99,6 +98,27 @@ jobs:
             DBAAS_DEPLOY_BRANCH: main
             GIT_COMMITTER_NAME: promotebot[bot]
             GIT_COMMITTER_EMAIL: support@nuodb.com
+
+commands:
+  check_skip_promotion:
+    description: |
+      Skip build promotion if it's not triggered by a release tag or build
+      promotion is not explicitly enabled.
+    steps:
+      - when:
+          condition:
+            and:
+              - not:
+                  matches:
+                    pattern: "^v.*"
+                    value: << pipeline.git.tag >>
+              - not: << pipeline.parameters.promote >>
+          steps:
+            - run:
+                name: Skip publishing because the build should not be promoted
+                command: circleci-agent step halt
+
+
 
 workflows:
   version: 2
