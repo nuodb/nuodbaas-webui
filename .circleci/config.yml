@@ -118,7 +118,13 @@ commands:
                 name: Skip publishing because the build should not be promoted
                 command: circleci-agent step halt
 
-
+parameters:
+  # set to true to promote this build into internal DBaaS cluster
+  promote:
+    type: boolean
+    default: false
+    description: |
+      Promotes NuoDB DBaaS Cockpit UI build into internal DBaaS cluster
 
 workflows:
   version: 2
