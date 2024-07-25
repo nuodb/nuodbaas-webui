@@ -76,7 +76,9 @@ jobs:
 
             mkdir -p tmp/repos/$DBAAS_DEPLOY_REPO \
               && cd tmp/repos/$DBAAS_DEPLOY_REPO
+            echo git clone "https://${DBAAS_DEPLOY_REPO}.git" .
             git clone "https://${DBAAS_DEPLOY_REPO}.git" .
+            echo git checkout $DBAAS_DEPLOY_BRANCH
             git checkout $DBAAS_DEPLOY_BRANCH
             COMMIT="$(echo ${CIRCLE_SHA1:0:7})"
             if [ -n "$GIT_TAG" ]; then
