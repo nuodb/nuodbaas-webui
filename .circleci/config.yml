@@ -51,7 +51,7 @@ jobs:
             helm push dbaas-cockpit-*.tgz "oci://$ECR_ACCOUNT_URL/"
       - run:
           name: Compress Test Results
-          command: tar -cvzf selenium-test-results.tar selenium-tests/target/test-results
+          command: tar -cvzf selenium-test-results.tar.gz -C selenium-tests/target/test-results .
       - store_artifacts:
           path: selenium-test-results.tar
           destination: selenium_test_results
