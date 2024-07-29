@@ -53,7 +53,7 @@ jobs:
           name: Compress Test Results
           command: tar -cvzf selenium-test-results.tar.gz -C selenium-tests/target/test-results .
       - store_artifacts:
-          path: selenium-test-results.tar
+          path: selenium-test-results.tar.gz
           destination: selenium_test_results
 workflows:
   version: 2
