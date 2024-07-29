@@ -50,11 +50,11 @@ jobs:
             helm package charts/dbaas-cockpit
             helm push dbaas-cockpit-*.tgz "oci://$ECR_ACCOUNT_URL/"
       - run:
-        name: Compress Test Results
-        command: tar -cvzf test-results.tar target/test-results
+          name: Compress Test Results
+          command: tar -cvzf test-results.tar target/test-results
       - store_artifacts:
-        path: test-results.tar
-        destination: test_results
+          path: test-results.tar
+          destination: test_results
 workflows:
   version: 2
   continuous:
