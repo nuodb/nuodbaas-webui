@@ -9,6 +9,7 @@ dbaasCockpit:
     repository: 253548315642.dkr.ecr.us-east-1.amazonaws.com/dbaas-cockpit-docker
     pullPolicy: IfNotPresent
     pullSecrets: []
+    tag: ""
   resources:
     limits:
       cpu: 100m

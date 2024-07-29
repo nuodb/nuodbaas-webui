@@ -20,7 +20,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.dbaasCockpit.image.repository }}:{{ .Chart.AppVersion }}"
+          image: "{{ .Values.dbaasCockpit.image.repository }}:{{ .Values.dbaasCockpit.image.tag | default (printf "v%s" .Chart.AppVersion) }}"
           imagePullPolicy: {{ .Values.dbaasCockpit.image.pullPolicy }}
           ports:
             - name: http-alt
