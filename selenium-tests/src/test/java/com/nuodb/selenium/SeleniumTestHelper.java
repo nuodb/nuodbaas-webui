@@ -121,17 +121,23 @@ public class SeleniumTestHelper {
     }
 
     /**
-     * searches all data-testid's with the "idPrefix" followed by 0 until {number of items - 1}
+     * searches all data-testid's with the "idPrefix" followed by sequential numbers starting from 0.
      * For example if items abc0, abc1, abc2, abc4 exist, it will return the text for abc0, abc1, abc2
+     *
+     * Specify in "minimumItems" the number you are expecting. If the UI changes a control (i.e. creating
+     * a list of 100 items), the items are not created at once, but rather each item is added individually.
+     * If Selenium retrieves the item list while it's being created half way, it might only get the first 50
+     * items. For this reason, this methods waits for the first "minimumItems" to appear. If more exist,
+     * they will be returned as well, but it will not wait for the UI update to complete.
      * @param idPrefix
-     * @param number of items requested
+     * @param minimumItems minimum number of items requested
      * @return
      */
-    public List<String> getTextList(String idPrefix, int count) {
+    public List<String> getTextList(String idPrefix, int minimumItems) {
         int index;
         WebElement element;
         List<String> items = new ArrayList<>();
-        for(index=0; index<count; index++) {
+        for(index=0; index<minimumItems; index++) {
             element = waitElement(idPrefix + index);
             items.add(element.getText());
         }

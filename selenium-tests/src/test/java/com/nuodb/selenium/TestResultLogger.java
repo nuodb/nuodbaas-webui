@@ -19,8 +19,8 @@ public class TestResultLogger implements TestWatcher {
         Logger LOG = LoggerFactory.getLogger(context.getTestClass().get());
 
         Path snapshotPath = getTestHelper(context).saveSnapshot("SUCCESS.png");
-        LOG.error("Test {} successful", context.getTestMethod().get().getName());
-        LOG.error("  Snapshot saved in {}", snapshotPath.toAbsolutePath());
+        LOG.info("Test {} successful", context.getTestMethod().get().getName());
+        LOG.info("  Snapshot saved in {}", snapshotPath.toAbsolutePath());
     }
 
     @Override
