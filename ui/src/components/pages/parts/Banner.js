@@ -37,7 +37,8 @@ function ResponsiveAppBar(resources) {
     };
 
     return (
-      <AppBar position="static">
+      <AppBar data-testid={resources.length > 0 ? "banner-done" : ""}
+       position="static">
         <Container maxWidth="xl">
           <Toolbar disableGutters>
             <Typography
@@ -68,7 +69,7 @@ function ResponsiveAppBar(resources) {
                 onClick={handleOpenNavMenu}
                 color="inherit"
               >
-                <MenuIcon />
+                <MenuIcon data-testid="menu-appbar" />
               </IconButton>
               <Menu
                 id="menu-appbar"
@@ -88,13 +89,13 @@ function ResponsiveAppBar(resources) {
                   display: { xs: 'block', md: 'none' },
                 }}
               >
-                {resources.map(resource => {
+                {resources.map((resource, index) => {
                     return (
                         <MenuItem key={resource} onClick={() => {
                             handleCloseNavMenu();
                             navigate("/ui/resource/list/" + resource);
                         }}>
-                            <Typography textAlign="center">{resource}</Typography>
+                            <Typography textAlign="center"><span data-testid={"menu-label-" + index}>{resource}</span></Typography>
                         </MenuItem>);
                 })}
               </Menu>
@@ -118,8 +119,9 @@ function ResponsiveAppBar(resources) {
               NuoDB
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-              {resources.map((resource) => (
+              {resources.map((resource, index) => (
                 <Button
+                data-testid={"menu-button-" + index}
                   key={resource}
                   onClick={()=>{
                     handleCloseNavMenu();

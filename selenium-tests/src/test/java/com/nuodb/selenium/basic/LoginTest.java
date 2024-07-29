@@ -23,15 +23,11 @@ public class LoginTest extends SeleniumTestHelper {
         sendKeys("username", "invalid_user");
         sendKeys("password", "invalid_password");
         click("login_button");
-        assertEquals("Invalid Credentials", getText("error_message"));
+        assertEquals("Invalid Credentials", waitText("error_message"));
     }
 
     @Test
     public void testLogin() throws MalformedURLException {
-        get("/ui/");
-        sendKeys("username", Constants.ADMIN_USER);
-        sendKeys("password", Constants.ADMIN_PASSWORD);
-        click("login_button");
-        assertEquals("Home", getText("title"));
+        login(Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
     }
 }
