@@ -1,7 +1,7 @@
 import axios from "axios";
 import Auth from "./auth";
 
-let schema;
+let schema = null;
 
 /**
  * Pulls OpenAPI spec schema and parses it
@@ -215,6 +215,151 @@ export async function getResource(path) {
             .then(response => resolve(response.data))
             .catch(reason => reject(reason));
     });
+}
+
+function concatChunks(chunk1, chunk2) {
+    let ret = new Uint8Array(chunk1.length + chunk2.length);
+    ret.set(chunk1, 0);
+    ret.set(chunk2, chunk1.length);
+    return ret;
+}
+
+/**
+ * Gets event streaming resource by path (fall back to non-streaming resource on failure)
+ * @param {*} path
+ * @param {*} multiResolve - returns response
+ * @param {*} multiReject - returns error
+ * @returns AbortController - use ret.abort() to abort
+ */
+export function getResourceEvents(path, multiResolve, multiReject) {
+    //only one event stream is supported - close prior one if it exists.
+    let eventsAbortController = new AbortController();
+
+    let fullPath = Auth.getNuodbCpRestPrefix() + "/events" + path;
+    axios({
+        headers: {...Auth.getHeaders(), 'Accept': 'text/event-stream'},
+        method: 'get',
+        url: fullPath,
+        responseType: 'stream',
+        adapter: 'fetch',
+        signal: eventsAbortController.signal
+      })
+      .then(async response => {
+        let event = null;
+        let data = null;
+        let id = null;
+        let mergedData = {};
+        let buffer = Uint8Array.of();
+        for await (let chunk of response.data) {
+            while(chunk.length > 0) {
+                let posNewline = chunk.indexOf("\n".charCodeAt(0));
+                if(posNewline === -1) {
+                    buffer = concatChunks(buffer, chunk);
+                    break;
+                }
+                let line = new TextDecoder().decode(concatChunks(buffer, chunk.slice(0, posNewline)));
+                chunk = chunk.slice(posNewline+1);
+                if(line.startsWith("event: ")) {
+                    event = line.substring("event: ".length);
+                }
+                else if(line.startsWith("data: ")) {
+                    data = line.substring("data: ".length);
+                }
+                else if(line.startsWith("id: ")) {
+                    id = line.substring("id: ".length);
+                }
+                else if(line.length === 0) {
+                    if(event === "HEARTBEAT") {
+                        // ignore
+                    }
+                    else if(event === "RESYNC" && data !== null) {
+                        mergedData = JSON.parse(data);
+                        multiResolve(mergedData);
+                    }
+                    else if(event === "UPDATED" && id !== null && data !== null) {
+                        let newData = {...mergedData};
+                        newData.items = [...newData.items];
+                        let modified = false;
+                        for(let i=0; i<newData.items.length; i++) {
+                            if(id === newData.items[i]["$ref"]) {
+                                newData.items[i] = JSON.parse(data);
+                                newData.items[i]["$ref"] = id;
+                                modified = true;
+                                break;
+                            }
+                        }
+                        if(modified) {
+                            mergedData = newData;
+                            multiResolve(mergedData);
+                        }
+                        else {
+                            console.log("item with id " + id + " not found for merging");
+                        }
+                    }
+                    else if(event === "DELETED" && id !== null) {
+                        let newData = {...mergedData};
+                        newData.items = [...newData.items];
+                        let modified = false;
+                        for(let i=0; i<newData.items.length; i++) {
+                            if(id === newData.items[i]["$ref"]) {
+                                newData.items[i] = {...newData.items[i], __deleted__: true};
+                                modified = true;
+                                break;
+                            }
+                        }
+                        if(modified) {
+                            mergedData = newData;
+                            multiResolve(mergedData);
+                        }
+                    }
+                    else if(event === "CREATED" && id !== null && data !== null) {
+                        data = JSON.parse(data);
+                        data["$ref"] = id;
+                        mergedData = {...mergedData};
+                        mergedData.items = [...mergedData.items];
+
+                        let found = false;
+                        for(let i=0; i<mergedData.items.length; i++) {
+                            if(id === mergedData.items[i]["$ref"]) {
+                                mergedData.items[i] = data;
+                                delete mergedData.items[i]["__deleted__"];
+                                found = true;
+                                break;
+                            }
+                        }
+                        if(!found) {
+                            mergedData.items.push(data);
+                        }
+                        multiResolve(mergedData);
+                    }
+                    else {
+                        console.log("Ignoring event " + event + ", id=" + id + ", data=" + data);
+                    }
+
+                    //clear out all data
+                    event = null;
+                    data = null;
+                    id = null;
+                }
+                else {
+                    console.log("Ignoring line " + line);
+                }
+            }
+        }
+      })
+      .catch((error) => {
+        if(error.name === "AbortError" || error.name === "CanceledError") {
+            return;
+        }
+        console.log("Event streaming request failed for " + path, error);
+
+        // fall back to non-streaming request
+        getResource(path)
+            .then(data => multiResolve(data))
+            .catch(reason => multiReject(reason));
+      });
+
+      return eventsAbortController;
 }
 
 /**

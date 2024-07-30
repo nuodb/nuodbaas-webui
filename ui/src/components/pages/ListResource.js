@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Table from "./parts/Table";
-import { getResource, getCreatePath, getResourceByPath } from "../../utils/schema";
+import { getResourceEvents, getCreatePath, getResourceByPath } from "../../utils/schema";
 import Button from '@mui/material/Button'
 import Path from './parts/Path'
 import Auth from "../../utils/auth"
@@ -15,6 +15,7 @@ export default function ListResource({ schema }) {
 
     const [data, setData] = useState([]);
     const [createPath, setCreatePath] = useState(null);
+    const [abortController, setAbortController] = useState(null);
 
     useEffect(() => {
         if (!schema) {
@@ -22,20 +23,30 @@ export default function ListResource({ schema }) {
         }
         let resourcesByPath_ = getResourceByPath(schema, path);
         if("get" in resourcesByPath_) {
-            getResource(path + "?expand=true").then((data) => {
-                if(data.items) {
-                    setData(data.items);
-                }
-                else {
+            setAbortController(
+                getResourceEvents(path + "?expand=true", (data) => {
+                    if(data.items) {
+                        setData(data.items);
+                    }
+                    else {
+                        setData([]);
+                    }
+                }, (error) => {
+                    Auth.handle401Error(error);
                     setData([]);
-                }
-            }).catch((error) => {
-                Auth.handle401Error(error);
-                setData([]);
-            })
+                })
+            );
         }
         setCreatePath(getCreatePath(schema, path));
     }, [ path, schema]);
+
+    useEffect(() => {
+        return () => {
+          if(abortController) {
+            abortController.abort();
+          }
+        }
+      }, [abortController]);
 
     function handleCreate() {
         navigate("/ui/resource/create" + path);
@@ -45,7 +56,7 @@ export default function ListResource({ schema }) {
         <React.Fragment>
             <Path schema={schema} path={path} data={data} />
             {createPath && <Button variant="outlined" onClick={handleCreate}>Create</Button>}
-            <Table schema={schema} data={data} path={path} />
+            <Table schema={schema} data={data.filter(d=> d.__deleted__ !== true)} path={path} />
         </React.Fragment>
     );
 }

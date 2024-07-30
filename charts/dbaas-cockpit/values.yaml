@@ -6,10 +6,10 @@ cpRest:
 dbaasCockpit:
   replicaCount: 1
   image:
-    repository: 253548315642.dkr.ecr.us-east-1.amazonaws.com/dbaas-cockpit
+    repository: 253548315642.dkr.ecr.us-east-1.amazonaws.com/dbaas-cockpit-docker
     pullPolicy: IfNotPresent
     pullSecrets: []
-    tag: latest
+    tag: ""
   resources:
     limits:
       cpu: 100m
@@ -19,4 +19,7 @@ dbaasCockpit:
       memory: 128Mi
   service:
     type: ClusterIP
-  pathPrefix: ui
+  ingress:
+    pathPrefix: ui
+    hosts:
+      - dbaas-cockpit.local
