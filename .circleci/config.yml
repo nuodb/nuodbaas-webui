@@ -15,6 +15,19 @@ orbs:
   # Check https://circleci.com/developer/orbs/orb/circleci/helm for more details
   helm: circleci/helm@2.0.1
 
+executors:
+  terragrunt:
+    description: |
+      Docker based Terraform and Terragrunt executor.
+    docker:
+      - image: alpine/terragrunt:<< parameters.tag >>
+    parameters:
+      tag:
+        default: 1.5.7
+        description: Specify the Terragrunt Docker image tag for the executor
+        type: string
+    resource_class: small
+
 jobs:
   build_and_deploy:
     # Check https://circleci.com/developer/images/image/cimg/base for more details
@@ -39,16 +52,80 @@ jobs:
             aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
             aws ecr get-login-password --region "$AWS_REGION" | helm registry login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
       - run:
-          name: Build, Test and deploy Docker image to ECR
-          command: PUSH_REPO="$ECR_ACCOUNT_URL/$IMG_REPO" make all
-          environment:
-            IMG_REPO: dbaas-cockpit
-            IMG_TAG: latest
+          name: Build, Test and deploy Docker image / Helm Charts to ECR
+          command: make all
+  promote_build:
+    # Terragunt executor is needed because the promote-version.sh needs to
+    # auto-format the files after modification
+    executor: terragrunt
+    steps:
+      - checkout # check out source code to working directory
+      - check_skip_promotion
       - run:
-          name: Push Helm charts to ECR
+          name: Install python
           command: |
-            helm package charts/dbaas-cockpit
-            helm push dbaas-cockpit-*.tgz "oci://$ECR_ACCOUNT_URL/"
+            apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
+      - add_ssh_keys:
+          fingerprints: # add SSH deploy key for nuodb/nuodb-dbaas-deploy repository
+            - "SHA256:0sqlXsA8Q/ZV4+M+0X2l0X2Aqj80QksvC7mCs0p0CQI"
+      - run:
+          name: Promote Build to DEV
+          command: |
+            VERSION=$(grep -e "^appVersion:" charts/dbaas-cockpit/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
+            SHA=$(git rev-parse --short HEAD)
+            VERSION_SHA=${VERSION}-dev.sha-${SHA}
+
+            mkdir -p tmp/repos/$DBAAS_DEPLOY_REPO \
+              && cd tmp/repos/$DBAAS_DEPLOY_REPO
+            git clone "https://github.com/nuodb/${DBAAS_DEPLOY_REPO}.git" .
+            git checkout $DBAAS_DEPLOY_BRANCH
+            COMMIT="$(echo ${CIRCLE_SHA1:0:7})"
+            if [ -n "$GIT_TAG" ]; then
+              COMMIT="$GIT_TAG"
+            fi
+            head="$(git rev-parse --short HEAD)"
+            # Update DbaaS Cockpit UI version
+            scripts/promote-version.sh dbaas-cockpit \
+              --set dbaas_cockpit_image_tag=$VERSION_SHA \
+              --set dbaas_cockpit_chart_version=$VERSION_SHA
+            # Check if the version has been promoted
+            if [ "$head" != "$(git rev-parse --short HEAD)" ]; then
+              git commit -a --amend --no-edit
+              git push --set-upstream origin "$(git rev-parse --abbrev-ref HEAD)"
+            fi
+          environment:
+            DBAAS_DEPLOY_REPO: nuodb-dbaas-deploy
+            DBAAS_DEPLOY_BRANCH: main
+            GIT_COMMITTER_NAME: promotebot[bot]
+            GIT_COMMITTER_EMAIL: support@nuodb.com
+
+commands:
+  check_skip_promotion:
+    description: |
+      Skip build promotion if it's not triggered by a release tag or build
+      promotion is not explicitly enabled.
+    steps:
+      - when:
+          condition:
+            and:
+              - not:
+                  matches:
+                    pattern: "^v.*"
+                    value: << pipeline.git.tag >>
+              - not: << pipeline.parameters.promote >>
+          steps:
+            - run:
+                name: Skip publishing because the build should not be promoted
+                command: circleci-agent step halt
+
+parameters:
+  # set to true to promote this build into internal DBaaS cluster
+  promote:
+    type: boolean
+    default: false
+    description: |
+      Promotes NuoDB DBaaS Cockpit UI build into internal DBaaS cluster
+
 workflows:
   version: 2
   continuous:
@@ -56,3 +133,7 @@ workflows:
       # run test jobs in parallel
       - build_and_deploy:
           name: "Build and deploy"
+      - promote_build:
+          requires:
+            - "Build and deploy"
+          name: "Promote to DBaaS DEV"

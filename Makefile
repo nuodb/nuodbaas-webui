@@ -27,8 +27,11 @@ NUODB_CP_VERSION ?= 2.6.0
 KWOKCTL := bin/kwokctl
 KUBECTL := bin/kubectl
 
-IMG_REPO ?= dbaas-cockpit
-IMG_TAG ?= latest
+IMG_REPO := dbaas-cockpit
+VERSION := $(shell grep -e "^appVersion:" charts/dbaas-cockpit/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
+SHA := $(shell git rev-parse --short HEAD)
+VERSION_SHA ?= ${VERSION}-dev.sha-${SHA}
+UNCOMMITTED := $(shell rm -f get_helm.sh && git status --porcelain)
 
 ##@ Production Builds
 
@@ -37,7 +40,7 @@ all: run-integration-tests deploy-image ## build, test + deploy everything
 
 .PHONY: build-image
 build-image:  ## build UI and create Docker image
-	@docker build -t ${IMG_REPO} -f docker/production/Dockerfile .
+	@docker build -t "${IMG_REPO}:latest" -f docker/production/Dockerfile .
 
 .PHONY: check-dev-services
 check-dev-services:
@@ -52,12 +55,20 @@ check-dev-services:
 
 .PHONY: deploy-image
 deploy-image: build-image ## deploy Docker image to AWS
-	@if [ "${PUSH_REPO}" != "" ] ; then \
-		docker tag "${IMG_REPO}:${IMG_TAG}" "${PUSH_REPO}:${IMG_TAG}" && \
-		docker push "${PUSH_REPO}:${IMG_TAG}"; \
-	else \
-		echo "PUSH_REPO environment variable must be set" && \
+	@if [ "${ECR_ACCOUNT_URL}" = "" ] ; then \
+		echo "ECR_ACCOUNT_URL environment variable must be set"; \
+	elif [ "${UNCOMMITTED}" != "" ] ; then \
+		echo "Uncommitted changes in GIT. Will not push to ECR." && \
+		echo "${UNCOMMITTED}" && \
 		exit 1; \
+	else \
+		sed -i "s/^version: \".*\"/version: \"${VERSION_SHA}\"/g" charts/dbaas-cockpit/Chart.yaml && \
+		sed -i "s/^appVersion: \".*\"/appVersion: \"${VERSION_SHA}\"/g" charts/dbaas-cockpit/Chart.yaml && \
+		docker tag "${IMG_REPO}:latest" "${ECR_ACCOUNT_URL}/${IMG_REPO}-docker:${VERSION_SHA}" && \
+		helm package charts/dbaas-cockpit && \
+		git checkout HEAD -- charts/dbaas-cockpit/Chart.yaml && \
+		docker push "${ECR_ACCOUNT_URL}/${IMG_REPO}-docker:${VERSION_SHA}" && \
+		helm push dbaas-cockpit-*.tgz "oci://${ECR_ACCOUNT_URL}/"; \
 	fi
 
 .PHONY: setup-integration-tests

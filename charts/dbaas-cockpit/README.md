@@ -16,7 +16,6 @@ All configurable parameters for each top-level scope are detailed below, organiz
 | ----- | ----------- | ------ |
 | `dbaasCockpit.replicaCount` | Number of replicas | `1` |
 | `dbaasCockpit.image.repository` | NuoDB Cockpit UI container image repository |`ghcr.io/nuodb/nuodb-cp-images`|
-| `dbaasCockpit.image.tag` | NuoDB Cockpit UI container image tag | `""` |
 | `dbaasCockpit.image.pullPolicy` | NuoDB Cockpit UI container pull policy |`IfNotPresent`|
 | `dbaasCockpit.image.pullSecrets` | Specify docker-registry secret names as an array | `[]` |
 | `dbaasCockpit.resources.limits.cpu` | Specify cpu limit | `100m` |
