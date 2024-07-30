@@ -54,6 +54,12 @@ jobs:
       - run:
           name: Build, Test and deploy Docker image / Helm Charts to ECR
           command: make all
+      - run:
+          name: Compress Test Results
+          command: tar -cvzf selenium-test-results.tar.gz -C selenium-tests/target/test-results .
+      - store_artifacts:
+          path: selenium-test-results.tar.gz
+          destination: selenium_test_results
   promote_build:
     # Terragunt executor is needed because the promote-version.sh needs to
     # auto-format the files after modification
