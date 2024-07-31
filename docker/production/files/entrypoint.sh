@@ -2,7 +2,7 @@
 
 if [ "${NUODB_CP_REST_URL}" != "" ] ; then
     find /usr/share/nginx/html -type f | while read line; do
-        sed -i "s:___NUODB_CP_REST_URL___:${NUODB_CP_REST_URL}:g" ${line}
+        sed -i "s#___NUODB_CP_REST_URL___#${NUODB_CP_REST_URL}#g" ${line}
     done
 fi
 
