@@ -1,8 +1,8 @@
 #!/bin/sh
 
-if [ "${NUODB_CP_REST_PATH_PREFIX}" != "" ] ; then
+if [ "${NUODB_CP_REST_URL}" != "" ] ; then
     find /usr/share/nginx/html -type f | while read line; do
-        sed -i "s:___NUODB_CP_REST_PATH_PREFIX___:${NUODB_CP_REST_PATH_PREFIX}:g" ${line}
+        sed -i "s:___NUODB_CP_REST_URL___:${NUODB_CP_REST_URL}:g" ${line}
     done
 fi
 
