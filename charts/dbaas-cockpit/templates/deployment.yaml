@@ -20,7 +20,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.dbaasCockpit.image.repository }}:{{ .Values.dbaasCockpit.image.tag | default (printf "v%s" .Chart.AppVersion) }}"
+          image: "{{ .Values.dbaasCockpit.image.repository }}:{{ .Values.dbaasCockpit.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.dbaasCockpit.image.pullPolicy }}
           ports:
             - name: http-alt
@@ -37,7 +37,7 @@ spec:
           resources:
             {{- toYaml .Values.dbaasCockpit.resources | nindent 12 }}
           env:
-            - name: NUODB_CP_REST_PATH_PREFIX
-              value: {{ .Values.cpRest.ingress.pathPrefix }}
+            - name: NUODB_CP_REST_URL
+              value: {{ .Values.dbaasCockpit.cpUrl }}
             - name: NUODB_COCKPIT_PATH_PREFIX
               value: {{ .Values.dbaasCockpit.ingress.pathPrefix }}
