@@ -148,8 +148,9 @@ public class SeleniumTestHelper {
         return items;
     }
 
-    public void login(String username, String password) {
+    public void login(String organization, String username, String password) {
         get("/ui/");
+        sendKeys("organization", organization);
         sendKeys("username", username);
         sendKeys("password", password);
         click("login_button");

@@ -41,7 +41,7 @@ services:
   nginx:
     image: "nginx"
     ports:
-      - "8080:80"
+      - "8088:80"
     networks:
       - kwok-kwok
     volumes:

@@ -7,13 +7,14 @@ import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography';
+import CircularProgress from '@mui/material/CircularProgress';
 import { getFilterField } from "../../../utils/schema";
 
-export default function Path({schema, path, data}) {
+export default function Path({schema, path, filterValues, loading}) {
     const navigate = useNavigate();
 
     function renderFilter() {
-        if(!filterField) {
+        if(!filterValues || filterValues.length === 0) {
             return null;
         }
 
@@ -27,15 +28,11 @@ export default function Path({schema, path, data}) {
             </Select>
         </FormControl>;
     }
-
     let filterField = getFilterField(schema, path);
-    let filterValues = [];
-    if(filterField) {
-        filterValues = [...new Set(data.map(d => d[filterField]))];
-    }
 
     let pathParts = (path.startsWith("/") ? path.substring(1) : path).split("/");
-    return <Breadcrumbs separator=">" aria-label="resources" style={{fontSize: "2em", padding: "20px"}}>
+    return <div style={{display: "flex", flexDirection: "row", alignItems: "center"}}>
+        <Breadcrumbs separator=">" aria-label="resources" style={{fontSize: "2em", padding: "20px"}}>
         {pathParts && pathParts.map((p,index) => {
             if(index === pathParts.length-1) {
                 return <Typography key={index} color="text.primary" style={{fontSize: "1em"}}>{p}</Typography>
@@ -49,6 +46,8 @@ export default function Path({schema, path, data}) {
             }
         })}
         {renderFilter()}
-        </Breadcrumbs>;
+        </Breadcrumbs>
+        {loading && <CircularProgress color="inherit" size="1em" />}
+    </div>;
 
 }
