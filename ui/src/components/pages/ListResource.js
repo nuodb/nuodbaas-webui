@@ -32,7 +32,7 @@ export default function ListResource({ schema }) {
         if("get" in resourcesByPath_) {
             setLoadingItems(true);
             setAbortController(
-                getResourceEvents(path + "?expand=true&offset=" + String((page-1)*pageSize) + "&limit=" + pageSize, (data) => {
+                getResourceEvents(path + "?listAccessible=true&expand=true&offset=" + String((page-1)*pageSize) + "&limit=" + pageSize, (data) => {
                     setLoadingItems(false);
                     if(data.items) {
                         setItems(data.items);
@@ -47,7 +47,7 @@ export default function ListResource({ schema }) {
                 })
             );
             setLoadingAllItems(true);
-            getResource(path).then(data => {
+            getResource(path + "?listAccessible=true").then(data => {
                 setLoadingAllItems(false);
                 setAllItems(data.items);
             })
