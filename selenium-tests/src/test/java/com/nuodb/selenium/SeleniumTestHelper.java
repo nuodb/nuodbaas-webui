@@ -116,8 +116,79 @@ public class SeleniumTestHelper {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(testId));
     }
 
+    public WebElement waitInputElementByName(String name) {
+        By testId = By.xpath("//input[@name='" + name + "']");
+        WebDriverWait wait = new WebDriverWait(driver, waitTimeout);
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(testId));
+    }
+
     public String waitText(String id) {
         return waitElement(id).getText();
+    }
+
+    /**
+     * returns column number
+     * @param searchValues values to search
+     * @param searchColumn numberic(index) or value to find index
+     * @return -1 if not found or out of range
+     */
+    private int getColumn(List<String> searchValues, String searchColumn) {
+        int column = searchValues.indexOf(searchColumn);
+        if(column >= 0) {
+            return column;
+        }
+
+        try {
+            column = Integer.parseInt(searchColumn);
+            if(column < 0 || column >= searchValues.size()) {
+                return -1;
+            }
+            return column;
+        }
+        catch(NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    /**
+     * Returns matching elements of a table search
+     * @param tableId data-testid of table element
+     * @param searchColumn numeric (index) or column name to search
+     * @param searchValue find all rows with this value at the specified searchColumn
+     * @param resultColumn if null, return entire row element. numeric (index) or column name to return element cell
+     * @return element of matching cells (resultColumn specified) or entire row element (resultColumn = null)
+     */
+    public List<WebElement> waitTableElements(String tableId, String searchColumn, String searchValue, String resultColumn) {
+        WebElement table = waitElement(tableId);
+        WebElement thead = table.findElement(By.tagName("thead"));
+        List<String> headers = thead.findElements(By.tagName("th")).stream().map(head -> head.getText()).toList();
+        int sColumn = getColumn(headers, searchColumn);
+        int rColumn = Integer.MAX_VALUE;
+        if(resultColumn != null) {
+            rColumn = getColumn(headers, resultColumn);
+        }
+
+        if(sColumn < 0 || rColumn < 0) {
+            return null;
+        }
+
+        List<WebElement> ret = new ArrayList<>();
+        WebElement body = table.findElement(By.tagName("tbody"));
+        for(WebElement row : body.findElements(By.tagName("tr"))) {
+            List<WebElement> cells = row.findElements(By.tagName("td"));
+            if(sColumn < cells.size() && (resultColumn == null || rColumn < cells.size())) {
+                if(searchValue == null || searchValue.equals(cells.get(sColumn).getText())) {
+                    if(resultColumn == null) {
+                        ret.add(row);
+                    }
+                    else {
+                        ret.add(cells.get(rColumn));
+                    }
+                }
+            }
+        }
+
+        return ret;
     }
 
     /**
@@ -146,6 +217,23 @@ public class SeleniumTestHelper {
             items.add(element.getText());
         }
         return items;
+    }
+
+    /**
+     * searches all elements with "idPrefix + index" (starting from 0 until found) having specified text value
+     * @param idPrefix data-testid to search for (with index appended to it)
+     * @param textValue text to search for (case insensitive)
+     * @return found element. If not found, method times out.
+     */
+    public WebElement findElementFromList(String idPrefix, String textValue) {
+        int index = 0;
+        while(true) {
+            WebElement element = waitElement(idPrefix + index);
+            if(element.getText().equalsIgnoreCase(textValue)) {
+                return element;
+            }
+            index++;
+        }
     }
 
     public void login(String organization, String username, String password) {
@@ -201,5 +289,14 @@ public class SeleniumTestHelper {
             throw new RuntimeException("Unable to save snapshot " + snapshotPath, e);
         }
         return snapshotPath;
+    }
+
+    public void sleep(int ms) {
+        try {
+            Thread.sleep(ms);
+        }
+        catch(InterruptedException e) {
+            // NOOP
+        }
     }
 }
