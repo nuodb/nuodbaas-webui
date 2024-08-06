@@ -85,7 +85,7 @@ export default function CreateEditEntry ({schema, path, data}) {
         {error && <h3 style={{color: "red"}}>{error}</h3>}
         {errorDetail && <div style={{color: "red"}}>{errorDetail}</div>}
         {message && <div>{message}</div>}
-        <Button data-testid="create_resource_create_button" variant="contained" onClick={()=> {
+        <Button data-testid="create_resource__create_button" variant="contained" onClick={()=> {
             submitForm(urlParameters, formParameters, data ? path : getCreatePath(schema, path), values)
                 .then(() => {
                     setMessage("Sucess!");

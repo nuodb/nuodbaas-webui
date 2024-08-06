@@ -20,29 +20,28 @@ public class UserTest extends SeleniumTestHelper {
     @Test
     public void testShowUsers() throws MalformedURLException {
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
-        waitElement("banner-done");
         clickUsersMenu();
-        waitElement("list_resource_complete");
+        waitElement("list_resource__complete");
     }
 
     private String createUser() {
         String name = "user" + System.currentTimeMillis();
         clickUsersMenu();
-        waitElement("list_resource_complete");
-        WebElement createButton = waitElement("list_resource_create_button");
+        waitElement("list_resource__complete");
+        WebElement createButton = waitElement("list_resource__create_button");
         createButton.click();
         waitInputElementByName("organization").sendKeys("acme");
         waitInputElementByName("name").sendKeys(name);
         waitInputElementByName("password").sendKeys("passw0rd");
         waitInputElementByName("accessRule.allow.0").sendKeys("all:acme");
-        waitElement("create_resource_create_button").click();
-        waitElement("list_resource_complete");
+        waitElement("create_resource__create_button").click();
+        waitElement("list_resource__complete");
 
         return name;
     }
 
     private void deleteUser(String userName) {
-        List<WebElement> buttonsCell = waitTableElements("list_resource_table", "name", userName, "0");
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", userName, "0");
         assertEquals(1, buttonsCell.size());
         List<WebElement> buttons = buttonsCell.get(0).findElements(By.tagName("button"));
         List<WebElement> deleteButtons = buttons.stream().filter(button -> button.getText().equalsIgnoreCase("Delete")).toList();
@@ -53,7 +52,6 @@ public class UserTest extends SeleniumTestHelper {
     @Test
     public void testCreateUser() throws MalformedURLException {
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
-        waitElement("banner-done");
         String name = createUser();
         deleteUser(name);
     }
@@ -62,20 +60,52 @@ public class UserTest extends SeleniumTestHelper {
     public void testListCreateAndDeleteUsers() {
         // Setup and list users
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
-        waitElement("banner-done");
         String userName = createUser();
         clickUsersMenu();
-        waitElement("list_resource_complete");
+        waitElement("list_resource__complete");
 
         // find user and delete
         deleteUser(userName);
 
         // verify user is gone
-        waitElement("list_resource_complete");
+        waitElement("list_resource__complete");
         sleep(1000); // TODO(agr22): wait for AJAX call and page reload to complete. We should use global state for all AJAX calls to determine if the call is complete
                         //              also we should avoid a page reload after a delete operation allowing us to set a global state.
-        List<WebElement> buttonsCell = waitTableElements("list_resource_complete", "name", userName, "0");
+        List<WebElement> buttonsCell = waitTableElements("list_resource__complete", "name", userName, "0");
         assertEquals(0, buttonsCell.size());
 
+    }
+
+    @Test
+    public void testEditUser() {
+        // Setup and list users
+        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        String userName = createUser();
+        clickUsersMenu();
+        waitElement("list_resource__complete");
+
+        // find user and start edit mode
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", userName, "0");
+        assertEquals(1, buttonsCell.size());
+        List<WebElement> buttons = buttonsCell.get(0).findElements(By.tagName("button"));
+        List<WebElement> editButtons = buttons.stream().filter(button -> button.getText().equalsIgnoreCase("Edit")).toList();
+        assertEquals(1, editButtons.size());
+        editButtons.get(0).click();
+
+        // edit user and save
+        waitInputElementByName("labels.key").sendKeys(userName);
+        waitInputElementByName("labels.value").sendKeys(userName);
+        waitElement("add_button_labels").click();
+        waitElement("create_resource__create_button").click();
+        waitElement("list_resource__complete");
+
+        // verify user was modified
+        waitElement("list_resource__complete");
+        List<WebElement> labelsCell = waitTableElements("list_resource__table", "name", userName, "labels");
+        assertEquals(1, labelsCell.size());
+        String[] labels = labelsCell.get(0).getText().split("\n");
+        assertEquals(2, labels.length);
+        assertEquals(userName + ":", labels[0].trim());
+        assertEquals(userName, labels[1].trim());
     }
 }

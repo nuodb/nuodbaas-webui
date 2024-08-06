@@ -91,11 +91,11 @@ export default function ListResource({ schema }) {
     }
 
     return (
-        <div data-testid={!loadingItems && !loadingAllItems && "list_resource_complete"}>
+        <div data-testid={!loadingItems && !loadingAllItems && "list_resource__complete"}>
             <Path schema={schema} path={path} filterValues={getFilterValues()} loading={loadingItems || loadingAllItems} />
-            {createPath && <Button data-testid="list_resource_create_button" variant="outlined" onClick={handleCreate}>Create</Button>}
+            {createPath && <Button data-testid="list_resource__create_button" variant="outlined" onClick={handleCreate}>Create</Button>}
             {renderPaging()}
-            <Table data-testid="list_resource_table" schema={schema} data={items.filter(d=> d.__deleted__ !== true)} path={path} />
+            <Table data-testid="list_resource__table" schema={schema} data={items.filter(d=> d.__deleted__ !== true)} path={path} />
             {renderPaging()}
         </div>
     );

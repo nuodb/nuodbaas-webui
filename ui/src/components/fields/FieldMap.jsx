@@ -89,7 +89,7 @@ export default function FieldMap({ prefix, parameter, values, setValues }) {
                 }} />
         </TableCell>
         <TableCell>
-            <Button disabled={newKey === "" || valueKeys.includes(newKey)} onClick={() => {
+            <Button data-testid={"add_button_" + prefix} disabled={newKey === "" || valueKeys.includes(newKey)} onClick={() => {
                 let value = getValue(values, prefix);
                 if (value === null) {
                     value = {};

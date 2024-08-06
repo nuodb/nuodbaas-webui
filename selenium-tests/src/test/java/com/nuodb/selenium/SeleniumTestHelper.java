@@ -243,6 +243,7 @@ public class SeleniumTestHelper {
         sendKeys("password", password);
         click("login_button");
         assertEquals("Home", waitText("title"));
+        waitElement("banner-done");
     }
 
     /**
