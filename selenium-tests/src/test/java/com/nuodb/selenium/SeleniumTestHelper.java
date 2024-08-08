@@ -155,7 +155,7 @@ public class SeleniumTestHelper {
      * @param tableId data-testid of table element
      * @param searchColumn numeric (index) or column name to search
      * @param searchValue find all rows with this value at the specified searchColumn
-     * @param resultColumn if null, return entire row element. numeric (index) or column name to return element cell
+     * @param resultColumn numeric (index) or column name to return element cell
      * @return element of matching cells (resultColumn specified) or entire row element (resultColumn = null)
      */
     public List<WebElement> waitTableElements(String tableId, String searchColumn, String searchValue, String resultColumn) {
@@ -164,9 +164,7 @@ public class SeleniumTestHelper {
         List<String> headers = thead.findElements(By.tagName("th")).stream().map(head -> head.getText()).toList();
         int sColumn = getColumn(headers, searchColumn);
         int rColumn = Integer.MAX_VALUE;
-        if(resultColumn != null) {
-            rColumn = getColumn(headers, resultColumn);
-        }
+        rColumn = getColumn(headers, resultColumn);
 
         if(sColumn < 0 || rColumn < 0) {
             return null;
@@ -178,12 +176,7 @@ public class SeleniumTestHelper {
             List<WebElement> cells = row.findElements(By.tagName("td"));
             if(sColumn < cells.size() && (resultColumn == null || rColumn < cells.size())) {
                 if(searchValue == null || searchValue.equals(cells.get(sColumn).getText())) {
-                    if(resultColumn == null) {
-                        ret.add(row);
-                    }
-                    else {
-                        ret.add(cells.get(rColumn));
-                    }
+                    ret.add(cells.get(rColumn));
                 }
             }
         }
@@ -297,7 +290,7 @@ public class SeleniumTestHelper {
             Thread.sleep(ms);
         }
         catch(InterruptedException e) {
-            // NOOP
+            Thread.currentThread().interrupt();
         }
     }
 }

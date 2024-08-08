@@ -54,8 +54,7 @@ export default function Table(props) {
                 return value.map((v,index) => <div key={index}>{showValue(v)}</div>);
             }
             else {
-                return Object.keys(value).map(key => {
-                    return <div key={key} style={{display: "flex", flexDirection: "row"}}><div>{String(key) + ": "}</div><div>{showValue(value[key])}</div></div>})
+                return <dl className="map">{Object.keys(value).map(key => <div key={key}><dt>{String(key)}</dt><dd>{showValue(value[key])}</dd></div>)}</dl>
             }
         }
         else if(typeof value === "string") {

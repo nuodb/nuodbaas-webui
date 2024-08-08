@@ -6,6 +6,7 @@ import org.openqa.selenium.WebElement;
 
 import com.nuodb.selenium.Constants;
 import com.nuodb.selenium.SeleniumTestHelper;
+import static com.nuodb.selenium.SeleniumAssert.assertThat;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -15,13 +16,6 @@ import java.util.List;
 public class UserTest extends SeleniumTestHelper {
     public void clickUsersMenu() {
         findElementFromList("menu-button-", "users").click();
-    }
-
-    @Test
-    public void testShowUsers() throws MalformedURLException {
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
-        clickUsersMenu();
-        waitElement("list_resource__complete");
     }
 
     private String createUser() {
@@ -43,8 +37,7 @@ public class UserTest extends SeleniumTestHelper {
     private void deleteUser(String userName) {
         List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", userName, "0");
         assertEquals(1, buttonsCell.size());
-        List<WebElement> buttons = buttonsCell.get(0).findElements(By.tagName("button"));
-        List<WebElement> deleteButtons = buttons.stream().filter(button -> button.getText().equalsIgnoreCase("Delete")).toList();
+        List<WebElement> deleteButtons = buttonsCell.get(0).findElements(By.xpath("button[@data-testid='delete_button']"));
         assertEquals(1, deleteButtons.size());
         deleteButtons.get(0).click();
     }
@@ -87,8 +80,7 @@ public class UserTest extends SeleniumTestHelper {
         // find user and start edit mode
         List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", userName, "0");
         assertEquals(1, buttonsCell.size());
-        List<WebElement> buttons = buttonsCell.get(0).findElements(By.tagName("button"));
-        List<WebElement> editButtons = buttons.stream().filter(button -> button.getText().equalsIgnoreCase("Edit")).toList();
+        List<WebElement> editButtons = buttonsCell.get(0).findElements(By.xpath("button[@data-testid='edit_button']"));
         assertEquals(1, editButtons.size());
         editButtons.get(0).click();
 
@@ -100,12 +92,13 @@ public class UserTest extends SeleniumTestHelper {
         waitElement("list_resource__complete");
 
         // verify user was modified
-        waitElement("list_resource__complete");
-        List<WebElement> labelsCell = waitTableElements("list_resource__table", "name", userName, "labels");
-        assertEquals(1, labelsCell.size());
-        String[] labels = labelsCell.get(0).getText().split("\n");
-        assertEquals(2, labels.length);
-        assertEquals(userName + ":", labels[0].trim());
-        assertEquals(userName, labels[1].trim());
+        List<WebElement> labelsCells = waitTableElements("list_resource__table", "name", userName, "labels");
+        assertThat(labelsCells)
+            .hasSize(1)
+            .get(0)
+            .mapContains(userName, userName);
+
+        // Delete User
+        deleteUser(userName);
     }
 }
