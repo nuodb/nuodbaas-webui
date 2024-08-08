@@ -1,8 +1,4 @@
 # Default values for dbaas-cockpit.
-cpRest:
-  ingress:
-    pathPrefix: nuodb-cp
-
 dbaasCockpit:
   replicaCount: 1
   image:
@@ -23,3 +19,4 @@ dbaasCockpit:
     pathPrefix: ui
     hosts:
       - dbaas-cockpit.local
+  cpUrl: /nuodb-cp

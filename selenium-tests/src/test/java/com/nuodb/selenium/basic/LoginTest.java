@@ -20,6 +20,7 @@ public class LoginTest extends SeleniumTestHelper {
     @Test
     public void testInvalidLogin() throws MalformedURLException {
         get("/ui/");
+        sendKeys("organization", "invalid_org");
         sendKeys("username", "invalid_user");
         sendKeys("password", "invalid_password");
         click("login_button");
@@ -28,6 +29,6 @@ public class LoginTest extends SeleniumTestHelper {
 
     @Test
     public void testLogin() throws MalformedURLException {
-        login(Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
     }
 }
