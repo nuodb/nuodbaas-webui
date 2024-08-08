@@ -18,3 +18,17 @@ code {
   flex-direction: column;
   gap: 1em;
 }
+/* Style for showing Maps (list of key/value pairs) */
+dl.map>div {
+  display: flex;
+  flex-direction: row;
+}
+
+dl.map>div>dd {
+  margin-inline-start: 0px;
+}
+
+dl.map>div>dt::after {
+  content: ":";
+  padding-right: 5px;
+}

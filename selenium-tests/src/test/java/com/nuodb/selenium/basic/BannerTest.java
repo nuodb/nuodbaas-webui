@@ -16,7 +16,6 @@ public class BannerTest extends SeleniumTestHelper {
     @Test
     public void testHorizontalBanner() throws MalformedURLException {
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
-        waitElement("banner-done");
 
         // get all the menu item labels
         List<String> menuItems = getTextList("menu-button-", expectedMenuItems.size());
@@ -30,7 +29,6 @@ public class BannerTest extends SeleniumTestHelper {
     public void testMenuBanner() throws MalformedURLException {
         setWindowSize(500, 800);
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
-        waitElement("banner-done");
         click("menu-appbar");
 
         // get all the menu item labels

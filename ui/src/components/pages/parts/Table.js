@@ -15,7 +15,8 @@ import Paper from '@mui/material/Paper';
  * @param {*} param0
  * @returns
  */
-export default function Table({ schema, data, path }) {
+export default function Table(props) {
+    const { schema, data, path } = props;
     let navigate = useNavigate();
 
     /**
@@ -53,8 +54,7 @@ export default function Table({ schema, data, path }) {
                 return value.map((v,index) => <div key={index}>{showValue(v)}</div>);
             }
             else {
-                return Object.keys(value).map(key => {
-                    return <div key={key} style={{display: "flex", flexDirection: "row"}}><div>{String(key) + ": "}</div><div>{showValue(value[key])}</div></div>})
+                return <dl className="map">{Object.keys(value).map(key => <div key={key}><dt>{String(key)}</dt><dd>{showValue(value[key])}</dd></div>)}</dl>
             }
         }
         else if(typeof value === "string") {
@@ -74,7 +74,7 @@ export default function Table({ schema, data, path }) {
     let tableFields = getTableFields();
 
     return (<TableContainer component={Paper}>
-        <TableMaterial sx={{ minWidth: 650 }}>
+        <TableMaterial data-testid={props["data-testid"]} sx={{ minWidth: 650 }}>
             <TableHead>
                 <TableRow>
                     {tableFields.map(field => <TableCell key={field}>{field === "$ref" ? "" : field}</TableCell>)}
@@ -86,10 +86,10 @@ export default function Table({ schema, data, path }) {
                         {tableFields.map(field => {
                             if(field === "$ref") {
                                 return <TableCell key={field}>
-                                    <Button variant="text" onClick={() =>
+                                    <Button data-testid="edit_button" variant="text" onClick={() =>
                                         navigate("/ui/resource/edit" + path + "/" + row[field])
                                     }>Edit</Button>
-                                    {("delete" in (getResourceByPath(schema, path + "/" + row[field]) || {})) && <Button variant="text" onClick={async () => {
+                                    {("delete" in (getResourceByPath(schema, path + "/" + row[field]) || {})) && <Button data-testid="delete_button" variant="text" onClick={async () => {
                                         await deleteResource(path + "/" + row[field]);
                                         window.location.reload();
                                     }}>Delete</Button>}</TableCell>;
