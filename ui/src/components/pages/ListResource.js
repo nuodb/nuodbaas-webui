@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Table from "./parts/Table";
-import { getResourceEvents, getCreatePath, getResourceByPath } from "../../utils/schema";
+import { getResourceEvents, getCreatePath, getResourceByPath, getCustomizations } from "../../utils/schema";
 import Button from '@mui/material/Button'
 import Path from './parts/Path'
 import Auth from "../../utils/auth"
@@ -14,6 +14,7 @@ export default function ListResource({ schema }) {
     const path = "/" + useParams()["*"];
 
     const [data, setData] = useState([]);
+    const [customizations, setCustomizations] = useState({});
     const [createPath, setCreatePath] = useState(null);
     const [abortController, setAbortController] = useState(null);
 
@@ -41,6 +42,10 @@ export default function ListResource({ schema }) {
     }, [ path, schema]);
 
     useEffect(() => {
+        setCustomizations(getCustomizations());
+    }, []);
+
+    useEffect(() => {
         return () => {
           if(abortController) {
             abortController.abort();
@@ -56,7 +61,7 @@ export default function ListResource({ schema }) {
         <React.Fragment>
             <Path schema={schema} path={path} data={data} />
             {createPath && <Button variant="outlined" onClick={handleCreate}>Create</Button>}
-            <Table schema={schema} data={data.filter(d=> d.__deleted__ !== true)} path={path} />
+            <Table schema={schema} customizations={customizations} data={data.filter(d=> d.__deleted__ !== true)} path={path} />
         </React.Fragment>
     );
 }

@@ -2,6 +2,7 @@ import axios from "axios";
 import Auth from "./auth";
 
 let schema = null;
+let customizations = null;
 
 /**
  * Pulls OpenAPI spec schema and parses it
@@ -19,6 +20,22 @@ export async function getSchema() {
         }
     }
     return schema;
+}
+
+/**
+ * Pulls customizations.json file
+ * @returns JSON of customizations file
+ */
+export async function getCustomizations() {
+    if(!customizations) {
+        try {
+            customizations = (await axios.get("/ui/customizations.json")).data;
+        }
+        catch(error) {
+            console.log("Error loading customizations", error);
+        }
+    }
+    return customizations || {};
 }
 
 /**
