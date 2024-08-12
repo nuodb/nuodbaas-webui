@@ -249,7 +249,7 @@ export function getResourceEvents(path, multiResolve, multiReject) {
         let id = null;
         let mergedData = {};
         let buffer = Uint8Array.of();
-        for await (let chunk of response.data) {
+        for await (let chunk of response) {
             while(chunk.length > 0) {
                 let posNewline = chunk.indexOf("\n".charCodeAt(0));
                 if(posNewline === -1) {
