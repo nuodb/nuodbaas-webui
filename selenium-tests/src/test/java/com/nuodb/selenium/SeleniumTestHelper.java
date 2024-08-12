@@ -191,6 +191,7 @@ public class SeleniumTestHelper {
     /**
      * searches all data-testid's with the "idPrefix" followed by sequential numbers starting from 0.
      * For example if items abc0, abc1, abc2, abc4 exist, it will return the text for abc0, abc1, abc2
+     * It ignores all empty values.
      *
      * Specify in "minimumItems" the number you are expecting. If the UI changes a control (i.e. creating
      * a list of 100 items), the items are not created at once, but rather each item is added individually.
@@ -203,15 +204,24 @@ public class SeleniumTestHelper {
      */
     public List<String> getTextList(String idPrefix, int minimumItems) {
         int index;
-        WebElement element;
+        WebElement element = null;
         List<String> items = new ArrayList<>();
         for(index=0; index<minimumItems; index++) {
-            element = waitElement(idPrefix + index);
+            for(int retry=0; retry < 10; retry++) {
+                element = waitElement(idPrefix + index);
+                if(element.getText().length() > 0) {
+                    break;
+                }
+                sleep(50);
+            }
             items.add(element.getText());
         }
         while((element = getElement(idPrefix + index)) != null) {
             index++;
-            items.add(element.getText());
+            String text = element.getText();
+            if(text.length() > 0) {
+                items.add(element.getText());
+            }
         }
         return items;
     }
