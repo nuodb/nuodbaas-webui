@@ -1,9 +1,8 @@
 import React from "react";
+import Path from "./parts/Path";
 
-export default function Home() {
+export default function Home({schema}) {
     return (
-        <React.Fragment>
-            <h1 data-testid="title">Home</h1>
-        </React.Fragment>
+        <Path schema={schema} path="Home" filterValues={[]} />
     );
 }

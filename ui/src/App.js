@@ -10,6 +10,7 @@ import Banner from "./components/pages/parts/Banner";
 import Schema from "./components/pages/parts/Schema";
 import CssBaseline from '@mui/material/CssBaseline';
 import NotFound from "./components/pages/NotFound";
+import Dialog from "./components/pages/parts/Dialog";
 import Auth from "./utils/auth";
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
   return (
     <div className="App">
       <CssBaseline/>
+      <Dialog/>
       <BrowserRouter>
         {isLoggedIn
           ?
@@ -26,7 +28,7 @@ export default function App() {
             {schema && <Banner schema={schema} />}
             <Routes>
               <Route path="/" element={<Navigate to="/ui" />} />
-              <Route path="/ui" element={<Home />} />
+              <Route path="/ui" element={<Home schema={schema} />} />
               <Route path="/ui/error" element={<ErrorPage />} />
               <Route path="/ui/resource/list/*" element={<ListResource schema={schema} />} />
               <Route path="/ui/resource/create/*" element={<CreateResource schema={schema} />} />

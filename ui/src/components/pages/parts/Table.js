@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from 'react-router-dom';
-import { deleteResource, getResourceByPath } from '../../../utils/schema'
+import { deleteResource, getResourceByPath, matchesPath, replaceVariables } from '../../../utils/schema'
 import Button from '@mui/material/Button';
 import TableMaterial from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -9,6 +9,8 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import RestSpinner from "../../pages/parts/RestSpinner";
+import Dialog from "./Dialog";
 
 /**
  * shows a table with all the "data". Columns are determined by the schema definition for the "path"
@@ -45,11 +47,37 @@ export default function Table(props) {
         if("resourceVersion" in dataKeys) {
             delete dataKeys["resourceVersion"]
         }
-        return [...tableFields, ...Object.keys(dataKeys)];
+        let ret = [...tableFields, ...Object.keys(dataKeys)];
+
+        let cf = getCustomFields();
+        Object.keys(cf).forEach(key => {
+            if(!ret.includes(key)) {
+                ret.push(key);
+            }
+        })
+        return ret;
+    }
+
+    let customFields = null;
+    function getCustomFields() {
+        let customizations = window["getCustomizations"] && window["getCustomizations"]();
+        if(customFields === null && customizations && customizations.views) {
+            customFields = {};
+            for (const sPath of Object.keys(customizations.views)) {
+                if(matchesPath(path, sPath)) {
+                    customFields = customizations.views[sPath];
+                    break;
+                }
+            }
+        }
+        return customFields || {};
     }
 
     function showValue(value) {
-        if(typeof value === "object") {
+        if(value === undefined || value === null) {
+            return "";
+        }
+        else if(typeof value === "object") {
             if(Array.isArray(value)) {
                 return value.map((v,index) => <div key={index}>{showValue(v)}</div>);
             }
@@ -95,7 +123,34 @@ export default function Table(props) {
                                     }}>Delete</Button>}</TableCell>;
                             }
                             else {
-                                return <TableCell key={field}>{showValue(row[field])}</TableCell>;
+                                let cf = getCustomFields();
+
+                                let value = showValue(row[field]);
+                                if(field in cf && cf[field].value && typeof cf[field].value === "function") {
+                                    value = showValue(cf[field].value(row));
+                                }
+
+                                let buttons = [];
+                                if(field in cf && cf[field].buttons) {
+                                    cf[field].buttons.forEach(button => {
+                                        if(!button.visible || button.visible(row)) {
+                                            buttons.push(<Button key={button.label} variant="outlined" onClick={async () => {
+                                                let label = replaceVariables(button.label, row);
+                                                if(button.confirm) {
+                                                    let confirm = replaceVariables(button.confirm, row);
+                                                    if("yes" !== await Dialog.confirm(label, confirm)) {
+                                                        return;
+                                                    }
+                                                }
+                                                if(button.patch) {
+                                                    await RestSpinner.patch(path + "/" + row["$ref"], button.patch);
+                                                }
+                                            }}>{button.label}</Button>)
+                                        }
+                                    })
+                                }
+
+                                return <TableCell key={field}>{value}{buttons}</TableCell>;
                             }
                         })}
                     </TableRow>

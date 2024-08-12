@@ -1,8 +1,6 @@
-import axios from "axios";
-import Auth from "./auth";
-
+import RestSpinner from "../components/pages/parts/RestSpinner";
+import Auth from "./auth"
 let schema = null;
-let customizations = null;
 
 /**
  * Pulls OpenAPI spec schema and parses it
@@ -11,7 +9,7 @@ let customizations = null;
 export async function getSchema() {
     if(!schema) {
         try {
-            schema = (await axios.get(Auth.getNuodbCpRestUrl() + "/openapi", { headers: Auth.getHeaders() })).data;
+            schema = await RestSpinner.get("/openapi");
             parseSchema(schema, schema, []);
             schema = schema["paths"];
         }
@@ -20,22 +18,6 @@ export async function getSchema() {
         }
     }
     return schema;
-}
-
-/**
- * Pulls customizations.json file
- * @returns JSON of customizations file
- */
-export async function getCustomizations() {
-    if(!customizations) {
-        try {
-            customizations = (await axios.get("/ui/customizations.json")).data;
-        }
-        catch(error) {
-            console.log("Error loading customizations", error);
-        }
-    }
-    return customizations || {};
 }
 
 /**
@@ -93,7 +75,7 @@ function parseSchema(rootSchema, schema, path) {
  * @param {*} path2
  * @returns
  */
-function matchesPath(path1, path2) {
+export function matchesPath(path1, path2) {
     let parts1 = path1.split("/");
     let parts2 = path2.split("/");
     if(parts1.length !== parts2.length) {
@@ -105,6 +87,19 @@ function matchesPath(path1, path2) {
         }
     }
     return true;
+}
+
+/**
+ * given a search string, replaces all placeholders "{variable}" with the value of the variable
+ * @param {*} search
+ * @param {*} variables
+ * @returns string with the placeholders replaced.
+ */
+export function replaceVariables(search, variables) {
+    Object.keys(variables).forEach(key => {
+        search = search.replaceAll("{" + key + "}", variables[key]);
+    })
+    return search;
 }
 
 /**
@@ -226,12 +221,7 @@ export function getFilterField(rootSchema, path) {
  * @returns
  */
 export async function getResource(path) {
-    let fullPath = Auth.getNuodbCpRestUrl() + path;
-    return new Promise((resolve, reject) => {
-        axios.get(fullPath, { headers: Auth.getHeaders() })
-            .then(response => resolve(response.data))
-            .catch(reason => reject(reason));
-    });
+    return await RestSpinner.get(path);
 }
 
 function concatChunks(chunk1, chunk2) {
@@ -252,15 +242,7 @@ export function getResourceEvents(path, multiResolve, multiReject) {
     //only one event stream is supported - close prior one if it exists.
     let eventsAbortController = new AbortController();
 
-    let fullPath = Auth.getNuodbCpRestUrl() + "/events" + path;
-    axios({
-        headers: {...Auth.getHeaders(), 'Accept': 'text/event-stream'},
-        method: 'get',
-        url: fullPath,
-        responseType: 'stream',
-        adapter: 'fetch',
-        signal: eventsAbortController.signal
-      })
+    RestSpinner.getStream("/events" + path, eventsAbortController)
       .then(async response => {
         let event = null;
         let data = null;
@@ -385,9 +367,7 @@ export function getResourceEvents(path, multiResolve, multiReject) {
  * @returns
  */
 export async function deleteResource(path) {
-    return new Promise((resolve, reject) => {
-        axios.delete(Auth.getNuodbCpRestUrl() + "/" + path, { headers: Auth.getHeaders() }).then(response => resolve(response.data)).catch(reason => reject(reason));
-    })
+    return await RestSpinner.delete(path);
 }
 
 /**
@@ -470,39 +450,33 @@ export function getDefaultValue(parameter, value) {
  */
 export async function submitForm(urlParameters, formParameters, path, values) {
     let queryParameters = Object.keys(urlParameters).filter(key => urlParameters[key]["in"] === "query");
-    let fullPath = Auth.getNuodbCpRestUrl() + path;
 
     // the last URL parameter has the name of the resource, while the form parameter always has "name"
     // rename last URL parameter to "name"
-    let posBracketStart = fullPath.lastIndexOf("{");
-    let posBracketEnd = fullPath.lastIndexOf("}");
+    let posBracketStart = path.lastIndexOf("{");
+    let posBracketEnd = path.lastIndexOf("}");
     if(posBracketStart >= 0 && posBracketEnd > posBracketStart) {
-        fullPath = fullPath.substring(0, posBracketStart+1) + "name" + fullPath.substring(posBracketEnd);
+        path = path.substring(0, posBracketStart+1) + "name" + path.substring(posBracketEnd);
     }
 
     queryParameters.forEach((query, index) => {
         if(index === 0) {
-            fullPath += "?";
+            path += "?";
         }
         else {
-            fullPath += "&";
+            path += "&";
         }
-        fullPath += encodeURIComponent(query) + "={" + query + "}";
+        path += encodeURIComponent(query) + "={" + query + "}";
     })
 
     values = {...values};
     Object.keys(values).forEach(key => {
-        fullPath = fullPath.replace("{" + key + "}", String(values[key]));
+        path = path.replace("{" + key + "}", String(values[key]));
         if(!(key in formParameters)) {
             //remove fields which are not used as form parameter
             delete values[key];
         }
     });
 
-    return new Promise((resolve, reject) => {
-        axios.put(fullPath, values, { headers: Auth.getHeaders() })
-            .then(response => resolve(response.data))
-            .catch(error => { return reject(error)})
-    });
-
+    return RestSpinner.put(path, values);
 }
