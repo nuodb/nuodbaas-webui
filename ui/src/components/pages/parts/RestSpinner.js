@@ -46,7 +46,7 @@ export default class RestSpinner extends React.Component {
     static async get(path) {
         return new Promise((resolve, reject) => {
             RestSpinner.incrementPending();
-            axios.get(Auth.getNuodbCpRestUrl() + path, { headers: Auth.getHeaders() })
+            axios.get(Auth.getNuodbCpRestUrl(path), { headers: Auth.getHeaders() })
                 .then(response => {
                     RestSpinner.decrementPending();
                     resolve(response.data);
@@ -63,7 +63,7 @@ export default class RestSpinner extends React.Component {
             axios({
                 headers: {...Auth.getHeaders(), 'Accept': 'text/event-stream'},
                 method: 'get',
-                url: Auth.getNuodbCpRestUrl() + path,
+                url: Auth.getNuodbCpRestUrl(path),
                 responseType: 'stream',
                 adapter: 'fetch',
                 signal: eventsAbortController.signal
@@ -81,7 +81,7 @@ export default class RestSpinner extends React.Component {
     static async put(path, data) {
         return new Promise((resolve, reject) => {
             RestSpinner.incrementPending();
-            axios.put(Auth.getNuodbCpRestUrl() + path, data, { headers: Auth.getHeaders() })
+            axios.put(Auth.getNuodbCpRestUrl(path), data, { headers: Auth.getHeaders() })
                 .then(response => {
                     RestSpinner.decrementPending();
                     resolve(response.data);
@@ -94,7 +94,7 @@ export default class RestSpinner extends React.Component {
     static async delete(path) {
         return new Promise((resolve, reject) => {
             RestSpinner.incrementPending();
-            axios.delete(Auth.getNuodbCpRestUrl() + path, { headers: Auth.getHeaders() })
+            axios.delete(Auth.getNuodbCpRestUrl(path), { headers: Auth.getHeaders() })
                 .then(response => {
                     RestSpinner.decrementPending();
                     resolve(response.data);
@@ -108,7 +108,7 @@ export default class RestSpinner extends React.Component {
     static async patch(path, data) {
         return new Promise((resolve, reject) => {
             RestSpinner.incrementPending();
-            axios.patch(Auth.getNuodbCpRestUrl() + path, data, { headers: {...Auth.getHeaders(), "Content-Type": "application/json-patch+json"} })
+            axios.patch(Auth.getNuodbCpRestUrl(path), data, { headers: {...Auth.getHeaders(), "Content-Type": "application/json-patch+json"} })
                 .then(response => {
                     RestSpinner.decrementPending();
                     resolve(response.data);

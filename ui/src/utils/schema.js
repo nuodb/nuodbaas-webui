@@ -9,7 +9,7 @@ let schema = null;
 export async function getSchema() {
     if(!schema) {
         try {
-            schema = await RestSpinner.get("/openapi");
+            schema = await RestSpinner.get("openapi");
             parseSchema(schema, schema, []);
             schema = schema["paths"];
         }
@@ -242,7 +242,7 @@ export function getResourceEvents(path, multiResolve, multiReject) {
     //only one event stream is supported - close prior one if it exists.
     let eventsAbortController = new AbortController();
 
-    RestSpinner.getStream("/events" + path, eventsAbortController)
+    RestSpinner.getStream("events" + path, eventsAbortController)
       .then(async response => {
         let event = null;
         let data = null;
