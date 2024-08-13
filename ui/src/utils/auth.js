@@ -10,7 +10,7 @@ export default class Auth {
         return this.getCredentials() ? true : false;
     }
 
-    static getNuodbCpRestUrl() {
+    static getNuodbCpRestUrl(path) {
         // The default for the NuoDB REST Control Plane prefix is "/nuodb-cp", which can be overwritten by the
         // environment variable NUODB_CP_REST_URL in the Docker container or Helm Chart config.
         //
@@ -18,17 +18,25 @@ export default class Auth {
         // built client with the custom URL using string replacement. I had to prevent the JavaScript
         // optimizer / webpack to optimize the next line, that's why I split the constant and made it
         // dependent on the current time (it will always be after January 1, 1970)
+        let prefixPath = "/nuodb-cp"
         if ("___NUODB_CP_REST_URL___" !== "___NUODB_CP" + (Date.now() > 0 ? "_REST_URL___" : "")) {
-            return "___NUODB_CP_REST_URL___";
+            prefixPath = "___NUODB_CP_REST_URL___";
         }
-        else {
-            return "/nuodb-cp";
+
+        while(prefixPath.endsWith("/")) {
+            prefixPath.substring(0, prefixPath.length-1);
         }
+
+        while(path.startsWith("/")) {
+            path = path.substring(1);
+        }
+
+        return prefixPath + "/" + path;
     }
 
     static async login(username, password) {
         return new Promise((resolve) => {
-            axios.post(Auth.getNuodbCpRestUrl() + "/login", { "expiresIn": "24h" }, { auth: { username, password }, headers: { "Content-Type": "application/json" } })
+            axios.post(Auth.getNuodbCpRestUrl("login"), { "expiresIn": "24h" }, { auth: { username, password }, headers: { "Content-Type": "application/json" } })
                 .then((response) => {
                     if(response.data && response.data.token && response.data.expiresAtTime) {
                         localStorage.setItem("credentials", JSON.stringify({

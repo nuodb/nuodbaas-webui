@@ -10,7 +10,7 @@ let schema = null;
 export async function getSchema() {
     if(!schema) {
         try {
-            schema = (await axios.get(Auth.getNuodbCpRestUrl() + "/openapi", { headers: Auth.getHeaders() })).data;
+            schema = (await axios.get(Auth.getNuodbCpRestUrl("openapi"), { headers: Auth.getHeaders() })).data;
             parseSchema(schema, schema, []);
             schema = schema["paths"];
         }
@@ -209,9 +209,8 @@ export function getFilterField(rootSchema, path) {
  * @returns
  */
 export async function getResource(path) {
-    let fullPath = Auth.getNuodbCpRestUrl() + path;
     return new Promise((resolve, reject) => {
-        axios.get(fullPath, { headers: Auth.getHeaders() })
+        axios.get(Auth.getNuodbCpRestUrl(path), { headers: Auth.getHeaders() })
             .then(response => resolve(response.data))
             .catch(reason => reject(reason));
     });
@@ -235,7 +234,7 @@ export function getResourceEvents(path, multiResolve, multiReject) {
     //only one event stream is supported - close prior one if it exists.
     let eventsAbortController = new AbortController();
 
-    let fullPath = Auth.getNuodbCpRestUrl() + "/events" + path;
+    let fullPath = Auth.getNuodbCpRestUrl("events" + path);
     axios({
         headers: {...Auth.getHeaders(), 'Accept': 'text/event-stream'},
         method: 'get',
@@ -369,7 +368,7 @@ export function getResourceEvents(path, multiResolve, multiReject) {
  */
 export async function deleteResource(path) {
     return new Promise((resolve, reject) => {
-        axios.delete(Auth.getNuodbCpRestUrl() + "/" + path, { headers: Auth.getHeaders() }).then(response => resolve(response.data)).catch(reason => reject(reason));
+        axios.delete(Auth.getNuodbCpRestUrl(path), { headers: Auth.getHeaders() }).then(response => resolve(response.data)).catch(reason => reject(reason));
     })
 }
 
@@ -453,7 +452,7 @@ export function getDefaultValue(parameter, value) {
  */
 export async function submitForm(urlParameters, formParameters, path, values) {
     let queryParameters = Object.keys(urlParameters).filter(key => urlParameters[key]["in"] === "query");
-    let fullPath = Auth.getNuodbCpRestUrl() + path;
+    let fullPath = Auth.getNuodbCpRestUrl(path);
 
     // the last URL parameter has the name of the resource, while the form parameter always has "name"
     // rename last URL parameter to "name"
