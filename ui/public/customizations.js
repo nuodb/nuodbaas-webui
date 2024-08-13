@@ -54,11 +54,28 @@ function getCustomizations() {
         },
     };
 
+    const backupPolicyView = {
+        "show": {
+            buttons: [
+                {
+                    "label": "Show Databases",
+                    "link": "/ui/resource/list/backuppolicies/{organization}/{name}/databases"
+                },
+                {
+                    "label": "Show Backups",
+                    "link": "/ui/resource/list/backuppolicies/{organization}/{name}/backups"
+                }
+            ]
+        }
+    };
+
     return {
     "views": {
         "/databases": databaseView,
         "/databases/{organization}": databaseView,
-        "/databases/{organization}/{project}": databaseView
+        "/databases/{organization}/{project}": databaseView,
+        "/backuppolicies": backupPolicyView,
+        "/backuppolicies/{organization}": backupPolicyView
     }
 }
 }

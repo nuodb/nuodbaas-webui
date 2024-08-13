@@ -145,6 +145,10 @@ export default function Table(props) {
                                                 if(button.patch) {
                                                     await RestSpinner.patch(path + "/" + row["$ref"], button.patch);
                                                 }
+                                                else if(button.link) {
+                                                    const link = replaceVariables(button.link, row);
+                                                    navigate(link);
+                                                }
                                             }}>{button.label}</Button>)
                                         }
                                     })
