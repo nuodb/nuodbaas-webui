@@ -4,13 +4,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.nuodb.selenium.Constants;
-import com.nuodb.selenium.SeleniumTestHelper;
+import com.nuodb.selenium.TestRoutines;
 
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.List;
 
-public class BannerTest extends SeleniumTestHelper {
+public class BannerTest extends TestRoutines {
     private List<String> expectedMenuItems = Arrays.asList("backuppolicies", "backups", "databases", "projects", "users");
 
     @Test

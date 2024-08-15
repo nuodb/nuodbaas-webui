@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Table from "./parts/Table";
-import { getResourceEvents, getCreatePath, getResourceByPath, getResource } from "../../utils/schema";
+import { getResourceEvents, getCreatePath, getResourceByPath } from "../../utils/schema";
+import RestSpinner from "./parts/RestSpinner";
 import Button from '@mui/material/Button'
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
@@ -21,8 +22,6 @@ export default function ListResource({ schema }) {
     const [allItems, setAllItems] = useState([]);
     const [createPath, setCreatePath] = useState(null);
     const [abortController, setAbortController] = useState(null);
-    const [loadingItems, setLoadingItems] = useState(false);
-    const [loadingAllItems, setLoadingAllItems] = useState(false);
 
     useEffect(() => {
         if (!schema) {
@@ -30,10 +29,8 @@ export default function ListResource({ schema }) {
         }
         let resourcesByPath_ = getResourceByPath(schema, path);
         if("get" in resourcesByPath_) {
-            setLoadingItems(true);
             setAbortController(
                 getResourceEvents(path + "?listAccessible=true&expand=true&offset=" + String((page-1)*pageSize) + "&limit=" + pageSize, (data) => {
-                    setLoadingItems(false);
                     if(data.items) {
                         setItems(data.items);
                     }
@@ -41,16 +38,15 @@ export default function ListResource({ schema }) {
                         setItems([]);
                     }
                 }, (error) => {
-                    setLoadingItems(false);
                     Auth.handle401Error(error);
                     setItems([]);
                 })
             );
-            setLoadingAllItems(true);
-            getResource(path + "?listAccessible=true").then(data => {
-                setLoadingAllItems(false);
+            RestSpinner.get(path + "?listAccessible=true").then(data => {
                 setAllItems(data.items);
-            })
+            }).catch((reason)=>{
+                RestSpinner.toastError("Unable to get resource in " + path, reason);
+            });
         }
         setCreatePath(getCreatePath(schema, path));
     }, [ page, path, schema]);
@@ -91,12 +87,12 @@ export default function ListResource({ schema }) {
     }
 
     return (
-        <div data-testid={!loadingItems && !loadingAllItems && "list_resource__complete"}>
-            <Path schema={schema} path={path} filterValues={getFilterValues()} loading={loadingItems || loadingAllItems} />
+        <React.Fragment>
+            <Path schema={schema} path={path} filterValues={getFilterValues()} />
             {createPath && <Button data-testid="list_resource__create_button" variant="outlined" onClick={handleCreate}>Create</Button>}
             {renderPaging()}
             <Table data-testid="list_resource__table" schema={schema} data={items.filter(d=> d.__deleted__ !== true)} path={path} />
             {renderPaging()}
-        </div>
+        </React.Fragment>
     );
 }

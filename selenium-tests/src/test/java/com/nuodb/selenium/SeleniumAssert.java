@@ -46,6 +46,11 @@ public class SeleniumAssert {
             }
             return this;
         }
+
+        public Element hasValue(String value) {
+            assertEquals(value, element.getText());
+            return this;
+        }
     }
 
     public static Elements assertThat(List<WebElement> elements) {

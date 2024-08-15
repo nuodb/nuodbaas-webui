@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import CreateEditEntry from "./parts/CreateEditEntry";
-import { getResourceByPath, getResource } from "../../utils/schema";
+import { getResourceByPath } from "../../utils/schema";
+import RestSpinner from "./parts/RestSpinner";
 import Auth from "../../utils/auth";
 
 /**
@@ -14,7 +15,7 @@ export default function EditResource({ schema }) {
     useEffect(() => {
         let resourceByPath = getResourceByPath(schema, path);
         if("get" in resourceByPath) {
-            getResource(path).then((data) => {
+            RestSpinner.get(path).then((data) => {
                 setData(data);
             }).catch((error) => {
                 Auth.handle401Error(error);

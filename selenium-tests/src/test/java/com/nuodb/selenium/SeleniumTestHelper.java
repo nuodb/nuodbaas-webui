@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -59,10 +60,6 @@ public class SeleniumTestHelper {
         else {
             throw new RuntimeException("unable to clear local storage");
         }
-    }
-
-    public static void setWaitTimeout(Duration duration) {
-        waitTimeout = duration;
     }
 
     public void setWindowSize(int width, int height) {
@@ -113,13 +110,20 @@ public class SeleniumTestHelper {
     public WebElement waitElement(String id) {
         By testId = By.xpath("//*[@data-testid='" + id + "']");
         WebDriverWait wait = new WebDriverWait(driver, waitTimeout);
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(testId));
+        return wait.until(ExpectedConditions.presenceOfElementLocated(testId));
     }
 
     public WebElement waitInputElementByName(String name) {
         By testId = By.xpath("//input[@name='" + name + "']");
         WebDriverWait wait = new WebDriverWait(driver, waitTimeout);
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(testId));
+        return wait.until(ExpectedConditions.presenceOfElementLocated(testId));
+    }
+
+    public void replaceInputElementByName(String name, String value) {
+        WebElement element = waitInputElementByName(name);
+        element.click();
+        element.sendKeys(Keys.chord(Keys.CONTROL, "A"));
+        element.sendKeys(value);
     }
 
     public String waitText(String id) {
@@ -166,11 +170,11 @@ public class SeleniumTestHelper {
         int rColumn = Integer.MAX_VALUE;
         rColumn = getColumn(headers, resultColumn);
 
+        List<WebElement> ret = new ArrayList<>();
         if(sColumn < 0 || rColumn < 0) {
-            return null;
+            return ret;
         }
 
-        List<WebElement> ret = new ArrayList<>();
         WebElement body = table.findElement(By.tagName("tbody"));
         for(WebElement row : body.findElements(By.tagName("tr"))) {
             List<WebElement> cells = row.findElements(By.tagName("td"));
@@ -187,6 +191,7 @@ public class SeleniumTestHelper {
     /**
      * searches all data-testid's with the "idPrefix" followed by sequential numbers starting from 0.
      * For example if items abc0, abc1, abc2, abc4 exist, it will return the text for abc0, abc1, abc2
+     * It ignores all empty values.
      *
      * Specify in "minimumItems" the number you are expecting. If the UI changes a control (i.e. creating
      * a list of 100 items), the items are not created at once, but rather each item is added individually.
@@ -199,15 +204,24 @@ public class SeleniumTestHelper {
      */
     public List<String> getTextList(String idPrefix, int minimumItems) {
         int index;
-        WebElement element;
+        WebElement element = null;
         List<String> items = new ArrayList<>();
         for(index=0; index<minimumItems; index++) {
-            element = waitElement(idPrefix + index);
+            for(int retry=0; retry < 10; retry++) {
+                element = waitElement(idPrefix + index);
+                if(element.getText().length() > 0) {
+                    break;
+                }
+                sleep(50);
+            }
             items.add(element.getText());
         }
         while((element = getElement(idPrefix + index)) != null) {
             index++;
-            items.add(element.getText());
+            String text = element.getText();
+            if(text.length() > 0) {
+                items.add(element.getText());
+            }
         }
         return items;
     }
@@ -235,7 +249,7 @@ public class SeleniumTestHelper {
         sendKeys("username", username);
         sendKeys("password", password);
         click("login_button");
-        assertEquals("Home", waitText("title"));
+        assertEquals("Home", waitText("path_component"));
         waitElement("banner-done");
     }
 

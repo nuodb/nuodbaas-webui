@@ -1,6 +1,5 @@
-import axios from "axios";
-import Auth from "./auth";
-
+import RestSpinner from "../components/pages/parts/RestSpinner";
+import Auth from "./auth"
 let schema = null;
 
 /**
@@ -10,7 +9,7 @@ let schema = null;
 export async function getSchema() {
     if(!schema) {
         try {
-            schema = (await axios.get(Auth.getNuodbCpRestUrl("openapi"), { headers: Auth.getHeaders() })).data;
+            schema = await RestSpinner.get("openapi");
             parseSchema(schema, schema, []);
             schema = schema["paths"];
         }
@@ -76,7 +75,7 @@ function parseSchema(rootSchema, schema, path) {
  * @param {*} path2
  * @returns
  */
-function matchesPath(path1, path2) {
+export function matchesPath(path1, path2) {
     let parts1 = path1.split("/");
     let parts2 = path2.split("/");
     if(parts1.length !== parts2.length) {
@@ -88,6 +87,19 @@ function matchesPath(path1, path2) {
         }
     }
     return true;
+}
+
+/**
+ * given a search string, replaces all placeholders "{variable}" with the value of the variable
+ * @param {*} search
+ * @param {*} variables
+ * @returns string with the placeholders replaced.
+ */
+export function replaceVariables(search, variables) {
+    Object.keys(variables).forEach(key => {
+        search = search.replaceAll("{" + key + "}", variables[key]);
+    })
+    return search;
 }
 
 /**
@@ -203,19 +215,6 @@ export function getFilterField(rootSchema, path) {
     }
 }
 
-/**
- * Gets a resource by path
- * @param {*} path
- * @returns
- */
-export async function getResource(path) {
-    return new Promise((resolve, reject) => {
-        axios.get(Auth.getNuodbCpRestUrl(path), { headers: Auth.getHeaders() })
-            .then(response => resolve(response.data))
-            .catch(reason => reject(reason));
-    });
-}
-
 function concatChunks(chunk1, chunk2) {
     let ret = new Uint8Array(chunk1.length + chunk2.length);
     ret.set(chunk1, 0);
@@ -234,22 +233,14 @@ export function getResourceEvents(path, multiResolve, multiReject) {
     //only one event stream is supported - close prior one if it exists.
     let eventsAbortController = new AbortController();
 
-    let fullPath = Auth.getNuodbCpRestUrl("events" + path);
-    axios({
-        headers: {...Auth.getHeaders(), 'Accept': 'text/event-stream'},
-        method: 'get',
-        url: fullPath,
-        responseType: 'stream',
-        adapter: 'fetch',
-        signal: eventsAbortController.signal
-      })
+    RestSpinner.getStream("events" + path, eventsAbortController)
       .then(async response => {
         let event = null;
         let data = null;
         let id = null;
         let mergedData = {};
         let buffer = Uint8Array.of();
-        for await (let chunk of response.data) {
+        for await (let chunk of response) {
             while(chunk.length > 0) {
                 let posNewline = chunk.indexOf("\n".charCodeAt(0));
                 if(posNewline === -1) {
@@ -350,26 +341,14 @@ export function getResourceEvents(path, multiResolve, multiReject) {
         if(error.name === "AbortError" || error.name === "CanceledError") {
             return;
         }
-        console.log("Event streaming request failed for " + path, error);
 
         // fall back to non-streaming request
-        getResource(path)
+        RestSpinner.get(path)
             .then(data => multiResolve(data))
             .catch(reason => multiReject(reason));
       });
 
       return eventsAbortController;
-}
-
-/**
- * Deletes a resource by path
- * @param {*} path
- * @returns
- */
-export async function deleteResource(path) {
-    return new Promise((resolve, reject) => {
-        axios.delete(Auth.getNuodbCpRestUrl(path), { headers: Auth.getHeaders() }).then(response => resolve(response.data)).catch(reason => reject(reason));
-    })
 }
 
 /**
@@ -452,39 +431,33 @@ export function getDefaultValue(parameter, value) {
  */
 export async function submitForm(urlParameters, formParameters, path, values) {
     let queryParameters = Object.keys(urlParameters).filter(key => urlParameters[key]["in"] === "query");
-    let fullPath = Auth.getNuodbCpRestUrl(path);
 
     // the last URL parameter has the name of the resource, while the form parameter always has "name"
     // rename last URL parameter to "name"
-    let posBracketStart = fullPath.lastIndexOf("{");
-    let posBracketEnd = fullPath.lastIndexOf("}");
+    let posBracketStart = path.lastIndexOf("{");
+    let posBracketEnd = path.lastIndexOf("}");
     if(posBracketStart >= 0 && posBracketEnd > posBracketStart) {
-        fullPath = fullPath.substring(0, posBracketStart+1) + "name" + fullPath.substring(posBracketEnd);
+        path = path.substring(0, posBracketStart+1) + "name" + path.substring(posBracketEnd);
     }
 
     queryParameters.forEach((query, index) => {
         if(index === 0) {
-            fullPath += "?";
+            path += "?";
         }
         else {
-            fullPath += "&";
+            path += "&";
         }
-        fullPath += encodeURIComponent(query) + "={" + query + "}";
+        path += encodeURIComponent(query) + "={" + query + "}";
     })
 
     values = {...values};
     Object.keys(values).forEach(key => {
-        fullPath = fullPath.replace("{" + key + "}", String(values[key]));
+        path = path.replace("{" + key + "}", String(values[key]));
         if(!(key in formParameters)) {
             //remove fields which are not used as form parameter
             delete values[key];
         }
     });
 
-    return new Promise((resolve, reject) => {
-        axios.put(fullPath, values, { headers: Auth.getHeaders() })
-            .then(response => resolve(response.data))
-            .catch(error => { return reject(error)})
-    });
-
+    return RestSpinner.put(path, values);
 }
