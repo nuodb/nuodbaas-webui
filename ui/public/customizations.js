@@ -1,7 +1,7 @@
 function getCustomizations() {
-    const databaseView = {
+    const databaseActions = {
         status: {
-            value: (data) => data.status && ((data.status.ready ? "Ready" : "Not Ready") + " - " + data.status.state),
+            value: (data) => data.status && data.status.state,
             buttons: [
                 {
                     "label": "Start Database",
@@ -47,19 +47,18 @@ function getCustomizations() {
         extendedStatus: {
             value: (data) => {
                 let status = data.status && {...data.status};
-                delete status.ready;
                 delete status.state;
                 return status;
             }
         },
     };
 
-    const backupPolicyView = {
+    const backupPolicyActions = {
         "show": {
             buttons: [
                 {
                     "label": "Show Databases",
-                    "link": "/ui/resource/list/backuppolicies/{organization}/{name}/databases"
+                    "link": "/ui/resource/list/backuppolicies/{organization}/{name}/databases",
                 },
                 {
                     "label": "Show Backups",
@@ -71,11 +70,11 @@ function getCustomizations() {
 
     return {
     "views": {
-        "/databases": databaseView,
-        "/databases/{organization}": databaseView,
-        "/databases/{organization}/{project}": databaseView,
-        "/backuppolicies": backupPolicyView,
-        "/backuppolicies/{organization}": backupPolicyView
+        "/databases": databaseActions,
+        "/databases/{organization}": databaseActions,
+        "/databases/{organization}/{project}": databaseActions,
+        "/backuppolicies": backupPolicyActions,
+        "/backuppolicies/{organization}": backupPolicyActions
     }
 }
 }

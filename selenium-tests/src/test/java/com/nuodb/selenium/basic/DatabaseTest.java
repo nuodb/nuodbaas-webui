@@ -19,7 +19,11 @@ public class DatabaseTest extends TestRoutines {
     public void testCreateDatabase() throws MalformedURLException {
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
         String projectName = createProject();
-        createDatabase(projectName);
+        String databaseName = createDatabase(projectName);
+
+        // verify database was created
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", databaseName, "0");
+        assertEquals(1, buttonsCell.size());
     }
 
     @Test

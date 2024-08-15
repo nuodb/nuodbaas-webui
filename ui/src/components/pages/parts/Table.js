@@ -1,6 +1,5 @@
 import React from "react";
 import { useNavigate } from 'react-router-dom';
-import { deleteResource, getResourceByPath, matchesPath, replaceVariables } from '../../../utils/schema'
 import Button from '@mui/material/Button';
 import TableMaterial from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -9,6 +8,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import { getResourceByPath, replaceVariables, matchesPath } from "../../../utils/schema";
 import RestSpinner from "../../pages/parts/RestSpinner";
 import Dialog from "./Dialog";
 
@@ -117,8 +117,13 @@ export default function Table(props) {
                                     <Button data-testid="edit_button" variant="text" onClick={() =>
                                         navigate("/ui/resource/edit" + path + "/" + row[field])
                                     }>Edit</Button>
-                                    {("delete" in (getResourceByPath(schema, path + "/" + row[field]) || {})) && <Button data-testid="delete_button" variant="text" onClick={async () => {
-                                        await deleteResource(path + "/" + row[field]);
+                                    {("delete" in (getResourceByPath(schema, path + "/" + row[field]) || {})) && <Button data-testid="delete_button" variant="text" onClick={() => {
+                                        RestSpinner.delete(path + "/" + row[field])
+                                            .then(()=> {
+                                                window.location.reload();
+                                            }).catch((error) => {
+                                                RestSpinner.toastError("Unable to delete " + path + "/" + row[field], error);
+                                            });
                                         window.location.reload();
                                     }}>Delete</Button>}</TableCell>;
                             }
@@ -133,7 +138,7 @@ export default function Table(props) {
                                 let buttons = [];
                                 if(field in cf && cf[field].buttons) {
                                     cf[field].buttons.forEach(button => {
-                                        if(!button.visible || button.visible(row)) {
+                                        if(!button.visible || (typeof button.visible === "function" && button.visible(row))) {
                                             buttons.push(<Button key={button.label} variant="outlined" onClick={async () => {
                                                 let label = replaceVariables(button.label, row);
                                                 if(button.confirm) {
@@ -143,11 +148,16 @@ export default function Table(props) {
                                                     }
                                                 }
                                                 if(button.patch) {
-                                                    await RestSpinner.patch(path + "/" + row["$ref"], button.patch);
+                                                    RestSpinner.patch(path + "/" + row["$ref"], button.patch)
+                                                        .catch((error)=> {
+                                                            RestSpinner.toastError("Unable to update " + path + "/" + row["$ref"], error);
+                                                        })
                                                 }
                                                 else if(button.link) {
                                                     const link = replaceVariables(button.link, row);
-                                                    navigate(link);
+                                                    if(!link.startsWith("//") && link.indexOf("://") === -1) {
+                                                        navigate(link);
+                                                    }
                                                 }
                                             }}>{button.label}</Button>)
                                         }

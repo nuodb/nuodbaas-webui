@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Field from "../../fields/Field";
 import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultValue, submitForm } from "../../../utils/schema";
+import RestSpinner from "./RestSpinner";
 import Container from '@mui/material/Container'
 import Button from '@mui/material/Button'
 import Auth from "../../../utils/auth";
@@ -65,6 +66,7 @@ export default function CreateEditEntry ({schema, path, data}) {
     }
 
     return <Container maxWidth="sm">
+    <RestSpinner/>
     <form>
         <h1>{(data && "Edit") || "Create"} entry for {path}</h1>
         <div className="fields">

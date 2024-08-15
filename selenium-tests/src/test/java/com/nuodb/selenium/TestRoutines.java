@@ -70,13 +70,16 @@ public class TestRoutines extends SeleniumTestHelper {
         return sb.toString();
     }
     public void clickMenuItem(String item) {
+        final int maxRetries = 3;
         for(int retry=0; retry<3; retry++) {
             try {
                 findElementFromList("menu-button-", item).click();
                 break;
             }
             catch(StaleElementReferenceException e) {
-                // NOOP - retry.
+                if(retry+1 == maxRetries) {
+                    throw e;
+                }
             }
         }
         waitRestComplete();

@@ -1,5 +1,6 @@
 import React from "react"
 import CircularProgress from '@mui/material/CircularProgress';
+import Snackbar from '@mui/material/Snackbar';
 import axios from "axios";
 import Auth from "../../../utils/auth";
 
@@ -7,11 +8,17 @@ let instance = null;
 
 export default class RestSpinner extends React.Component {
     state = {
-        pendingRequests: 0
+        pendingRequests: 0,
+        errorMessage: null
     }
 
     componentDidMount() {
         instance = this;
+    }
+
+    static toastError(msg, error) {
+        instance.setState({errorMessage: msg});
+        console.log(msg, error);
     }
 
     static incrementPending() {
@@ -35,12 +42,20 @@ export default class RestSpinner extends React.Component {
     }
 
     render() {
-        if(this.state.pendingRequests > 0) {
-            return <CircularProgress color="inherit" size="1em" />;
-        }
-        else {
-            return <div data-testid="rest_spinner__complete">&nbsp;</div>;
-        }
+        return <React.Fragment>
+            <Snackbar
+                open={this.state.errorMessage !== null}
+                autoHideDuration={5000}
+                anchorOrigin={{vertical: "top", horizontal: "center"}}
+                message={this.state.errorMessage}
+                onClose={() => this.setState({errorMessage: null})}
+            />
+            {this.state.pendingRequests > 0 ?
+                <CircularProgress color="inherit" size="1em" />
+                :
+                <div data-testid="rest_spinner__complete">&nbsp;</div>
+            }
+        </React.Fragment>;
     }
 
     static async get(path) {
@@ -48,11 +63,11 @@ export default class RestSpinner extends React.Component {
             RestSpinner.incrementPending();
             axios.get(Auth.getNuodbCpRestUrl(path), { headers: Auth.getHeaders() })
                 .then(response => {
-                    RestSpinner.decrementPending();
                     resolve(response.data);
                 }).catch(reason => {
-                    RestSpinner.decrementPending();
                     reject(reason);
+                }).finally(() => {
+                    RestSpinner.decrementPending();
                 })
         })
     }
@@ -69,11 +84,11 @@ export default class RestSpinner extends React.Component {
                 signal: eventsAbortController.signal
               })
               .then(async response => {
-                RestSpinner.decrementPending();
                 resolve(response.data);
               }).catch(reason => {
-                RestSpinner.decrementPending();
                 reject(reason);
+              }).finally(() => {
+                RestSpinner.decrementPending();
               })
         })
     }
@@ -83,11 +98,12 @@ export default class RestSpinner extends React.Component {
             RestSpinner.incrementPending();
             axios.put(Auth.getNuodbCpRestUrl(path), data, { headers: Auth.getHeaders() })
                 .then(response => {
-                    RestSpinner.decrementPending();
                     resolve(response.data);
                 }).catch(error => {
+                    return reject(error);
+                }).finally(() => {
                     RestSpinner.decrementPending();
-                    return reject(error)})
+                })
         });
     }
 
@@ -96,12 +112,12 @@ export default class RestSpinner extends React.Component {
             RestSpinner.incrementPending();
             axios.delete(Auth.getNuodbCpRestUrl(path), { headers: Auth.getHeaders() })
                 .then(response => {
-                    RestSpinner.decrementPending();
                     resolve(response.data);
                 }).catch(reason => {
-                    RestSpinner.decrementPending();
                     reject(reason);
-                });
+                }).finally(() => {
+                    RestSpinner.decrementPending();
+                })
             });
     }
 
@@ -110,13 +126,12 @@ export default class RestSpinner extends React.Component {
             RestSpinner.incrementPending();
             axios.patch(Auth.getNuodbCpRestUrl(path), data, { headers: {...Auth.getHeaders(), "Content-Type": "application/json-patch+json"} })
                 .then(response => {
-                    RestSpinner.decrementPending();
                     resolve(response.data);
-                })
-                .catch(error => {
-                    RestSpinner.decrementPending();
+                }).catch(error => {
                     reject(error);
-                });
+                }).finally(()=> {
+                    RestSpinner.decrementPending();
+                })
         });
     }
 }

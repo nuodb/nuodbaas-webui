@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Table from "./parts/Table";
-import { getResourceEvents, getCreatePath, getResourceByPath, getResource } from "../../utils/schema";
+import { getResourceEvents, getCreatePath, getResourceByPath } from "../../utils/schema";
+import RestSpinner from "./parts/RestSpinner";
 import Button from '@mui/material/Button'
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
@@ -41,9 +42,11 @@ export default function ListResource({ schema }) {
                     setItems([]);
                 })
             );
-            getResource(path + "?listAccessible=true").then(data => {
+            RestSpinner.get(path + "?listAccessible=true").then(data => {
                 setAllItems(data.items);
-            })
+            }).catch((reason)=>{
+                RestSpinner.toastError("Unable to get resource in " + path, reason);
+            });
         }
         setCreatePath(getCreatePath(schema, path));
     }, [ page, path, schema]);

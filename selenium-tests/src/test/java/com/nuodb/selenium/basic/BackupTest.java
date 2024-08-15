@@ -20,7 +20,11 @@ public class BackupTest extends TestRoutines {
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
         String projectName = createProject();
         String databaseName = createDatabase(projectName);
-        createBackup(projectName, databaseName);
+        String backupName = createBackup(projectName, databaseName);
+
+        // verify that backup was created
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", backupName, "0");
+        assertEquals(1, buttonsCell.size());
     }
 
     @Test

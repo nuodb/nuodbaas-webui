@@ -215,15 +215,6 @@ export function getFilterField(rootSchema, path) {
     }
 }
 
-/**
- * Gets a resource by path
- * @param {*} path
- * @returns
- */
-export async function getResource(path) {
-    return await RestSpinner.get(path);
-}
-
 function concatChunks(chunk1, chunk2) {
     let ret = new Uint8Array(chunk1.length + chunk2.length);
     ret.set(chunk1, 0);
@@ -350,24 +341,14 @@ export function getResourceEvents(path, multiResolve, multiReject) {
         if(error.name === "AbortError" || error.name === "CanceledError") {
             return;
         }
-        console.log("Event streaming request failed for " + path, error);
 
         // fall back to non-streaming request
-        getResource(path)
+        RestSpinner.get(path)
             .then(data => multiResolve(data))
             .catch(reason => multiReject(reason));
       });
 
       return eventsAbortController;
-}
-
-/**
- * Deletes a resource by path
- * @param {*} path
- * @returns
- */
-export async function deleteResource(path) {
-    return await RestSpinner.delete(path);
 }
 
 /**
