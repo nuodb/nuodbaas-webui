@@ -11,10 +11,14 @@ import CardContent from '@mui/material/CardContent';
  * @param parameter - schema definition for this field
  * @param values - contains object with ALL values (and field names) of this form (not just this field).
  *                 the key is the field name (name is separated by period if the field is hierarchical)
- * @param setValues - callback to update field values
+ * @param errors - contains object with ALL errors (and field names) of this form (not just this field).
+ *                 the key is the field name (name is separated by period if the field is hierarchical)
+ * @param required
+ * @param setValues - callback to update field value
+ * @param onExit onExit callback. first argument is the field prefix
  * @returns
  */
-export default function FieldObject({ prefix, parameter, values, setValues }) {
+export default function FieldObject({ prefix, parameter, values, errors, required, setValues, onExit }) {
     return <Card>
         <CardContent className="fields">
             <h3>{prefix}</h3>
@@ -24,7 +28,7 @@ export default function FieldObject({ prefix, parameter, values, setValues }) {
                 if (defaultValue !== null) {
                     setValue(values, prefixKey, defaultValue);
                 }
-                return <Field key={prefixKey} prefix={prefixKey} parameter={parameter[key]} values={values} setValues={setValues} />
+                return <Field key={prefixKey} prefix={prefixKey} parameter={parameter[key]} values={values} errors={errors} required={required} setValues={setValues} onExit={onExit} />
             })}
         </CardContent>
     </Card>

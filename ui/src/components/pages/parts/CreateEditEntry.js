@@ -6,7 +6,7 @@ import RestSpinner from "./RestSpinner";
 import Container from '@mui/material/Container'
 import Button from '@mui/material/Button'
 import Auth from "../../../utils/auth";
-import { setValue } from "../../fields/utils";
+import { getValue, setValue } from "../../fields/utils";
 
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
@@ -17,9 +17,7 @@ export default function CreateEditEntry ({schema, path, data}) {
     const [ formParameters, setFormParameters ] = useState({});
     const [ urlParameters, setUrlParameters ] = useState({});
     const [ values, setValues ] = useState({});
-    const [ error, setError ] = useState("");
-    const [ errorDetail, setErrorDetail ] = useState("");
-    const [ message, setMessage ] = useState("");
+    const [ errors, setErrors ] = useState({});
 
     useEffect(() => {
         function setDefaultValues(values, fullKey, params, data) {
@@ -65,6 +63,54 @@ export default function CreateEditEntry ({schema, path, data}) {
         }
     }
 
+    function validateField(prefix, parameter) {
+        let value = getValue(values, prefix);
+
+        console.log("ValidateField", prefix, parameter, value, values);
+        if(!value) {
+            if(parameter.required && !value) {
+                return "Field " + prefix + "is required";
+            }
+        }
+        else {
+            if(parameter.pattern) {
+                if(!(new RegExp("^" + parameter.pattern + "$")).test(value)) {
+                    return "Field \"" + prefix + "\" must match pattern \"" + parameter.pattern + "\"";
+                }
+            }
+        }
+        return null;
+    }
+
+    function handleFieldExit(prefix, parameter) {
+        console.log("handleFieldExit2", prefix, parameter);
+        let errs = {...errors};
+        const error = validateField(prefix, parameter);
+        if(error) {
+            errs[prefix] = error;
+        }
+        else {
+            delete errs[prefix];
+        }
+        console.log("handleFieldExit", prefix, parameter, errs);
+        setErrors(errs);
+    }
+
+    function validateFields() {
+        let errs = {};
+        Object.keys(formParameters).forEach(key => {
+            let error = validateField(key, formParameters[key]);
+            if(error) {
+                errs[key] = error;
+            }
+            else {
+                delete errs[key];
+            }
+        });
+        setErrors(errs);
+        return errs;
+    }
+
     return <Container maxWidth="sm">
     <RestSpinner/>
     <form>
@@ -74,38 +120,46 @@ export default function CreateEditEntry ({schema, path, data}) {
         .filter(key => urlParameters[key]["in"] === "query")
         .map(key => {
             let urlParameter = {...urlParameters[key]};
-            return <Field key={key} prefix={key} parameter={urlParameter} values={values} setValues={setValues}/>
+            return <Field key={key} prefix={key} parameter={urlParameter} values={values} errors={errors} onExit={(k)=> handleFieldExit(k, urlParameter)} setValues={setValues}/>
         }
         )}
         {formParameters && Object.keys(formParameters)
                 .filter(key => formParameters[key].readOnly !== true)
                 .map(key => {
                     let formParameter = {...formParameters[key]};
-                    return <Field key={key} prefix={key} parameter={formParameter} values={values} setValues={setValues}/>
+                    return <Field key={key} prefix={key} parameter={formParameter} values={values} errors={errors} onExit={(k) => handleFieldExit(k, formParameter)} setValues={setValues}/>
                 }
         )}
-        {error && <h3 style={{color: "red"}}>{error}</h3>}
-        {errorDetail && <div style={{color: "red"}}>{errorDetail}</div>}
-        {message && <div>{message}</div>}
+
+        {Object.keys(errors)
+            .filter(key => key !== "_error" && key !== "_errorDetail")
+            .map(key => <div style={{color: "red"}} key={key}>{errors[key]}</div>)
+        }
+        {errors._error && <h3 style={{color: "red"}}>{errors._error}</h3>}
+        {errors._errorDetail && <div style={{color: "red"}}>{errors._errorDetail}</div>}
+
         <Button data-testid="create_resource__create_button" variant="contained" onClick={()=> {
+            let errs = validateFields();
+            if(Object.keys(errs).length > 0) {
+                setErrors(errs);
+                return;
+            }
             submitForm(urlParameters, formParameters, data ? path : getCreatePath(schema, path), values)
                 .then(() => {
-                    setMessage("Sucess!");
-                    setError("")
-                    setErrorDetail("");
                     navigate("/ui/resource/list" + getParentPath(path));
                 })
                 .catch(error => {
                     Auth.handle401Error(error);
+                    let errs = {...errors};
                     if(error.response && error.response.data && error.response.data.status) {
-                        setMessage("");
-                        setError(error.response.data.status);
-                        setErrorDetail(error.response.data.detail);
+                        errs["_error"] = error.response.data.status;
+                        errs["_errorDetail"] = error.response.data.detail;
                     }
                     else {
-                        setError("Error occurred: " + JSON.stringify(error));
-                        setErrorDetail("");
+                        errs["_error"] = "Error occurred: " + JSON.stringify(error);
+                        delete errs["_errorDetail"];
                     }
+                    setErrors(errs);
                 });
         }}>{(data && "Save") || "Create"}</Button>
     </div>

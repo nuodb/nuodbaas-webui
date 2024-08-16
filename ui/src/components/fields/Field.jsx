@@ -18,7 +18,7 @@ import FieldInteger from "./FieldInteger";
  * @param setValues - callback to update field values
  * @returns
  */
-export default function Field({ prefix, parameter, values, setValues }) {
+export default function Field({ prefix, parameter, values, errors, setValues, onExit }) {
     let leftOvers = JSON.parse(JSON.stringify(parameter));
     if (!("schema" in leftOvers)) {
         leftOvers["schema"] = {};
@@ -62,24 +62,24 @@ export default function Field({ prefix, parameter, values, setValues }) {
 
     if (type === "string") {
         if (prefix === "resourceVersion") {
-            return <FieldHidden prefix={prefix} values={values} />;
+            return <FieldHidden prefix={prefix} values={values} errors={errors} />;
         }
         else if (prefix.toLowerCase().includes("password")) {
-            return <FieldPassword prefix={prefix} values={values} required={required} setValues={setValues} />;
+            return <FieldPassword prefix={prefix} values={values} errors={errors} required={required} setValues={setValues} onExit={onExit} />;
         }
         else {
-            return <FieldString prefix={prefix} values={values} required={required} setValues={setValues} />;
+            return <FieldString prefix={prefix} values={values} errors={errors} required={required} setValues={setValues} onExit={onExit} />;
         }
     }
     else if (type === "boolean") {
-        return <FieldBoolean prefix={prefix} values={values} required={required} setValues={setValues} />;
+        return <FieldBoolean prefix={prefix} values={values} errors={errors} required={required} setValues={setValues} onExit={onExit} />;
     }
     else if (type === "object") {
         if (parameter["properties"]) {
-            return <FieldObject prefix={prefix} parameter={parameter["properties"]} values={values} setValues={setValues} />;
+            return <FieldObject prefix={prefix} parameter={parameter["properties"]} values={values} errors={errors} setValues={setValues} onExit={onExit} />;
         }
         else if (parameter["additionalProperties"]) {
-            return <FieldMap prefix={prefix} parameter={parameter["additionalProperties"]} values={values} setValues={setValues} />;
+            return <FieldMap prefix={prefix} parameter={parameter["additionalProperties"]} values={values} errors={errors} setValues={setValues} onExit={onExit} />;
         }
         else {
             console.log("ERROR: Invalid object", prefix, parameter);
@@ -92,10 +92,10 @@ export default function Field({ prefix, parameter, values, setValues }) {
         }
     }
     else if (type === "array") {
-        return <FieldArray prefix={prefix} parameter={parameter} values={values} setValues={setValues} />;
+        return <FieldArray prefix={prefix} parameter={parameter} values={values} errors={errors} setValues={setValues} onExit={onExit} />;
     }
     else if (type === "integer") {
-        return <FieldInteger prefix={prefix} values={values} required={required} setValues={setValues} />;
+        return <FieldInteger prefix={prefix} values={values} required={required} errors={errors} setValues={setValues} onExit={onExit} />;
     }
     else {
         return <h3>Invalid type {String(type)} {JSON.stringify(parameter)} {JSON.stringify(leftOvers)}</h3>;

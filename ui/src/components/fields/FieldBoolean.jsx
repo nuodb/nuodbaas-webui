@@ -11,10 +11,14 @@ import { getValue, setValue } from "./utils"
  * @param parameter - schema definition for this field
  * @param values - contains object with ALL values (and field names) of this form (not just this field).
  *                 the key is the field name (name is separated by period if the field is hierarchical)
+ * @param errors - contains object with ALL errors (and field names) of this form (not just this field).
+ *                 the key is the field name (name is separated by period if the field is hierarchical)
+ * @param required
  * @param setValues - callback to update field value
+ * @param onExit onExit callback. first argument is the field prefix
  * @returns
  */
-export default function FieldBoolean({ prefix, values, required, setValues }) {
+export default function FieldBoolean({ prefix, values, errors, required, setValues, onExit }) {
     let value = getValue(values, prefix);
     return <FormControl fullWidth>
         <InputLabel id={"label_" + prefix}>{prefix}</InputLabel>
@@ -22,7 +26,7 @@ export default function FieldBoolean({ prefix, values, required, setValues }) {
             let v = { ...values };
             setValue(v, prefix, input.value);
             setValues(v);
-        }}>
+        }} onBlur={event => onExit && onExit(prefix)}>
             <MenuItem value="true">True</MenuItem>
             <MenuItem value="false">False</MenuItem>
         </Select>

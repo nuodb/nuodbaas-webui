@@ -16,10 +16,14 @@ import TableRow from '@mui/material/TableRow';
  * @param parameter - schema definition for this field
  * @param values - contains object with ALL values (and field names) of this form (not just this field).
  *                 the key is the field name (name is separated by period if the field is hierarchical)
- * @param setValues - callback to update field values
+ * @param errors - contains object with ALL errors (and field names) of this form (not just this field).
+ *                 the key is the field name (name is separated by period if the field is hierarchical)
+ * @param required - does this field require a value?
+ * @param setValues - callback to update field value
+ * @param onExit onExit callback. The field prefix is passed in as first argument
  * @returns
  */
-export default function FieldMap({ prefix, parameter, values, setValues }) {
+export default function FieldMap({ prefix, parameter, values, errors, required, setValues, onExit }) {
     const [newKey, setNewKey] = useState("");
     const [newValue, setNewValue] = useState("");
 
@@ -29,6 +33,8 @@ export default function FieldMap({ prefix, parameter, values, setValues }) {
         let prefixKeyLabel = prefix + "." + i + ".key";
         let prefixKeyValue = prefix + "." + i + ".value";
         let prefixKey = prefix + "." + valueKeys[i];
+        let errorValue = (errors && (prefixKeyValue in errors) && errors[prefixKeyValue]) || "";
+        console.log("prefixKeyValue", prefixKeyValue);
         rows.push(<TableRow key={prefixKeyLabel}>
             <TableCell>
                 <TextField
@@ -50,7 +56,10 @@ export default function FieldMap({ prefix, parameter, values, setValues }) {
                         let v = { ...values };
                         setValue(v, prefixKey, input.value);
                         setValues(v)
-                    }} />
+                    }}
+                    error={errorValue !== ""}
+                    helperText={errorValue}
+                    onBlur={event => onExit && onExit(prefixKeyValue)} />
             </TableCell>
             <TableCell><Button onClick={() => {
                 let v = { ...values };
