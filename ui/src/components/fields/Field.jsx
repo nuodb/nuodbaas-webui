@@ -9,25 +9,9 @@ import FieldInteger from "./FieldInteger";
 import FieldMessage from "./FieldMessage";
 
 export default class Field {
-    constructor(props) {
-        this.props = props;
-    }
-
-    /**
-     * show one Field of any type using the values and schema definition
-     * @param prefix - contains field name (hierarchical fields are separated by period)
-     * @param parameter - schema definition for this field
-     * @param values - contains object with ALL values (and field names) of this form (not just this field).
-     *                 the key is the field name (name is separated by period if the field is hierarchical)
-     * @param setValues - callback to update field values
-     * @returns
-     */
-    show() {
-        return this.getField().show();
-    }
-
-    getField() {
-        let leftOvers = JSON.parse(JSON.stringify(this.props.parameter));
+    static create(props) {
+        props = { ...props };
+        let leftOvers = JSON.parse(JSON.stringify(props.parameter));
         if (!("schema" in leftOvers)) {
             leftOvers["schema"] = {};
         }
@@ -59,7 +43,7 @@ export default class Field {
             throw new Error("Invalid IN value " + in_);
         }
 
-        this.props.required = get("required");
+        props.required = get("required");
 
         let type = get("type")
         if (!type) {
@@ -68,30 +52,29 @@ export default class Field {
 
         false && dumpLeftovers();
         if (type === "string") {
-            if (this.props.prefix === "resourceVersion") {
-                return new FieldHidden(this.props);
+            if (props.prefix === "resourceVersion") {
+                return new FieldHidden(props);
             }
-            else if (this.props.prefix.toLowerCase().includes("password")) {
-                return new FieldPassword(this.props);
+            else if (props.prefix.toLowerCase().includes("password")) {
+                return new FieldPassword(props);
             }
             else {
-                return new FieldString(this.props);
+                return new FieldString(props);
             }
         }
         else if (type === "boolean") {
-            return new FieldBoolean(this.props);
+            return new FieldBoolean(props);
         }
         else if (type === "object") {
-            if (this.props.parameter["properties"]) {
-                let p = { ...this.props, parameter: this.props.parameter["properties"] };
-                return new FieldObject(p);
+            if (props.parameter["properties"]) {
+                props.parameter = props.parameter["properties"];
+                return new FieldObject(props);
             }
-            else if (this.props.parameter["additionalProperties"]) {
-                let p = { ...this.props, parameter: this.props.parameter["additionalProperties"] };
-                return new FieldMap(p);
+            else if (props.parameter["additionalProperties"]) {
+                return new FieldMap(props);
             }
             else {
-                console.log("ERROR: Invalid object", this.props.prefix, this.props.parameter);
+                console.log("ERROR: Invalid object", props.prefix, props.parameter);
                 if (process && process.env && process.env.NODE_ENV === "development") {
                     return new FieldMessage({ message: "ERROR: Invalid object" });
                 }
@@ -101,13 +84,13 @@ export default class Field {
             }
         }
         else if (type === "array") {
-            return new FieldArray(this.props);
+            return new FieldArray(props);
         }
         else if (type === "integer") {
-            return new FieldInteger(this.props);
+            return new FieldInteger(props);
         }
         else {
-            return new FieldMessage({ message: "Invalid type " + String(type) + " " + JSON.stringify(this.props.parameter) + " " + JSON.stringify(leftOvers) });
+            return new FieldMessage({ message: "Invalid type " + String(type) + " " + JSON.stringify(props.parameter) + " " + JSON.stringify(leftOvers) });
         }
     }
 }

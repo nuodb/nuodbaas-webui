@@ -9,10 +9,43 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import FieldBase from "./FieldBase"
 
-export default class FieldMap {
-    constructor(props) {
-        this.props = props;
+export default class FieldMap extends FieldBase {
+
+    validateNew() {
+        const { prefix, parameter, updateErrors } = this.props;
+        let prefixKeyLabel = prefix + ".key";
+        let prefixValueLabel = prefix + ".value";
+        let success = true;
+        let keyElement = document.getElementById(prefixKeyLabel);
+        let valueElement = document.getElementById(prefixValueLabel);
+        if (keyElement.value !== "" || valueElement.value !== "") {
+            if (parameter.pattern) {
+                if (!(new RegExp("^" + parameter.pattern + "$")).test(keyElement.value)) {
+                    updateErrors(prefixKeyLabel, "Field \"" + prefixKeyLabel + "\" must match pattern \"" + parameter.pattern + "\"");
+                    success = false;
+                }
+                else {
+                    updateErrors(prefixKeyLabel, null);
+                }
+            }
+
+            if (parameter["additionalProperties"].pattern) {
+                if (!(new RegExp("^" + parameter["additionalProperties"].pattern + "$")).test(valueElement.value)) {
+                    updateErrors(prefixValueLabel, "Field \"" + prefixValueLabel + "\" must match pattern \"" + parameter["additionalProperties"].pattern + "\"");
+                    success = false;
+                }
+                else {
+                    updateErrors(prefixValueLabel, null);
+                }
+            }
+            return success;
+        }
+
+        updateErrors(prefixKeyLabel, null);
+        updateErrors(prefixValueLabel, null);
+        return true;
     }
 
     /**
@@ -25,11 +58,10 @@ export default class FieldMap {
      *                 the key is the field name (name is separated by period if the field is hierarchical)
      * @param required - does this field require a value?
      * @param setValues - callback to update field value
-     * @param onExit onExit callback. The field prefix is passed in as first argument
      * @returns
      */
     show() {
-        const { prefix, values, errors, setValues, onExit } = this.props;
+        const { prefix, values, errors, setValues } = this.props;
 
         let valueKeys = Object.keys(getValue(values, prefix) || {});
         let rows = [];
@@ -62,7 +94,7 @@ export default class FieldMap {
                         }}
                         error={errorValue !== ""}
                         helperText={errorValue}
-                        onBlur={event => onExit && onExit(prefixKeyValue)} />
+                        onBlur={event => this.validate(prefixKeyValue)} />
                 </TableCell>
                 <TableCell><Button onClick={() => {
                     let v = { ...values };
@@ -87,6 +119,7 @@ export default class FieldMap {
                     name={prefixKeyLabel}
                     label={"new key"}
                     defaultValue=""
+                    onBlur={() => this.validateNew()}
                     error={errorKey !== ""} helperText={errorKey} />
             </TableCell>
             <TableCell>
@@ -96,6 +129,7 @@ export default class FieldMap {
                     name={prefixValueLabel}
                     label={"new value"}
                     defaultValue=""
+                    onBlur={() => this.validateNew()}
                     error={errorValue !== ""} helperText={errorValue} />
             </TableCell>
             <TableCell>
@@ -103,17 +137,12 @@ export default class FieldMap {
                     let keyElement = document.getElementById(prefixKeyLabel);
                     let valueElement = document.getElementById(prefixValueLabel);
                     if (keyElement.value === "" && valueElement.value === "") {
-                        console.log("empty");
                         return;
                     }
 
-                    const successKeyField = onExit(prefixKeyLabel);
-                    const successValueField = onExit(prefixValueLabel);
-                    if (!successKeyField || !successValueField) {
-                        console.log("failed");
+                    if (!this.validateNew()) {
                         return;
                     }
-                    console.log("A");
 
                     let value = getValue(values, prefix);
                     if (value === null) {
@@ -124,7 +153,6 @@ export default class FieldMap {
                     keyElement.value = "";
                     valueElement.value = "";
                     setValue(values, prefix, value);
-                    console.log("Values", values);
                     setValues(values);
                 }}>Add</Button>
             </TableCell>
@@ -147,4 +175,22 @@ export default class FieldMap {
             </TableContainer>
         );
     }
+
+    validate() {
+        const { prefix, parameter, values } = this.props;
+
+        let value = values[prefix];
+        let success = true;
+        if (value && parameter["additionalProperties"]) {
+            // validate Maps
+            Object.keys(value).forEach((key2, index) => {
+                success = super.validate(prefix + "." + key2, parameter) && success;
+            })
+            Object.values(value).forEach((value2, index) => {
+                success = super.validate(prefix + "." + index + ".value", parameter) && success;
+            })
+        }
+        return success;
+    }
+
 }

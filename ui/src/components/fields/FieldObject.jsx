@@ -1,14 +1,12 @@
 import React from "react";
+import FieldBase from "./FieldBase";
 import Field from "./Field";
 import { getDefaultValue } from "../../utils/schema";
 import { setValue, getValue } from "./utils";
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 
-export default class FieldObject {
-    constructor(props) {
-        this.props = props;
-    }
+export default class FieldObject extends FieldBase {
 
     /**
      * show Field of type Object using the values and schema definition
@@ -20,11 +18,10 @@ export default class FieldObject {
      *                 the key is the field name (name is separated by period if the field is hierarchical)
      * @param required
      * @param setValues - callback to update field value
-     * @param onExit onExit callback. first argument is the field prefix
      * @returns
      */
     show() {
-        const { prefix, parameter, values, errors, required, setValues, onExit } = this.props;
+        const { prefix, parameter, values, errors, required, setValues, updateErrors } = this.props;
         return <Card key={prefix}>
             <CardContent className="fields">
                 <h3>{prefix}</h3>
@@ -34,9 +31,23 @@ export default class FieldObject {
                     if (defaultValue !== null) {
                         setValue(values, prefixKey, defaultValue);
                     }
-                    return (new Field({ prefix: prefixKey, parameter: parameter[key], values, errors, required, setValues, onExit })).show();
+                    return (Field.create({ prefix: prefixKey, parameter: parameter[key], values, errors, required, setValues, updateErrors })).show();
                 })}
             </CardContent>
         </Card>
+    }
+
+    validate() {
+        const { prefix, parameter, values } = this.props;
+        const value = values[prefix];
+        let success = true;
+        if (parameter["properties"]) {
+            // validate objects (hierarchical fields)
+            Object.keys(value).forEach(subKey => {
+                const field = Field.create({ prefix: prefix + "." + subKey, parameter }) && success;
+                success = field.validate() && success;
+            });
+        }
+        return success;
     }
 }

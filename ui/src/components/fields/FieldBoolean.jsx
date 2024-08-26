@@ -4,11 +4,9 @@ import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
 import { getValue, setValue } from "./utils"
+import FieldBase from "./FieldBase"
 
-export default class FieldBoolean {
-    constructor(props) {
-        this.props = props;
-    }
+export default class FieldBoolean extends FieldBase {
 
     /**
      * show Field of type Boolean using the values and schema definition
@@ -20,11 +18,10 @@ export default class FieldBoolean {
      *                 the key is the field name (name is separated by period if the field is hierarchical)
      * @param required
      * @param setValues - callback to update field value
-     * @param onExit onExit callback. first argument is the field prefix
      * @returns
      */
     show() {
-        const { prefix, values, required, setValues, onExit } = this.props;
+        const { prefix, values, required, setValues } = this.props;
         let value = getValue(values, prefix);
         return <FormControl key={prefix} fullWidth>
             <InputLabel id={"label_" + prefix}>{prefix}</InputLabel>
@@ -32,7 +29,7 @@ export default class FieldBoolean {
                 let v = { ...values };
                 setValue(v, prefix, input.value);
                 setValues(v);
-            }} onBlur={event => onExit && onExit(prefix)}>
+            }} onBlur={event => this.validate()}>
                 <MenuItem value="true">True</MenuItem>
                 <MenuItem value="false">False</MenuItem>
             </Select>

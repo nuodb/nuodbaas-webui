@@ -6,7 +6,7 @@ import RestSpinner from "./RestSpinner";
 import Container from '@mui/material/Container'
 import Button from '@mui/material/Button'
 import Auth from "../../../utils/auth";
-import { getValue, setValue } from "../../fields/utils";
+import { setValue } from "../../fields/utils";
 
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
@@ -76,79 +76,12 @@ export default function CreateEditEntry ({schema, path, data}) {
         }
     }
 
-    /**
-     *
-     * @param {*} prefix
-     * @param {*} parameter
-     * @returns true if validation succeeded
-     */
-    function validateField(prefix, parameter) {
-        if (parameter.type === "object") {
-            if (parameter["additionalProperties"]) {
-                if(parameter.pattern) {
-                    let value = document.getElementById(prefix).value;
-                    if(!(new RegExp("^" + parameter.pattern + "$")).test(value)) {
-                        updateErrors(prefix, "Field \"" + prefix + "\" must match pattern \"" + parameter.pattern + "\"");
-                        return false;
-                    }
-                    else {
-                        updateErrors(prefix, null);
-                        return true;
-                    }
-
-                }
-            }
-            else {
-                return true;
-            }
-        }
-
-        let value = getValue(values, prefix);
-
-        if(!value) {
-            if(parameter.required && !value) {
-                updateErrors(prefix, "Field " + prefix + " is required");
-                return false;
-            }
-        }
-        else {
-            if(parameter.pattern) {
-                if(!(new RegExp("^" + parameter.pattern + "$")).test(value)) {
-                    updateErrors(prefix, "Field \"" + prefix + "\" must match pattern \"" + parameter.pattern + "\"");
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     function validateFields() {
         let success = true;
         Object.keys(formParameters).forEach(key => {
             let parameter = formParameters[key];
-            if (parameter.type === "object") {
-                let value = values[key];
-                if(value) {
-                    if (parameter["properties"]) {
-                        // validate objects (hierarchical fields)
-                        Object.keys(value).forEach(subKey => {
-                            success = validateField(key + "." + subKey, formParameters[key]) && success;
-                        });
-                    }
-                    else if (parameter["additionalProperties"]) {
-                        // validate Maps
-                        Object.keys(value).forEach((key2,index) => {
-                            success = validateField(key + "." + index + ".key", formParameters[key]) && success;
-                        })
-                        Object.values(value).forEach((value2,index) => {
-                            success = validateField(key + "." + index + ".value", formParameters[key]) && success;
-                        })
-                    }
-                }
-            }
-            else {
-                success = validateField(key, formParameters[key]) && success
-            }
+            const field = (Field.create({prefix: key, parameter, values, errors, updateErrors, setValues}));
+            success = field.validate() && success;
         });
         return success;
     }
@@ -162,14 +95,14 @@ export default function CreateEditEntry ({schema, path, data}) {
         .filter(key => urlParameters[key]["in"] === "query")
         .map(key => {
             let urlParameter = {...urlParameters[key]};
-            return (new Field({prefix: key, parameter: urlParameter, values, errors, onExit: (k)=> validateField(k, urlParameter), setValues})).show();
+            return (Field.create({prefix: key, parameter: urlParameter, values, errors, updateErrors, setValues})).show();
         }
         )}
         {formParameters && Object.keys(formParameters)
                 .filter(key => formParameters[key].readOnly !== true)
                 .map(key => {
                     let formParameter = {...formParameters[key]};
-                    return (new Field({prefix: key, parameter: formParameter, values, errors, onExit: (k) => validateField(k, formParameter), setValues})).show();
+                    return (Field.create({prefix: key, parameter: formParameter, values, errors, updateErrors, setValues})).show();
                 }
         )}
 

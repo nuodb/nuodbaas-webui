@@ -1,11 +1,8 @@
 import React from "react";
 import { getValue } from "./utils"
+import FieldBase from "./FieldBase"
 
-export default class FieldHidden {
-    constructor(props) {
-        this.props = props;
-    }
-
+export default class FieldHidden extends FieldBase {
     /**
      * show Field of type String using the values and schema definition
      * @param prefix - contains field name (hierarchical fields are separated by period)

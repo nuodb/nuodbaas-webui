@@ -1,12 +1,9 @@
 import React from "react";
 import TextField from '@mui/material/TextField'
 import { getValue, setValue } from "./utils"
+import FieldBase from "./FieldBase"
 
-export default class FieldString {
-    constructor(props) {
-        this.props = props;
-    }
-
+export default class FieldString extends FieldBase {
     /**
      * show Field of type String using the values and schema definition
      * @param prefix - contains field name (hierarchical fields are separated by period)
@@ -17,17 +14,16 @@ export default class FieldString {
      *                 the key is the field name (name is separated by period if the field is hierarchical)
      * @param required
      * @param setValues - callback to update field value
-     * @param onExit onExit callback. first argument is the field prefix
      * @returns
      */
     show() {
-        const { prefix, values, errors, required, setValues, onExit } = this.props;
+        const { prefix, values, errors, required, setValues } = this.props;
         let value = String(getValue(values, prefix) || "");
         let error = (errors && (prefix in errors) && errors[prefix]) || "";
         return <TextField key={prefix} fullWidth={true} required={required} id={prefix} name={prefix} label={prefix} value={value} onChange={({ currentTarget: input }) => {
             let v = { ...values };
             setValue(v, prefix, input.value);
             setValues(v);
-        }} error={error !== ""} helperText={error} onBlur={event => onExit && onExit(prefix)} />
+        }} error={error !== ""} helperText={error} onBlur={event => this.validate()} />
     }
 }

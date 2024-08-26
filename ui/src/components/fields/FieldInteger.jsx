@@ -1,11 +1,9 @@
 import React from "react";
 import TextField from '@mui/material/TextField'
 import { getValue, setValue } from "./utils"
+import FieldBase from "./FieldBase"
 
-export default class FieldInteger {
-    constructor(props) {
-        this.props = props;
-    }
+export default class FieldInteger extends FieldBase {
 
     /**
      * show Field of type Integer using the values and schema definition

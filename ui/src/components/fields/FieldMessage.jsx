@@ -1,9 +1,7 @@
 import React from "react";
+import FieldBase from "./FieldBase"
 
-export default class FieldMessage {
-    constructor(props) {
-        this.props = props;
-    }
+export default class FieldMessage extends FieldBase {
 
     /**
      * show message (as a Field type)
