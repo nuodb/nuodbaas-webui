@@ -182,7 +182,6 @@ export default class FieldMap extends FieldBase {
         let value = values[prefix];
         let success = true;
         if (value && parameter["additionalProperties"]) {
-            // validate Maps
             Object.keys(value).forEach((key2, index) => {
                 success = super.validate(prefix + "." + key2, parameter) && success;
             })
@@ -192,5 +191,4 @@ export default class FieldMap extends FieldBase {
         }
         return success;
     }
-
 }
