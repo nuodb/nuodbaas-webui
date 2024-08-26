@@ -177,17 +177,22 @@ export default class FieldMap extends FieldBase {
     }
 
     validate() {
-        const { prefix, parameter, values } = this.props;
+        const { prefix, parameter, values, updateErrors } = this.props;
 
         let value = values[prefix];
         let success = true;
         if (value && parameter["additionalProperties"]) {
-            Object.keys(value).forEach((key2, index) => {
-                success = super.validate(prefix + "." + key2, parameter) && success;
-            })
-            Object.values(value).forEach((value2, index) => {
-                success = super.validate(prefix + "." + index + ".value", parameter) && success;
-            })
+            const pattern = parameter["additionalProperties"].pattern;
+            let value = getValue(values, prefix);
+            if (value && pattern) {
+                Object.values(value).forEach((v, index) => {
+                    if (!(new RegExp("^" + pattern + "$")).test(v)) {
+                        const fieldKey = prefix + "." + index + ".value";
+                        updateErrors(fieldKey, "Field \"" + fieldKey + "\" must match pattern \"" + pattern + "\"");
+                        success = false;
+                    }
+                })
+            }
         }
         return success;
     }
