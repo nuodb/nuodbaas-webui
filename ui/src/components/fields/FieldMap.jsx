@@ -13,37 +13,40 @@ import FieldBase from "./FieldBase"
 
 export default class FieldMap extends FieldBase {
 
-    validateNew() {
+    validateNewKey() {
         const { prefix, parameter, updateErrors } = this.props;
         let prefixKeyLabel = prefix + ".key";
         let prefixValueLabel = prefix + ".value";
-        let success = true;
         let keyElement = document.getElementById(prefixKeyLabel);
         let valueElement = document.getElementById(prefixValueLabel);
         if (keyElement.value !== "" || valueElement.value !== "") {
             if (parameter.pattern) {
                 if (!(new RegExp("^" + parameter.pattern + "$")).test(keyElement.value)) {
                     updateErrors(prefixKeyLabel, "Field \"" + prefixKeyLabel + "\" must match pattern \"" + parameter.pattern + "\"");
-                    success = false;
-                }
-                else {
-                    updateErrors(prefixKeyLabel, null);
+                    return false;
                 }
             }
-
-            if (parameter["additionalProperties"].pattern) {
-                if (!(new RegExp("^" + parameter["additionalProperties"].pattern + "$")).test(valueElement.value)) {
-                    updateErrors(prefixValueLabel, "Field \"" + prefixValueLabel + "\" must match pattern \"" + parameter["additionalProperties"].pattern + "\"");
-                    success = false;
-                }
-                else {
-                    updateErrors(prefixValueLabel, null);
-                }
-            }
-            return success;
         }
 
         updateErrors(prefixKeyLabel, null);
+        return true;
+    }
+
+    validateNewValue() {
+        const { prefix, parameter, updateErrors } = this.props;
+        let prefixKeyLabel = prefix + ".key";
+        let prefixValueLabel = prefix + ".value";
+        let keyElement = document.getElementById(prefixKeyLabel);
+        let valueElement = document.getElementById(prefixValueLabel);
+        if (keyElement.value !== "" || valueElement.value !== "") {
+            if (parameter["additionalProperties"].pattern) {
+                if (!(new RegExp("^" + parameter["additionalProperties"].pattern + "$")).test(valueElement.value)) {
+                    updateErrors(prefixValueLabel, "Field \"" + prefixValueLabel + "\" must match pattern \"" + parameter["additionalProperties"].pattern + "\"");
+                    return false;
+                }
+            }
+        }
+
         updateErrors(prefixValueLabel, null);
         return true;
     }
@@ -119,7 +122,7 @@ export default class FieldMap extends FieldBase {
                     name={prefixKeyLabel}
                     label={"new key"}
                     defaultValue=""
-                    onBlur={() => this.validateNew()}
+                    onBlur={() => this.validateNewKey()}
                     error={errorKey !== ""} helperText={errorKey} />
             </TableCell>
             <TableCell>
@@ -129,7 +132,7 @@ export default class FieldMap extends FieldBase {
                     name={prefixValueLabel}
                     label={"new value"}
                     defaultValue=""
-                    onBlur={() => this.validateNew()}
+                    onBlur={() => this.validateNewValue()}
                     error={errorValue !== ""} helperText={errorValue} />
             </TableCell>
             <TableCell>
@@ -140,7 +143,7 @@ export default class FieldMap extends FieldBase {
                         return;
                     }
 
-                    if (!this.validateNew()) {
+                    if (!this.validateNewKey() || !this.validateNewValue()) {
                         return;
                     }
 
