@@ -19,6 +19,19 @@ export default function CreateEditEntry ({schema, path, data}) {
     const [ values, setValues ] = useState({});
     const [ errors, setErrors ] = useState({});
 
+    function updateErrors(key, value) {
+        setErrors(errs => {
+            errs = { ...errs };
+            if(value === null || value === undefined) {
+                delete errs[key];
+            }
+            else {
+                errs[key] = value;
+            }
+            return errs;
+        })
+    }
+
     useEffect(() => {
         function setDefaultValues(values, fullKey, params, data) {
             Object.keys(params).forEach(key => {
@@ -63,52 +76,81 @@ export default function CreateEditEntry ({schema, path, data}) {
         }
     }
 
+    /**
+     *
+     * @param {*} prefix
+     * @param {*} parameter
+     * @returns true if validation succeeded
+     */
     function validateField(prefix, parameter) {
+        if (parameter.type === "object") {
+            if (parameter["additionalProperties"]) {
+                if(parameter.pattern) {
+                    let value = document.getElementById(prefix).value;
+                    if(!(new RegExp("^" + parameter.pattern + "$")).test(value)) {
+                        updateErrors(prefix, "Field \"" + prefix + "\" must match pattern \"" + parameter.pattern + "\"");
+                        return false;
+                    }
+                    else {
+                        updateErrors(prefix, null);
+                        return true;
+                    }
+
+                }
+            }
+            else {
+                return true;
+            }
+        }
+
         let value = getValue(values, prefix);
 
-        console.log("ValidateField", prefix, parameter, value, values);
         if(!value) {
             if(parameter.required && !value) {
-                return "Field " + prefix + "is required";
+                updateErrors(prefix, "Field " + prefix + " is required");
+                return false;
             }
         }
         else {
             if(parameter.pattern) {
                 if(!(new RegExp("^" + parameter.pattern + "$")).test(value)) {
-                    return "Field \"" + prefix + "\" must match pattern \"" + parameter.pattern + "\"";
+                    updateErrors(prefix, "Field \"" + prefix + "\" must match pattern \"" + parameter.pattern + "\"");
+                    return false;
                 }
             }
         }
-        return null;
-    }
-
-    function handleFieldExit(prefix, parameter) {
-        console.log("handleFieldExit2", prefix, parameter);
-        let errs = {...errors};
-        const error = validateField(prefix, parameter);
-        if(error) {
-            errs[prefix] = error;
-        }
-        else {
-            delete errs[prefix];
-        }
-        console.log("handleFieldExit", prefix, parameter, errs);
-        setErrors(errs);
+        return true;
     }
 
     function validateFields() {
-        let errs = {};
+        let success = true;
         Object.keys(formParameters).forEach(key => {
-            let error = validateField(key, formParameters[key]);
-            if(error) {
-                errs[key] = error;
+            let parameter = formParameters[key];
+            if (parameter.type === "object") {
+                let value = values[key];
+                if(value) {
+                    if (parameter["properties"]) {
+                        // validate objects (hierarchical fields)
+                        Object.keys(value).forEach(subKey => {
+                            success = validateField(key + "." + subKey, formParameters[key]) && success;
+                        });
+                    }
+                    else if (parameter["additionalProperties"]) {
+                        // validate Maps
+                        Object.keys(value).forEach((key2,index) => {
+                            success = validateField(key + "." + index + ".key", formParameters[key]) && success;
+                        })
+                        Object.values(value).forEach((value2,index) => {
+                            success = validateField(key + "." + index + ".value", formParameters[key]) && success;
+                        })
+                    }
+                }
             }
             else {
-                delete errs[key];
+                success = validateField(key, formParameters[key]) && success
             }
         });
-        setErrors(errs);
-        return errs;
+        return success;
     }
 
     return <Container maxWidth="sm">
@@ -120,14 +162,14 @@ export default function CreateEditEntry ({schema, path, data}) {
         .filter(key => urlParameters[key]["in"] === "query")
         .map(key => {
             let urlParameter = {...urlParameters[key]};
-            return <Field key={key} prefix={key} parameter={urlParameter} values={values} errors={errors} onExit={(k)=> handleFieldExit(k, urlParameter)} setValues={setValues}/>
+            return (new Field({prefix: key, parameter: urlParameter, values, errors, onExit: (k)=> validateField(k, urlParameter), setValues})).show();
         }
         )}
         {formParameters && Object.keys(formParameters)
                 .filter(key => formParameters[key].readOnly !== true)
                 .map(key => {
                     let formParameter = {...formParameters[key]};
-                    return <Field key={key} prefix={key} parameter={formParameter} values={values} errors={errors} onExit={(k) => handleFieldExit(k, formParameter)} setValues={setValues}/>
+                    return (new Field({prefix: key, parameter: formParameter, values, errors, onExit: (k) => validateField(k, formParameter), setValues})).show();
                 }
         )}
 
@@ -139,9 +181,7 @@ export default function CreateEditEntry ({schema, path, data}) {
         {errors._errorDetail && <div style={{color: "red"}}>{errors._errorDetail}</div>}
 
         <Button data-testid="create_resource__create_button" variant="contained" onClick={()=> {
-            let errs = validateFields();
-            if(Object.keys(errs).length > 0) {
-                setErrors(errs);
+            if(!validateFields()) {
                 return;
             }
             submitForm(urlParameters, formParameters, data ? path : getCreatePath(schema, path), values)
@@ -150,16 +190,14 @@ export default function CreateEditEntry ({schema, path, data}) {
                 })
                 .catch(error => {
                     Auth.handle401Error(error);
-                    let errs = {...errors};
                     if(error.response && error.response.data && error.response.data.status) {
-                        errs["_error"] = error.response.data.status;
-                        errs["_errorDetail"] = error.response.data.detail;
+                        updateErrors("_error", error.response.data.status);
+                        updateErrors("_errorDetail", error.response.data.detail);
                     }
                     else {
-                        errs["_error"] = "Error occurred: " + JSON.stringify(error);
-                        delete errs["_errorDetail"];
+                        updateErrors("_error", "Error occurred: " + JSON.stringify(error));
+                        updateErrors("_errorDetail", null);
                     }
-                    setErrors(errs);
                 });
         }}>{(data && "Save") || "Create"}</Button>
     </div>
