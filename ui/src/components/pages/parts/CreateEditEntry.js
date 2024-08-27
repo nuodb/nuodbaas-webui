@@ -18,6 +18,7 @@ export default function CreateEditEntry ({schema, path, data}) {
     const [ urlParameters, setUrlParameters ] = useState({});
     const [ values, setValues ] = useState({});
     const [ errors, setErrors ] = useState({});
+    const [ focusField, setFocusField ] = useState(null);
 
     function updateErrors(key, value) {
         setErrors(errs => {
@@ -47,6 +48,49 @@ export default function CreateEditEntry ({schema, path, data}) {
             });
         }
 
+        /**
+         * Sets field values based on URL parameters
+         * @param {*} values field object to set values to
+         * @param {*} path the URL path given
+         * @param {*} createPath the path to create/update object. It contains the field name placeholders in the path
+         */
+        function setUrlValues(values, path, createPath) {
+            const pathParts = path.split("/");
+            const createParts = createPath.split("/");
+            for(let i=0; i<pathParts.length && i<createParts.length; i++) {
+                if(createParts[i].startsWith("{") && createParts[i].endsWith("}")) {
+                    const key = createParts[i].substring(1, createParts[i].length-1);
+                    if(!(key in values)) {
+                        values[key] = pathParts[i];
+                    }
+                }
+            }
+        }
+
+        /**
+         * Determines the field to set the focus to
+         * @param {*} values
+         * @param {*} params
+         * @returns
+         */
+        function setFocus(values, params) {
+            if(!params) {
+                return;
+            }
+            let fieldName = null;
+
+            //find first required empty field
+            Object.keys(params).forEach(key => {
+                if(fieldName === null && params[key].required) {
+                    if(!(key in values) || values[key] === "") {
+                        fieldName = key;
+                    }
+                }
+            })
+
+            setFocusField(fieldName);
+        }
+
         let createPath = data ? path : getCreatePath(schema, path);
         let putResource = getResourceByPath(schema, createPath)["put"];
 
@@ -62,6 +106,8 @@ export default function CreateEditEntry ({schema, path, data}) {
 
         let v = {};
         setDefaultValues(v, null, formParams, data);
+        setUrlValues(v, path, createPath);
+        setFocus(v, formParams);
         setValues(v);
         setFormParameters(formParams);
     }, [schema, path, data]);
@@ -95,14 +141,14 @@ export default function CreateEditEntry ({schema, path, data}) {
         .filter(key => urlParameters[key]["in"] === "query")
         .map(key => {
             let urlParameter = {...urlParameters[key]};
-            return (Field.create({prefix: key, parameter: urlParameter, values, errors, updateErrors, setValues})).show();
+            return (Field.create({prefix: key, parameter: urlParameter, values, errors, updateErrors, setValues, autoFocus: key === focusField})).show();
         }
         )}
         {formParameters && Object.keys(formParameters)
                 .filter(key => formParameters[key].readOnly !== true)
                 .map(key => {
                     let formParameter = {...formParameters[key]};
-                    return (Field.create({prefix: key, parameter: formParameter, values, errors, updateErrors, setValues})).show();
+                    return (Field.create({prefix: key, parameter: formParameter, values, errors, updateErrors, setValues, autoFocus: key === focusField})).show();
                 }
         )}
 

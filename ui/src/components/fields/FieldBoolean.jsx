@@ -21,11 +21,11 @@ export default class FieldBoolean extends FieldBase {
      * @returns
      */
     show() {
-        const { prefix, values, required, setValues } = this.props;
+        const { prefix, values, required, setValues, autoFocus } = this.props;
         let value = getValue(values, prefix);
         return <FormControl key={prefix} fullWidth>
             <InputLabel id={"label_" + prefix}>{prefix}</InputLabel>
-            <Select labelId={"label_" + prefix} id={prefix} name={prefix} value={String(value || false)} label={prefix} onChange={({ target: input }) => {
+            <Select labelId={"label_" + prefix} id={prefix} name={prefix} value={String(value || false)} label={prefix} autoFocus={autoFocus} onChange={({ target: input }) => {
                 let v = { ...values };
                 setValue(v, prefix, input.value);
                 setValues(v);
