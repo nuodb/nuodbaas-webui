@@ -46,7 +46,6 @@ public class SearchTest extends TestRoutines {
 
         // search users starting with "1" index and check that 10 users are returned
         replaceInputElementByName("search", name + "1");
-        sleep(1000);
         waitElement("searchButton").click();
         waitRestComplete();
         nameCell = waitTableElements("list_resource__table", "name", null, "name");

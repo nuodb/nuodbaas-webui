@@ -32,7 +32,7 @@ export function parseSearch(search) {
                 ret[key] = value;
             }
         }
-        else if(parts.indexOf("") !== -1) {
+        else if(parts.indexOf(" ") !== -1) {
             // ignore double spaces
         }
         else if("name" in ret) {
@@ -75,7 +75,6 @@ export default function Path({schema, path, filterValues, search, setSearch, set
 
     function handleSearch() {
         const parsed = parseSearch(searchField);
-        console.log("parsed", parsed);
         if("error" in parsed) {
             setError(parsed["error"]);
         }
