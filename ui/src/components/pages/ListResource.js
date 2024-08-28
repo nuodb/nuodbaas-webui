@@ -6,7 +6,7 @@ import RestSpinner from "./parts/RestSpinner";
 import Button from '@mui/material/Button'
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
-import Path from './parts/Path'
+import Path, { parseSearch } from './parts/Path'
 import Auth from "../../utils/auth"
 
 /**
@@ -22,34 +22,62 @@ export default function ListResource({ schema }) {
     const [allItems, setAllItems] = useState([]);
     const [createPath, setCreatePath] = useState(null);
     const [abortController, setAbortController] = useState(null);
+    const [search, setSearch] = useState("");
 
     useEffect(() => {
         if (!schema) {
             return;
         }
+
+        function lastPartLower(value) {
+            const lastSlash = value.lastIndexOf("/");
+            if(lastSlash !== -1) {
+                value = value.substring(lastSlash+1);
+            }
+            return value.toLowerCase();
+        }
+
+        const parsedSearch = parseSearch(search);
+        let labelFilter = "";
+        if("label" in parsedSearch) {
+            labelFilter = "&labelFilter=" + parsedSearch["label"];
+        }
+        let name = "";
+        if("name" in parsedSearch) {
+            name = parsedSearch["name"];
+        }
+
         let resourcesByPath_ = getResourceByPath(schema, path);
         if("get" in resourcesByPath_) {
-            setAbortController(
-                getResourceEvents(path + "?listAccessible=true&expand=true&offset=" + String((page-1)*pageSize) + "&limit=" + pageSize, (data) => {
-                    if(data.items) {
-                        setItems(data.items);
-                    }
-                    else {
+            RestSpinner.get(path + "?listAccessible=true" + labelFilter).then(data => {
+                let start = 0;
+                let end = data.items.length;
+                while(data.items.length > start && !lastPartLower(data.items[start]).startsWith(name)) {
+                    start++;
+                }
+                while(end-1 >= start && !lastPartLower(data.items[end-1]).startsWith(name)) {
+                    end--;
+                }
+                setAllItems(data.items.slice(start, end));
+                setAbortController(
+                    getResourceEvents(path + "?listAccessible=true&expand=true&offset=" + String(start + (page-1)*pageSize) + "&limit=" + Math.min(pageSize, end-start) + labelFilter, (data) => {
+                        if(data.items) {
+                            setItems(data.items);
+                        }
+                        else {
+                            setItems([]);
+                        }
+                    }, (error) => {
+                        Auth.handle401Error(error);
                         setItems([]);
-                    }
-                }, (error) => {
-                    Auth.handle401Error(error);
-                    setItems([]);
-                })
-            );
-            RestSpinner.get(path + "?listAccessible=true").then(data => {
-                setAllItems(data.items);
+                    })
+                );
             }).catch((reason)=>{
                 RestSpinner.toastError("Unable to get resource in " + path, reason);
             });
         }
         setCreatePath(getCreatePath(schema, path));
-    }, [ page, path, schema]);
+    }, [ page, path, schema, search]);
 
     useEffect(() => {
         return () => {
@@ -88,7 +116,7 @@ export default function ListResource({ schema }) {
 
     return (
         <React.Fragment>
-            <Path schema={schema} path={path} filterValues={getFilterValues()} />
+            <Path schema={schema} path={path} filterValues={getFilterValues()} search={search} setSearch={setSearch} setPage={setPage} />
             {createPath && <Button data-testid="list_resource__create_button" variant="outlined" onClick={handleCreate}>Create</Button>}
             {renderPaging()}
             <Table data-testid="list_resource__table" schema={schema} data={items.filter(d=> d.__deleted__ !== true)} path={path} />

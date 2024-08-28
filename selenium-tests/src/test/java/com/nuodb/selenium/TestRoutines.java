@@ -2,44 +2,61 @@ package com.nuodb.selenium;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.junit.jupiter.api.AfterEach;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 public class TestRoutines extends SeleniumTestHelper {
+    public static final String CP_URL = "http://localhost:8081";
+    public static final String CP_USERNAME = "acme/admin";
+    public static final String CP_PASSWORD = "passw0rd";
+    public static final String CP_AUTHORIZATION = "Basic " + Base64.getEncoder().encodeToString((CP_USERNAME + ":" + CP_PASSWORD).getBytes(StandardCharsets.UTF_8));
 
     Map<Resource, Set<String>> createdResources = new HashMap<>();
 
     @AfterEach
     public void after() {
-        // clean up all the created resources
+        // clean up all the created resources except admin user
         for(int i=Resource.values().length-1; i >= 0; i--) {
             Resource resource = Resource.values()[i];
-            Set<String> names = createdResources.get(resource);
-            if(names != null) {
-                for(String name : names) {
-                    try {
-                        deleteResource(resource, name);
-                    }
-                    catch(Throwable e) {
-                        // don't fail test on resource clean up
-                        System.err.println("unable to delete resource " + resource.name() + " with name " + name);
-                        e.printStackTrace();
-                    }
+            List<String> items = getResourcesRest(resource);
+            for(String item : items) {
+                if(resource != Resource.users || !item.equals(CP_USERNAME)) {
+                    System.out.println("Deleting resource " + resource.name() + "/" + item);
+                    deleteResourceRest(resource, item);
                 }
             }
         }
     }
 
     /* keep in right order - it deletes the resources from the bottom up */
-    private enum Resource {
+    public enum Resource {
         users,
         projects,
         databases,
@@ -53,7 +70,7 @@ public class TestRoutines extends SeleniumTestHelper {
      * @param prefix if null, use "s"
      * @return shortened unique name
      */
-    private String shortUnique(String prefix) {
+    public String shortUnique(String prefix) {
         final String chars = "abcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder sb = new StringBuilder();
         if(prefix == null) {
@@ -110,6 +127,81 @@ public class TestRoutines extends SeleniumTestHelper {
         assertEquals(1, deleteButtons.size());
         deleteButtons.get(0).click();
         createdResources.get(resource).remove(name);
+    }
+
+    /**
+     * performs authenticated REST call. Returns response body or null on failure.
+     * @param request
+     * @return
+     */
+    public String rest(ClassicHttpRequest request) {
+        request.addHeader("Authorization", CP_AUTHORIZATION);
+        try(CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            return httpClient.execute(request, new HttpClientResponseHandler<String>(){
+                @Override
+                public String handleResponse(ClassicHttpResponse httpResponse) throws IOException {
+                    if (httpResponse.getCode() < 200 || httpResponse.getCode() >= 300) {
+                        return null;
+                    }
+                    try {
+                        HttpEntity entity = httpResponse.getEntity();
+                        if(entity != null) {
+                            return EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+                        }
+                        return null;
+                    }
+                    catch(Exception e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                }
+            });
+        }
+        catch(Exception e) {
+            return null;
+        }
+    }
+
+    public String createResourceRest(Resource resource, String path, String body) {
+        if(path == null) {
+            path = "";
+        }
+        else if(!path.startsWith("/")) {
+            path = "/" + path;
+        }
+        HttpPut request = new HttpPut(CP_URL + "/" + resource.name() + path);
+        request.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
+        return rest(request);
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private static class ListResponse {
+        private List<String> items;
+
+        public List<String> getItems() {
+            return items;
+        }
+    }
+
+    /** Returns list of items of the specified resource */
+    public List<String> getResourcesRest(Resource resource) {
+        HttpGet request = new HttpGet(CP_URL + "/" + resource.name());
+        String body = rest(request);
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            ListResponse response = mapper.readValue(body, ListResponse.class);
+            return response.getItems();
+        }
+        catch(JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public boolean deleteResourceRest(Resource resource, String name) {
+        HttpDelete request = new HttpDelete(CP_URL + "/" + resource.name() + "/" + name);
+        String body = rest(request);
+        return body != null;
     }
 
     public String createUser() {

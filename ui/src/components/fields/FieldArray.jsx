@@ -39,7 +39,6 @@ export default function FieldArray({ prefix, parameter, values, setValues }) {
 
     let nextIndex = value === null ? 0 : value.length;
     let prefixKey = prefix + "." + nextIndex;
-    console.log("parameter", parameter);
     ret.push(<TableRow key={prefixKey}>
         <TableCell>
             <Field key={prefixKey} prefix={prefixKey} parameter={parameter.items} values={values} setValues={(vs) => {
