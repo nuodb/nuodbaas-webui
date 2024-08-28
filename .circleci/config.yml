@@ -56,6 +56,7 @@ jobs:
           command: make all
       - run:
           name: Compress Test Results
+          when: always
           command: tar -cvzf selenium-test-results.tar.gz -C selenium-tests/target/test-results .
       - store_artifacts:
           path: selenium-test-results.tar.gz
