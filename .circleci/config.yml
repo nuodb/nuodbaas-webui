@@ -52,11 +52,6 @@ jobs:
             aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
             aws ecr get-login-password --region "$AWS_REGION" | helm registry login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
       - run:
-build-image
-setup-integration-tests
-run-integration-tests-only
-teardown-integration-tests
-deploy-image
           name: Build Image
           command: make build-image
       - run:
