@@ -73,6 +73,21 @@ export default function Table(props) {
         return customFields || {};
     }
 
+    function localizeIfDateTime(value) {
+        if(!value) {
+            return value;
+        }
+
+        // check if YYYY-MM-DDTHH:MM:SSZ format
+        if(/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ/.test(value)) {
+            let date = new Date(value);
+            if(!isNaN(date)) {
+                return date.toLocaleString();
+            }
+        }
+        return value;
+    }
+
     function showValue(value) {
         if(value === undefined || value === null) {
             return "";
@@ -92,6 +107,7 @@ export default function Table(props) {
             if(value.length > 80) {
                 value = value.substring(0, 80) + "...";
             }
+            value = localizeIfDateTime(value);
             return String(value);
         }
         else {
