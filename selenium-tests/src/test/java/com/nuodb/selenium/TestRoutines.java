@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.hc.client5.http.ClientProtocolException;
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
@@ -20,6 +21,7 @@ import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
@@ -45,12 +47,22 @@ public class TestRoutines extends SeleniumTestHelper {
         // clean up all the created resources except admin user
         for(int i=Resource.values().length-1; i >= 0; i--) {
             Resource resource = Resource.values()[i];
-            List<String> items = getResourcesRest(resource);
-            for(String item : items) {
-                if(resource != Resource.users || !item.equals(CP_USERNAME)) {
-                    System.out.println("Deleting resource " + resource.name() + "/" + item);
-                    deleteResourceRest(resource, item);
+            try {
+                List<String> items = getResourcesRest(resource);
+                for(String item : items) {
+                    if(resource != Resource.users || !item.equals(CP_USERNAME)) {
+                        System.out.println("Deleting resource " + resource.name() + "/" + item);
+                        try {
+                            deleteResourceRest(resource, item);
+                        }
+                        catch(IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
+            }
+            catch(IOException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -130,39 +142,39 @@ public class TestRoutines extends SeleniumTestHelper {
     }
 
     /**
-     * performs authenticated REST call. Returns response body or null on failure.
+     * performs authenticated REST call. Returns response body
      * @param request
      * @return
      */
-    public String rest(ClassicHttpRequest request) {
+    public String rest(ClassicHttpRequest request) throws IOException {
         request.addHeader("Authorization", CP_AUTHORIZATION);
         try(CloseableHttpClient httpClient = HttpClients.createDefault()) {
             return httpClient.execute(request, new HttpClientResponseHandler<String>(){
                 @Override
                 public String handleResponse(ClassicHttpResponse httpResponse) throws IOException {
                     if (httpResponse.getCode() < 200 || httpResponse.getCode() >= 300) {
-                        return null;
+                        throw new IOException("Invalid status code " + httpResponse.getCode());
                     }
-                    try {
-                        HttpEntity entity = httpResponse.getEntity();
-                        if(entity != null) {
+
+                    HttpEntity entity = httpResponse.getEntity();
+                    if(entity != null) {
+                        try {
                             return EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
                         }
-                        return null;
+                        catch(ParseException e) {
+                            throw new IOException(e);
+                        }
                     }
-                    catch(Exception e) {
-                        e.printStackTrace();
-                        return null;
-                    }
+                    return "";
                 }
             });
         }
-        catch(Exception e) {
-            return null;
+        catch(ClientProtocolException e) {
+            throw new IOException(e);
         }
     }
 
-    public String createResourceRest(Resource resource, String path, String body) {
+    public String createResourceRest(Resource resource, String path, String body) throws IOException {
         if(path == null) {
             path = "";
         }
@@ -184,7 +196,7 @@ public class TestRoutines extends SeleniumTestHelper {
     }
 
     /** Returns list of items of the specified resource */
-    public List<String> getResourcesRest(Resource resource) {
+    public List<String> getResourcesRest(Resource resource) throws IOException {
         HttpGet request = new HttpGet(CP_URL + "/" + resource.name());
         String body = rest(request);
         ObjectMapper mapper = new ObjectMapper();
@@ -193,12 +205,11 @@ public class TestRoutines extends SeleniumTestHelper {
             return response.getItems();
         }
         catch(JsonProcessingException e) {
-            e.printStackTrace();
-            return null;
+            throw new IOException(e);
         }
     }
 
-    public boolean deleteResourceRest(Resource resource, String name) {
+    public boolean deleteResourceRest(Resource resource, String name) throws IOException {
         HttpDelete request = new HttpDelete(CP_URL + "/" + resource.name() + "/" + name);
         String body = rest(request);
         return body != null;

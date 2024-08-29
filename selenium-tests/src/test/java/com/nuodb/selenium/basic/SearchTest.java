@@ -8,7 +8,7 @@ import com.nuodb.selenium.TestRoutines;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.util.List;
 
 public class SearchTest extends TestRoutines {
@@ -17,7 +17,7 @@ public class SearchTest extends TestRoutines {
     }
 
     @Test
-    public void testSearch() throws MalformedURLException {
+    public void testSearch() throws IOException {
         String body = """
             {"organization":"acme",
                 "name": "%%%NAME%%%",
