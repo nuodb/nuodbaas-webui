@@ -55,13 +55,13 @@ jobs:
           name: Build Image
           command: make build-image
       - run:
-          name: Setup Integration Tests
+          name: Setup Integration Test Environment
           command: make setup-integration-tests
       - run:
           name: Run Integration Tests
           command: make run-integration-tests-only
       - run:
-          name: Teardown Integration Tests
+          name: Teardown Integration Test Environment
           when: always
           command: make teardown-integration-tests
       - run:
