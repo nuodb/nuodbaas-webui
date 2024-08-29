@@ -32,3 +32,6 @@ dl.map>div>dt::after {
   content: ":";
   padding-right: 5px;
 }
+.verticalAlignTop {
+  vertical-align: top !important
+}
