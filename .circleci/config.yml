@@ -52,8 +52,34 @@ jobs:
             aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
             aws ecr get-login-password --region "$AWS_REGION" | helm registry login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
       - run:
-          name: Build, Test and deploy Docker image / Helm Charts to ECR
-          command: make all
+build-image
+setup-integration-tests
+run-integration-tests-only
+teardown-integration-tests
+deploy-image
+          name: Build Image
+          command: make build-image
+      - run:
+          name: Setup Integration Tests
+          command: make setup-integration-tests
+      - run:
+          name: Run Integration Tests
+          command: make run-integration-tests-only
+      - run:
+          name: Teardown Integration Tests
+          when: always
+          command: make teardown-integration-tests
+      - run:
+          name: Deploy Docker image / Helm Charts to ECR
+          command: make deploy-image
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/test-results/junit/
+            find ./selenium-tests/target/test-reports -type f -name "*.xml" -exec cp {} ~/test-results/junit/ \;
+          when: always
+      - store_test_results:
+          path: ~/test-results
       - run:
           name: Compress Test Results
           when: always
