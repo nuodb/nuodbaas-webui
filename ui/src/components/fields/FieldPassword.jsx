@@ -20,7 +20,7 @@ export default class FieldPassword extends FieldBase {
         let { prefix, values, errors, required, setValues, autoFocus } = this.props;
         let value = String(getValue(values, prefix) || "");
         let error = (errors && (prefix in errors) && errors[prefix]) || "";
-        return <TextField type="password" required={required} id={prefix} name={prefix} label={prefix} value={value} autoFocus={autoFocus} onChange={({ currentTarget: input }) => {
+        return <TextField key={prefix} type="password" required={required} id={prefix} name={prefix} label={prefix} value={value} autoFocus={autoFocus} onChange={({ currentTarget: input }) => {
             let v = { ...values };
             setValue(v, prefix, input.value);
             setValues(v);

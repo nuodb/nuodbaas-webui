@@ -8,6 +8,7 @@ import FieldArray from "./FieldArray";
 import FieldInteger from "./FieldInteger";
 import FieldMessage from "./FieldMessage";
 
+/** Factory class to create components based on the field type */
 export default class Field {
     static create(props) {
         props = { ...props };
@@ -29,15 +30,6 @@ export default class Field {
             }
         }
 
-        function dumpLeftovers() {
-            if (Object.keys(leftOvers["schema"]).length === 0) {
-                delete leftOvers["schema"];
-            }
-            if (Object.keys(leftOvers).length > 0) {
-                console.log("LEFTOVERS", leftOvers);
-            }
-        }
-
         let in_ = get("in");
         if (in_ && in_ !== "path" && in_ !== "query") {
             throw new Error("Invalid IN value " + in_);
@@ -50,12 +42,11 @@ export default class Field {
             type = get("schema", "type");
         }
 
-        false && dumpLeftovers();
         if (type === "string") {
             if (props.prefix === "resourceVersion") {
                 return new FieldHidden(props);
             }
-            else if (props.prefix.toLowerCase().includes("password")) {
+            else if (props.parameter["x-tf-sensitive"] === true) {
                 return new FieldPassword(props);
             }
             else {

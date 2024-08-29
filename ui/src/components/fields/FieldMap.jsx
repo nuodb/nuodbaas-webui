@@ -19,16 +19,12 @@ export default class FieldMap extends FieldBase {
         let prefixValueLabel = prefix + ".value";
         let keyElement = document.getElementById(prefixKeyLabel);
         let valueElement = document.getElementById(prefixValueLabel);
-        if (keyElement.value !== "" || valueElement.value !== "") {
-            if (parameter.pattern) {
-                if (!(new RegExp("^" + parameter.pattern + "$")).test(keyElement.value)) {
-                    updateErrors(prefixKeyLabel, "Field \"" + prefixKeyLabel + "\" must match pattern \"" + parameter.pattern + "\"");
-                    return false;
-                }
-            }
+        if ((keyElement && keyElement.value !== "") || (valueElement && valueElement.value !== "")) {
+            return super.validate(prefixKeyLabel, parameter, keyElement.value);
         }
 
         updateErrors(prefixKeyLabel, null);
+        updateErrors(prefixValueLabel, null);
         return true;
     }
 
@@ -38,15 +34,11 @@ export default class FieldMap extends FieldBase {
         let prefixValueLabel = prefix + ".value";
         let keyElement = document.getElementById(prefixKeyLabel);
         let valueElement = document.getElementById(prefixValueLabel);
-        if (keyElement.value !== "" || valueElement.value !== "") {
-            if (parameter["additionalProperties"].pattern) {
-                if (!(new RegExp("^" + parameter["additionalProperties"].pattern + "$")).test(valueElement.value)) {
-                    updateErrors(prefixValueLabel, "Field \"" + prefixValueLabel + "\" must match pattern \"" + parameter["additionalProperties"].pattern + "\"");
-                    return false;
-                }
-            }
+        if ((keyElement && keyElement.value !== "") || (valueElement && valueElement.value !== "")) {
+            return super.validate(prefixValueLabel, parameter["additionalProperties"], valueElement.value);
         }
 
+        updateErrors(prefixKeyLabel, null);
         updateErrors(prefixValueLabel, null);
         return true;
     }
@@ -73,7 +65,7 @@ export default class FieldMap extends FieldBase {
             let prefixKeyValue = prefix + "." + i + ".value";
             let prefixKey = prefix + "." + valueKeys[i];
             let errorValue = (errors && (prefixKeyValue in errors) && errors[prefixKeyValue]) || "";
-            rows.push(<TableRow key={prefixKeyLabel}>
+            rows.push(<TableRow key={prefixKeyLabel} style={{ verticalAlign: 'top' }}>
                 <TableCell>
                     <TextField
                         fullWidth={true}
@@ -114,7 +106,7 @@ export default class FieldMap extends FieldBase {
         let prefixValueLabel = prefix + ".value"
         let errorKey = (errors && (prefixKeyLabel in errors) && errors[prefixKeyLabel]) || "";
         let errorValue = (errors && (prefixValueLabel in errors) && errors[prefixValueLabel]) || "";
-        rows.push(<TableRow key={prefixKeyLabel}>
+        rows.push(<TableRow key={prefixKeyLabel} style={{ verticalAlign: 'top' }}>
             <TableCell>
                 <TextField
                     fullWidth={true}
@@ -180,23 +172,21 @@ export default class FieldMap extends FieldBase {
     }
 
     validate() {
-        const { prefix, parameter, values, updateErrors } = this.props;
+        const { prefix, parameter, values } = this.props;
 
         let value = values[prefix];
         let success = true;
         if (value && parameter["additionalProperties"]) {
-            const pattern = parameter["additionalProperties"].pattern;
             let value = getValue(values, prefix);
-            if (value && pattern) {
+            if (value) {
                 Object.values(value).forEach((v, index) => {
-                    if (!(new RegExp("^" + pattern + "$")).test(v)) {
-                        const fieldKey = prefix + "." + index + ".value";
-                        updateErrors(fieldKey, "Field \"" + fieldKey + "\" must match pattern \"" + pattern + "\"");
-                        success = false;
-                    }
+                    const fieldKey = prefix + "." + index + ".value";
+                    success = super.validate(fieldKey, parameter["additionalProperties"], v) && success;
                 })
             }
         }
+        success = this.validateNewKey() && success;
+        success = this.validateNewValue() && success;
         return success;
     }
 }

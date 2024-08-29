@@ -8,6 +8,6 @@ export default class FieldMessage extends FieldBase {
      * @returns
      */
     show() {
-        return <h1>{this.props.message}</h1>;
+        return <h1 key={this.props.prefix}>{this.props.message}</h1>;
     }
 }

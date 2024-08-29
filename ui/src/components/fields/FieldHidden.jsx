@@ -16,6 +16,6 @@ export default class FieldHidden extends FieldBase {
         if (value === null) {
             return null;
         }
-        return <input type="hidden" id={prefix} name={prefix} value={String(value)} />
+        return <input key={prefix} type="hidden" id={prefix} name={prefix} value={String(value)} />
     }
 }

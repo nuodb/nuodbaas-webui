@@ -8,7 +8,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import FieldBase from './FieldBase'
-import Field from "./Field"
+import FieldFactory from "./FieldFactory"
 
 export default class FieldArray extends FieldBase {
     /**
@@ -31,7 +31,7 @@ export default class FieldArray extends FieldBase {
         if (value !== null) {
             for (let i = 0; i < value.length; i++) {
                 let prefixKey = prefix + "." + i;
-                const field = Field.create({
+                const field = FieldFactory.create({
                     prefix: prefixKey, parameter: parameter.items, values, errors, required: (i === 0 && required), setValues: (vs) => {
                         vs = { ...vs };
                         let v = getValue(values, prefixKey);
@@ -49,7 +49,7 @@ export default class FieldArray extends FieldBase {
 
         let nextIndex = value === null ? 0 : value.length;
         let prefixKey = prefix + "." + nextIndex;
-        let field = Field.create({
+        let field = FieldFactory.create({
             prefix: prefixKey, parameter: parameter.items, values, setValues: (vs) => {
                 vs = { ...vs };
                 let v = getValue(values, prefixKey);
@@ -63,7 +63,7 @@ export default class FieldArray extends FieldBase {
             </TableCell>
         </TableRow>);
 
-        return <TableContainer component={Card}>
+        return <TableContainer key={prefix} component={Card}>
             <Table>
                 <TableHead>
                     <TableRow>

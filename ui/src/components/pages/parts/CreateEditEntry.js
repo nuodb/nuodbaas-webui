@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Field from "../../fields/Field";
+import FieldFactory from "../../fields/FieldFactory";
 import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultValue, submitForm } from "../../../utils/schema";
 import RestSpinner from "./RestSpinner";
 import Container from '@mui/material/Container'
@@ -49,7 +49,7 @@ export default function CreateEditEntry ({schema, path, data}) {
         }
 
         /**
-         * Sets field values based on URL parameters
+         * Pre-fills empty field values based on provided URL parameters
          * @param {*} values field object to set values to
          * @param {*} path the URL path given
          * @param {*} createPath the path to create/update object. It contains the field name placeholders in the path
@@ -77,9 +77,21 @@ export default function CreateEditEntry ({schema, path, data}) {
             if(!params) {
                 return;
             }
+
             let fieldName = null;
 
-            //find first required empty field
+            Object.keys(params).forEach(key => {
+                let parameter = params[key];
+                if(parameter && fieldName === null && key in values) {
+                    const field = (FieldFactory.create({prefix: key, parameter, values, updateErrors, setValues}));
+                    if(!field.validate()) {
+                        fieldName = key;
+                    }
+                }
+
+            })
+
+            //find first required empty field (or a field with an error)
             Object.keys(params).forEach(key => {
                 if(fieldName === null && params[key].required) {
                     if(!(key in values) || values[key] === "") {
@@ -107,8 +119,8 @@ export default function CreateEditEntry ({schema, path, data}) {
         let v = {};
         setDefaultValues(v, null, formParams, data);
         setUrlValues(v, path, createPath);
-        setFocus(v, formParams);
         setValues(v);
+        setFocus(v, formParams);
         setFormParameters(formParams);
     }, [schema, path, data]);
 
@@ -126,7 +138,7 @@ export default function CreateEditEntry ({schema, path, data}) {
         let success = true;
         Object.keys(formParameters).forEach(key => {
             let parameter = formParameters[key];
-            const field = (Field.create({prefix: key, parameter, values, errors, updateErrors, setValues}));
+            const field = (FieldFactory.create({prefix: key, parameter, values, errors, updateErrors, setValues}));
             success = field.validate() && success;
         });
         return success;
@@ -141,26 +153,33 @@ export default function CreateEditEntry ({schema, path, data}) {
         .filter(key => urlParameters[key]["in"] === "query")
         .map(key => {
             let urlParameter = {...urlParameters[key]};
-            return (Field.create({prefix: key, parameter: urlParameter, values, errors, updateErrors, setValues, autoFocus: key === focusField})).show();
+            return (FieldFactory.create({prefix: key, parameter: urlParameter, values, errors, updateErrors, setValues, autoFocus: key === focusField})).show();
         }
         )}
         {formParameters && Object.keys(formParameters)
                 .filter(key => formParameters[key].readOnly !== true)
                 .map(key => {
                     let formParameter = {...formParameters[key]};
-                    return (Field.create({prefix: key, parameter: formParameter, values, errors, updateErrors, setValues, autoFocus: key === focusField})).show();
+                    return (FieldFactory.create({prefix: key, parameter: formParameter, values, errors, updateErrors, setValues, autoFocus: key === focusField})).show();
                 }
         )}
 
-        {Object.keys(errors)
-            .filter(key => key !== "_error" && key !== "_errorDetail")
-            .map(key => <div style={{color: "red"}} key={key}>{errors[key]}</div>)
-        }
         {errors._error && <h3 style={{color: "red"}}>{errors._error}</h3>}
         {errors._errorDetail && <div style={{color: "red"}}>{errors._errorDetail}</div>}
 
         <Button data-testid="create_resource__create_button" variant="contained" onClick={()=> {
+            let err = {...errors};
+            delete err._error;
+            delete err._errorDetail;
+            setErrors(err);
             if(!validateFields()) {
+                const errorKeys = Object.keys(errors);
+                if(errorKeys.length > 0) {
+                    const inputElement = document.getElementById(errorKeys[0]);
+                    if(inputElement) {
+                        inputElement.focus();
+                    }
+                }
                 return;
             }
             submitForm(urlParameters, formParameters, data ? path : getCreatePath(schema, path), values)

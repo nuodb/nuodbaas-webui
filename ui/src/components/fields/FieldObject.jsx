@@ -1,6 +1,6 @@
 import React from "react";
 import FieldBase from "./FieldBase";
-import Field from "./Field";
+import FieldFactory from "./FieldFactory";
 import { getDefaultValue } from "../../utils/schema";
 import { setValue, getValue } from "./utils";
 import Card from '@mui/material/Card';
@@ -31,20 +31,20 @@ export default class FieldObject extends FieldBase {
                     if (defaultValue !== null) {
                         setValue(values, prefixKey, defaultValue);
                     }
-                    return (Field.create({ prefix: prefixKey, parameter: parameter[key], values, errors, required, setValues, updateErrors })).show();
+                    return (FieldFactory.create({ prefix: prefixKey, parameter: parameter[key], values, errors, required, setValues, updateErrors })).show();
                 })}
             </CardContent>
         </Card>
     }
 
     validate() {
-        const { prefix, parameter, values } = this.props;
+        const { prefix, parameter, values, updateErrors } = this.props;
         const value = values[prefix];
         let success = true;
-        if (parameter["properties"]) {
+        if (parameter && value) {
             // validate objects (hierarchical fields)
             Object.keys(value).forEach(subKey => {
-                const field = Field.create({ prefix: prefix + "." + subKey, parameter }) && success;
+                const field = FieldFactory.create({ prefix: prefix + "." + subKey, parameter: parameter[subKey], values, updateErrors });
                 success = field.validate() && success;
             });
         }

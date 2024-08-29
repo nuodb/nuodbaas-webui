@@ -18,7 +18,7 @@ export default class FieldInteger extends FieldBase {
         const { prefix, values, required, setValues, autoFocus } = this.props;
         let value = String(getValue(values, prefix) || "");
 
-        return <TextField required={required} id={prefix} name={prefix} label={prefix} value={value} autoFocus={autoFocus} onChange={({ currentTarget: input }) => {
+        return <TextField key={prefix} required={required} id={prefix} name={prefix} label={prefix} value={value} autoFocus={autoFocus} onChange={({ currentTarget: input }) => {
             let v = { ...values };
             setValue(values, prefix, input.value);
             setValues(v);
