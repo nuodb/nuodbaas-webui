@@ -65,7 +65,7 @@ export default class FieldMap extends FieldBase {
             let prefixKeyValue = prefix + "." + i + ".value";
             let prefixKey = prefix + "." + valueKeys[i];
             let errorValue = (errors && (prefixKeyValue in errors) && errors[prefixKeyValue]) || "";
-            rows.push(<TableRow key={prefixKeyLabel} style={{ verticalAlign: 'top' }}>
+            rows.push(<TableRow key={prefixKeyLabel} className="verticalAlignTop">
                 <TableCell>
                     <TextField
                         fullWidth={true}
@@ -106,7 +106,7 @@ export default class FieldMap extends FieldBase {
         let prefixValueLabel = prefix + ".value"
         let errorKey = (errors && (prefixKeyLabel in errors) && errors[prefixKeyLabel]) || "";
         let errorValue = (errors && (prefixValueLabel in errors) && errors[prefixValueLabel]) || "";
-        rows.push(<TableRow key={prefixKeyLabel} style={{ verticalAlign: 'top' }}>
+        rows.push(<TableRow key={prefixKeyLabel} className="verticalAlignTop">
             <TableCell>
                 <TextField
                     fullWidth={true}
