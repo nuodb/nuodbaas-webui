@@ -3,7 +3,7 @@ import FieldBase from "./FieldBase";
 import TextField from '@mui/material/TextField'
 import { getValue, setValue } from "./utils"
 
-export default class FieldString extends FieldBase {
+export default class FieldDateTime extends FieldBase {
     /**
      * show Field of type DateTime using the values and schema definition
      * @param prefix - contains field name (hierarchical fields are separated by period)
@@ -74,7 +74,7 @@ export default class FieldString extends FieldBase {
     }
 
     getDisplayValue() {
-        let value = super.getDisplayValue();
+        const value = super.getDisplayValue();
         if (!value) {
             return value;
         }

@@ -52,7 +52,7 @@ export default class FieldObject extends FieldBase {
     }
 
     getDisplayValue() {
-        const { prefix, parameter, values, errors, required, setValues, updateErrors } = this.props;
+        const { prefix, parameter, values } = this.props;
         return <dl className="map">
             {Object.keys(parameter).map(key => {
                 const prefixKey = prefix ? (prefix + "." + key) : key;
