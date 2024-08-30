@@ -55,7 +55,7 @@ export default class FieldObject extends FieldBase {
         const { prefix, parameter, values, errors, required, setValues, updateErrors } = this.props;
         return <dl className="map">
             {Object.keys(parameter).map(key => {
-                let prefixKey = prefix ? (prefix + "." + key) : key;
+                const prefixKey = prefix ? (prefix + "." + key) : key;
                 const field = FieldFactory.create({ prefix: prefixKey, parameter: parameter[key], values });
                 return <div key={key}><dt>{String(key)}</dt><dd>{field.getDisplayValue()}</dd></div>;
             })}

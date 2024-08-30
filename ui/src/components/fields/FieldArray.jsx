@@ -79,7 +79,7 @@ export default class FieldArray extends FieldBase {
 
     getDisplayValue() {
         const { prefix, values } = this.props;
-        let value = getValue(values, prefix);
+        const value = getValue(values, prefix);
         return value && value.map((v, index) => <div key={index}>{v}</div>);
     }
 }

@@ -136,12 +136,11 @@ export default function Table(props) {
                                 let value;
                                 if(field in cf && cf[field].value && typeof cf[field].value === "function") {
                                     if(field in fieldsSchema) {
-                                        const fieldObject = FieldFactory.create({
+                                        value = FieldFactory.create({
                                             prefix: field,
                                             parameter: fieldsSchema[field],
                                             values: {[field]: cf[field].value(row)}
-                                        });
-                                        value = fieldObject.getDisplayValue();
+                                        }).getDisplayValue();
                                     }
                                     else {
                                         value = showValue(cf[field].value(row));
@@ -149,8 +148,11 @@ export default function Table(props) {
                                 }
                                 else {
                                     if(field in fieldsSchema) {
-                                        const fieldObject = FieldFactory.create({prefix: field, parameter: fieldsSchema[field], values: row});
-                                        value = fieldObject.getDisplayValue();
+                                        value = FieldFactory.create({
+                                            prefix: field,
+                                            parameter: fieldsSchema[field],
+                                            values: row
+                                        }).getDisplayValue();
                                     }
                                     else {
                                         value = showValue(getValue(row, field));
