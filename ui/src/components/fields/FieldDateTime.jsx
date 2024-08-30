@@ -72,4 +72,17 @@ export default class FieldString extends FieldBase {
         }
         return super.validate();
     }
+
+    getDisplayValue() {
+        let value = super.getDisplayValue();
+        if (!value) {
+            return value;
+        }
+
+        let date = new Date(value);
+        if (!isNaN(date)) {
+            return date.toLocaleString();
+        }
+        return value;
+    }
 }

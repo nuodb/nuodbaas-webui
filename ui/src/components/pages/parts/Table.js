@@ -8,8 +8,10 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { getResourceByPath, replaceVariables, matchesPath } from "../../../utils/schema";
+import { getResourceByPath, getCreatePath, getChild, replaceVariables, matchesPath } from "../../../utils/schema";
+import FieldFactory from "../../fields/FieldFactory";
 import RestSpinner from "../../pages/parts/RestSpinner";
+import { getValue } from "../../fields/utils";
 import Dialog from "./Dialog";
 
 /**
@@ -73,21 +75,6 @@ export default function Table(props) {
         return customFields || {};
     }
 
-    function localizeIfDateTime(value) {
-        if(!value) {
-            return value;
-        }
-
-        // check if YYYY-MM-DDTHH:MM:SSZ format
-        if(/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\dZ/.test(value)) {
-            let date = new Date(value);
-            if(!isNaN(date)) {
-                return date.toLocaleString();
-            }
-        }
-        return value;
-    }
-
     function showValue(value) {
         if(value === undefined || value === null) {
             return "";
@@ -107,7 +94,6 @@ export default function Table(props) {
             if(value.length > 80) {
                 value = value.substring(0, 80) + "...";
             }
-            value = localizeIfDateTime(value);
             return String(value);
         }
         else {
@@ -115,7 +101,8 @@ export default function Table(props) {
         }
     }
 
-    let tableFields = getTableFields();
+    const tableFields = getTableFields();
+    const fieldsSchema = getChild(getResourceByPath(schema, getCreatePath(schema, path)), ["get", "responses", "200", "content", "application/json", "schema", "properties"]);
 
     return (<TableContainer component={Paper}>
         <TableMaterial data-testid={props["data-testid"]} sx={{ minWidth: 650 }}>
@@ -146,9 +133,28 @@ export default function Table(props) {
                             else {
                                 let cf = getCustomFields();
 
-                                let value = showValue(row[field]);
+                                let value;
                                 if(field in cf && cf[field].value && typeof cf[field].value === "function") {
-                                    value = showValue(cf[field].value(row));
+                                    if(field in fieldsSchema) {
+                                        const fieldObject = FieldFactory.create({
+                                            prefix: field,
+                                            parameter: fieldsSchema[field],
+                                            values: {[field]: cf[field].value(row)}
+                                        });
+                                        value = fieldObject.getDisplayValue();
+                                    }
+                                    else {
+                                        value = showValue(cf[field].value(row));
+                                    }
+                                }
+                                else {
+                                    if(field in fieldsSchema) {
+                                        const fieldObject = FieldFactory.create({prefix: field, parameter: fieldsSchema[field], values: row});
+                                        value = fieldObject.getDisplayValue();
+                                    }
+                                    else {
+                                        value = showValue(getValue(row, field));
+                                    }
                                 }
 
                                 let buttons = [];

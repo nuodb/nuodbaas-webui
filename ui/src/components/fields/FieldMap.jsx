@@ -189,4 +189,13 @@ export default class FieldMap extends FieldBase {
         success = this.validateNewValue() && success;
         return success;
     }
+
+    getDisplayValue() {
+        const { prefix, parameter, values } = this.props;
+        let value = getValue(values, prefix);
+        return <dl className="map">{Object.keys(value).map(key => {
+            const field = FieldFactory.create({ prefix: prefix + "." + key, parameter: parameter[key], values });
+            return <div key={key}><dt>{String(key)}</dt><dd>{field.getDisplayValue()}</dd></div>;
+        })}</dl>
+    }
 }

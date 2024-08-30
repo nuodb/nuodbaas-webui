@@ -422,6 +422,34 @@ export function getDefaultValue(parameter, value) {
 }
 
 /**
+ * Delete fields with undefined, null or "" values. Also deletes empty Arrays or empty Objects.
+ * @param {*} values
+ */
+function deleteEmptyFields(values) {
+    if(typeof values === 'object' && !Array.isArray(values)) {
+        Object.keys(values).forEach(key => {
+            if(!values[key]) {
+                // delete keys with undefined, null or empty values
+                delete values[key];
+            }
+            else if(typeof values[key] === 'object') {
+                if(!Array.isArray(values[key])) {
+                    deleteEmptyFields(values[key]);
+                    if(Object.keys(values[key]).length === 0) {
+                        // Delete empty Objects
+                        delete values[key];
+                    }
+                }
+                else if(Array.isArray(values[key]) && values[key].length === 0) {
+                    // Delete empty arrays
+                    delete values[key];
+                }
+            }
+        });
+    }
+}
+
+/**
  * sends form
  * @param {*} urlParameters
  * @param {*} formParameters
@@ -458,6 +486,8 @@ export async function submitForm(urlParameters, formParameters, path, values) {
             delete values[key];
         }
     });
+
+    deleteEmptyFields(values);
 
     return RestSpinner.put(path, values);
 }

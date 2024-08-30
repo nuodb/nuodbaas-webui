@@ -36,4 +36,10 @@ export default class FieldBoolean extends FieldBase {
             {required && <span>Required</span>}
         </FormControl>;
     }
+
+    getDisplayValue() {
+        const { prefix, values } = this.props;
+        const value = getValue(values, prefix);
+        return value ? "true" : "false";
+    }
 }
