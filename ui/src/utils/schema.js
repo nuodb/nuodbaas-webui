@@ -440,7 +440,7 @@ function deleteEmptyFields(values) {
                         delete values[key];
                     }
                 }
-                else if(Array.isArray(values[key]) && values[key].length === 0) {
+                else if(values[key].length === 0) {
                     // Delete empty arrays
                     delete values[key];
                 }

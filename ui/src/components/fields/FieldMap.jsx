@@ -10,7 +10,6 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import FieldBase from "./FieldBase"
-import FieldFactory from "./FieldFactory";
 
 export default class FieldMap extends FieldBase {
 
@@ -192,11 +191,10 @@ export default class FieldMap extends FieldBase {
     }
 
     getDisplayValue() {
-        const { prefix, parameter, values } = this.props;
+        const { prefix, values } = this.props;
         const value = getValue(values, prefix);
         return <dl className="map">{Object.keys(value).map(key => {
-            const field = FieldFactory.create({ prefix: prefix + "." + key, parameter: parameter[key], values });
-            return <div key={key}><dt>{String(key)}</dt><dd>{field.getDisplayValue()}</dd></div>;
+            return <div key={key}><dt>{String(key)}</dt><dd>{getValue(values, prefix + "." + key)}</dd></div>;
         })}</dl>
     }
 }

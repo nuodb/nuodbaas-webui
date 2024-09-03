@@ -41,7 +41,9 @@ public class SeleniumTestHelper {
     @BeforeAll
     public static void beforeAll() throws IOException, InterruptedException {
         URL hubUrl = new URL("http://localhost:4444/wd/hub");
-        driver = new RemoteWebDriver(hubUrl, new ChromeOptions());
+        ChromeOptions options = new ChromeOptions();
+        // options.addArguments("--auto-open-devtools-for-tabs"); // enable to see dev tools for debugging
+        driver = new RemoteWebDriver(hubUrl, options);
     }
 
     @AfterAll
