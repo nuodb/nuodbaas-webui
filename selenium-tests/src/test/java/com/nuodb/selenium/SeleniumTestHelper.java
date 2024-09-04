@@ -33,6 +33,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 @ExtendWith(TestResultLogger.class)
 public class SeleniumTestHelper {
+    private static final String SHOW_CHROME_DEVTOOLS = "SHOW_CHROME_DEVTOOLS";
     private static WebDriver driver = null;
     private static String URL_BASE = "http://selenium-tests-nginx-1";
     private static Duration waitTimeout = Duration.ofSeconds(10);
@@ -42,7 +43,9 @@ public class SeleniumTestHelper {
     public static void beforeAll() throws IOException, InterruptedException {
         URL hubUrl = new URL("http://localhost:4444/wd/hub");
         ChromeOptions options = new ChromeOptions();
-        // options.addArguments("--auto-open-devtools-for-tabs"); // enable to see dev tools for debugging
+        if("true".equals(System.getProperty(SHOW_CHROME_DEVTOOLS)) || "true".equals(System.getenv(SHOW_CHROME_DEVTOOLS))) {
+            options.addArguments("--auto-open-devtools-for-tabs");
+        }
         driver = new RemoteWebDriver(hubUrl, options);
     }
 

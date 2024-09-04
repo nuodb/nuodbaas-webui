@@ -180,15 +180,17 @@ public class TestRoutines extends SeleniumTestHelper {
     }
 
     /** retries rest call on specified exceptions */
-    public String restRetry(ClassicHttpRequest request, Class<?> ...clazz) throws IOException {
-        Throwable lastException;
+    public String restRetry(ClassicHttpRequest request, Class<?> ...clazz) throws RuntimeException {
+        RuntimeException error = new RuntimeException("Exhausted " + MAX_RETRIES + " retries");
+        Exception lastException;
         int retry = 0;
         do {
             try {
                 return rest(request);
             }
-            catch(Throwable t) {
-                lastException = t;
+            catch(RuntimeException | IOException e) {
+                lastException = e;
+                error.addSuppressed(e);
             }
 
             for(int i=0; i<clazz.length; i++) {
@@ -197,18 +199,24 @@ public class TestRoutines extends SeleniumTestHelper {
                     break;
                 }
             }
-            if(lastException == null && retry + 1 < MAX_RETRIES) {
-                try {
-                    Thread.sleep(RETRY_WAIT_TIME.toMillis());
-                }
-                catch(InterruptedException e) {
-                    throw new RuntimeException(e);
+            if(lastException != null) {
+                throw error;
+            }
+            else {
+                if(retry + 1 < MAX_RETRIES) {
+                    try {
+                        Thread.sleep(RETRY_WAIT_TIME.toMillis());
+                    }
+                    catch(InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         }
         while(++retry < MAX_RETRIES);
 
-        throw new IOException(lastException);
+        throw error;
     }
 
     public String createResourceRest(Resource resource, String path, String body) throws IOException {
