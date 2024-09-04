@@ -39,4 +39,19 @@ export default class FieldBase {
         updateErrors(prefix, null);
         return true;
     }
+
+    getDisplayValue() {
+        const { prefix, values } = this.props;
+        let value = getValue(values, prefix);
+        if (value === undefined || value === null) {
+            return "";
+        }
+        if (value.indexOf("\n") !== -1) {
+            value = value.substring(0, value.indexOf("\n")) + "...";
+        }
+        if (value.length > 80) {
+            value = value.substring(0, 80) + "...";
+        }
+        return String(value);
+    }
 }

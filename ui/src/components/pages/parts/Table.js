@@ -8,8 +8,10 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { getResourceByPath, replaceVariables, matchesPath } from "../../../utils/schema";
+import { getResourceByPath, getCreatePath, getChild, replaceVariables, matchesPath } from "../../../utils/schema";
+import FieldFactory from "../../fields/FieldFactory";
 import RestSpinner from "../../pages/parts/RestSpinner";
+import { getValue } from "../../fields/utils";
 import Dialog from "./Dialog";
 
 /**
@@ -99,7 +101,8 @@ export default function Table(props) {
         }
     }
 
-    let tableFields = getTableFields();
+    const tableFields = getTableFields();
+    const fieldsSchema = getChild(getResourceByPath(schema, getCreatePath(schema, path)), ["get", "responses", "200", "content", "application/json", "schema", "properties"]);
 
     return (<TableContainer component={Paper}>
         <TableMaterial data-testid={props["data-testid"]} sx={{ minWidth: 650 }}>
@@ -130,9 +133,30 @@ export default function Table(props) {
                             else {
                                 let cf = getCustomFields();
 
-                                let value = showValue(row[field]);
+                                let value;
                                 if(field in cf && cf[field].value && typeof cf[field].value === "function") {
-                                    value = showValue(cf[field].value(row));
+                                    if(field in fieldsSchema) {
+                                        value = FieldFactory.create({
+                                            prefix: field,
+                                            parameter: fieldsSchema[field],
+                                            values: {[field]: cf[field].value(row)}
+                                        }).getDisplayValue();
+                                    }
+                                    else {
+                                        value = showValue(cf[field].value(row));
+                                    }
+                                }
+                                else {
+                                    if(field in fieldsSchema) {
+                                        value = FieldFactory.create({
+                                            prefix: field,
+                                            parameter: fieldsSchema[field],
+                                            values: row
+                                        }).getDisplayValue();
+                                    }
+                                    else {
+                                        value = showValue(getValue(row, field));
+                                    }
                                 }
 
                                 let buttons = [];

@@ -189,4 +189,12 @@ export default class FieldMap extends FieldBase {
         success = this.validateNewValue() && success;
         return success;
     }
+
+    getDisplayValue() {
+        const { prefix, values } = this.props;
+        const value = getValue(values, prefix);
+        return <dl className="map">{Object.keys(value).map(key => {
+            return <div key={key}><dt>{String(key)}</dt><dd>{getValue(values, prefix + "." + key)}</dd></div>;
+        })}</dl>
+    }
 }

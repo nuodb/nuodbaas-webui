@@ -11,6 +11,7 @@ import Schema from "./components/pages/parts/Schema";
 import CssBaseline from '@mui/material/CssBaseline';
 import NotFound from "./components/pages/NotFound";
 import Dialog from "./components/pages/parts/Dialog";
+import GlobalErrorBoundary from "./components/GlobalErrorBoundary";
 import Auth from "./utils/auth";
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(Auth.isLoggedIn());
   return (
     <div className="App">
+      <GlobalErrorBoundary>
       <CssBaseline/>
       <Dialog/>
       <BrowserRouter>
@@ -43,6 +45,7 @@ export default function App() {
           </Routes>
         }
       </BrowserRouter>
+      </GlobalErrorBoundary>
     </div>
   );
 }

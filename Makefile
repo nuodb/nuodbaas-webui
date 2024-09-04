@@ -71,13 +71,16 @@ deploy-image: build-image ## deploy Docker image to AWS
 		helm push dbaas-cockpit-*.tgz "oci://${ECR_ACCOUNT_URL}/"; \
 	fi
 
-.PHONY: setup-integration-tests
-setup-integration-tests: build-image $(KWOKCTL) ## setup containers before running integration tests
+.PHONY: install-crds
+install-crds: $(KWOKCTL) $(KUBECTL)
 	@$(KWOKCTL) create cluster --wait 120s
 	@$(KWOKCTL) get kubeconfig | sed "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kwok-kwok-kube-apiserver:6443/g" > selenium-tests/files/kubeconfig
 	@$(KUBECTL) apply -f selenium-tests/files/nuodb-cp-runtime-config.yaml --context kwok-kwok -n default
 	@curl -L https://github.com/nuodb/nuodb-cp-releases/releases/download/v$(NUODB_CP_VERSION)/nuodb-cp-crd-$(NUODB_CP_VERSION).tgz | \
 		tar -axzOf - --wildcards nuodb-cp-crd/templates/*.yaml | $(KUBECTL) apply -f - --context kwok-kwok -n default
+
+.PHONY: setup-integration-tests
+setup-integration-tests: build-image install-crds ## setup containers before running integration tests
 	@docker compose -f selenium-tests/compose.yaml up --wait
 	@docker exec -it selenium-tests-nuodb-cp-1 bash -c "curl \
 		http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true \
@@ -101,7 +104,7 @@ run-integration-tests: build-image setup-integration-tests ## run integration te
 ##@ Development Environment
 
 .PHONY: run-dev
-run-dev: check-dev-services ## launch nginx reverse proxy for development of /ui/ and /nuodb-cp/
+run-dev: check-dev-services install-crds ## launch nginx reverse proxy for development of /ui/ and /nuodb-cp/
 	$(KUBECTL) apply -f docker/development/runtime-config.yaml
 	curl http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true --data-binary '{"password":"passw0rd", "name":"admin", "organization": "acme", "accessRule":{"allow": "all:*"}}' -X PUT -H "Content-Type: application/json"
 	docker run -v `pwd`/docker/development/default.conf:/etc/nginx/conf.d/default.conf --network=host -it nginx:stable-alpine

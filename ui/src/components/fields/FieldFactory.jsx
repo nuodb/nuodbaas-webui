@@ -7,6 +7,7 @@ import FieldMap from "./FieldMap";
 import FieldArray from "./FieldArray";
 import FieldInteger from "./FieldInteger";
 import FieldMessage from "./FieldMessage";
+import FieldDateTime from "./FieldDateTime";
 
 /** Factory class to create components based on the field type */
 export default class Field {
@@ -37,12 +38,17 @@ export default class Field {
 
         props.required = get("required");
 
+        let format = get("format");
         let type = get("type")
         if (!type) {
             type = get("schema", "type");
+            format = get("schema", "format");
         }
 
-        if (type === "string") {
+        if (type === "string" && format === "date-time") {
+            return new FieldDateTime(props);
+        }
+        else if (type === "string") {
             if (props.prefix === "resourceVersion") {
                 return new FieldHidden(props);
             }

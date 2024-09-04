@@ -18,7 +18,7 @@ public class SeleniumAssert {
         }
 
         public Elements hasSize(int size) {
-            assertEquals(elements.size(), size);
+            assertEquals(size, elements.size());
             return this;
         }
 

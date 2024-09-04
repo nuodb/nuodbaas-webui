@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.hc.client5.http.ClientProtocolException;
+import org.apache.hc.client5.http.HttpHostConnectException;
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
@@ -39,6 +42,9 @@ public class TestRoutines extends SeleniumTestHelper {
     public static final String CP_USERNAME = "acme/admin";
     public static final String CP_PASSWORD = "passw0rd";
     public static final String CP_AUTHORIZATION = "Basic " + Base64.getEncoder().encodeToString((CP_USERNAME + ":" + CP_PASSWORD).getBytes(StandardCharsets.UTF_8));
+
+    private static final int MAX_RETRIES = 10;
+    private static final Duration RETRY_WAIT_TIME = Duration.ofMillis(500);
 
     Map<Resource, Set<String>> createdResources = new HashMap<>();
 
@@ -147,7 +153,7 @@ public class TestRoutines extends SeleniumTestHelper {
      * @return
      */
     public String rest(ClassicHttpRequest request) throws IOException {
-        request.addHeader("Authorization", CP_AUTHORIZATION);
+        request.setHeader("Authorization", CP_AUTHORIZATION);
         try(CloseableHttpClient httpClient = HttpClients.createDefault()) {
             return httpClient.execute(request, new HttpClientResponseHandler<String>(){
                 @Override
@@ -174,6 +180,55 @@ public class TestRoutines extends SeleniumTestHelper {
         }
     }
 
+    /** retries rest call on specified exceptions */
+    public String restRetry(ClassicHttpRequest request, Class<?> ...clazz) throws RuntimeException {
+        List<Exception> exceptions = new ArrayList<>();
+        do {
+            try {
+                return rest(request);
+            }
+            catch(RuntimeException | IOException e) {
+                exceptions.add(e);
+            }
+
+            boolean isMatch = false;
+            for(int i=0; i<clazz.length; i++) {
+                if(clazz[i].isInstance(exceptions.get(exceptions.size()-1))) {
+                    isMatch = true;
+                    break;
+                }
+            }
+            if(!isMatch) {
+                break;
+            }
+            else {
+                if(exceptions.size() + 1 < MAX_RETRIES) {
+                    try {
+                        Thread.sleep(RETRY_WAIT_TIME.toMillis());
+                    }
+                    catch(InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+        while(exceptions.size() < MAX_RETRIES);
+
+        RuntimeException error;
+        if(exceptions.size() == MAX_RETRIES) {
+            error = new RuntimeException("Exhausted " + MAX_RETRIES + " retries", exceptions.get(exceptions.size()-1));
+        }
+        else {
+            error = new RuntimeException(exceptions.get(exceptions.size()-1));
+        }
+
+        for(int i=0; i<exceptions.size()-1; i++) {
+            error.addSuppressed(exceptions.get(i));
+        }
+        throw error;
+    }
+
     public String createResourceRest(Resource resource, String path, String body) throws IOException {
         if(path == null) {
             path = "";
@@ -183,7 +238,7 @@ public class TestRoutines extends SeleniumTestHelper {
         }
         HttpPut request = new HttpPut(CP_URL + "/" + resource.name() + path);
         request.setEntity(new StringEntity(body, ContentType.APPLICATION_JSON));
-        return rest(request);
+        return restRetry(request, HttpHostConnectException.class);
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -198,7 +253,7 @@ public class TestRoutines extends SeleniumTestHelper {
     /** Returns list of items of the specified resource */
     public List<String> getResourcesRest(Resource resource) throws IOException {
         HttpGet request = new HttpGet(CP_URL + "/" + resource.name());
-        String body = rest(request);
+        String body = restRetry(request, HttpHostConnectException.class);
         ObjectMapper mapper = new ObjectMapper();
         try {
             ListResponse response = mapper.readValue(body, ListResponse.class);
@@ -211,7 +266,7 @@ public class TestRoutines extends SeleniumTestHelper {
 
     public boolean deleteResourceRest(Resource resource, String name) throws IOException {
         HttpDelete request = new HttpDelete(CP_URL + "/" + resource.name() + "/" + name);
-        String body = rest(request);
+        String body = restRetry(request, HttpHostConnectException.class);
         return body != null;
     }
 

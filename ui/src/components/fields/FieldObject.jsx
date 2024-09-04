@@ -50,4 +50,15 @@ export default class FieldObject extends FieldBase {
         }
         return success;
     }
+
+    getDisplayValue() {
+        const { prefix, parameter, values } = this.props;
+        return <dl className="map">
+            {Object.keys(parameter).map(key => {
+                const prefixKey = prefix ? (prefix + "." + key) : key;
+                const field = FieldFactory.create({ prefix: prefixKey, parameter: parameter[key], values });
+                return <div key={key}><dt>{String(key)}</dt><dd>{field.getDisplayValue()}</dd></div>;
+            })}
+        </dl>
+    }
 }
