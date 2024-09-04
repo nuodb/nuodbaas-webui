@@ -34,9 +34,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 @ExtendWith(TestResultLogger.class)
 public class SeleniumTestHelper {
     private static final String SHOW_CHROME_DEVTOOLS = "SHOW_CHROME_DEVTOOLS";
+    private static final String URL_BASE = "http://selenium-tests-nginx-1";
+    private static final Duration waitTimeout = Duration.ofSeconds(10);
     private static WebDriver driver = null;
-    private static String URL_BASE = "http://selenium-tests-nginx-1";
-    private static Duration waitTimeout = Duration.ofSeconds(10);
     private TestInfo testInfo;
 
     @BeforeAll

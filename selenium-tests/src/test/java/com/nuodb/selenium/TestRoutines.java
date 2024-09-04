@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,8 +43,8 @@ public class TestRoutines extends SeleniumTestHelper {
     public static final String CP_PASSWORD = "passw0rd";
     public static final String CP_AUTHORIZATION = "Basic " + Base64.getEncoder().encodeToString((CP_USERNAME + ":" + CP_PASSWORD).getBytes(StandardCharsets.UTF_8));
 
-    private static int MAX_RETRIES = 10;
-    private static Duration RETRY_WAIT_TIME = Duration.ofMillis(500);
+    private static final int MAX_RETRIES = 10;
+    private static final Duration RETRY_WAIT_TIME = Duration.ofMillis(500);
 
     Map<Resource, Set<String>> createdResources = new HashMap<>();
 
@@ -181,29 +182,27 @@ public class TestRoutines extends SeleniumTestHelper {
 
     /** retries rest call on specified exceptions */
     public String restRetry(ClassicHttpRequest request, Class<?> ...clazz) throws RuntimeException {
-        RuntimeException error = new RuntimeException("Exhausted " + MAX_RETRIES + " retries");
-        Exception lastException;
-        int retry = 0;
+        List<Exception> exceptions = new ArrayList<>();
         do {
             try {
                 return rest(request);
             }
             catch(RuntimeException | IOException e) {
-                lastException = e;
-                error.addSuppressed(e);
+                exceptions.add(e);
             }
 
+            boolean isMatch = false;
             for(int i=0; i<clazz.length; i++) {
-                if(clazz[i].isInstance(lastException)) {
-                    lastException = null;
+                if(clazz[i].isInstance(exceptions.get(exceptions.size()-1))) {
+                    isMatch = true;
                     break;
                 }
             }
-            if(lastException != null) {
-                throw error;
+            if(!isMatch) {
+                break;
             }
             else {
-                if(retry + 1 < MAX_RETRIES) {
+                if(exceptions.size() + 1 < MAX_RETRIES) {
                     try {
                         Thread.sleep(RETRY_WAIT_TIME.toMillis());
                     }
@@ -214,8 +213,19 @@ public class TestRoutines extends SeleniumTestHelper {
                 }
             }
         }
-        while(++retry < MAX_RETRIES);
+        while(exceptions.size() < MAX_RETRIES);
 
+        RuntimeException error;
+        if(exceptions.size() == MAX_RETRIES) {
+            error = new RuntimeException("Exhausted " + MAX_RETRIES + " retries", exceptions.get(exceptions.size()-1));
+        }
+        else {
+            error = new RuntimeException(exceptions.get(exceptions.size()-1));
+        }
+
+        for(int i=0; i<exceptions.size()-1; i++) {
+            error.addSuppressed(exceptions.get(i));
+        }
         throw error;
     }
 
