@@ -3,8 +3,10 @@ import FieldBase from "./FieldBase";
 import FieldFactory from "./FieldFactory";
 import { getDefaultValue } from "../../utils/schema";
 import { setValue, getValue } from "./utils";
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 export default class FieldObject extends FieldBase {
 
@@ -21,20 +23,21 @@ export default class FieldObject extends FieldBase {
      * @returns
      */
     show() {
-        const { prefix, parameter, values, errors, required, setValues, updateErrors } = this.props;
-        return <Card key={prefix}>
-            <CardContent className="fields">
-                <h3>{prefix}</h3>
+        const { prefix, parameter, values, errors, required, setValues, updateErrors, advanced } = this.props;
+        console.log("FieldObject", prefix, parameter);
+        return <Accordion className="gap" key={prefix} defaultExpanded={!!advanced === false} style={{ gap: "1em" }}>
+            <AccordionSummary className="FieldObjectSection" expandIcon={<ArrowDropDownIcon />}>{prefix}</AccordionSummary>
+            <AccordionDetails className="AccordionDetails">
                 {Object.keys(parameter).map(key => {
                     let prefixKey = prefix ? (prefix + "." + key) : key;
                     let defaultValue = getDefaultValue(parameter[key], values && getValue(values, prefixKey));
                     if (defaultValue !== null) {
                         setValue(values, prefixKey, defaultValue);
                     }
-                    return (FieldFactory.create({ prefix: prefixKey, parameter: parameter[key], values, errors, required, setValues, updateErrors })).show();
+                    return <div className="gap">{(FieldFactory.create({ prefix: prefixKey, parameter: parameter[key], values, errors, required, setValues, updateErrors })).show()}</div>
                 })}
-            </CardContent>
-        </Card>
+            </AccordionDetails>
+        </Accordion>
     }
 
     validate() {

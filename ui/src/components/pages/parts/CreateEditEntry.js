@@ -5,8 +5,13 @@ import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultVa
 import RestSpinner from "./RestSpinner";
 import Container from '@mui/material/Container'
 import Button from '@mui/material/Button'
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Auth from "../../../utils/auth";
 import { setValue } from "../../fields/utils";
+import { matchesPath } from "../../../utils/schema";
 
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
@@ -103,6 +108,52 @@ export default function CreateEditEntry ({schema, path, data}) {
             setFocusField(fieldName);
         }
 
+        function getCustomForm(path) {
+            let customizations = window["getCustomizations"] && window["getCustomizations"]();
+            if(customizations && customizations.forms) {
+                for (const sPath of Object.keys(customizations.forms)) {
+                    if(matchesPath(path, sPath)) {
+                        return customizations.forms[sPath];
+                    }
+                }
+            }
+            return null;
+        }
+
+        /** get field params for the specified field key (hierarchical ones are separated by period) */
+        function getFieldParameters(formParams, key) {
+            const posPeriod = key.indexOf(".");
+            if(posPeriod === -1) {
+                return formParams[key];
+            }
+            else {
+                const childForm = formParams[key.substring(0, posPeriod)];
+                return childForm && childForm.properties && getFieldParameters(childForm.properties, key.substring(posPeriod+1));
+            }
+        }
+
+        function setFieldParameters(formParams, key, parameters) {
+            const posPeriod = key.indexOf(".");
+            if(posPeriod === -1) {
+                formParams[key] = parameters;
+            }
+            else {
+                const firstPart = key.substring(0, posPeriod);
+                const remainingPart = key.substring(posPeriod+1);
+                if(!(firstPart in formParams)) {
+                    formParams[firstPart] = {properties:{}, type:"object"};
+                }
+                setFieldParameters(formParams[firstPart].properties, remainingPart, parameters);
+            }
+        }
+
+        function cloneRecursive(obj) {
+            if(obj === null || obj === undefined) {
+                return obj;
+            }
+            return JSON.parse(JSON.stringify(obj));
+        }
+
         let createPath = data ? path : getCreatePath(schema, path);
         let putResource = getResourceByPath(schema, createPath)["put"];
 
@@ -115,6 +166,34 @@ export default function CreateEditEntry ({schema, path, data}) {
         required.forEach(req => {
             formParams[req].required = true;
         })
+
+        const customForm = getCustomForm(path);
+        if(customForm && customForm.fields) {
+            let newFormParams = {};
+            Object.keys(customForm.fields).forEach(key => {
+                let fieldParameters = cloneRecursive(getFieldParameters(formParams, key));
+                if(fieldParameters) {
+                    Object.keys(customForm.fields[key]).forEach(fieldKey => {
+                        fieldParameters[fieldKey] = cloneRecursive(customForm.fields[key][fieldKey]);
+                    })
+                    setFieldParameters(newFormParams, key, fieldParameters);
+                }
+            });
+            if("*" in customForm.fields) {
+                const advanced = !!customForm.fields["*"].advanced;
+                Object.keys(formParams).forEach(key => {
+                    let fieldParameters = cloneRecursive(getFieldParameters(formParams, key))
+                    let newFieldParameters = getFieldParameters(newFormParams, key);
+                    if(fieldParameters && !newFieldParameters) {
+                        if(advanced) {
+                            fieldParameters.advanced = true;
+                        }
+                        setFieldParameters(newFormParams, key, fieldParameters);
+                    }
+                })
+            }
+            formParams = newFormParams;
+        }
 
         let v = {};
         setDefaultValues(v, null, formParams, data);
@@ -144,6 +223,21 @@ export default function CreateEditEntry ({schema, path, data}) {
         return success;
     }
 
+    function showFormFields(advanced) {
+        return formParameters && Object.keys(formParameters)
+            .filter(key => {
+                const param = formParameters[key];
+                return param.readOnly !== true && !!param.advanced === !!advanced && param.hidden !== true
+            })
+            .map(key => {
+                let formParameter = {...formParameters[key]};
+                return (FieldFactory.create({prefix: key, parameter: formParameter, values, errors, updateErrors, setValues, advanced, autoFocus: key === focusField})).show();
+            }
+        );
+    }
+
+    const advancedFields = showFormFields(true);
+
     return <Container maxWidth="sm">
     <RestSpinner/>
     <form>
@@ -156,13 +250,15 @@ export default function CreateEditEntry ({schema, path, data}) {
             return (FieldFactory.create({prefix: key, parameter: urlParameter, values, errors, updateErrors, setValues, autoFocus: key === focusField})).show();
         }
         )}
-        {formParameters && Object.keys(formParameters)
-                .filter(key => formParameters[key].readOnly !== true)
-                .map(key => {
-                    let formParameter = {...formParameters[key]};
-                    return (FieldFactory.create({prefix: key, parameter: formParameter, values, errors, updateErrors, setValues, autoFocus: key === focusField})).show();
-                }
-        )}
+        {showFormFields(false)}
+        {advancedFields && advancedFields.length > 0 &&
+            <Accordion className="advancedCard">
+                <AccordionSummary className="AdvancedSection" expandIcon={<ArrowDropDownIcon />}>Advanced</AccordionSummary>
+                <AccordionDetails>
+                    {advancedFields}
+                </AccordionDetails>
+            </Accordion>
+        }
 
         {errors._error && <h3 style={{color: "red"}}>{errors._error}</h3>}
         {errors._errorDetail && <div style={{color: "red"}}>{errors._errorDetail}</div>}
