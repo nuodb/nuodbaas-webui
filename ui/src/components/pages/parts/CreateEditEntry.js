@@ -20,8 +20,7 @@ export default function CreateEditEntry ({schema, path, data}) {
     const navigate = useNavigate();
 
     const [ formParameters, setFormParameters ] = useState({});
-    const [ simpleFormParameters, setSimpleFormParameters ] = useState({});
-    const [ advancedFormParameters, setAdvancedFormParameters ] = useState({});
+    const [ sectionFormParameters, setSectionFormParameters ] = useState([]);
     const [ urlParameters, setUrlParameters ] = useState({});
     const [ values, setValues ] = useState({});
     const [ errors, setErrors ] = useState({});
@@ -171,17 +170,6 @@ export default function CreateEditEntry ({schema, path, data}) {
             return JSON.parse(JSON.stringify(obj));
         }
 
-        function setAdvancedRecursive(fieldParams) {
-            if(fieldParams) {
-                fieldParams.advanced = true;
-                if(fieldParams.type === "object" && fieldParams.properties) {
-                    Object.keys(fieldParams.properties).forEach(key => {
-                        setAdvancedRecursive(fieldParams.properties[key]);
-                    });
-                }
-            }
-        }
-
         let createPath = data ? path : getCreatePath(schema, path);
         let putResource = getResourceByPath(schema, createPath)["put"];
 
@@ -194,42 +182,46 @@ export default function CreateEditEntry ({schema, path, data}) {
         required.forEach(req => {
             formParams[req].required = true;
         })
-        let simpleFormParams = cloneRecursive(formParams);
-        let advancedFormParams = null;
+        let remainingFormParams = cloneRecursive(formParams);
+        let sectionFormParams = [formParams];
 
         const customForm = getCustomForm(path);
-        if(customForm && customForm.fields) {
-            advancedFormParams = cloneRecursive(formParams);
-            simpleFormParams = {};
-            Object.keys(customForm.fields).forEach(key => {
-                let fieldParameters = cloneRecursive(getFieldParameters(formParams, key));
-                if(fieldParameters) {
-                    Object.keys(customForm.fields[key]).forEach(fieldKey => {
-                        fieldParameters[fieldKey] = cloneRecursive(customForm.fields[key][fieldKey]);
-                    })
-                    if(!fieldParameters.advanced) {
-                        setFieldParameters(simpleFormParams, key, fieldParameters);
-                        deleteFieldParameters(advancedFormParams, key);
-                    }
-                }
-            });
-            if("*" in customForm.fields) {
-                const advanced = !!customForm.fields["*"].advanced;
-                Object.keys(formParams).forEach(key => {
-                    let fieldParameters = cloneRecursive(getFieldParameters(formParams, key))
-                    let simpleFieldParameters = getFieldParameters(simpleFormParams, key);
-                    if(fieldParameters && !simpleFieldParameters) {
-                        fieldParameters.advanced = advanced;
-                        if(!advanced) {
-                            setFieldParameters(simpleFormParams, key, fieldParameters);
-                            deleteFieldParameters(advancedFormParams, key);
+        if(customForm && customForm.sections) {
+            sectionFormParams = [];
+            Object.keys(customForm.sections).forEach(index => {
+                const section = customForm.sections[index];
+                console.log("D", section);
+                if(section.fields) {
+                    let params = {};
+                    let hasWildcard = false;
+                    Object.keys(section.fields).forEach(key => {
+                        if(key === "*") {
+                            hasWildcard = true;
                         }
                         else {
-                            setAdvancedRecursive(getFieldParameters(advancedFormParams, key));
+                            let fieldParameters = cloneRecursive(getFieldParameters(formParams, key));
+                            if(fieldParameters) {
+                                Object.keys(section.fields[key]).forEach(fieldKey => {
+                                    fieldParameters[fieldKey] = cloneRecursive(section.fields[key][fieldKey]);
+                                })
+                                setFieldParameters(params, key, fieldParameters);
+                                deleteFieldParameters(remainingFormParams, key);
+                            }
                         }
+                    })
+                    if(hasWildcard) {
+                        console.log("remainingFormParams", remainingFormParams);
+                        Object.keys(remainingFormParams).forEach(key => {
+                            let fieldParameters = cloneRecursive(getFieldParameters(remainingFormParams, key));
+                            console.log("A", key, fieldParameters);
+                            if(fieldParameters) {
+                                setFieldParameters(params, key, fieldParameters);
+                            }
+                        })
                     }
-                })
-            }
+                    sectionFormParams.push({title: section.title, params});
+                }
+            });
         }
 
         let v = {};
@@ -238,8 +230,7 @@ export default function CreateEditEntry ({schema, path, data}) {
         setValues(v);
         setFocus(v, formParams);
         setFormParameters(formParams);
-        setSimpleFormParameters(simpleFormParams);
-        setAdvancedFormParameters(advancedFormParams);
+        setSectionFormParameters(sectionFormParams);
     }, [schema, path, data]);
 
     function getParentPath(path) {
@@ -262,21 +253,26 @@ export default function CreateEditEntry ({schema, path, data}) {
         return success;
     }
 
-    function showFormFields(advanced) {
-        const params = advanced ? advancedFormParameters : simpleFormParameters;
-        return params && Object.keys(params)
+    function showSectionFields(section) {
+        let ret = section && section.params && Object.keys(section.params)
             .filter(key => {
-                const param = params[key];
-                return param.readOnly !== true && param.hidden !== true
-            })
-            .map(key => {
-                let formParameter = {...params[key]};
-                return (FieldFactory.create({prefix: key, parameter: formParameter, values, errors, updateErrors, setValues, advanced, autoFocus: key === focusField})).show();
-            }
-        );
+                const param = section.params[key];
+                return param.readOnly !== true && param.hidden !== true && key !== "resourceVersion"
+            }) || [];
+        ret = ret.map(key => {
+                let formParameter = {...section.params[key]};
+                return (FieldFactory.create({prefix: key, parameter: formParameter, values, errors, updateErrors, setValues, expand: !section.title, autoFocus: key === focusField, hideTitle: ret.length === 1})).show();
+            });
+        if(ret && ret.length > 0 && section.title) {
+            ret = <Accordion className="advancedCard">
+                <AccordionSummary className="AdvancedSection" expandIcon={<ArrowDropDownIcon />}>{section.title}</AccordionSummary>
+                <AccordionDetails>
+                    {ret}
+                </AccordionDetails>
+            </Accordion>;
+        }
+        return ret;
     }
-
-    const advancedFields = showFormFields(true);
 
     return <Container maxWidth="sm">
     <RestSpinner/>
@@ -290,15 +286,9 @@ export default function CreateEditEntry ({schema, path, data}) {
             return (FieldFactory.create({prefix: key, parameter: urlParameter, values, errors, updateErrors, setValues, autoFocus: key === focusField})).show();
         }
         )}
-        {showFormFields(false)}
-        {advancedFields && advancedFields.length > 0 &&
-            <Accordion className="advancedCard">
-                <AccordionSummary className="AdvancedSection" expandIcon={<ArrowDropDownIcon />}>Advanced</AccordionSummary>
-                <AccordionDetails>
-                    {advancedFields}
-                </AccordionDetails>
-            </Accordion>
-        }
+        {sectionFormParameters.map(section => {
+            return showSectionFields(section);
+        })}
 
         {errors._error && <h3 style={{color: "red"}}>{errors._error}</h3>}
         {errors._errorDetail && <div style={{color: "red"}}>{errors._errorDetail}</div>}

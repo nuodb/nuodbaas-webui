@@ -23,18 +23,23 @@ export default class FieldObject extends FieldBase {
      * @returns
      */
     show() {
-        const { prefix, parameter, values, errors, required, setValues, updateErrors, advanced } = this.props;
-        return <Accordion className="gap" key={prefix} defaultExpanded={!!advanced === false} style={{ gap: "1em" }}>
+        const { prefix, parameter, values, errors, required, setValues, updateErrors, expand, hideTitle } = this.props;
+        let ret = Object.keys(parameter).map(key => {
+            let prefixKey = prefix ? (prefix + "." + key) : key;
+            let defaultValue = getDefaultValue(parameter[key], values && getValue(values, prefixKey));
+            if (defaultValue !== null) {
+                setValue(values, prefixKey, defaultValue);
+            }
+            return <div key={key} className="gap">{(FieldFactory.create({ prefix: prefixKey, parameter: parameter[key], values, errors, required, setValues, updateErrors, expand: false })).show()}</div>
+        });
+        console.log("PARAM", prefix, parameter);
+        if (hideTitle) {
+            return ret;
+        }
+        return <Accordion className="gap" key={prefix} defaultExpanded={!!expand} style={{ gap: "1em" }}>
             <AccordionSummary className="FieldObjectSection" expandIcon={<ArrowDropDownIcon />}>{prefix}</AccordionSummary>
             <AccordionDetails className="AccordionDetails">
-                {Object.keys(parameter).map(key => {
-                    let prefixKey = prefix ? (prefix + "." + key) : key;
-                    let defaultValue = getDefaultValue(parameter[key], values && getValue(values, prefixKey));
-                    if (defaultValue !== null) {
-                        setValue(values, prefixKey, defaultValue);
-                    }
-                    return <div key={key} className="gap">{(FieldFactory.create({ prefix: prefixKey, parameter: parameter[key], values, errors, required, setValues, updateErrors, advanced })).show()}</div>
-                })}
+                {ret}
             </AccordionDetails>
         </Accordion>
     }

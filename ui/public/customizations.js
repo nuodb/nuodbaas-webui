@@ -1,5 +1,5 @@
 function getCustomizations() {
-    const databaseActions = {
+    const viewDatabases = {
         status: {
             value: (data) => data.status && data.status.state,
             buttons: [
@@ -53,7 +53,7 @@ function getCustomizations() {
         },
     };
 
-    const backupPolicyActions = {
+    const viewBackupPolicies = {
         "show": {
             buttons: [
                 {
@@ -69,92 +69,164 @@ function getCustomizations() {
     };
 
     const formCreateUsers = {
-        fields: {
-            organization: {},
-            name: {},
-            password: {
-                required: true
+        sections: [
+            {
+                fields: {
+                    organization: {},
+                    name: {},
+                    password: {
+                        required: true
+                    },
+                    "accessRule": {},
+                }
             },
-            "accessRule": {},
-            "*": {
-                advanced: true
+            {
+                title: "Advanced",
+                fields: {
+                    "*": {}
+                }
             }
-        }
+        ]
     };
 
     const formEditUsers = {
-        fields: {
-            password: {
-                hidden: true
+        sections: [
+            {
+                fields: {
+                    password: {
+                        hidden: true
+                    },
+                }
             },
-            "*": {}
-        }
+            {
+                title: "Advanced",
+                fields: {
+                    "*": {}
+                }
+            }
+        ]
     };
 
     const formCreateProjects = {
-        fields: {
-            organization: {},
-            name: {},
-            sla: {},
-            tier: {},
-            "*": {
-                advanced: true
+        sections: [
+            {
+                fields: {
+                    organization: {},
+                    name: {},
+                    sla: {},
+                    tier: {},
+                }
+            },
+            {
+                title: "Advanced",
+                fields: {
+                    "*": {}
+                }
             }
-        }
+        ]
     };
 
     const formCreateDatabases = {
-        fields: {
-            organization: {},
-            project: {},
-            name: {},
-            dbaPassword: {},
-            "*": {
-                advanced: true
+        sections: [
+            {
+                fields: {
+                    organization: {},
+                    project: {},
+                    name: {},
+                    dbaPassword: {},
+                }
+            },
+            {
+                title: "Advanced",
+                fields: {
+                    "*": {}
+                }
             }
-        }
+        ]
     };
 
     const formEditDatabases = {
-        fields: {
-            "dbaPassword": {
-                hidden: true
+        sections: [
+            {
+                fields: {
+                    "dbaPassword": {
+                        hidden: true
+                    },
+                }
             },
-            "*": {}
-        }
+            {
+                title: "Advanced",
+                fields: {
+                    "*": {}
+                }
+            }
+        ]
     };
 
     const formCreateBackups = {
-        fields: {
-            organization: {},
-            project: {},
-            database: {},
-            name: {},
-            "*": {
-                advanced: true
+        sections: [
+            {
+                fields: {
+                    organization: {},
+                    project: {},
+                    database: {},
+                    name: {},
+                }
+            },
+            {
+                title: "Advanced",
+                fields: {
+                    "*": {}
+                }
             }
-        }
+        ]
     };
 
     const formCreateBackuppolicies = {
-        fields: {
-            organization: {},
-            name: {},
-            frequency: {},
-            "selector.scope": {},
-            "*": {
-                advanced:true
+        sections: [
+            {
+                fields: {
+                    organization: {},
+                    name: {},
+                    frequency: {},
+                    suspended: {},
+                }
+            },
+            {
+                title: "Database Selection",
+                fields: {
+                    selector: {}
+                }
+            },
+            {
+                title: "Database Retention",
+                fields: {
+                    retention: {}
+                }
+            },
+            {
+                title: "Labels",
+                fields: {
+                    labels: {},
+                    "properties": {}
+                }
+            },
+            {
+                title: "Advanced",
+                fields: {
+                    "*": {}
+                }
             }
-        }
+        ]
     };
 
     return {
     "views": {
-        "/databases": databaseActions,
-        "/databases/{organization}": databaseActions,
-        "/databases/{organization}/{project}": databaseActions,
-        "/backuppolicies": backupPolicyActions,
-        "/backuppolicies/{organization}": backupPolicyActions,
+        "/databases": viewDatabases,
+        "/databases/{organization}": viewDatabases,
+        "/databases/{organization}/{project}": viewDatabases,
+        "/backuppolicies": viewBackupPolicies,
+        "/backuppolicies/{organization}": viewBackupPolicies,
     },
     "forms": {
         "/users": formCreateUsers,
