@@ -1,3 +1,5 @@
+# (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 apiVersion: v2
 name: dbaas-cockpit
 description: Dynamic DBaaS UI populated by the OpenAPI spec

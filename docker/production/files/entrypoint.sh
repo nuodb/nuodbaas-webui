@@ -1,4 +1,5 @@
 #!/bin/sh
+# (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
 if [ "${NUODB_CP_REST_URL}" != "" ] ; then
     find /usr/share/nginx/html -type f | while read line; do
