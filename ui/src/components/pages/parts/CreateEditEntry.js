@@ -254,11 +254,11 @@ export default function CreateEditEntry ({schema, path, data}) {
     }
 
     function showSectionFields(section) {
-        let ret = section && section.params && Object.keys(section.params)
+        let ret = (section && section.params && Object.keys(section.params)
             .filter(key => {
                 const param = section.params[key];
                 return param.readOnly !== true && param.hidden !== true && key !== "resourceVersion"
-            }) || [];
+            })) || [];
         ret = ret.map(key => {
                 let formParameter = {...section.params[key]};
                 return (FieldFactory.create({prefix: key, parameter: formParameter, values, errors, updateErrors, setValues, expand: !section.title, autoFocus: key === focusField, hideTitle: ret.length === 1})).show();
