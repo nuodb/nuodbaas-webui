@@ -10,7 +10,7 @@ import FieldMessage from "./FieldMessage";
 import FieldDateTime from "./FieldDateTime";
 
 /** Factory class to create components based on the field type */
-export default class Field {
+export default class FieldFactory {
     static create(props) {
         props = { ...props };
         let leftOvers = JSON.parse(JSON.stringify(props.parameter));

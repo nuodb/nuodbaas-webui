@@ -24,7 +24,6 @@ export default class FieldObject extends FieldBase {
      */
     show() {
         const { prefix, parameter, values, errors, required, setValues, updateErrors, advanced } = this.props;
-        console.log("FieldObject", prefix, parameter);
         return <Accordion className="gap" key={prefix} defaultExpanded={!!advanced === false} style={{ gap: "1em" }}>
             <AccordionSummary className="FieldObjectSection" expandIcon={<ArrowDropDownIcon />}>{prefix}</AccordionSummary>
             <AccordionDetails className="AccordionDetails">
@@ -34,7 +33,7 @@ export default class FieldObject extends FieldBase {
                     if (defaultValue !== null) {
                         setValue(values, prefixKey, defaultValue);
                     }
-                    return <div className="gap">{(FieldFactory.create({ prefix: prefixKey, parameter: parameter[key], values, errors, required, setValues, updateErrors })).show()}</div>
+                    return <div key={key} className="gap">{(FieldFactory.create({ prefix: prefixKey, parameter: parameter[key], values, errors, required, setValues, updateErrors, advanced })).show()}</div>
                 })}
             </AccordionDetails>
         </Accordion>

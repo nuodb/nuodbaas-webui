@@ -20,6 +20,8 @@ export default function CreateEditEntry ({schema, path, data}) {
     const navigate = useNavigate();
 
     const [ formParameters, setFormParameters ] = useState({});
+    const [ simpleFormParameters, setSimpleFormParameters ] = useState({});
+    const [ advancedFormParameters, setAdvancedFormParameters ] = useState({});
     const [ urlParameters, setUrlParameters ] = useState({});
     const [ values, setValues ] = useState({});
     const [ errors, setErrors ] = useState({});
@@ -147,11 +149,37 @@ export default function CreateEditEntry ({schema, path, data}) {
             }
         }
 
+        function deleteFieldParameters(formParams, key) {
+            const posPeriod = key.indexOf(".");
+            if(posPeriod === -1) {
+                delete formParams[key];
+            }
+            else {
+                const firstPart = key.substring(0, posPeriod);
+                const remainingPart = key.substring(posPeriod+1);
+                if(!(firstPart in formParams)) {
+                    formParams[firstPart] = {properties:{}, type:"object"};
+                }
+                deleteFieldParameters(formParams[firstPart].properties, remainingPart);
+            }
+        }
+
         function cloneRecursive(obj) {
             if(obj === null || obj === undefined) {
                 return obj;
             }
             return JSON.parse(JSON.stringify(obj));
+        }
+
+        function setAdvancedRecursive(fieldParams) {
+            if(fieldParams) {
+                fieldParams.advanced = true;
+                if(fieldParams.type === "object" && fieldParams.properties) {
+                    Object.keys(fieldParams.properties).forEach(key => {
+                        setAdvancedRecursive(fieldParams.properties[key]);
+                    });
+                }
+            }
         }
 
         let createPath = data ? path : getCreatePath(schema, path);
@@ -161,38 +189,47 @@ export default function CreateEditEntry ({schema, path, data}) {
         setUrlParameters(urlParams);
 
         let formParams = getChild(putResource, ["requestBody", "content", "application/json", "schema", "properties"])
-        formParams = JSON.parse(JSON.stringify(formParams));
+        formParams = cloneRecursive(formParams);
         let required = getChild(putResource, ["requestBody", "content", "application/json", "schema", "required"])
         required.forEach(req => {
             formParams[req].required = true;
         })
+        let simpleFormParams = cloneRecursive(formParams);
+        let advancedFormParams = null;
 
         const customForm = getCustomForm(path);
         if(customForm && customForm.fields) {
-            let newFormParams = {};
+            advancedFormParams = cloneRecursive(formParams);
+            simpleFormParams = {};
             Object.keys(customForm.fields).forEach(key => {
                 let fieldParameters = cloneRecursive(getFieldParameters(formParams, key));
                 if(fieldParameters) {
                     Object.keys(customForm.fields[key]).forEach(fieldKey => {
                         fieldParameters[fieldKey] = cloneRecursive(customForm.fields[key][fieldKey]);
                     })
-                    setFieldParameters(newFormParams, key, fieldParameters);
+                    if(!fieldParameters.advanced) {
+                        setFieldParameters(simpleFormParams, key, fieldParameters);
+                        deleteFieldParameters(advancedFormParams, key);
+                    }
                 }
             });
             if("*" in customForm.fields) {
                 const advanced = !!customForm.fields["*"].advanced;
                 Object.keys(formParams).forEach(key => {
                     let fieldParameters = cloneRecursive(getFieldParameters(formParams, key))
-                    let newFieldParameters = getFieldParameters(newFormParams, key);
-                    if(fieldParameters && !newFieldParameters) {
-                        if(advanced) {
-                            fieldParameters.advanced = true;
+                    let simpleFieldParameters = getFieldParameters(simpleFormParams, key);
+                    if(fieldParameters && !simpleFieldParameters) {
+                        fieldParameters.advanced = advanced;
+                        if(!advanced) {
+                            setFieldParameters(simpleFormParams, key, fieldParameters);
+                            deleteFieldParameters(advancedFormParams, key);
                         }
-                        setFieldParameters(newFormParams, key, fieldParameters);
+                        else {
+                            setAdvancedRecursive(getFieldParameters(advancedFormParams, key));
+                        }
                     }
                 })
             }
-            formParams = newFormParams;
         }
 
         let v = {};
@@ -201,6 +238,8 @@ export default function CreateEditEntry ({schema, path, data}) {
         setValues(v);
         setFocus(v, formParams);
         setFormParameters(formParams);
+        setSimpleFormParameters(simpleFormParams);
+        setAdvancedFormParameters(advancedFormParams);
     }, [schema, path, data]);
 
     function getParentPath(path) {
@@ -224,13 +263,14 @@ export default function CreateEditEntry ({schema, path, data}) {
     }
 
     function showFormFields(advanced) {
-        return formParameters && Object.keys(formParameters)
+        const params = advanced ? advancedFormParameters : simpleFormParameters;
+        return params && Object.keys(params)
             .filter(key => {
-                const param = formParameters[key];
-                return param.readOnly !== true && !!param.advanced === !!advanced && param.hidden !== true
+                const param = params[key];
+                return param.readOnly !== true && param.hidden !== true
             })
             .map(key => {
-                let formParameter = {...formParameters[key]};
+                let formParameter = {...params[key]};
                 return (FieldFactory.create({prefix: key, parameter: formParameter, values, errors, updateErrors, setValues, advanced, autoFocus: key === focusField})).show();
             }
         );
