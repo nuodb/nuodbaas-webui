@@ -96,11 +96,6 @@ function getCustomizations() {
                     password: {
                         hidden: true
                     },
-                }
-            },
-            {
-                title: "Advanced",
-                fields: {
                     "*": {}
                 }
             }
@@ -152,11 +147,6 @@ function getCustomizations() {
                     "dbaPassword": {
                         hidden: true
                     },
-                }
-            },
-            {
-                title: "Advanced",
-                fields: {
                     "*": {}
                 }
             }

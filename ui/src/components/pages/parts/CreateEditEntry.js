@@ -183,14 +183,13 @@ export default function CreateEditEntry ({schema, path, data}) {
             formParams[req].required = true;
         })
         let remainingFormParams = cloneRecursive(formParams);
-        let sectionFormParams = [formParams];
+        let sectionFormParams = [{params: formParams}];
 
         const customForm = getCustomForm(path);
         if(customForm && customForm.sections) {
             sectionFormParams = [];
             Object.keys(customForm.sections).forEach(index => {
                 const section = customForm.sections[index];
-                console.log("D", section);
                 if(section.fields) {
                     let params = {};
                     let hasWildcard = false;
@@ -210,7 +209,6 @@ export default function CreateEditEntry ({schema, path, data}) {
                         }
                     })
                     if(hasWildcard) {
-                        console.log("remainingFormParams", remainingFormParams);
                         Object.keys(remainingFormParams).forEach(key => {
                             let fieldParameters = cloneRecursive(getFieldParameters(remainingFormParams, key));
                             console.log("A", key, fieldParameters);

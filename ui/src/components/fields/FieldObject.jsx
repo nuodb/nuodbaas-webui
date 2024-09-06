@@ -32,7 +32,6 @@ export default class FieldObject extends FieldBase {
             }
             return <div key={key} className="gap">{(FieldFactory.create({ prefix: prefixKey, parameter: parameter[key], values, errors, required, setValues, updateErrors, expand: false })).show()}</div>
         });
-        console.log("PARAM", prefix, parameter);
         if (hideTitle) {
             return ret;
         }
