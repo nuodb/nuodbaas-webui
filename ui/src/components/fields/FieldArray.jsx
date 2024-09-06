@@ -1,5 +1,5 @@
 import React from "react";
-import { setValue, getValue } from "./utils";
+import { setValue, getValue } from "./utils.ts";
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';

@@ -2,7 +2,7 @@ import React from "react";
 import FieldBase from "./FieldBase";
 import FieldFactory from "./FieldFactory";
 import { getDefaultValue } from "../../utils/schema";
-import { setValue, getValue } from "./utils";
+import { setValue, getValue } from "./utils.ts";
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';

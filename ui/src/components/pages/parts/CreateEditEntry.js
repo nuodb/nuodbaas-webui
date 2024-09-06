@@ -10,7 +10,7 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Auth from "../../../utils/auth";
-import { setValue } from "../../fields/utils";
+import { setValue } from "../../fields/utils.ts";
 import { matchesPath } from "../../../utils/schema";
 
 /**

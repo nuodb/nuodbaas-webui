@@ -1,7 +1,7 @@
 import React from "react";
 import FieldBase from "./FieldBase";
 import TextField from '@mui/material/TextField'
-import { getValue, setValue } from "./utils"
+import { getValue, setValue } from "./utils.ts"
 
 export default class FieldDateTime extends FieldBase {
     /**

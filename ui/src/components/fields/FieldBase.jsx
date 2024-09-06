@@ -1,4 +1,4 @@
-import { getValue } from "./utils";
+import { getValue } from "./utils.ts";
 
 export default class FieldBase {
     constructor(props) {
