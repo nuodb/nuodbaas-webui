@@ -211,7 +211,6 @@ export default function CreateEditEntry ({schema, path, data}) {
                     if(hasWildcard) {
                         Object.keys(remainingFormParams).forEach(key => {
                             let fieldParameters = cloneRecursive(getFieldParameters(remainingFormParams, key));
-                            console.log("A", key, fieldParameters);
                             if(fieldParameters) {
                                 setFieldParameters(params, key, fieldParameters);
                             }
@@ -263,7 +262,7 @@ export default function CreateEditEntry ({schema, path, data}) {
             });
         if(ret && ret.length > 0 && section.title) {
             ret = <Accordion className="advancedCard">
-                <AccordionSummary className="AdvancedSection" expandIcon={<ArrowDropDownIcon />}>{section.title}</AccordionSummary>
+                <AccordionSummary data-testid={"section-" + section.title.toLowerCase()} className="AdvancedSection" expandIcon={<ArrowDropDownIcon />}>{section.title}</AccordionSummary>
                 <AccordionDetails>
                     {ret}
                 </AccordionDetails>

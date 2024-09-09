@@ -36,7 +36,7 @@ export default class FieldObject extends FieldBase {
             return ret;
         }
         return <Accordion className="gap" key={prefix} defaultExpanded={!!expand} style={{ gap: "1em" }}>
-            <AccordionSummary className="FieldObjectSection" expandIcon={<ArrowDropDownIcon />}>{prefix}</AccordionSummary>
+            <AccordionSummary data-testid={"section-" + prefix} className="FieldObjectSection" expandIcon={<ArrowDropDownIcon />}>{prefix}</AccordionSummary>
             <AccordionDetails className="AccordionDetails">
                 {ret}
             </AccordionDetails>

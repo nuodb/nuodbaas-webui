@@ -102,7 +102,7 @@ function getCustomizations() {
         ]
     };
 
-    const formCreateProjects = {
+    const formCreateEditProjects = {
         sections: [
             {
                 fields: {
@@ -153,7 +153,7 @@ function getCustomizations() {
         ]
     };
 
-    const formCreateBackups = {
+    const formCreateEditBackups = {
         sections: [
             {
                 fields: {
@@ -172,7 +172,7 @@ function getCustomizations() {
         ]
     };
 
-    const formCreateBackuppolicies = {
+    const formCreateEditBackuppolicies = {
         sections: [
             {
                 fields: {
@@ -222,18 +222,21 @@ function getCustomizations() {
         "/users": formCreateUsers,
         "/users/{organization}": formCreateUsers,
         "/users/{organization}/{name}": formEditUsers,
-        "/projects": formCreateProjects,
-        "/projects/{organization}": formCreateProjects,
+        "/projects": formCreateEditProjects,
+        "/projects/{organization}": formCreateEditProjects,
+        "/projects/{organization}/{name}": formCreateEditProjects,
         "/databases": formCreateDatabases,
         "/databases/{organization}": formCreateDatabases,
         "/databases/{organization}/{project}": formCreateDatabases,
         "/databases/{organization}/{project}/{name}": formEditDatabases,
-        "/backups": formCreateBackups,
-        "/backups/{organization}": formCreateBackups,
-        "/backups/{organization}/{project}": formCreateBackups,
-        "/backups/{organization}/{project}/{database}": formCreateBackups,
-        "/backuppolicies": formCreateBackuppolicies,
-        "/backuppolicies/{organization}": formCreateBackuppolicies,
+        "/backups": formCreateEditBackups,
+        "/backups/{organization}": formCreateEditBackups,
+        "/backups/{organization}/{project}": formCreateEditBackups,
+        "/backups/{organization}/{project}/{database}": formCreateEditBackups,
+        "/backups/{organization}/{project}/{database}/{name}": formCreateEditBackups,
+        "/backuppolicies": formCreateEditBackuppolicies,
+        "/backuppolicies/{organization}": formCreateEditBackuppolicies,
+        "/backuppolicies/{organization}/{name}": formCreateEditBackuppolicies,
     }
 }
 }
