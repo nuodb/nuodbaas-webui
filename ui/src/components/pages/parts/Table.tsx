@@ -10,16 +10,17 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { getResourceByPath, getCreatePath, getChild, replaceVariables, matchesPath } from "../../../utils/schema";
 import FieldFactory from "../../fields/FieldFactory";
-import RestSpinner from "../../pages/parts/RestSpinner";
-import { getValue } from "../../fields/utils.ts";
+import RestSpinner from "./RestSpinner";
+import { getValue } from "../../fields/utils";
 import Dialog from "./Dialog";
+import { TempAny } from "../../../utils/types";
 
 /**
  * shows a table with all the "data". Columns are determined by the schema definition for the "path"
  * @param {*} param0
  * @returns
  */
-export default function Table(props) {
+export default function Table(props: TempAny) {
     const { schema, data, path } = props;
     let navigate = useNavigate();
 
@@ -31,42 +32,43 @@ export default function Table(props) {
     function getTableFields() {
         let resourcesByPath = getResourceByPath(schema, path);
         let methodSchema = resourcesByPath["get"];
-        if(!methodSchema || !data) {
+        if (!methodSchema || !data) {
             return [];
         }
-        let dataKeys = {};
-        data.forEach(row => {
-            Object.keys(row).forEach(key => {
+        let dataKeys: TempAny = {};
+        data.forEach((row: TempAny) => {
+            Object.keys(row).forEach((key: TempAny) => {
                 dataKeys[key] = "";
             });
         })
 
         let tableFields = [];
-        if("$ref" in dataKeys) {
+        if ("$ref" in dataKeys) {
             tableFields.push("$ref");
             delete dataKeys["$ref"];
         }
-        if("resourceVersion" in dataKeys) {
+        if ("resourceVersion" in dataKeys) {
             delete dataKeys["resourceVersion"]
         }
         let ret = [...tableFields, ...Object.keys(dataKeys)];
 
         let cf = getCustomFields();
         Object.keys(cf).forEach(key => {
-            if(!ret.includes(key)) {
+            if (!ret.includes(key)) {
                 ret.push(key);
             }
         })
         return ret;
     }
 
-    let customFields = null;
+    let customFields: TempAny = null;
     function getCustomFields() {
-        let customizations = window["getCustomizations"] && window["getCustomizations"]();
-        if(customFields === null && customizations && customizations.views) {
+        const w: TempAny = window;
+        let customizations = w["getCustomizations"] && w["getCustomizations"]();
+        if (customFields === null && customizations && customizations.views) {
             customFields = {};
             for (const sPath of Object.keys(customizations.views)) {
-                if(matchesPath(path, sPath)) {
+                if (matchesPath(path, sPath)) {
                     customFields = customizations.views[sPath];
                     break;
                 }
@@ -75,23 +77,23 @@ export default function Table(props) {
         return customFields || {};
     }
 
-    function showValue(value) {
-        if(value === undefined || value === null) {
+    function showValue(value: TempAny) {
+        if (value === undefined || value === null) {
             return "";
         }
-        else if(typeof value === "object") {
-            if(Array.isArray(value)) {
-                return value.map((v,index) => <div key={index}>{showValue(v)}</div>);
+        else if (typeof value === "object") {
+            if (Array.isArray(value)) {
+                return value.map((v, index) => <div key={index}>{showValue(v)}</div>);
             }
             else {
                 return <dl className="map">{Object.keys(value).map(key => <div key={key}><dt>{String(key)}</dt><dd>{showValue(value[key])}</dd></div>)}</dl>
             }
         }
-        else if(typeof value === "string") {
-            if(value.indexOf("\n") !== -1) {
+        else if (typeof value === "string") {
+            if (value.indexOf("\n") !== -1) {
                 value = value.substring(0, value.indexOf("\n")) + "...";
             }
-            if(value.length > 80) {
+            if (value.length > 80) {
                 value = value.substring(0, 80) + "...";
             }
             return String(value);
@@ -112,17 +114,17 @@ export default function Table(props) {
                 </TableRow>
             </TableHead>
             <TableBody>
-                {data.map((row, index) => (
+                {data.map((row: TempAny, index: number) => (
                     <TableRow key={row["$ref"] || index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                         {tableFields.map(field => {
-                            if(field === "$ref") {
+                            if (field === "$ref") {
                                 return <TableCell key={field}>
                                     <Button data-testid="edit_button" variant="text" onClick={() =>
                                         navigate("/ui/resource/edit" + path + "/" + row[field])
                                     }>Edit</Button>
                                     {("delete" in (getResourceByPath(schema, path + "/" + row[field]) || {})) && <Button data-testid="delete_button" variant="text" onClick={() => {
                                         RestSpinner.delete(path + "/" + row[field])
-                                            .then(()=> {
+                                            .then(() => {
                                                 window.location.reload();
                                             }).catch((error) => {
                                                 RestSpinner.toastError("Unable to delete " + path + "/" + row[field], error);
@@ -134,52 +136,52 @@ export default function Table(props) {
                                 let cf = getCustomFields();
 
                                 let value;
-                                if(field in cf && cf[field].value && typeof cf[field].value === "function") {
-                                    if(field in fieldsSchema) {
-                                        value = FieldFactory.create({
+                                if (field in cf && cf[field].value && typeof cf[field].value === "function") {
+                                    if (field in fieldsSchema) {
+                                        value = FieldFactory.createDisplayValue({
                                             prefix: field,
                                             parameter: fieldsSchema[field],
-                                            values: {[field]: cf[field].value(row)}
-                                        }).getDisplayValue();
+                                            values: { [field]: cf[field].value(row) }
+                                        });
                                     }
                                     else {
                                         value = showValue(cf[field].value(row));
                                     }
                                 }
                                 else {
-                                    if(field in fieldsSchema) {
-                                        value = FieldFactory.create({
+                                    if (field in fieldsSchema) {
+                                        value = FieldFactory.createDisplayValue({
                                             prefix: field,
                                             parameter: fieldsSchema[field],
                                             values: row
-                                        }).getDisplayValue();
+                                        });
                                     }
                                     else {
                                         value = showValue(getValue(row, field));
                                     }
                                 }
 
-                                let buttons = [];
-                                if(field in cf && cf[field].buttons) {
-                                    cf[field].buttons.forEach(button => {
-                                        if(!button.visible || (typeof button.visible === "function" && button.visible(row))) {
+                                let buttons: TempAny = [];
+                                if (field in cf && cf[field].buttons) {
+                                    cf[field].buttons.forEach((button: TempAny) => {
+                                        if (!button.visible || (typeof button.visible === "function" && button.visible(row))) {
                                             buttons.push(<Button key={button.label} variant="outlined" onClick={async () => {
                                                 let label = replaceVariables(button.label, row);
-                                                if(button.confirm) {
+                                                if (button.confirm) {
                                                     let confirm = replaceVariables(button.confirm, row);
-                                                    if("yes" !== await Dialog.confirm(label, confirm)) {
+                                                    if ("yes" !== await Dialog.confirm(label, confirm)) {
                                                         return;
                                                     }
                                                 }
-                                                if(button.patch) {
+                                                if (button.patch) {
                                                     RestSpinner.patch(path + "/" + row["$ref"], button.patch)
-                                                        .catch((error)=> {
+                                                        .catch((error) => {
                                                             RestSpinner.toastError("Unable to update " + path + "/" + row["$ref"], error);
                                                         })
                                                 }
-                                                else if(button.link) {
+                                                else if (button.link) {
                                                     const link = replaceVariables(button.link, row);
-                                                    if(!link.startsWith("//") && link.indexOf("://") === -1) {
+                                                    if (!link.startsWith("//") && link.indexOf("://") === -1) {
                                                         navigate(link);
                                                     }
                                                 }

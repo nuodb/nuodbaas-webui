@@ -1,6 +1,7 @@
 import RestSpinner from "../components/pages/parts/RestSpinner";
 import Auth from "./auth"
-let schema = null;
+import { FieldValuesType, FieldParameterType, TempAny, SchemaType } from "./types";
+let schema : TempAny = null;
 
 /**
  * Pulls OpenAPI spec schema and parses it
@@ -27,7 +28,7 @@ export async function getSchema() {
  * @param {*} schema
  * @param {*} path
  */
-function parseSchema(rootSchema, schema, path) {
+function parseSchema(rootSchema:SchemaType, schema:SchemaType, path:string[]) {
 
     // remove all non-2xx responses (not relevant for the UI)
     if(path.length === 4 && path[0] === "paths" && path[3] === "responses") {
@@ -75,7 +76,7 @@ function parseSchema(rootSchema, schema, path) {
  * @param {*} path2
  * @returns
  */
-export function matchesPath(path1, path2) {
+export function matchesPath(path1:string, path2:string) : boolean {
     let parts1 = path1.split("/");
     let parts2 = path2.split("/");
     if(parts1.length !== parts2.length) {
@@ -95,7 +96,7 @@ export function matchesPath(path1, path2) {
  * @param {*} variables
  * @returns string with the placeholders replaced.
  */
-export function replaceVariables(search, variables) {
+export function replaceVariables(search: string, variables: TempAny) : string {
     Object.keys(variables).forEach(key => {
         search = search.replaceAll("{" + key + "}", variables[key]);
     })
@@ -108,7 +109,7 @@ export function replaceVariables(search, variables) {
  * @param {*} path
  * @returns
  */
-export function getResourceByPath(rootSchema, path) {
+export function getResourceByPath(rootSchema: TempAny, path: string | null) : TempAny {
     if(!rootSchema || !path) {
         return [];
     }
@@ -133,7 +134,7 @@ export function getResourceByPath(rootSchema, path) {
  * @param {*} path
  * @returns full path or null if not found
  */
-export function getCreatePath(rootSchema, path) {
+export function getCreatePath(rootSchema: TempAny, path: string) : string|null {
     if(!rootSchema) {
         return null;
     }
@@ -168,7 +169,7 @@ export function getCreatePath(rootSchema, path) {
  * @param {*} path
  * @returns full path or null if not found
  */
-export function getFilterField(rootSchema, path) {
+export function getFilterField(rootSchema: TempAny, path: string) {
     if(!rootSchema) {
         return null;
     }
@@ -197,10 +198,10 @@ export function getFilterField(rootSchema, path) {
             }
         })
         if(hasChildPaths) {
-            let ret = retPaths[0].split("/");
-            ret = ret[ret.length-1];
-            if(ret.startsWith("{") && ret.endsWith("}")) {
-                return ret.substring(1, ret.length-1);
+            const parts = retPaths[0].split("/");
+            const lastPart = parts[parts.length-1];
+            if(lastPart.startsWith("{") && lastPart.endsWith("}")) {
+                return lastPart.substring(1, lastPart.length-1);
             }
             else {
                 return null;
@@ -215,7 +216,7 @@ export function getFilterField(rootSchema, path) {
     }
 }
 
-function concatChunks(chunk1, chunk2) {
+function concatChunks(chunk1: Uint8Array, chunk2: Uint8Array) : Uint8Array {
     let ret = new Uint8Array(chunk1.length + chunk2.length);
     ret.set(chunk1, 0);
     ret.set(chunk2, chunk1.length);
@@ -229,16 +230,16 @@ function concatChunks(chunk1, chunk2) {
  * @param {*} multiReject - returns error
  * @returns AbortController - use ret.abort() to abort
  */
-export function getResourceEvents(path, multiResolve, multiReject) {
+export function getResourceEvents(path: string, multiResolve: TempAny, multiReject: TempAny) {
     //only one event stream is supported - close prior one if it exists.
     let eventsAbortController = new AbortController();
 
     RestSpinner.getStream("events" + path, eventsAbortController)
-      .then(async response => {
+      .then(async (response: TempAny) => {
         let event = null;
         let data = null;
         let id = null;
-        let mergedData = {};
+        let mergedData: TempAny = {};
         let buffer = Uint8Array.of();
         for await (let chunk of response) {
             while(chunk.length > 0) {
@@ -267,7 +268,7 @@ export function getResourceEvents(path, multiResolve, multiReject) {
                         multiResolve(mergedData);
                     }
                     else if(event === "UPDATED" && id !== null && data !== null) {
-                        let newData = {...mergedData};
+                        let newData: TempAny = {...mergedData};
                         newData.items = [...newData.items];
                         let modified = false;
                         for(let i=0; i<newData.items.length; i++) {
@@ -287,7 +288,7 @@ export function getResourceEvents(path, multiResolve, multiReject) {
                         }
                     }
                     else if(event === "DELETED" && id !== null) {
-                        let newData = {...mergedData};
+                        let newData: TempAny = {...mergedData};
                         newData.items = [...newData.items];
                         let modified = false;
                         for(let i=0; i<newData.items.length; i++) {
@@ -357,7 +358,7 @@ export function getResourceEvents(path, multiResolve, multiReject) {
  * @param {*} pathParts a path separated by slashes or an array of path components
  * @returns
  */
-export function getChild(schema, pathParts) {
+export function getChild(schema: TempAny, pathParts: string | string[]) {
     if(typeof pathParts === "string") {
         while(pathParts.startsWith("/")) {
             pathParts = pathParts.substring(1);
@@ -381,9 +382,9 @@ export function getChild(schema, pathParts) {
  * @param {*} key
  * @returns
  */
-export function arrayToObject(array, key) {
-    let ret = {};
-    array.forEach(a => {
+export function arrayToObject(array: TempAny, key: string): TempAny {
+    let ret:TempAny = {};
+    array.forEach((a: TempAny) => {
         ret[a[key]] = a;
     });
     return ret;
@@ -395,7 +396,7 @@ export function arrayToObject(array, key) {
  * @param {*} value
  * @returns
  */
-export function getDefaultValue(parameter, value) {
+export function getDefaultValue(parameter: TempAny, value: TempAny) {
     if(value) {
         return value;
     }
@@ -425,7 +426,7 @@ export function getDefaultValue(parameter, value) {
  * Delete fields with undefined, null or "" values. Also deletes empty Arrays or empty Objects.
  * @param {*} values
  */
-function deleteEmptyFields(values) {
+function deleteEmptyFields(values: FieldValuesType) {
     if(typeof values === 'object' && !Array.isArray(values)) {
         Object.keys(values).forEach(key => {
             if(!values[key]) {
@@ -457,7 +458,7 @@ function deleteEmptyFields(values) {
  * @param {*} values
  * @returns
  */
-export async function submitForm(urlParameters, formParameters, path, values) {
+export async function submitForm(urlParameters: FieldParameterType, formParameters: FieldParameterType, path: string, values: FieldValuesType) {
     let queryParameters = Object.keys(urlParameters).filter(key => urlParameters[key]["in"] === "query");
 
     // the last URL parameter has the name of the resource, while the form parameter always has "name"

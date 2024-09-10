@@ -1,5 +1,5 @@
 import React from "react";
-import { setValue, getValue } from "./utils.ts";
+import { setValue, getValue } from "./utils";
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card';
@@ -10,6 +10,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import FieldBase from "./FieldBase"
+import { TempAny } from "../../utils/types";
 
 export default class FieldMap extends FieldBase {
 
@@ -17,8 +18,8 @@ export default class FieldMap extends FieldBase {
         const { prefix, parameter, updateErrors } = this.props;
         let prefixKeyLabel = prefix + ".key";
         let prefixValueLabel = prefix + ".value";
-        let keyElement = document.getElementById(prefixKeyLabel);
-        let valueElement = document.getElementById(prefixValueLabel);
+        let keyElement = document.getElementById(prefixKeyLabel) as HTMLInputElement;
+        let valueElement = document.getElementById(prefixValueLabel) as HTMLInputElement;
         if ((keyElement && keyElement.value !== "") || (valueElement && valueElement.value !== "")) {
             return super.validate(prefixKeyLabel, parameter, keyElement.value);
         }
@@ -32,8 +33,8 @@ export default class FieldMap extends FieldBase {
         const { prefix, parameter, updateErrors } = this.props;
         let prefixKeyLabel = prefix + ".key";
         let prefixValueLabel = prefix + ".value";
-        let keyElement = document.getElementById(prefixKeyLabel);
-        let valueElement = document.getElementById(prefixValueLabel);
+        let keyElement = document.getElementById(prefixKeyLabel) as HTMLInputElement;
+        let valueElement = document.getElementById(prefixValueLabel) as HTMLInputElement;
         if ((keyElement && keyElement.value !== "") || (valueElement && valueElement.value !== "")) {
             return super.validate(prefixValueLabel, parameter["additionalProperties"], valueElement.value);
         }
@@ -89,7 +90,7 @@ export default class FieldMap extends FieldBase {
                         }}
                         error={errorValue !== ""}
                         helperText={errorValue}
-                        onBlur={event => this.validate(prefixKeyValue)} />
+                        onBlur={event => super.validate(prefixKeyValue, getValue(values, prefix)[valueKeys[i]])} />
                 </TableCell>
                 <TableCell><Button onClick={() => {
                     let v = { ...values };
@@ -129,8 +130,8 @@ export default class FieldMap extends FieldBase {
             </TableCell>
             <TableCell>
                 <Button data-testid={"add_button_" + prefix} onClick={() => {
-                    let keyElement = document.getElementById(prefixKeyLabel);
-                    let valueElement = document.getElementById(prefixValueLabel);
+                    let keyElement = document.getElementById(prefixKeyLabel) as HTMLInputElement;
+                    let valueElement = document.getElementById(prefixValueLabel) as HTMLInputElement;
                     if (keyElement.value === "" && valueElement.value === "") {
                         return;
                     }
@@ -179,7 +180,7 @@ export default class FieldMap extends FieldBase {
         if (value && parameter["additionalProperties"]) {
             let value = getValue(values, prefix);
             if (value) {
-                Object.values(value).forEach((v, index) => {
+                Object.values(value).forEach((v: TempAny, index: number) => {
                     const fieldKey = prefix + "." + index + ".value";
                     success = super.validate(fieldKey, parameter["additionalProperties"], v) && success;
                 })

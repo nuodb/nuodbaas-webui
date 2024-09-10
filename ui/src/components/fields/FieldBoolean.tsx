@@ -3,22 +3,13 @@ import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
-import { getValue, setValue } from "./utils.ts"
+import { getValue, setValue } from "./utils"
 import FieldBase from "./FieldBase"
 
 export default class FieldBoolean extends FieldBase {
 
     /**
      * show Field of type Boolean using the values and schema definition
-     * @param prefix - contains field name (hierarchical fields are separated by period)
-     * @param parameter - schema definition for this field
-     * @param values - contains object with ALL values (and field names) of this form (not just this field).
-     *                 the key is the field name (name is separated by period if the field is hierarchical)
-     * @param errors - contains object with ALL errors (and field names) of this form (not just this field).
-     *                 the key is the field name (name is separated by period if the field is hierarchical)
-     * @param required
-     * @param setValues - callback to update field value
-     * @returns
      */
     show() {
         const { prefix, values, required, setValues, autoFocus } = this.props;
@@ -29,7 +20,7 @@ export default class FieldBoolean extends FieldBase {
                 let v = { ...values };
                 setValue(v, prefix, input.value);
                 setValues(v);
-            }} onBlur={event => this.validate()}>
+            }} onBlur={() => this.validate()}>
                 <MenuItem value="true">True</MenuItem>
                 <MenuItem value="false">False</MenuItem>
             </Select>

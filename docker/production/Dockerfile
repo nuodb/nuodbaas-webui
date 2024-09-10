@@ -5,6 +5,7 @@ WORKDIR /app/
 COPY ui/public/ /app/public
 COPY ui/src/ /app/src
 COPY ui/package.json /app/
+COPY ui/tsconfig.json /app/
 RUN npm install
 RUN npm run build
 

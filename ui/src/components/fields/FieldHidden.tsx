@@ -1,5 +1,5 @@
 import React from "react";
-import { getValue } from "./utils.ts"
+import { getValue } from "./utils"
 import FieldBase from "./FieldBase"
 
 export default class FieldHidden extends FieldBase {

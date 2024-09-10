@@ -12,30 +12,31 @@ import TextField from '@mui/material/TextField'
 import { styled } from '@mui/material';
 import RestSpinner from './RestSpinner';
 import { getFilterField } from "../../../utils/schema";
+import { TempAny } from "../../../utils/types"
 
-export function parseSearch(search) {
+export function parseSearch(search: string) {
     search = search.trim();
-    let ret = {};
+    let ret: TempAny = {};
 
-    search.split(" ").forEach(parts => {
+    search.split(" ").forEach((parts: string) => {
         const posEqual = parts.indexOf("=");
-        if(posEqual !== -1) {
+        if (posEqual !== -1) {
             const key = parts.substring(0, posEqual);
-            const value = parts.substring(posEqual+1);
-            if(key !== "name" && key !== "label") {
+            const value = parts.substring(posEqual + 1);
+            if (key !== "name" && key !== "label") {
                 ret["error"] = "Invalid search key \"" + key + "\". Can only search for \"name\" or \"label\"";
             }
-            else if(key in ret) {
+            else if (key in ret) {
                 ret["error"] = "Key \"" + key + "\" can only be specified once.";
             }
             else {
                 ret[key] = value;
             }
         }
-        else if(parts.indexOf(" ") !== -1) {
+        else if (parts.indexOf(" ") !== -1) {
             // ignore double spaces
         }
-        else if("name" in ret) {
+        else if ("name" in ret) {
             ret["error"] = "Cannot search for \"name\" attribute multiple times";
         }
         else {
@@ -45,9 +46,9 @@ export function parseSearch(search) {
     return ret;
 }
 
-export default function Path({schema, path, filterValues, search, setSearch, setPage}) {
-    const [ searchField, setSearchField ] = useState(search);
-    const [ error, setError ] = useState(null);
+export default function Path({ schema, path, filterValues, search, setSearch, setPage }: TempAny) {
+    const [searchField, setSearchField] = useState(search);
+    const [error, setError] = useState(null);
 
     const navigate = useNavigate();
 
@@ -58,24 +59,24 @@ export default function Path({schema, path, filterValues, search, setSearch, set
     });
 
     function renderFilter() {
-        if(!filterValues || filterValues.length === 0) {
+        if (!filterValues || filterValues.length === 0) {
             return null;
         }
 
         return <FormControl>
             <InputLabel id="filter_label">{filterField}</InputLabel>
-            <Select labelId="filter_label" id="filter" value={"__all__"} label={filterField} onChange={({target})=>{
+            <Select labelId="filter_label" id="filter" value={"__all__"} label={filterField} onChange={({ target }) => {
                 navigate("/ui/resource/list" + path + "/" + target.value);
             }}>
                 <MenuItem value={"__all__"}>--- All ---</MenuItem>
-                {filterValues && filterValues.map(fv => <MenuItem key={fv} value={fv}>{fv}</MenuItem>)}
+                {filterValues && filterValues.map((fv: string) => <MenuItem key={fv} value={fv}>{fv}</MenuItem>)}
             </Select>
         </FormControl>;
     }
 
     function handleSearch() {
-        const parsed = parseSearch(searchField);
-        if("error" in parsed) {
+        const parsed: TempAny = parseSearch(searchField);
+        if ("error" in parsed) {
             setError(parsed["error"]);
         }
         else {
@@ -88,21 +89,21 @@ export default function Path({schema, path, filterValues, search, setSearch, set
     let filterField = getFilterField(schema, path);
 
     let pathParts = (path.startsWith("/") ? path.substring(1) : path).split("/");
-    return <div style={{display: "flex", flexDirection: "row", alignItems: "center"}}>
-        <StyledBreadcrumbs data-testid="path_component" separator=">" aria-label="resources" style={{fontSize: "2em", padding: "20px", display: "flex", flexWrap: "nowrap"}}>
-        {pathParts && pathParts.map((p,index) => {
-            if(index === pathParts.length-1) {
-                return <Typography key={index} color="text.primary" style={{fontSize: "1em"}}>{p}</Typography>
-            }
-            else {
-                let subPath = "/ui/resource/list/" + pathParts.slice(0, index+1).join("/")
-                return <Link underline="hover" key={index} color="inherit" href="#" onClick={() => {
-                    navigate(subPath);
+    return <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+        <StyledBreadcrumbs data-testid="path_component" separator=">" aria-label="resources" style={{ fontSize: "2em", padding: "20px", display: "flex", flexWrap: "nowrap" }}>
+            {pathParts && pathParts.map((p: string, index: number) => {
+                if (index === pathParts.length - 1) {
+                    return <Typography key={index} color="text.primary" style={{ fontSize: "1em" }}>{p}</Typography>
                 }
-                }>{p}</Link>;
-            }
-        })}
-        {renderFilter()}
+                else {
+                    let subPath = "/ui/resource/list/" + pathParts.slice(0, index + 1).join("/")
+                    return <Link underline="hover" key={index} color="inherit" href="#" onClick={() => {
+                        navigate(subPath);
+                    }
+                    }>{p}</Link>;
+                }
+            })}
+            {renderFilter()}
         </StyledBreadcrumbs>
         <RestSpinner />
         {setSearch && <React.Fragment>
@@ -118,7 +119,7 @@ export default function Path({schema, path, filterValues, search, setSearch, set
                     setSearchField(input.value);
                 }}
                 onKeyDown={(event) => {
-                    if(event.keyCode === 13) {
+                    if (event.keyCode === 13) {
                         handleSearch();
                     }
                 }}
@@ -127,7 +128,7 @@ export default function Path({schema, path, filterValues, search, setSearch, set
             />
             <Button data-testid="searchButton" onClick={handleSearch}
             >Search</Button>
-            </React.Fragment>
+        </React.Fragment>
         }
     </div>;
 }

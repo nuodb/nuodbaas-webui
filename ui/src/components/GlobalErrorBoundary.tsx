@@ -1,13 +1,22 @@
-import React from "react";
+import React, { ErrorInfo, ReactNode } from "react";
 import Button from '@mui/material/Button'
 
-export default class GlobalErrorBoundary extends React.Component {
-    constructor(props) {
+interface IProps {
+    children?: ReactNode
+}
+
+interface IState {
+    error: Error | null,
+    errorInfo: ErrorInfo | null
+}
+
+export default class GlobalErrorBoundary extends React.Component<IProps, IState> {
+    constructor(props: IProps) {
         super(props);
         this.state = { error: null, errorInfo: null };
     }
 
-    componentDidCatch(error, errorInfo) {
+    componentDidCatch(error: Error, errorInfo: ErrorInfo) {
         this.setState({ error, errorInfo });
     }
 

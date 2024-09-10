@@ -1,10 +1,12 @@
+import { FieldValuesType, TempAny } from "../../utils/types";
+
 /**
  * gets a value from a field. If not found, returns null.
  * @param {*} values object containing possibly hierarchical fields
  * @param {*} prefix field name. Hierarchical fields are separated by a period.
  * @returns
  */
-export function getValue(values: any, prefix: string): any {
+export function getValue(values: FieldValuesType, prefix: string): TempAny {
     let value = values;
     const parts = prefix.split(".");
     for(let i=0; i<parts.length; i++) {
@@ -25,7 +27,7 @@ export function getValue(values: any, prefix: string): any {
  * @param {*} prefix field name. Hierarchical fields are separated by a period.
  * @param {*} value value to assign. Deletes field if value is undefined or null.
  */
-export function setValue(values:any, prefix:string, value:any) {
+export function setValue(values:FieldValuesType, prefix:string, value?:TempAny) {
     const parts = prefix.split(".");
     let values_ = values;
     for(let i=0; i<parts.length-1; i++) {

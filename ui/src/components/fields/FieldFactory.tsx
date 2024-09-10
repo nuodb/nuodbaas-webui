@@ -8,17 +8,19 @@ import FieldArray from "./FieldArray";
 import FieldInteger from "./FieldInteger";
 import FieldMessage from "./FieldMessage";
 import FieldDateTime from "./FieldDateTime";
+import FieldBase, { FieldProps, FieldPropsDisplay, FieldPropsValidate } from "./FieldBase";
+import { ReactNode } from "react";
 
 /** Factory class to create components based on the field type */
 export default class FieldFactory {
-    static create(props) {
+    static create(props: FieldProps): FieldBase {
         props = { ...props };
         let leftOvers = JSON.parse(JSON.stringify(props.parameter));
         if (!("schema" in leftOvers)) {
             leftOvers["schema"] = {};
         }
 
-        function get(key1, key2) {
+        function get(key1: string, key2?: string) {
             if (!key2) {
                 let ret = leftOvers[key1];
                 delete leftOvers[key1];
@@ -71,13 +73,7 @@ export default class FieldFactory {
                 return new FieldMap(props);
             }
             else {
-                console.log("ERROR: Invalid object", props.prefix, props.parameter);
-                if (process && process.env && process.env.NODE_ENV === "development") {
-                    return new FieldMessage({ message: "ERROR: Invalid object" });
-                }
-                else {
-                    return null;
-                }
+                return new FieldMessage({ ...props, message: "ERROR: Invalid object" });
             }
         }
         else if (type === "array") {
@@ -87,7 +83,25 @@ export default class FieldFactory {
             return new FieldInteger(props);
         }
         else {
-            return new FieldMessage({ message: "Invalid type " + String(type) + " " + JSON.stringify(props.parameter) + " " + JSON.stringify(leftOvers) });
+            return new FieldMessage({ ...props, message: "Invalid type " + String(type) + " " + JSON.stringify(props.parameter) + " " + JSON.stringify(leftOvers) });
         }
+    }
+
+    static createDisplayValue(props: FieldPropsDisplay): ReactNode {
+        return this.create({
+            setValues: () => { },
+            errors: {},
+            updateErrors: () => { },
+            required: false,
+            autoFocus: false,
+            expand: false,
+            hideTitle: false,
+            ...props
+        }).getDisplayValue();
+    }
+
+    static validateProps(props: FieldPropsValidate): boolean {
+        const field: FieldBase = FieldFactory.create({ errors: {}, required: false, autoFocus: false, expand: false, hideTitle: false, ...props });
+        return field.validate();
     }
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import FieldBase from "./FieldBase";
 import TextField from '@mui/material/TextField'
-import { getValue, setValue } from "./utils.ts"
+import { getValue, setValue } from "./utils"
 
 export default class FieldDateTime extends FieldBase {
     /**
@@ -45,7 +45,7 @@ export default class FieldDateTime extends FieldBase {
                 }
                 else {
                     const date = new Date(editValue);
-                    if (isNaN(date)) {
+                    if (isNaN(date.getTime())) {
                         updateErrors(prefix, "Field \"" + prefix + "\" has invalid date/time value");
                         return;
                     }
@@ -74,13 +74,13 @@ export default class FieldDateTime extends FieldBase {
     }
 
     getDisplayValue() {
-        const value = super.getDisplayValue();
+        const value = String(super.getDisplayValue());
         if (!value) {
             return value;
         }
 
         let date = new Date(value);
-        if (!isNaN(date)) {
+        if (!isNaN(date.getTime())) {
             return date.toLocaleString();
         }
         return value;

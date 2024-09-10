@@ -20,31 +20,31 @@ export default function App() {
   return (
     <div className="App">
       <GlobalErrorBoundary>
-      <CssBaseline/>
-      <Dialog/>
-      <BrowserRouter>
-        {isLoggedIn
-          ?
-          <React.Fragment>
-            <Schema setSchema={setSchema} />
-            {schema && <Banner schema={schema} />}
+        <CssBaseline />
+        <Dialog />
+        <BrowserRouter>
+          {isLoggedIn
+            ?
+            <React.Fragment>
+              <Schema setSchema={setSchema} />
+              {schema && <Banner schema={schema} />}
+              <Routes>
+                <Route path="/" element={<Navigate to="/ui" />} />
+                <Route path="/ui" element={<Home schema={schema} />} />
+                <Route path="/ui/error" element={<ErrorPage />} />
+                <Route path="/ui/resource/list/*" element={<ListResource schema={schema} />} />
+                <Route path="/ui/resource/create/*" element={<CreateResource schema={schema} />} />
+                <Route path="/ui/resource/edit/*" element={<EditResource schema={schema} />} />
+                <Route path="/*" element={<NotFound />} />
+              </Routes></React.Fragment>
+            :
             <Routes>
-              <Route path="/" element={<Navigate to="/ui" />} />
-              <Route path="/ui" element={<Home schema={schema} />} />
+              <Route path="/ui/login" element={<LoginForm setIsLoggedIn={setIsLoggedIn} />} />
               <Route path="/ui/error" element={<ErrorPage />} />
-              <Route path="/ui/resource/list/*" element={<ListResource schema={schema} />} />
-              <Route path="/ui/resource/create/*" element={<CreateResource schema={schema} />} />
-              <Route path="/ui/resource/edit/*" element={<EditResource schema={schema} />} />
-              <Route path="/*" element={<NotFound />} />
-            </Routes></React.Fragment>
-          :
-          <Routes>
-            <Route path="/ui/login" element={<LoginForm setIsLoggedIn={setIsLoggedIn}/>} />
-            <Route path="/ui/error" element={<ErrorPage />} />
-            <Route path="/*" element={<Navigate to={"/ui/login?redirect=" + encodeURIComponent(window.location.pathname)} />} />
-          </Routes>
-        }
-      </BrowserRouter>
+              <Route path="/*" element={<Navigate to={"/ui/login?redirect=" + encodeURIComponent(window.location.pathname)} />} />
+            </Routes>
+          }
+        </BrowserRouter>
       </GlobalErrorBoundary>
     </div>
   );

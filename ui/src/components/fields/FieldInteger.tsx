@@ -1,6 +1,6 @@
 import React from "react";
 import TextField from '@mui/material/TextField'
-import { getValue, setValue } from "./utils.ts"
+import { getValue, setValue } from "./utils"
 import FieldBase from "./FieldBase"
 
 export default class FieldInteger extends FieldBase {

@@ -1,16 +1,22 @@
 import axios from "axios";
+import { TempAny } from "./types";
 
 /**
  * Authenticates users and stores info in localStorage "credentials".
- * TODO(agr22): At some point we should change to token authentication
  */
 
+interface Credentials {
+    token: string,
+    expiresAtTime: string,
+    username: string
+}
+
 export default class Auth {
-    static isLoggedIn() {
+    static isLoggedIn() : boolean {
         return this.getCredentials() ? true : false;
     }
 
-    static getNuodbCpRestUrl(path) {
+    static getNuodbCpRestUrl(path:string) {
         // The default for the NuoDB REST Control Plane prefix is "/nuodb-cp", which can be overwritten by the
         // environment variable NUODB_CP_REST_URL in the Docker container or Helm Chart config.
         //
@@ -34,7 +40,7 @@ export default class Auth {
         return prefixPath + "/" + path;
     }
 
-    static async login(username, password) {
+    static async login(username:string, password:string) {
         return new Promise((resolve) => {
             axios.post(Auth.getNuodbCpRestUrl("login"), { "expiresIn": "24h" }, { auth: { username, password }, headers: { "Content-Type": "application/json" } })
                 .then((response) => {
@@ -69,15 +75,15 @@ export default class Auth {
         return null;
     }
 
-    static getCredentials() {
-        let credentials = localStorage.getItem("credentials");
-        if(credentials) {
-            credentials = JSON.parse(credentials);
+    static getCredentials() : Credentials|null {
+        const lcCredentials = localStorage.getItem("credentials");
+        if(!lcCredentials) {
+            return null;
         }
-        return credentials;
+        return JSON.parse(lcCredentials);
     }
 
-    static getHeaders() {
+    static getHeaders(): TempAny {
         let credentials = this.getCredentials();
         if(!credentials) {
             return {};
@@ -87,7 +93,7 @@ export default class Auth {
         }
     }
 
-    static handle401Error(error) {
+    static handle401Error(error:TempAny) {
         if(error.response && error.response.status === 401) {
             Auth.logout();
             window.location.href = "/ui/login?redirect=" + encodeURIComponent(window.location.pathname);
