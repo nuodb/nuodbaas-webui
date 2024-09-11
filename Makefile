@@ -92,6 +92,14 @@ run-integration-tests-only: ## integration tests without setup/teardown
 run-integration-tests: build-image setup-integration-tests ## run integration tests (+setup)
 	${MAKE} run-integration-tests-only teardown-integration-tests || (${MAKE} teardown-integration-tests && exit 1)
 
+.PHONY: deploy-nuodb-control-plane
+deploy-nuodb-control-plane:
+	@./nuodb-cp.sh install
+
+.PHONY: undeploy-nuodb-control-plane
+undeploy-nuodb-control-plane:
+	@./nuodb-cp.sh uninstall
+
 ##@ Development Environment
 
 .PHONY: run-dev
