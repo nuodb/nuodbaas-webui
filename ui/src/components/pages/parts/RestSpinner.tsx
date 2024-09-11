@@ -1,3 +1,5 @@
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import React, { ReactNode } from "react"
 import CircularProgress from '@mui/material/CircularProgress';
 import Snackbar from '@mui/material/Snackbar';

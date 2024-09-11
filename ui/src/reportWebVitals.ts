@@ -1,3 +1,5 @@
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import { ReportHandler } from 'web-vitals';
 
 const reportWebVitals = (onPerfEntry?: ReportHandler) => {

@@ -6,36 +6,30 @@ User Interface to the DBaaS Rest service (nuodb-control-plane)
 
 The following steps set up `nuodb-control-plane` as well as `dbaas-cockpit` in debug mode with an `nginx` reverse proxy to work around CORS issues connecting the UI to the REST service.
 
-### Clone necessary GIT repositories if not done already:
+### Clone necessary GIT repository if not done already:
 
 ```
-git clone git@github.com:nuodb/nuodb-control-plane
 git clone git@github.com:nuodb/dbaas-cockpit
 ```
 
-### Option 1: Setup Control plane (in Debug Mode)
+### Setup Control plane (in Kubernetes Cluster)
+
+The Cockpit UI needs to connect to the NuoDB Control Plane REST API server to function. Use below script to deploy the Control Plane on the Kubernetes server using helm charts (Prerequisite: helm chart tool + kubectl connected to a Kubernetes server)
 
 ```
-cd nuodb-control-plane
-make install
+cd dbaas-cockpit
+make deploy-nuodb-control-plane
 ```
 
-In your IDE, run the following Java program (potentially in Debug mode):
+### Setup and run Cockpit UI
 
 ```
-mainClass: com.nuodb.controlplane.Main
-args: ["server", "start"]
+cd dbaas-cockpit/ui
+npm install
+npm start
 ```
 
-### Option 2: Setup Control plane (in Kubernetes Cluster)
-
-```
-cd nuodb-control-plane
-make deploy
-kubectl port-forward svc/nuodb-cp-rest 8080 &
-```
-
-### Setup and run UI
+### Run Reverse proxy
 
 ```
 cd dbaas-cockpit
@@ -46,7 +40,8 @@ make run-dev
 
 ```
 Open in the browser at http://localhost:81/
-Username: acme/admin
+Organization: acme
+Username: admin
 Password: passw0rd
 ```
 

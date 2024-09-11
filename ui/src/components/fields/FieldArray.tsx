@@ -1,4 +1,6 @@
-import React, { ReactNode } from "react";
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
+import { ReactNode } from "react";
 import { setValue, getValue } from "./utils";
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';

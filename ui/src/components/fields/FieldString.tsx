@@ -1,4 +1,5 @@
-import React from "react";
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import TextField from '@mui/material/TextField'
 import { getValue, setValue } from "./utils"
 import FieldBase from "./FieldBase"
@@ -6,14 +7,6 @@ import FieldBase from "./FieldBase"
 export default class FieldString extends FieldBase {
     /**
      * show Field of type String using the values and schema definition
-     * @param prefix - contains field name (hierarchical fields are separated by period)
-     * @param parameter - schema definition for this field
-     * @param values - contains object with ALL values (and field names) of this form (not just this field).
-     *                 hierarchical fields are hierarchical in the structure.
-     * @param errors - contains object with ALL errors (and field names) of this form (not just this field).
-     *                 the key is the field name (name is separated by period if the field is hierarchical)
-     * @param required
-     * @param setValues - callback to update field value
      * @returns
      */
     show() {

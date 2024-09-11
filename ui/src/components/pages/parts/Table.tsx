@@ -1,4 +1,5 @@
-import React from "react";
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import { useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import TableMaterial from '@mui/material/Table';

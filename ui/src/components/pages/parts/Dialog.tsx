@@ -1,4 +1,5 @@
-import * as React from 'react';
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import Button from '@mui/material/Button';
 import DialogMaterial from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -6,7 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { TempAny } from '../../../utils/types';
-import { ReactNode } from 'react';
+import { Component, ReactNode } from 'react';
 
 let s_instance: Dialog | null = null;
 
@@ -27,7 +28,7 @@ interface IState {
     dialogs?: DialogProps[]
 }
 
-export default class Dialog extends React.Component<IProps, IState> {
+export default class Dialog extends Component<IProps, IState> {
     state = {
         dialogs: []
     }

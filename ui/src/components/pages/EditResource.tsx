@@ -1,3 +1,5 @@
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import CreateEditEntry from "./parts/CreateEditEntry";

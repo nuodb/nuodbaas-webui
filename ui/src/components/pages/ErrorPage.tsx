@@ -1,3 +1,5 @@
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import React from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Button from '@mui/material/Button'

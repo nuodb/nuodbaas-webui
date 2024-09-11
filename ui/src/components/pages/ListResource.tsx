@@ -1,3 +1,5 @@
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Table from "./parts/Table";
@@ -8,12 +10,12 @@ import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
 import Path, { parseSearch } from './parts/Path'
 import Auth from "../../utils/auth"
-import { TempAny } from "../../utils/types";
+import { SchemaType, TempAny } from "../../utils/types";
 
 /**
  * handles all the /resource/list/* requests to list a resource
  */
-export default function ListResource({ schema }: TempAny) {
+export default function ListResource({ schema }: SchemaType) {
     const navigate = useNavigate();
     const path = "/" + useParams()["*"];
     const pageSize = 20;

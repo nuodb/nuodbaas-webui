@@ -1,0 +1,10 @@
+^\./copyright_ignore.txt$
+^\./ui/node_modules/
+^\./.git/
+^\./selenium-tests/target/
+^\./ui/package-lock.json$
+\.md$
+\./ui/public/favicon.ico$
+\./ui/package.json$
+\./ui/public/logo512.png$
+\./ui/public/logo192.png$

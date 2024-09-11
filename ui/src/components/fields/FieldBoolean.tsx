@@ -1,4 +1,5 @@
-import React from "react";
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'

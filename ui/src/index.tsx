@@ -1,3 +1,5 @@
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';

@@ -1,3 +1,5 @@
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Auth from "../../utils/auth";

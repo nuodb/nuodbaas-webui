@@ -92,14 +92,6 @@ run-integration-tests-only: ## integration tests without setup/teardown
 run-integration-tests: build-image setup-integration-tests ## run integration tests (+setup)
 	${MAKE} run-integration-tests-only teardown-integration-tests || (${MAKE} teardown-integration-tests && exit 1)
 
-.PHONY: deploy-nuodb-control-plane
-deploy-nuodb-control-plane:
-	@./nuodb-cp.sh install
-
-.PHONY: undeploy-nuodb-control-plane
-undeploy-nuodb-control-plane:
-	@./nuodb-cp.sh uninstall
-
 ##@ Development Environment
 
 .PHONY: run-dev
@@ -107,6 +99,14 @@ run-dev: check-dev-services install-crds ## launch nginx reverse proxy for devel
 	$(KUBECTL) apply -f docker/development/runtime-config.yaml
 	curl http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true --data-binary '{"password":"passw0rd", "name":"admin", "organization": "acme", "accessRule":{"allow": "all:*"}}' -X PUT -H "Content-Type: application/json"
 	docker run -v `pwd`/docker/development/default.conf:/etc/nginx/conf.d/default.conf --network=host -it nginx:stable-alpine
+
+.PHONY: deploy-nuodb-control-plane
+deploy-nuodb-control-plane: ## install NuoDB Control Plane Helm Charts
+	@./nuodb-cp.sh install
+
+.PHONY: undeploy-nuodb-control-plane
+undeploy-nuodb-control-plane: ## uninstall NuoDB Control Plane Helm Charts
+	@./nuodb-cp.sh uninstall
 
 $(KWOKCTL): $(KUBECTL)
 	mkdir -p bin

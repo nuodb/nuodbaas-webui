@@ -1,4 +1,5 @@
-import React from "react";
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import { setValue, getValue } from "./utils";
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'

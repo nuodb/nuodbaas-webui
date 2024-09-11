@@ -1,4 +1,5 @@
-import React from "react";
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import FieldBase from "./FieldBase";
 import TextField from '@mui/material/TextField'
 import { getValue, setValue } from "./utils"
@@ -6,11 +7,6 @@ import { getValue, setValue } from "./utils"
 export default class FieldDateTime extends FieldBase {
     /**
      * show Field of type DateTime using the values and schema definition
-     * @param prefix - contains field name (hierarchical fields are separated by period)
-     * @param parameter - schema definition for this field
-     * @param values - contains object with ALL values (and field names) of this form (not just this field).
-     *                 the key is the field name (name is separated by period if the field is hierarchical)
-     * @param setValues - callback to update field value
      * @returns
      */
     show() {

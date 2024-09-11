@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import FieldFactory from "../../fields/FieldFactory";
 import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultValue, submitForm } from "../../../utils/schema";
@@ -272,7 +274,7 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
         });
         if (ret && ret.length > 0 && section.title) {
             ret = <Accordion className="advancedCard">
-                <AccordionSummary data-testid={"section-" + section.title.toLowerCase()} className="AdvancedSection" expandIcon={<ArrowDropDownIcon />}>{section.title}</AccordionSummary>
+                <AccordionSummary data-testid={"section-" + section.title.toLowerCase()} className="SectionSummary" expandIcon={<ArrowDropDownIcon />}>{section.title}</AccordionSummary>
                 <AccordionDetails>
                     {ret}
                 </AccordionDetails>

@@ -1,4 +1,6 @@
-import React, { ReactNode } from "react";
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
+import { ReactNode } from "react";
 import FieldBase from "./FieldBase";
 import FieldFactory from "./FieldFactory";
 import { getDefaultValue } from "../../utils/schema";
@@ -12,14 +14,6 @@ export default class FieldObject extends FieldBase {
 
     /**
      * show Field of type Object using the values and schema definition
-     * @param prefix - contains field name (hierarchical fields are separated by period)
-     * @param parameter - schema definition for this field
-     * @param values - contains object with ALL values (and field names) of this form (not just this field).
-     *                 the key is the field name (name is separated by period if the field is hierarchical)
-     * @param errors - contains object with ALL errors (and field names) of this form (not just this field).
-     *                 the key is the field name (name is separated by period if the field is hierarchical)
-     * @param required
-     * @param setValues - callback to update field value
      * @returns
      */
     show() {

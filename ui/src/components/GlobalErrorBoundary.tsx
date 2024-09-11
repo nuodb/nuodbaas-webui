@@ -1,3 +1,5 @@
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import React, { ErrorInfo, ReactNode } from "react";
 import Button from '@mui/material/Button'
 

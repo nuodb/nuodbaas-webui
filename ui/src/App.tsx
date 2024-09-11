@@ -1,3 +1,5 @@
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import React, { useState } from 'react';
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import LoginForm from "./components/pages/LoginForm";
@@ -14,6 +16,10 @@ import Dialog from "./components/pages/parts/Dialog";
 import GlobalErrorBoundary from "./components/GlobalErrorBoundary";
 import Auth from "./utils/auth";
 
+/**
+ * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
+ * @returns
+ */
 export default function App() {
   const [schema, setSchema] = useState();
   const [isLoggedIn, setIsLoggedIn] = useState(Auth.isLoggedIn());

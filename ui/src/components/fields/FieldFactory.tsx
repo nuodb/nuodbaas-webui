@@ -1,3 +1,5 @@
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import FieldString from "./FieldString";
 import FieldHidden from "./FieldHidden";
 import FieldPassword from "./FieldPassword";

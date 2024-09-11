@@ -1,5 +1,6 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
-import React, { ReactNode } from "react";
+
+import { ReactNode } from "react";
 import FieldBase from "./FieldBase"
 
 export default class FieldMessage extends FieldBase {

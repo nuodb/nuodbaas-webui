@@ -1,3 +1,5 @@
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import { render, screen } from '@testing-library/react';
 import App from './App';
 

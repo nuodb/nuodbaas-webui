@@ -1,4 +1,5 @@
 #!/bin/bash
+# (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
 function checkError() {
     RC=$?

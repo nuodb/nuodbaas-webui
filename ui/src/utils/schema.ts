@@ -1,3 +1,5 @@
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 import RestSpinner from "../components/pages/parts/RestSpinner";
 import Auth from "./auth"
 import { FieldValuesType, FieldParameterType, TempAny, SchemaType } from "./types";
