@@ -115,13 +115,13 @@ public class SeleniumTestHelper {
     public WebElement waitElement(String id) {
         By testId = By.xpath("//*[@data-testid='" + id + "']");
         WebDriverWait wait = new WebDriverWait(driver, waitTimeout);
-        return wait.until(ExpectedConditions.presenceOfElementLocated(testId));
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(testId));
     }
 
     public WebElement waitInputElementByName(String name) {
         By testId = By.xpath("//input[@name='" + name + "']");
         WebDriverWait wait = new WebDriverWait(driver, waitTimeout);
-        return wait.until(ExpectedConditions.presenceOfElementLocated(testId));
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(testId));
     }
 
     public void replaceInputElementByName(String name, String value) {
