@@ -60,10 +60,8 @@ public class ProjectTest extends TestRoutines {
 
         // edit project and save
         replaceInputElementByName("tier", "n0.small");
-        getElement("section-advanced").click();
-        sleep(200); // give time for the section to expand
-        getElement("section-maintenance").click();
-        sleep(200);
+        waitElement("section-advanced").click();
+        waitElement("section-maintenance").click();
         replaceInputElementByName("maintenance.expiresIn", "30d");
         waitElement("create_resource__create_button").click();
         waitRestComplete();

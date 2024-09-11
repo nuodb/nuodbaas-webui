@@ -95,9 +95,33 @@ function getCustomizations() {
         sections: [
             {
                 fields: {
-                    password: {
-                        hidden: true
+                    organization: {},
+                    name: {},
+                }
+            },
+            {
+                title: "Access/Deny Rules",
+                fields: {
+                    "accessRule": {
+                        expand: false
                     },
+                }
+            },
+            {
+                title: "Labels",
+                fields: {
+                    "labels": {}
+                }
+            },
+            {
+                title: "Change Password",
+                fields: {
+                    "password": {}
+                }
+            },
+            {
+                title: "Advanced",
+                fields: {
                     "*": {}
                 }
             }

@@ -58,6 +58,7 @@ public class UserTest extends TestRoutines {
         editButtons.get(0).click();
 
         // edit user and save
+        waitElement("section-labels").click();
         waitInputElementByName("labels.key").sendKeys(userName);
         waitInputElementByName("labels.value").sendKeys(userName);
         waitElement("add_button_labels").click();
