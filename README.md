@@ -1,6 +1,6 @@
 # dbaas-cockpit
 
-User Interface to the DBaaS Rest service (nuodb-control-plane)
+User Interface to the NuoDB DBaaS Rest service (nuodb-control-plane)
 
 ## Setup in a development environment
 

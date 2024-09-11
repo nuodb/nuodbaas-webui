@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 import { getValue } from "./utils";
 import { TempAny, FieldValuesType, FieldParameterType } from "../../utils/types";
 
-export interface FieldProps {
+export interface FieldPropsDisplay {
     /** contains field name (hierarchical fields are separated by period) */
     prefix: string,
 
@@ -14,18 +14,23 @@ export interface FieldProps {
     /** contains object with ALL values (and field names) of this form (not just this field).
      *  the key is the field name (name is separated by period if the field is hierarchical) */
     values: FieldValuesType,
+}
 
-    /** callback to updates all values for all fields */
-    setValues: (values: FieldValuesType) => void,
-
-    /** contains object with ALL errors(and field names) of this form(not just this field)
-     *  the key is the field name (name is separated by period if the field is hierarchical) */
-    errors: TempAny,
-
+export interface FieldPropsValidate extends FieldPropsDisplay {
     /** callback to updates errors for the specified field (prefix) and error message.
      *  the prefix is the field name (name is separated by period if the field is hierarchical)
      *  the message is the error message or null if the error message should be cleared. */
     updateErrors: (prefix: string, message: string | null) => void,
+
+    /** callback to updates all values for all fields */
+    setValues: (values: FieldValuesType) => void,
+
+}
+
+export interface FieldProps extends FieldPropsValidate {
+    /** contains object with ALL errors(and field names) of this form(not just this field)
+     *  the key is the field name (name is separated by period if the field is hierarchical) */
+    errors: TempAny,
 
     /** indicates if the field is required. This will be checked when validating the field
      *  or form and will also add an asterisk as visual indicator to the field.
@@ -43,40 +48,6 @@ export interface FieldProps {
 
     /** used by FieldMessage to indicate an error message */
     message?: string;
-
-}
-
-export interface FieldPropsDisplay {
-    /** contains field name (hierarchical fields are separated by period) */
-    prefix: string,
-
-    /** schema definition for this field */
-    parameter: FieldParameterType,
-
-    /** contains object with ALL values (and field names) of this form (not just this field).
-     *  the key is the field name (name is separated by period if the field is hierarchical) */
-    values: FieldValuesType,
-}
-
-export interface FieldPropsValidate {
-    /** contains field name (hierarchical fields are separated by period) */
-    prefix: string,
-
-    /** schema definition for this field */
-    parameter: FieldParameterType,
-
-    /** contains object with ALL values (and field names) of this form (not just this field).
-     *  the key is the field name (name is separated by period if the field is hierarchical) */
-    values: FieldValuesType,
-
-    /** callback to updates errors for the specified field (prefix) and error message.
-     *  the prefix is the field name (name is separated by period if the field is hierarchical)
-     *  the message is the error message or null if the error message should be cleared. */
-    updateErrors: (prefix: string, message: string | null) => void,
-
-    /** callback to updates all values for all fields */
-    setValues: (values: FieldValuesType) => void,
-
 }
 
 /**

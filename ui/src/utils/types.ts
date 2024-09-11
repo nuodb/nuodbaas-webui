@@ -7,3 +7,7 @@ export type TempAny = any;
 export type FieldValuesType = TempAny;
 export type FieldParameterType = TempAny;
 export type SchemaType = TempAny;
+export type CustomizationsType = {
+    forms: TempAny
+    views: TempAny
+};

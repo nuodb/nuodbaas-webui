@@ -14,7 +14,7 @@ import FieldFactory from "../../fields/FieldFactory";
 import RestSpinner from "./RestSpinner";
 import { getValue } from "../../fields/utils";
 import Dialog from "./Dialog";
-import { TempAny } from "../../../utils/types";
+import { CustomizationsType, TempAny } from "../../../utils/types";
 
 /**
  * shows a table with all the "data". Columns are determined by the schema definition for the "path"
@@ -65,7 +65,7 @@ export default function Table(props: TempAny) {
     let customFields: TempAny = null;
     function getCustomFields() {
         const w: TempAny = window;
-        let customizations = w["getCustomizations"] && w["getCustomizations"]();
+        let customizations: CustomizationsType = w["getCustomizations"] && w["getCustomizations"]();
         if (customFields === null && customizations && customizations.views) {
             customFields = {};
             for (const sPath of Object.keys(customizations.views)) {
