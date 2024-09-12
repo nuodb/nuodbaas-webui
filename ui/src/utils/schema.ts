@@ -2,7 +2,7 @@
 
 import RestSpinner from "../components/pages/parts/RestSpinner";
 import Auth from "./auth"
-import { FieldValuesType, FieldParameterType, TempAny, SchemaType } from "./types";
+import { FieldValuesType, TempAny, SchemaType, FieldParametersType } from "./types";
 let schema : TempAny = null;
 
 /**
@@ -460,7 +460,7 @@ function deleteEmptyFields(values: FieldValuesType) {
  * @param {*} values
  * @returns
  */
-export async function submitForm(urlParameters: FieldParameterType, formParameters: FieldParameterType, path: string, values: FieldValuesType) {
+export async function submitForm(urlParameters: FieldParametersType, formParameters: FieldParametersType, path: string, values: FieldValuesType) {
     let queryParameters = Object.keys(urlParameters).filter(key => urlParameters[key]["in"] === "query");
 
     // the last URL parameter has the name of the resource, while the form parameter always has "name"

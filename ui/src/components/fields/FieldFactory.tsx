@@ -71,7 +71,7 @@ export default class FieldFactory {
                 if (props.parameter.expand === false || props.parameter.expand === true) {
                     props.expand = props.parameter.expand;
                 }
-                props.parameter = props.parameter["properties"];
+
                 return new FieldObject(props);
             }
             else if (props.parameter["additionalProperties"]) {

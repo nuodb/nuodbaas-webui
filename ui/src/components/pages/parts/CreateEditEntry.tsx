@@ -14,7 +14,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Auth from "../../../utils/auth";
 import { setValue } from "../../fields/utils";
 import { matchesPath } from "../../../utils/schema";
-import { FieldValuesType, FieldParameterType, TempAny, CustomizationsType, StringMapType } from "../../../utils/types";
+import { FieldValuesType, FieldParameterType, TempAny, CustomizationsType, StringMapType, FieldParametersType } from "../../../utils/types";
 
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
@@ -22,9 +22,9 @@ import { FieldValuesType, FieldParameterType, TempAny, CustomizationsType, Strin
 export default function CreateEditEntry({ schema, path, data }: TempAny) {
     const navigate = useNavigate();
 
-    const [formParameters, setFormParameters]: FieldParameterType = useState({});
+    const [formParameters, setFormParameters] = useState<FieldParametersType>({});
     const [sectionFormParameters, setSectionFormParameters] = useState([]);
-    const [urlParameters, setUrlParameters]: FieldParameterType = useState({});
+    const [urlParameters, setUrlParameters] = useState<FieldParametersType>({});
     const [values, setValues]: FieldValuesType = useState({});
     const [errors, setErrors] = useState<StringMapType>({});
     const [focusField, setFocusField] = useState(null);
@@ -43,12 +43,15 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
     }
 
     useEffect(() => {
-        function setDefaultValues(values: FieldValuesType, fullKey: string | null, params: FieldParameterType, data: TempAny) {
+        function setDefaultValues(values: FieldValuesType, fullKey: string | null, params: FieldParametersType, data: TempAny) {
             Object.keys(params).forEach(key => {
                 let defaultValue = getDefaultValue(params[key], data && data[key]);
                 if (defaultValue !== null) {
-                    if (params[key].type === "object" && params[key].properties) {
-                        setDefaultValues(values, fullKey ? (fullKey + "." + key) : key, params[key].properties, data[key]);
+                    const param = params[key];
+                    if (param.type === "object" && param.properties) {
+                        if (params[key].properties) {
+                            setDefaultValues(values, fullKey ? (fullKey + "." + key) : key, param.properties, data[key]);
+                        }
                     }
                     else {
                         setValue(values, fullKey ? (fullKey + "." + key) : key, defaultValue);
@@ -125,7 +128,8 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
         }
 
         /** get field params for the specified field key (hierarchical ones are separated by period) */
-        function getFieldParameters(formParams: FieldParameterType, key: string): FieldParameterType {
+        function getFieldParameters(formParams: FieldParametersType, key: string): FieldParameterType | undefined {
+            console.log("getFieldParameters", key, formParams);
             const posPeriod = key.indexOf(".");
             if (posPeriod === -1) {
                 return formParams[key];
@@ -136,10 +140,10 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
             }
         }
 
-        function setFieldParameters(formParams: FieldParameterType, key: string, parameters: FieldParameterType) {
+        function setFieldParameters(formParams: FieldParametersType, key: string, parameter: FieldParameterType) {
             const posPeriod = key.indexOf(".");
             if (posPeriod === -1) {
-                formParams[key] = parameters;
+                formParams[key] = parameter;
             }
             else {
                 const firstPart = key.substring(0, posPeriod);
@@ -147,11 +151,14 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
                 if (!(firstPart in formParams)) {
                     formParams[firstPart] = { properties: {}, type: "object" };
                 }
-                setFieldParameters(formParams[firstPart].properties, remainingPart, parameters);
+                const formParam = formParams[firstPart];
+                if (formParam.properties) {
+                    setFieldParameters(formParam.properties, remainingPart, parameter);
+                }
             }
         }
 
-        function deleteFieldParameters(formParams: FieldParameterType, key: string) {
+        function deleteFieldParameters(formParams: FieldParametersType, key: string) {
             const posPeriod = key.indexOf(".");
             if (posPeriod === -1) {
                 delete formParams[key];
@@ -162,7 +169,10 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
                 if (!(firstPart in formParams)) {
                     formParams[firstPart] = { properties: {}, type: "object" };
                 }
-                deleteFieldParameters(formParams[firstPart].properties, remainingPart);
+                const formParam = formParams[firstPart];
+                if (formParam.properties) {
+                    deleteFieldParameters(formParam.properties, remainingPart);
+                }
             }
         }
 
@@ -289,7 +299,7 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
             <h1>{(data && "Edit") || "Create"} entry for {path}</h1>
             <div className="fields">
                 {urlParameters && Object.keys(urlParameters)
-                    .filter(key => urlParameters[key]["in"] === "query")
+                    .filter(key => urlParameters[key].in === "query")
                     .map(key => {
                         let urlParameter = { ...urlParameters[key] };
                         return (FieldFactory.create({ prefix: key, parameter: urlParameter, values, errors, updateErrors, setValues, autoFocus: key === focusField, required: false, expand: false, hideTitle: false })).show();

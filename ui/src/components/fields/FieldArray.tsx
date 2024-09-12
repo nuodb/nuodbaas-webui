@@ -11,6 +11,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import FieldBase from './FieldBase'
 import FieldFactory from "./FieldFactory"
+import FieldMessage from "./FieldMessage";
 
 export default class FieldArray extends FieldBase {
     /**
@@ -19,6 +20,9 @@ export default class FieldArray extends FieldBase {
      */
     show() {
         const { prefix, parameter, values, errors, required, setValues, updateErrors } = this.props;
+        if (!parameter.items) {
+            return new FieldMessage({ ...this.props, message: "\"items\" attribute missing in schema definition" }).show();
+        }
         let ret = [];
         let value = getValue(values, prefix);
         if (value !== null) {
