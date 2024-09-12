@@ -3,7 +3,7 @@ import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
-import { getValue, setValue } from "./utils"
+import { getValue, setValue } from "./utils.ts"
 import FieldBase from "./FieldBase"
 
 export default class FieldBoolean extends FieldBase {

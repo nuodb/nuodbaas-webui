@@ -58,6 +58,9 @@ public class ProjectTest extends TestRoutines {
 
         // edit project and save
         replaceInputElementByName("tier", "n0.small");
+        waitElement("section-advanced").click();
+        waitElement("section-maintenance").click();
+        replaceInputElementByName("maintenance.expiresIn", "30d");
         waitElement("create_resource__create_button").click();
         waitRestComplete();
 
@@ -67,5 +70,11 @@ public class ProjectTest extends TestRoutines {
             .hasSize(1)
             .get(0)
             .hasValue("n0.small");
-   }
+
+        List<WebElement> maintenanceCells = waitTableElements("list_resource__table", "name", projectName, "maintenance");
+            assertThat(maintenanceCells)
+                .hasSize(1)
+                .get(0)
+                .containsValue("2592000000000000ns");
+       }
 }

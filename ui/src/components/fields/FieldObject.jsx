@@ -2,9 +2,11 @@ import React from "react";
 import FieldBase from "./FieldBase";
 import FieldFactory from "./FieldFactory";
 import { getDefaultValue } from "../../utils/schema";
-import { setValue, getValue } from "./utils";
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
+import { setValue, getValue } from "./utils.ts";
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 export default class FieldObject extends FieldBase {
 
@@ -21,20 +23,24 @@ export default class FieldObject extends FieldBase {
      * @returns
      */
     show() {
-        const { prefix, parameter, values, errors, required, setValues, updateErrors } = this.props;
-        return <Card key={prefix}>
-            <CardContent className="fields">
-                <h3>{prefix}</h3>
-                {Object.keys(parameter).map(key => {
-                    let prefixKey = prefix ? (prefix + "." + key) : key;
-                    let defaultValue = getDefaultValue(parameter[key], values && getValue(values, prefixKey));
-                    if (defaultValue !== null) {
-                        setValue(values, prefixKey, defaultValue);
-                    }
-                    return (FieldFactory.create({ prefix: prefixKey, parameter: parameter[key], values, errors, required, setValues, updateErrors })).show();
-                })}
-            </CardContent>
-        </Card>
+        const { prefix, parameter, values, errors, required, setValues, updateErrors, expand, hideTitle } = this.props;
+        let ret = Object.keys(parameter).map(key => {
+            let prefixKey = prefix ? (prefix + "." + key) : key;
+            let defaultValue = getDefaultValue(parameter[key], values && getValue(values, prefixKey));
+            if (defaultValue !== null) {
+                setValue(values, prefixKey, defaultValue);
+            }
+            return <div key={key} className="gap">{(FieldFactory.create({ prefix: prefixKey, parameter: parameter[key], values, errors, required, setValues, updateErrors, expand: false })).show()}</div>
+        });
+        if (hideTitle) {
+            return ret;
+        }
+        return <Accordion className="gap" key={prefix} defaultExpanded={!!expand} style={{ gap: "1em" }}>
+            <AccordionSummary data-testid={"section-" + prefix} className="FieldObjectSection" expandIcon={<ArrowDropDownIcon />}>{prefix}</AccordionSummary>
+            <AccordionDetails className="AccordionDetails">
+                {ret}
+            </AccordionDetails>
+        </Accordion>
     }
 
     validate() {

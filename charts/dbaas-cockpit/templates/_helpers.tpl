@@ -1,4 +1,9 @@
 {{/*
+(C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+*/}}
+
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "dbaas-cockpit.chart" -}}

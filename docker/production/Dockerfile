@@ -1,3 +1,5 @@
+# (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 FROM node:18-alpine AS build-ui
 WORKDIR /app/
 COPY ui/public/ /app/public

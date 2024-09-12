@@ -1,3 +1,5 @@
+# (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

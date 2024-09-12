@@ -115,13 +115,19 @@ public class SeleniumTestHelper {
     public WebElement waitElement(String id) {
         By testId = By.xpath("//*[@data-testid='" + id + "']");
         WebDriverWait wait = new WebDriverWait(driver, waitTimeout);
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(testId));
+    }
+
+    public WebElement waitElementPresent(String id) {
+        By testId = By.xpath("//*[@data-testid='" + id + "']");
+        WebDriverWait wait = new WebDriverWait(driver, waitTimeout);
         return wait.until(ExpectedConditions.presenceOfElementLocated(testId));
     }
 
     public WebElement waitInputElementByName(String name) {
         By testId = By.xpath("//input[@name='" + name + "']");
         WebDriverWait wait = new WebDriverWait(driver, waitTimeout);
-        return wait.until(ExpectedConditions.presenceOfElementLocated(testId));
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(testId));
     }
 
     public void replaceInputElementByName(String name, String value) {
@@ -168,7 +174,7 @@ public class SeleniumTestHelper {
      * @return element of matching cells (resultColumn specified) or entire row element (resultColumn = null)
      */
     public List<WebElement> waitTableElements(String tableId, String searchColumn, String searchValue, String resultColumn) {
-        WebElement table = waitElement(tableId);
+        WebElement table = waitElementPresent(tableId);
         WebElement thead = table.findElement(By.tagName("thead"));
         List<String> headers = thead.findElements(By.tagName("th")).stream().map(head -> head.getText()).toList();
         int sColumn = getColumn(headers, searchColumn);

@@ -4,9 +4,9 @@
  * @param {*} prefix field name. Hierarchical fields are separated by a period.
  * @returns
  */
-export function getValue(values, prefix) {
+export function getValue(values: any, prefix: string): any {
     let value = values;
-    let parts = prefix.split(".");
+    const parts = prefix.split(".");
     for(let i=0; i<parts.length; i++) {
         value = value[parts[i]];
         if(value === undefined || value === null) {
@@ -25,8 +25,8 @@ export function getValue(values, prefix) {
  * @param {*} prefix field name. Hierarchical fields are separated by a period.
  * @param {*} value value to assign. Deletes field if value is undefined or null.
  */
-export function setValue(values, prefix, value) {
-    let parts = prefix.split(".");
+export function setValue(values:any, prefix:string, value:any) {
+    const parts = prefix.split(".");
     let values_ = values;
     for(let i=0; i<parts.length-1; i++) {
         if(!values_[parts[i]]) {
@@ -37,19 +37,20 @@ export function setValue(values, prefix, value) {
         }
         values_ = values_[parts[i]];
     }
+
+    const lastPart = parts[parts.length-1];
     if(value === null || value === undefined) {
-        const lastPart = parts[parts.length-1];
-        if(lastPart === "" || isNaN(lastPart)) {
+        const index = parseInt(lastPart);
+        if(lastPart === "" || isNaN(index)) {
             // remove object property
             delete values_[parts[parts.length-1]];
         }
         else {
             // remove array element
-            let index = parseInt(parts[parts.length-1]);
             values_.splice(index, 1);
         }
     }
     else {
-        values_[parts[parts.length-1]] = value;
+        values_[lastPart] = value;
     }
 }

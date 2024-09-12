@@ -11,7 +11,7 @@ import Paper from '@mui/material/Paper';
 import { getResourceByPath, getCreatePath, getChild, replaceVariables, matchesPath } from "../../../utils/schema";
 import FieldFactory from "../../fields/FieldFactory";
 import RestSpinner from "../../pages/parts/RestSpinner";
-import { getValue } from "../../fields/utils";
+import { getValue } from "../../fields/utils.ts";
 import Dialog from "./Dialog";
 
 /**

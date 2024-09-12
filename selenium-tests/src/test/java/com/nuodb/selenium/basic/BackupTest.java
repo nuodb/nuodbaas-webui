@@ -60,6 +60,8 @@ public class BackupTest extends TestRoutines {
         editButtons.get(0).click();
 
         // edit backup and save
+        waitElement("section-advanced").click();
+        sleep(200); // wait for section to expand
         waitInputElementByName("labels.key").sendKeys(projectName);
         waitInputElementByName("labels.value").sendKeys(databaseName);
         waitElement("add_button_labels").click();
