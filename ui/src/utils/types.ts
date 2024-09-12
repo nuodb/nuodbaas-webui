@@ -29,3 +29,7 @@ export type CustomizationsType = {
     }}
     views: {[key: string]:TempAny}
 };
+
+export type StringMapType = {
+    [key: string]: string
+}

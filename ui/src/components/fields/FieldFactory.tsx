@@ -95,7 +95,7 @@ export default class FieldFactory {
     static createDisplayValue(props: FieldPropsDisplay): ReactNode {
         return this.create({
             setValues: () => { },
-            errors: new Map<string, string>(),
+            errors: {},
             updateErrors: () => { },
             required: false,
             autoFocus: false,
@@ -106,7 +106,7 @@ export default class FieldFactory {
     }
 
     static validateProps(props: FieldPropsValidate): boolean {
-        const field: FieldBase = FieldFactory.create({ errors: new Map<string, string>(), required: false, autoFocus: false, expand: false, hideTitle: false, ...props });
+        const field: FieldBase = FieldFactory.create({ errors: {}, required: false, autoFocus: false, expand: false, hideTitle: false, ...props });
         return field.validate();
     }
 }

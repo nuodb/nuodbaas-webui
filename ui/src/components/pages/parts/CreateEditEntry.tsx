@@ -14,7 +14,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Auth from "../../../utils/auth";
 import { setValue } from "../../fields/utils";
 import { matchesPath } from "../../../utils/schema";
-import { FieldValuesType, FieldParameterType, TempAny, CustomizationsType } from "../../../utils/types";
+import { FieldValuesType, FieldParameterType, TempAny, CustomizationsType, StringMapType } from "../../../utils/types";
 
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
@@ -26,17 +26,17 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
     const [sectionFormParameters, setSectionFormParameters] = useState([]);
     const [urlParameters, setUrlParameters]: FieldParameterType = useState({});
     const [values, setValues]: FieldValuesType = useState({});
-    const [errors, setErrors] = useState(new Map<string, string>());
+    const [errors, setErrors] = useState<StringMapType>({});
     const [focusField, setFocusField] = useState(null);
 
     function updateErrors(key: string, value: string | null): void {
-        setErrors((errs) => {
-            errs = new Map<string, string>(errs);
+        setErrors((errs: StringMapType) => {
+            errs = { ...errs };
             if (value === null || value === undefined) {
-                errs.delete(key);
+                delete errs[key];
             }
             else {
-                errs.set(key, value);
+                errs[key] = value;
             }
             return errs;
         })
@@ -299,16 +299,16 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
                     return showSectionFields(section);
                 })}
 
-                {("_error" in errors) && <h3 style={{ color: "red" }}>{errors.get("_error")}</h3>}
-                {("_errorDetail" in errors) && <div style={{ color: "red" }}>{errors.get("_errorDetail")}</div>}
+                {("_error" in errors) && <h3 style={{ color: "red" }}>{errors["_error"]}</h3>}
+                {("_errorDetail" in errors) && <div style={{ color: "red" }}>{errors["_errorDetail"]}</div>}
 
                 <Button data-testid="create_resource__create_button" variant="contained" onClick={() => {
-                    let err = new Map<string, string>(errors);
-                    err.delete("_error");
-                    err.delete("_errorDetail");
+                    let err = { ...errors };
+                    delete err._error;
+                    delete err._errorDetail;
                     setErrors(err);
                     if (!validateFields()) {
-                        const errorKeys = Object.keys(errors.keys());
+                        const errorKeys = Object.keys(errors);
                         if (errorKeys.length > 0) {
                             const inputElement = document.getElementById(errorKeys[0]);
                             if (inputElement) {

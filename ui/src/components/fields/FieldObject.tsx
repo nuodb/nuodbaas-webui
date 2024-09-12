@@ -17,14 +17,14 @@ export default class FieldObject extends FieldBase {
      * @returns
      */
     show() {
-        const { prefix, parameter, values, expand, hideTitle } = this.props;
+        const { prefix, parameter, values, errors, required, setValues, updateErrors, expand, hideTitle } = this.props;
         let ret = Object.keys(parameter).map(key => {
             let prefixKey = prefix ? (prefix + "." + key) : key;
             let defaultValue = getDefaultValue(parameter[key], values && getValue(values, prefixKey));
             if (defaultValue !== null) {
                 setValue(values, prefixKey, defaultValue);
             }
-            return <div key={key} className="gap">{(FieldFactory.create({ ...this.props, prefix: prefixKey, parameter: parameter[key], expand: false })).show()}</div>
+            return <div key={key} className="gap">{(FieldFactory.create({ ...this.props, prefix: prefixKey, parameter: parameter[key], values, errors, required, setValues, updateErrors, expand: false })).show()}</div>
         });
         if (hideTitle) {
             return ret;
@@ -38,13 +38,13 @@ export default class FieldObject extends FieldBase {
     }
 
     validate() {
-        const { prefix, parameter, values } = this.props;
+        const { prefix, parameter, values, updateErrors } = this.props;
         const value = values[prefix];
         let success = true;
         if (parameter && value) {
             // validate objects (hierarchical fields)
             Object.keys(value).forEach(subKey => {
-                const field = FieldFactory.create({ ...this.props, prefix: prefix + "." + subKey, parameter: parameter[subKey] });
+                const field = FieldFactory.create({ ...this.props, prefix: prefix + "." + subKey, parameter: parameter[subKey], values, updateErrors });
                 success = field.validate() && success;
             });
         }
@@ -52,11 +52,11 @@ export default class FieldObject extends FieldBase {
     }
 
     getDisplayValue(): ReactNode {
-        const { prefix, parameter } = this.props;
+        const { prefix, parameter, values } = this.props;
         return <dl className="map">
             {Object.keys(parameter).map(key => {
                 const prefixKey = prefix ? (prefix + "." + key) : key;
-                const field = FieldFactory.create({ ...this.props, prefix: prefixKey, parameter: parameter[key] });
+                const field = FieldFactory.create({ ...this.props, prefix: prefixKey, parameter: parameter[key], values });
                 return <div key={key}><dt>{String(key)}</dt><dd>{field.getDisplayValue()}</dd></div>;
             })}
         </dl>
