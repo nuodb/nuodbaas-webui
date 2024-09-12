@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 import { getValue } from "./utils";
-import { TempAny, FieldValuesType, FieldParameterType } from "../../utils/types";
+import { FieldValuesType, FieldParameterType } from "../../utils/types";
 
 export interface FieldPropsDisplay {
     /** contains field name (hierarchical fields are separated by period) */
@@ -29,8 +29,9 @@ export interface FieldPropsValidate extends FieldPropsDisplay {
 
 export interface FieldProps extends FieldPropsValidate {
     /** contains object with ALL errors(and field names) of this form(not just this field)
-     *  the key is the field name (name is separated by period if the field is hierarchical) */
-    errors: TempAny,
+     *  the key is the field name (name is separated by period if the field is hierarchical)
+     *  and the value is the error message. */
+    errors: Map<string, string>,
 
     /** indicates if the field is required. This will be checked when validating the field
      *  or form and will also add an asterisk as visual indicator to the field.

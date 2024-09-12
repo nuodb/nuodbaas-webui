@@ -7,7 +7,25 @@ export type TempAny = any;
 export type FieldValuesType = TempAny;
 export type FieldParameterType = TempAny;
 export type SchemaType = TempAny;
+
+export type CustomFormField = {
+    required: boolean,
+    expand: boolean,
+    hidden: boolean
+}
+
+export type CustomFormSection = {
+    title: string,
+    fields: {
+        [key: string]:CustomFormField
+    }
+}
+
 export type CustomizationsType = {
-    forms: TempAny
-    views: TempAny
+    forms: {[key: string]:{
+        sections: [
+            CustomFormSection
+        ],
+    }}
+    views: {[key: string]:TempAny}
 };

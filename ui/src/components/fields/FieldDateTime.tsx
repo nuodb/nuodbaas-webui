@@ -16,7 +16,7 @@ export default class FieldDateTime extends FieldBase {
         if (editValue === null) {
             editValue = value === null ? "" : (new Date(value)).toLocaleString();
         }
-        let error = (errors && (prefix in errors) && errors[prefix]) || "";
+        let error = (errors && (prefix in errors) && errors.get(prefix)) || "";
         return <TextField
             key={prefix}
             fullWidth={true}

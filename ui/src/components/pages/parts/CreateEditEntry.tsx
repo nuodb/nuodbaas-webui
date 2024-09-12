@@ -26,17 +26,17 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
     const [sectionFormParameters, setSectionFormParameters] = useState([]);
     const [urlParameters, setUrlParameters]: FieldParameterType = useState({});
     const [values, setValues]: FieldValuesType = useState({});
-    const [errors, setErrors]: TempAny = useState({});
+    const [errors, setErrors] = useState(new Map<string, string>());
     const [focusField, setFocusField] = useState(null);
 
-    function updateErrors(key: string, value: string | null) {
-        setErrors((errs: TempAny) => {
-            errs = { ...errs };
+    function updateErrors(key: string, value: string | null): void {
+        setErrors((errs) => {
+            errs = new Map<string, string>(errs);
             if (value === null || value === undefined) {
-                delete errs[key];
+                errs.delete(key);
             }
             else {
-                errs[key] = value;
+                errs.set(key, value);
             }
             return errs;
         })
@@ -191,8 +191,7 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
         const customForm = getCustomForm(path);
         if (customForm && customForm.sections) {
             sectionFormParams = [];
-            Object.keys(customForm.sections).forEach(index => {
-                const section = customForm.sections[index];
+            customForm.sections.forEach((section: TempAny) => {
                 if (section.fields) {
                     let params = {};
                     let hasWildcard = false;
@@ -263,7 +262,8 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
             return (FieldFactory.create({
                 prefix: key,
                 parameter: formParameter,
-                values, errors,
+                values,
+                errors,
                 updateErrors,
                 setValues,
                 expand: !section.title,
@@ -273,7 +273,7 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
             })).show();
         });
         if (ret && ret.length > 0 && section.title) {
-            ret = <Accordion className="advancedCard">
+            ret = <Accordion key={"section-" + section.title.toLowerCase()} className="advancedCard">
                 <AccordionSummary data-testid={"section-" + section.title.toLowerCase()} className="SectionSummary" expandIcon={<ArrowDropDownIcon />}>{section.title}</AccordionSummary>
                 <AccordionDetails>
                     {ret}
@@ -299,16 +299,16 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
                     return showSectionFields(section);
                 })}
 
-                {errors._error && <h3 style={{ color: "red" }}>{errors._error}</h3>}
-                {errors._errorDetail && <div style={{ color: "red" }}>{errors._errorDetail}</div>}
+                {("_error" in errors) && <h3 style={{ color: "red" }}>{errors.get("_error")}</h3>}
+                {("_errorDetail" in errors) && <div style={{ color: "red" }}>{errors.get("_errorDetail")}</div>}
 
                 <Button data-testid="create_resource__create_button" variant="contained" onClick={() => {
-                    let err: TempAny = { ...errors };
-                    delete err._error;
-                    delete err._errorDetail;
+                    let err = new Map<string, string>(errors);
+                    err.delete("_error");
+                    err.delete("_errorDetail");
                     setErrors(err);
                     if (!validateFields()) {
-                        const errorKeys = Object.keys(errors);
+                        const errorKeys = Object.keys(errors.keys());
                         if (errorKeys.length > 0) {
                             const inputElement = document.getElementById(errorKeys[0]);
                             if (inputElement) {

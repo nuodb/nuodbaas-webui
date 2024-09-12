@@ -6,7 +6,7 @@ import { FieldValuesType, TempAny } from "../../utils/types";
  * gets a value from a field. If not found, returns null.
  * @param {*} values object containing possibly hierarchical fields
  * @param {*} prefix field name. Hierarchical fields are separated by a period.
- * @returns
+ * @returns null if value is not found
  */
 export function getValue(values: FieldValuesType, prefix: string): TempAny {
     let value = values;

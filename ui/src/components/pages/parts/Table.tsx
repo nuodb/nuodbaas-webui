@@ -70,7 +70,7 @@ export default function Table(props: TempAny) {
             customFields = {};
             for (const sPath of Object.keys(customizations.views)) {
                 if (matchesPath(path, sPath)) {
-                    customFields = customizations.views[sPath];
+                    customFields = customizations.views.get(sPath);
                     break;
                 }
             }
