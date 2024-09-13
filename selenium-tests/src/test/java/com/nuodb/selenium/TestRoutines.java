@@ -1,3 +1,5 @@
+// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
 package com.nuodb.selenium;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,9 +41,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TestRoutines extends SeleniumTestHelper {
     public static final String CP_URL = "http://localhost:8081";
-    public static final String CP_USERNAME = "acme/admin";
-    public static final String CP_PASSWORD = "passw0rd";
-    public static final String CP_AUTHORIZATION = "Basic " + Base64.getEncoder().encodeToString((CP_USERNAME + ":" + CP_PASSWORD).getBytes(StandardCharsets.UTF_8));
+    public static final String CP_USERNAME = Constants.ADMIN_ORGANIZATION + "/" + Constants.ADMIN_USER;
+    public static final String CP_AUTHORIZATION = "Basic " + Base64.getEncoder().encodeToString(
+        (CP_USERNAME + ":" + Constants.ADMIN_PASSWORD)
+        .getBytes(StandardCharsets.UTF_8));
 
     private static final int MAX_RETRIES = 10;
     private static final Duration RETRY_WAIT_TIME = Duration.ofMillis(500);

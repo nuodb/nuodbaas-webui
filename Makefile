@@ -112,6 +112,14 @@ run-dev: check-dev-services install-crds ## launch nginx reverse proxy for devel
 	curl http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true --data-binary '{"password":"passw0rd", "name":"admin", "organization": "acme", "accessRule":{"allow": "all:*"}}' -X PUT -H "Content-Type: application/json"
 	docker run -v `pwd`/docker/development/default.conf:/etc/nginx/conf.d/default.conf --network=host -it nginx:stable-alpine
 
+.PHONY: deploy-nuodb-control-plane
+deploy-nuodb-control-plane: ## install NuoDB Control Plane Helm Charts
+	@./nuodb-control-plane-setup.sh install
+
+.PHONY: undeploy-nuodb-control-plane
+undeploy-nuodb-control-plane: ## uninstall NuoDB Control Plane Helm Charts
+	@./nuodb-control-plane-setup.sh uninstall
+
 $(KWOKCTL): $(KUBECTL)
 	mkdir -p bin
 	curl -L -s https://github.com/kubernetes-sigs/kwok/releases/download/v$(KWOKCTL_VERSION)/kwokctl-$(OS)-$(ARCH) -o $(KWOKCTL)
