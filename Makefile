@@ -114,11 +114,11 @@ run-dev: check-dev-services install-crds ## launch nginx reverse proxy for devel
 
 .PHONY: deploy-nuodb-control-plane
 deploy-nuodb-control-plane: ## install NuoDB Control Plane Helm Charts
-	@./nuodb-cp.sh install
+	@./nuodb-control-plane-setup.sh install
 
 .PHONY: undeploy-nuodb-control-plane
 undeploy-nuodb-control-plane: ## uninstall NuoDB Control Plane Helm Charts
-	@./nuodb-cp.sh uninstall
+	@./nuodb-control-plane-setup.sh uninstall
 
 $(KWOKCTL): $(KUBECTL)
 	mkdir -p bin
