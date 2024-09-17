@@ -7,6 +7,9 @@ metadata:
   labels:
     {{- include "nuodbaas-webui.labels" . | nindent 4 }}
 spec:
+  {{- if .Values.nuodbaasWebui.ingress.className }}
+  ingressClassName: {{ .Values.nuodbaasWebui.ingress.className }}
+  {{- end }}
   rules:
     - http:
         paths:
