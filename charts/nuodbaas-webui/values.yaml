@@ -1,11 +1,11 @@
 # (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
-# Default values for dbaas-cockpit.
-dbaasCockpit:
+# Default values for nuodbaas-webui.
+nuodbaasWebui:
   replicaCount: 1
   image:
     # TODO review next line before open source publishing
-    repository: 253548315642.dkr.ecr.us-east-1.amazonaws.com/dbaas-cockpit-docker
+    repository: 253548315642.dkr.ecr.us-east-1.amazonaws.com/nuodbaas-webui-docker
     pullPolicy: IfNotPresent
     pullSecrets: []
     tag: ""
@@ -21,5 +21,5 @@ dbaasCockpit:
   ingress:
     pathPrefix: ui
     hosts:
-      - dbaas-cockpit.local
+      - nuodbaas-webui.local
   cpUrl: /nuodb-cp

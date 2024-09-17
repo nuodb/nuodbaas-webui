@@ -14,8 +14,8 @@ NUODB_CP_VERSION ?= 2.6.0
 KWOKCTL := bin/kwokctl
 KUBECTL := bin/kubectl
 
-IMG_REPO := dbaas-cockpit
-VERSION := $(shell grep -e "^appVersion:" charts/dbaas-cockpit/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
+IMG_REPO := nuodbaas-webui
+VERSION := $(shell grep -e "^appVersion:" charts/nuodbaas-webui/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
 SHA := $(shell git rev-parse --short HEAD)
 VERSION_SHA ?= ${VERSION}-dev.sha-${SHA}
 UNCOMMITTED := $(shell rm -f get_helm.sh && git status --porcelain)
@@ -65,13 +65,13 @@ deploy-image: build-image ## deploy Docker image to AWS
 		echo "${UNCOMMITTED}" && \
 		exit 1; \
 	else \
-		sed -i "s/^version: \".*\"/version: \"${VERSION_SHA}\"/g" charts/dbaas-cockpit/Chart.yaml && \
-		sed -i "s/^appVersion: \".*\"/appVersion: \"${VERSION_SHA}\"/g" charts/dbaas-cockpit/Chart.yaml && \
+		sed -i "s/^version: \".*\"/version: \"${VERSION_SHA}\"/g" charts/nuodbaas-webui/Chart.yaml && \
+		sed -i "s/^appVersion: \".*\"/appVersion: \"${VERSION_SHA}\"/g" charts/nuodbaas-webui/Chart.yaml && \
 		docker tag "${IMG_REPO}:latest" "${ECR_ACCOUNT_URL}/${IMG_REPO}-docker:${VERSION_SHA}" && \
-		helm package charts/dbaas-cockpit && \
-		git checkout HEAD -- charts/dbaas-cockpit/Chart.yaml && \
+		helm package charts/nuodbaas-webui && \
+		git checkout HEAD -- charts/nuodbaas-webui/Chart.yaml && \
 		docker push "${ECR_ACCOUNT_URL}/${IMG_REPO}-docker:${VERSION_SHA}" && \
-		helm push dbaas-cockpit-*.tgz "oci://${ECR_ACCOUNT_URL}/"; \
+		helm push nuodbaas-webui-*.tgz "oci://${ECR_ACCOUNT_URL}/"; \
 	fi
 
 .PHONY: install-crds

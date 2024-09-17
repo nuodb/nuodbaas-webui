@@ -5,23 +5,23 @@ kind: Ingress
 metadata:
   name: {{ .Chart.Name }}
   labels:
-    {{- include "dbaas-cockpit.labels" . | nindent 4 }}
+    {{- include "nuodbaas-webui.labels" . | nindent 4 }}
 spec:
   rules:
     - http:
         paths:
-          - path: "/{{ .Values.dbaasCockpit.ingress.pathPrefix }}"
+          - path: "/{{ .Values.nuodbaasWebui.ingress.pathPrefix }}"
             pathType: Prefix
             backend:
               service:
                 name: {{ $.Chart.Name }}
                 port:
                   number: 8080
-    {{- range .Values.dbaasCockpit.ingress.hosts }}
+    {{- range .Values.nuodbaasWebui.ingress.hosts }}
     - host: {{ . | quote }}
       http:
         paths:
-          - path: "/{{ $.Values.dbaasCockpit.ingress.pathPrefix }}"
+          - path: "/{{ $.Values.nuodbaasWebui.ingress.pathPrefix }}"
             pathType: Prefix
             backend:
               service:
