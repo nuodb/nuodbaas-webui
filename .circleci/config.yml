@@ -100,7 +100,7 @@ jobs:
       - run:
           name: Promote Build to DEV
           command: |
-            VERSION=$(grep -e "^appVersion:" charts/dbaas-cockpit/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
+            VERSION=$(grep -e "^appVersion:" charts/nuodbaas-webui/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
             SHA=$(git rev-parse --short HEAD)
             VERSION_SHA=${VERSION}-dev.sha-${SHA}
 
@@ -113,10 +113,10 @@ jobs:
               COMMIT="$GIT_TAG"
             fi
             head="$(git rev-parse --short HEAD)"
-            # Update DbaaS Cockpit UI version
-            scripts/promote-version.sh dbaas-cockpit \
-              --set dbaas_cockpit_image_tag=$VERSION_SHA \
-              --set dbaas_cockpit_chart_version=$VERSION_SHA
+            # Update NuoDbaaS WebUI version
+            scripts/promote-version.sh nuodbaas-webui \
+              --set nuodbaas_webui_image_tag=$VERSION_SHA \
+              --set nuodbaas_webui_chart_version=$VERSION_SHA
             # Check if the version has been promoted
             if [ "$head" != "$(git rev-parse --short HEAD)" ]; then
               git commit -a --amend --no-edit
@@ -153,7 +153,7 @@ parameters:
     type: boolean
     default: false
     description: |
-      Promotes NuoDB DBaaS Cockpit UI build into internal DBaaS cluster
+      Promotes NuoDBaaS WebUI build into internal DBaaS cluster
 
 workflows:
   version: 2
