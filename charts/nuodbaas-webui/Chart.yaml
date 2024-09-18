@@ -1,7 +1,7 @@
 # (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
 apiVersion: v2
-name: dbaas-cockpit
-description: Dynamic DBaaS UI populated by the OpenAPI spec
+name: nuodbaas-webui
+description: NuoDBaaS WebUI populated by the OpenAPI spec
 version: "1.0.0-latest"
 appVersion: "1.0.0-latest"

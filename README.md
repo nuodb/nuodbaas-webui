@@ -1,30 +1,30 @@
-# dbaas-cockpit
+# NuoDBaaS WebUI
 
 User Interface to the NuoDB DBaaS Rest service (nuodb-control-plane)
 
 ## Setup in a development environment
 
-The following steps set up `nuodb-control-plane` as well as `dbaas-cockpit` in debug mode with an `nginx` reverse proxy to work around CORS issues connecting the UI to the REST service.
+The following steps set up `nuodb-control-plane` as well as `nuodbaas-webui` in debug mode with an `nginx` reverse proxy to work around CORS issues connecting the UI to the REST service.
 
 ### Clone necessary GIT repository if not done already:
 
 ```
-git clone git@github.com:nuodb/dbaas-cockpit
+git clone git@github.com:nuodb/nuodbaas-webui
 ```
 
 ### Setup Control plane (in Kubernetes Cluster)
 
-The Cockpit UI needs to connect to the NuoDB Control Plane REST API server to function. Use below script to deploy the Control Plane on the Kubernetes server using helm charts (Prerequisite: helm chart tool + kubectl connected to a Kubernetes server)
+The NuoDBaaS WebUI needs to connect to the NuoDB Control Plane REST API server to function. Use below script to deploy the Control Plane on the Kubernetes server using helm charts (Prerequisite: helm chart tool + kubectl connected to a Kubernetes server)
 
 ```
-cd dbaas-cockpit
+cd nuodbaas-webui
 make deploy-nuodb-control-plane
 ```
 
-### Setup and run Cockpit UI
+### Setup and run NuoDBaaS WebUI
 
 ```
-cd dbaas-cockpit/ui
+cd nuodbaas-webui/ui
 npm install
 npm start
 ```
@@ -32,7 +32,7 @@ npm start
 ### Run Reverse proxy
 
 ```
-cd dbaas-cockpit
+cd nuodbaas-webui
 make run-dev
 ```
 

@@ -1,6 +1,6 @@
-# Cockpit UI customizations
+# NuoDBaaS WebUI customizations
 
-The Cockpit UI allows for UI customizations to handle special cases which are not defined in the OpenAPI spec file. These are currently action buttons in the views and in the future will be extended to simplified forms.
+The NuoDBaaS WebUI allows for UI customizations to handle special cases which are not defined in the OpenAPI spec file. These are currently action buttons in the views and in the future will be extended to simplified forms.
 The configuration file is currently stored in `public/customizations.js` and is a JavaScript file containing configurations, function callbacks and constants referencing other parts of the file to avoid duplication.
 
 ## Example configuration file
@@ -78,7 +78,7 @@ function getCustomizations() {
 
 ### Explanation of configuration file definition
 
-The Cockpit UI will include the `customizations.js` file and call `getCustomizations()` to retrieve the customization definitions and callback functions.
+The NuoDBaaS WebUI will include the `customizations.js` file and call `getCustomizations()` to retrieve the customization definitions and callback functions.
 
 - The only root keyword is `views` right now defining view definitions
 - The `views` object contains a list of `RESOURCE_PATH` definition based on the Control Plane Rest API. These paths can have placeholders, i.e. `/databases/{organization}/{project}` which match with the definitions in the OpenAPI spec. All child elements below this resource path define how the view for this resource path is customized.

@@ -1,0 +1,45 @@
+# (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nuodbaas-webui
+  labels:
+    {{- include "nuodbaas-webui.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.nuodbaasWebui.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "nuodbaas-webui.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "nuodbaas-webui.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.nuodbaasWebui.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.nuodbaasWebui.image.repository }}:{{ .Values.nuodbaasWebui.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.nuodbaasWebui.image.pullPolicy }}
+          ports:
+            - name: http-alt
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http-alt
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http-alt
+          resources:
+            {{- toYaml .Values.nuodbaasWebui.resources | nindent 12 }}
+          env:
+            - name: NUODB_CP_REST_URL
+              value: {{ .Values.nuodbaasWebui.cpUrl }}
+            - name: NUODBAAS_WEBUI_PATH_PREFIX
+              value: {{ .Values.nuodbaasWebui.ingress.pathPrefix }}
