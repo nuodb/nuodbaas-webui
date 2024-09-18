@@ -113,7 +113,7 @@ jobs:
               COMMIT="$GIT_TAG"
             fi
             head="$(git rev-parse --short HEAD)"
-            # Update NuoDbaaS WebUI version
+            # Update NuoDBaaS WebUI version
             scripts/promote-version.sh nuodbaas-webui \
               --set nuodbaas_webui_image_tag=$VERSION_SHA \
               --set nuodbaas_webui_chart_version=$VERSION_SHA
