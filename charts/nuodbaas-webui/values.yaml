@@ -21,4 +21,5 @@ nuodbaasWebui:
     pathPrefix: ui
     hosts:
       - nuodbaas-webui.local
+    className: ""
   cpUrl: /nuodb-cp

@@ -18,6 +18,7 @@ All configurable parameters for each top-level scope are detailed below, organiz
 | `nuodbaasWebui.image.repository` | NuoDBaaS WebUI container image repository |`253548315642.dkr.ecr.us-east-1.amazonaws.com/nuodbaas-webui-docker`|
 | `nuodbaasWebui.image.pullPolicy` | NuoDBaaS WebUI container pull policy |`IfNotPresent`|
 | `nuodbaasWebui.image.pullSecrets` | Specify docker-registry secret names as an array | `[]` |
+| `nuodbaasWebui.ingress.className` | Class name of the ingress to use | `""` |
 | `nuodbaasWebui.resources.limits.cpu` | Specify cpu limit | `100m` |
 | `nuodbaasWebui.resources.limits.memory` | Specify memory limit | `128Mi` |
 | `nuodbaasWebui.resources.requests.cpu` | Specify cpu requests | `100m` |
