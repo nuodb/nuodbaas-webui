@@ -115,6 +115,7 @@ export default abstract class FieldBase {
         if (value === undefined || value === null) {
             return "";
         }
+        value = String(value);
         if (value.indexOf("\n") !== -1) {
             value = value.substring(0, value.indexOf("\n")) + "...";
         }
