@@ -152,8 +152,9 @@ export default function Table(props: TempAny) {
                                     }
                                     catch (ex) {
                                         const msg = "Error in custom value evaluation for field \"" + field + "\" in row " + String(index + 1);
-                                        RestSpinner.toastError(msg, String(ex), row);
-                                        console.log(msg, ex);
+                                        RestSpinner.toastError(msg, String(ex));
+                                        console.log(msg, ex, row);
+                                        value = ""
                                     }
                                 }
                                 else {
