@@ -49,7 +49,9 @@ function getCustomizations() {
         extendedStatus: {
             value: (data) => {
                 let status = data.status && {...data.status};
-                delete status.state;
+                if(status) {
+                    delete status.state;
+                }
                 return status;
             }
         },
