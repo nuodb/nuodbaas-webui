@@ -138,15 +138,23 @@ export default function Table(props: TempAny) {
 
                                 let value;
                                 if (field in cf && cf[field].value && typeof cf[field].value === "function") {
-                                    if (field in fieldsSchema) {
-                                        value = FieldFactory.createDisplayValue({
-                                            prefix: field,
-                                            parameter: fieldsSchema[field],
-                                            values: { [field]: cf[field].value(row) }
-                                        });
+                                    try {
+                                        if (field in fieldsSchema) {
+                                            value = FieldFactory.createDisplayValue({
+                                                prefix: field,
+                                                parameter: fieldsSchema[field],
+                                                values: { [field]: cf[field].value(row) }
+                                            });
+                                        }
+                                        else {
+                                            value = showValue(cf[field].value(row));
+                                        }
                                     }
-                                    else {
-                                        value = showValue(cf[field].value(row));
+                                    catch (ex) {
+                                        const msg = "Error in custom value evaluation for field \"" + field + "\" in row " + String(index + 1);
+                                        RestSpinner.toastError(msg, String(ex));
+                                        console.log(msg, ex, row);
+                                        value = ""
                                     }
                                 }
                                 else {
@@ -165,7 +173,17 @@ export default function Table(props: TempAny) {
                                 let buttons: TempAny = [];
                                 if (field in cf && cf[field].buttons) {
                                     cf[field].buttons.forEach((button: TempAny) => {
-                                        if (!button.visible || (typeof button.visible === "function" && button.visible(row))) {
+                                        let buttonVisible = false;
+                                        try {
+                                            buttonVisible = button.visible && (typeof button.visible === "function" && button.visible(row));
+                                        }
+                                        catch (ex) {
+                                            const msg = "Error in checking visibility of button. Field: " + field + " in row " + String(index + 1);
+                                            RestSpinner.toastError(msg, String(ex));
+                                            console.log(msg, ex, row);
+                                        }
+
+                                        if (buttonVisible) {
                                             buttons.push(<Button key={button.label} variant="outlined" onClick={async () => {
                                                 let label = replaceVariables(button.label, row);
                                                 if (button.confirm) {
