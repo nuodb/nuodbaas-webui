@@ -19,7 +19,7 @@ import { FieldValuesType, FieldParameterType, TempAny, CustomizationsType, Strin
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
  */
-export default function CreateEditEntry({ schema, path, data }: TempAny) {
+export default function CreateEditEntry({ schema, path, data, readonly }: TempAny) {
     const navigate = useNavigate();
 
     const [formParameters, setFormParameters] = useState<FieldParametersType>({});
@@ -279,7 +279,8 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
                 expand: !section.title,
                 autoFocus: key === focusField,
                 hideTitle: ret.length === 1,
-                required: false
+                required: false,
+                readonly
             })).show();
         });
         if (ret && ret.length > 0 && section.title) {
@@ -296,13 +297,13 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
     return <Container maxWidth="sm">
         <RestSpinner />
         <form>
-            <h1>{(data && "Edit") || "Create"} entry for {path}</h1>
+            {!readonly && <h1>{(data && "Edit") || "Create"} entry for {path}</h1>}
             <div className="fields">
                 {urlParameters && Object.keys(urlParameters)
                     .filter(key => urlParameters[key].in === "query")
                     .map(key => {
                         let urlParameter = { ...urlParameters[key] };
-                        return (FieldFactory.create({ prefix: key, parameter: urlParameter, values, errors, updateErrors, setValues, autoFocus: key === focusField, required: false, expand: false, hideTitle: false })).show();
+                        return (FieldFactory.create({ prefix: key, parameter: urlParameter, values, errors, updateErrors, setValues, autoFocus: key === focusField, required: false, expand: false, hideTitle: false, readonly })).show();
                     }
                     )}
                 {sectionFormParameters.map(section => {
@@ -312,7 +313,7 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
                 {("_error" in errors) && <h3 style={{ color: "red" }}>{errors["_error"]}</h3>}
                 {("_errorDetail" in errors) && <div style={{ color: "red" }}>{errors["_errorDetail"]}</div>}
 
-                <Button data-testid="create_resource__create_button" variant="contained" onClick={() => {
+                {!readonly && <Button data-testid="create_resource__create_button" variant="contained" onClick={() => {
                     let err = { ...errors };
                     delete err._error;
                     delete err._errorDetail;
@@ -342,7 +343,10 @@ export default function CreateEditEntry({ schema, path, data }: TempAny) {
                                 updateErrors("_errorDetail", null);
                             }
                         });
-                }}>{(data && "Save") || "Create"}</Button>
+                }}>{(data && "Save") || "Create"}</Button>}
+                {readonly && <Button variant="contained" onClick={() => {
+                    navigate("/ui/resource/list" + getParentPath(path));
+                }}>Close</Button>}
             </div>
         </form>
     </Container>

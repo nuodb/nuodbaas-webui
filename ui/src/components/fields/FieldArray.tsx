@@ -19,7 +19,7 @@ export default class FieldArray extends FieldBase {
      * @returns
      */
     show() {
-        const { prefix, parameter, values, errors, required, setValues, updateErrors } = this.props;
+        const { prefix, parameter, values, errors, required, setValues, updateErrors, readonly } = this.props;
         if (!parameter.items) {
             return new FieldMessage({ ...this.props, message: "\"items\" attribute missing in schema definition" }).show();
         }
@@ -45,22 +45,24 @@ export default class FieldArray extends FieldBase {
             }
         }
 
-        let nextIndex = value === null ? 0 : value.length;
-        let prefixKey = prefix + "." + nextIndex;
-        let field = FieldFactory.create({
-            ...this.props,
-            prefix: prefixKey, parameter: parameter.items, values, setValues: (vs) => {
-                vs = { ...vs };
-                let v = getValue(values, prefixKey);
-                setValue(vs, prefixKey, v === "" ? null : v);
-                setValues(vs);
-            }, updateErrors
-        });
-        ret.push(<TableRow key={prefixKey}>
-            <TableCell>
-                {field.show()}
-            </TableCell>
-        </TableRow>);
+        if (!readonly) {
+            let nextIndex = value === null ? 0 : value.length;
+            let prefixKey = prefix + "." + nextIndex;
+            let field = FieldFactory.create({
+                ...this.props,
+                prefix: prefixKey, parameter: parameter.items, values, setValues: (vs) => {
+                    vs = { ...vs };
+                    let v = getValue(values, prefixKey);
+                    setValue(vs, prefixKey, v === "" ? null : v);
+                    setValues(vs);
+                }, updateErrors
+            });
+            ret.push(<TableRow key={prefixKey}>
+                <TableCell>
+                    {field.show()}
+                </TableCell>
+            </TableRow>);
+        }
 
         return <TableContainer key={prefix} component={Card}>
             <Table>

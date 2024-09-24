@@ -13,7 +13,7 @@ export default class FieldBoolean extends FieldBase {
      * show Field of type Boolean using the values and schema definition
      */
     show() {
-        const { prefix, values, required, setValues, autoFocus } = this.props;
+        const { prefix, values, required, setValues, autoFocus, readonly } = this.props;
         let value = getValue(values, prefix);
         return <FormControl key={prefix} fullWidth>
             <InputLabel id={"label_" + prefix}>{prefix}</InputLabel>
@@ -21,7 +21,7 @@ export default class FieldBoolean extends FieldBase {
                 let v = { ...values };
                 setValue(v, prefix, input.value);
                 setValues(v);
-            }} onBlur={() => this.validate()}>
+            }} onBlur={() => this.validate()} disabled={readonly}>
                 <MenuItem value="true">True</MenuItem>
                 <MenuItem value="false">False</MenuItem>
             </Select>

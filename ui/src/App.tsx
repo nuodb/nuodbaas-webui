@@ -7,6 +7,7 @@ import Home from "./components/pages/Home";
 import ListResource from "./components/pages/ListResource";
 import CreateResource from "./components/pages/CreateResource";
 import EditResource from "./components/pages/EditResource";
+import ViewResource from "./components/pages/ViewResource";
 import ErrorPage from "./components/pages/ErrorPage";
 import Banner from "./components/pages/parts/Banner";
 import Schema from "./components/pages/parts/Schema";
@@ -41,6 +42,7 @@ export default function App() {
                 <Route path="/ui/resource/list/*" element={<ListResource schema={schema} />} />
                 <Route path="/ui/resource/create/*" element={<CreateResource schema={schema} />} />
                 <Route path="/ui/resource/edit/*" element={<EditResource schema={schema} />} />
+                <Route path="/ui/resource/view/*" element={<ViewResource schema={schema} />} />
                 <Route path="/*" element={<NotFound />} />
               </Routes></React.Fragment>
             :

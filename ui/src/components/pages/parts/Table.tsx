@@ -158,7 +158,7 @@ export default function Table(props: TempAny) {
                                     }
                                 }
                                 else {
-                                    if (field in fieldsSchema) {
+                                    if (fieldsSchema && field in fieldsSchema) {
                                         value = FieldFactory.createDisplayValue({
                                             prefix: field,
                                             parameter: fieldsSchema[field],
@@ -175,7 +175,7 @@ export default function Table(props: TempAny) {
                                     cf[field].buttons.forEach((button: TempAny) => {
                                         let buttonVisible = false;
                                         try {
-                                            buttonVisible = button.visible && (typeof button.visible === "function" && button.visible(row));
+                                            buttonVisible = !button.visible || (typeof button.visible === "function" && button.visible(row));
                                         }
                                         catch (ex) {
                                             const msg = "Error in checking visibility of button. Field: " + field + " in row " + String(index + 1);

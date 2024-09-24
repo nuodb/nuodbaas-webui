@@ -101,12 +101,13 @@ export default class FieldFactory {
             autoFocus: false,
             expand: false,
             hideTitle: false,
+            readonly: true,
             ...props
         }).getDisplayValue();
     }
 
     static validateProps(props: FieldPropsValidate): boolean {
-        const field: FieldBase = FieldFactory.create({ errors: {}, required: false, autoFocus: false, expand: false, hideTitle: false, ...props });
+        const field: FieldBase = FieldFactory.create({ errors: {}, required: false, autoFocus: false, expand: false, hideTitle: false, readonly: true, ...props });
         return field.validate();
     }
 }
