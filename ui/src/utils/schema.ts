@@ -93,6 +93,21 @@ export function matchesPath(path1:string, path2:string) : boolean {
 }
 
 /**
+ * Given a path, gets the path definition in the schema path (basically replacing path parts with the placeholders)
+ * For example /backuppolicies/acme/policy1/backups returns /backuppolicies/{organization}/{project}/backups
+ * @param {*} schema
+ * @param {*} path
+ * @returns
+ */
+export function getSchemaPath(schema: SchemaType, path:string) : string|null {
+    if(!schema) {
+        return null
+    }
+    const ret = Object.keys(schema).filter(key => matchesPath(key, path));
+    return ret.length === 1 ? ret[0] : null;
+}
+
+/**
  * given a search string, replaces all placeholders "{variable}" with the value of the variable
  * @param {*} search
  * @param {*} variables
@@ -106,7 +121,8 @@ export function replaceVariables(search: string, variables: TempAny) : string {
 }
 
 /**
- * returns object with all the method names as key for the specified path
+ * returns a subset of the schema for the given path. This subset has the http method names
+ * (i.e. get, post, delete) as keys and their values contain the parameter/field definitions.
  * @param {*} rootSchema
  * @param {*} path
  * @returns
@@ -171,7 +187,7 @@ export function getCreatePath(rootSchema: TempAny, path: string) : string|null {
  * @param {*} path
  * @returns full path or null if not found
  */
-export function getFilterField(rootSchema: TempAny, path: string) {
+export function getFilterField(rootSchema: TempAny, path: string): string|null|string[] {
     if(!rootSchema) {
         return null;
     }
@@ -192,7 +208,7 @@ export function getFilterField(rootSchema: TempAny, path: string) {
     if(retPaths.length === 0) {
         return null;
     }
-    if(retPaths.length === 1) {
+    else if(retPaths.length === 1) {
         let hasChildPaths = false;
         Object.keys(rootSchema).forEach(key => {
             if(key.startsWith(retPaths[0] + "/") && key.endsWith("}")) {
@@ -214,7 +230,14 @@ export function getFilterField(rootSchema: TempAny, path: string) {
         }
     }
     else {
-        throw Error("Duplicate GET child resources for path " + path);
+        // multiple schema definitions match the same path - return all the values
+        // which may be used to provide a selection box with those values
+        let ret:string[] = [];
+        retPaths.forEach((retPath:string) => {
+           const parts = retPath.split("/");
+           ret.push(parts[parts.length-1]);
+        });
+        return ret;
     }
 }
 

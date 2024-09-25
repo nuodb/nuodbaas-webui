@@ -10,7 +10,7 @@ export default class FieldDateTime extends FieldBase {
      * @returns
      */
     show() {
-        const { prefix, values, errors, required, setValues, autoFocus, updateErrors } = this.props;
+        const { prefix, values, errors, required, setValues, autoFocus, updateErrors, readonly } = this.props;
         let value = getValue(values, prefix);
         let editValue = getValue(values, "_" + prefix);
         if (editValue === null) {
@@ -50,7 +50,9 @@ export default class FieldDateTime extends FieldBase {
                 }
                 updateErrors(prefix, null);
                 setValues(v);
-            }} />
+            }}
+            disabled={readonly}
+        />
     }
 
     /** validates if field is in correct format

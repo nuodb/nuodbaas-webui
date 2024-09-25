@@ -49,6 +49,9 @@ export interface FieldProps extends FieldPropsValidate {
     /** hide title? */
     hideTitle: boolean,
 
+    /** is read only field? */
+    readonly: boolean,
+
     /** used by FieldMessage to indicate an error message */
     message?: string;
 }

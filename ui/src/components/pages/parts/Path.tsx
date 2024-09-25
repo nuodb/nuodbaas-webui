@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField'
 import { styled } from '@mui/material';
 import RestSpinner from './RestSpinner';
-import { getFilterField } from "../../../utils/schema";
+import { getFilterField, getSchemaPath } from "../../../utils/schema";
 import { TempAny } from "../../../utils/types"
 
 export function parseSearch(search: string) {
@@ -61,6 +61,18 @@ export default function Path({ schema, path, filterValues, search, setSearch, se
     });
 
     function renderFilter() {
+        if (filterField && Array.isArray(filterField)) {
+            // last path is not a variable but a list of constant paths - provide user an option to select those
+            return <FormControl>
+                <Select labelId="filter_label" id="filter" value={"__select__"} label={filterField} onChange={({ target }) => {
+                    navigate("/ui/resource/list" + path + "/" + target.value);
+                }}>
+                    <MenuItem value={"__select__"}>--- Select ---</MenuItem>
+                    {filterField.map((ff: string) => <MenuItem key={ff} value={ff}>{ff}</MenuItem>)}
+                </Select>
+            </FormControl>;
+        }
+
         if (!filterValues || filterValues.length === 0) {
             return null;
         }
@@ -91,11 +103,19 @@ export default function Path({ schema, path, filterValues, search, setSearch, se
     let filterField = getFilterField(schema, path);
 
     let pathParts = (path.startsWith("/") ? path.substring(1) : path).split("/");
+    const schemaPath = getSchemaPath(schema, path);
     return <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
         <StyledBreadcrumbs data-testid="path_component" separator=">" aria-label="resources" style={{ fontSize: "2em", padding: "20px", display: "flex", flexWrap: "nowrap" }}>
             {pathParts && pathParts.map((p: string, index: number) => {
                 if (index === pathParts.length - 1) {
                     return <Typography key={index} color="text.primary" style={{ fontSize: "1em" }}>{p}</Typography>
+                }
+                else if (index === pathParts.length - 2 && schemaPath != null && !schemaPath.endsWith("}")) {
+                    let subPath = "/ui/resource/view/" + pathParts.slice(0, index + 1).join("/")
+                    return <Link underline="hover" key={index} color="inherit" href="#" onClick={() => {
+                        navigate(subPath);
+                    }
+                    }>{p}</Link>;
                 }
                 else {
                     let subPath = "/ui/resource/list/" + pathParts.slice(0, index + 1).join("/")

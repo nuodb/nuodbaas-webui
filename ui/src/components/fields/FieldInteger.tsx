@@ -11,13 +11,13 @@ export default class FieldInteger extends FieldBase {
      * @returns
      */
     show() {
-        const { prefix, values, required, setValues, autoFocus } = this.props;
+        const { prefix, values, required, setValues, autoFocus, readonly } = this.props;
         let value = String(getValue(values, prefix) || "");
 
         return <TextField key={prefix} required={required} id={prefix} name={prefix} label={prefix} value={value} autoFocus={autoFocus} onChange={({ currentTarget: input }) => {
             let v = { ...values };
             setValue(values, prefix, input.value);
             setValues(v);
-        }} />
+        }} disabled={readonly} />
     }
 }

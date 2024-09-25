@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Table from "./parts/Table";
-import { getResourceEvents, getCreatePath, getResourceByPath } from "../../utils/schema";
+import { getResourceEvents, getCreatePath, getResourceByPath, getFilterField } from "../../utils/schema";
 import RestSpinner from "./parts/RestSpinner";
 import Button from '@mui/material/Button'
 import Pagination from '@mui/material/Pagination';
@@ -107,6 +107,9 @@ export default function ListResource({ schema }: SchemaType) {
     }
 
     function getFilterValues() {
+        if (!getFilterField(schema, path)) {
+            return [];
+        }
         let filterValues = new Set();
         allItems.forEach((item: string) => {
             const parts = item.split("/");

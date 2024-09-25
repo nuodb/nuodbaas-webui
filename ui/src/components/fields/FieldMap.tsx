@@ -58,7 +58,7 @@ export default class FieldMap extends FieldBase {
      * @returns
      */
     show() {
-        const { prefix, values, errors, setValues } = this.props;
+        const { prefix, values, errors, setValues, readonly } = this.props;
 
         let valueKeys = Object.keys(getValue(values, prefix) || {});
         let rows = [];
@@ -108,7 +108,7 @@ export default class FieldMap extends FieldBase {
         let prefixValueLabel = prefix + ".value"
         let errorKey = (errors && (prefixKeyLabel in errors) && errors[prefixKeyLabel]) || "";
         let errorValue = (errors && (prefixValueLabel in errors) && errors[prefixValueLabel]) || "";
-        rows.push(<TableRow key={prefixKeyLabel} className="verticalAlignTop">
+        !readonly && rows.push(<TableRow key={prefixKeyLabel} className="verticalAlignTop">
             <TableCell>
                 <TextField
                     fullWidth={true}
