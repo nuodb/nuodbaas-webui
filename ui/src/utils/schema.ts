@@ -121,7 +121,8 @@ export function replaceVariables(search: string, variables: TempAny) : string {
 }
 
 /**
- * returns object with all the method names as key for the specified path
+ * returns a subset of the schema for the given path. This subset has the http method names
+ * (i.e. get, post, delete) as keys and their values contain the parameter/field definitions.
  * @param {*} rootSchema
  * @param {*} path
  * @returns

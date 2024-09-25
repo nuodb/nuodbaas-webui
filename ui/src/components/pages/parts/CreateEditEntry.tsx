@@ -1,6 +1,6 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import FieldFactory from "../../fields/FieldFactory";
 import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultValue, submitForm } from "../../../utils/schema";
@@ -344,9 +344,14 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
                             }
                         });
                 }}>{(data && "Save") || "Create"}</Button>}
-                {readonly && <Button variant="contained" onClick={() => {
-                    navigate("/ui/resource/list" + getParentPath(path));
-                }}>Close</Button>}
+                {readonly && <React.Fragment>
+                    <Button variant="contained" onClick={() => {
+                        navigate("/ui/resource/edit" + path);
+                    }}>Edit</Button>
+                    <Button variant="contained" onClick={() => {
+                        navigate("/ui/resource/list" + getParentPath(path));
+                    }}>Close</Button>
+                </React.Fragment>}
             </div>
         </form>
     </Container>

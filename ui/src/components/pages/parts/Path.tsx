@@ -62,7 +62,7 @@ export default function Path({ schema, path, filterValues, search, setSearch, se
 
     function renderFilter() {
         if (filterField && Array.isArray(filterField)) {
-            // last path is not a variable but a list of constant paths - provide user ann option to select those
+            // last path is not a variable but a list of constant paths - provide user an option to select those
             return <FormControl>
                 <Select labelId="filter_label" id="filter" value={"__select__"} label={filterField} onChange={({ target }) => {
                     navigate("/ui/resource/list" + path + "/" + target.value);
