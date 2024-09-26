@@ -4,7 +4,7 @@
 nuodbaasWebui:
   replicaCount: 1
   image:
-    repository: 253548315642.dkr.ecr.us-east-1.amazonaws.com/nuodbaas-webui-docker
+    repository: ghcr.io/nuodb/nuodbaas-webui:latest # This Tag is updated from values.yaml:appVersion during build time
     pullPolicy: IfNotPresent
     pullSecrets: []
     tag: ""
