@@ -5,7 +5,9 @@ Official releases are available here:
 [Docker Images](github.com/nuodb/nuodbaas-webui/container/nuodbaas-webui)
 [Helm Charts](https://github.com/nuodb/nuodbaas-webui/blob/gh-pages/index.yaml)
 
-The release version numbers are stored in `/charts/nuodbaas-webui/Chart.yaml` in the `version` and `appVersion` attributes. The `major` and `minor` versions MUST match, but the patch version can be different (and will diverge). The `version` and `appVersion` attributes need to be in the `MAJOR.MINOR.PATCH` version format (i.e. 1.0.0)
+The release version numbers are defined in `/charts/nuodbaas-webui/Chart.yaml` in the `version` and `appVersion` attributes.
+The `major` and `minor` versions MUST match, but the patch version can be different (and will diverge).
+The `version` and `appVersion` attributes need to be in the `MAJOR.MINOR.PATCH` version format (i.e. 1.0.0)
 
 ## Creating a MAJOR or MINOR release
 
@@ -24,9 +26,21 @@ Follow these steps:
 - commit and push the branch
 - once pushed, the build process will automatically create and publish the release helm chart / docker image
 
-## Code changes pushed to master or rel/* branches
+## Subsequent code changes pushed to master or rel/* branches
 
-All the code changes pushed to the `master` and `rel/*` branches will be published in the docker and helm registries with following tags:
+All the code changes pushed to the `master` and `rel/*` branches will be published in the docker and helm registries with specific tags.
+
+If code is submitted with a version which doesn't exist in the docker/helm repositories, it is assumed this push is the first release and will have following tags:
+
+```
+Docker Images: <MAJOR>.<MINOR>.<PATCH>
+               <MAJOR>.<MINOR>.<PATCH>-latest
+Helm Charts: <MAJOR>.<MINOR>.<PATCH>
+             <MAJOR>.<MINOR>.<PATCH>-latest
+```
+
+If the version exists in the repository already, it will add additional information to the tags to represent "daily" or similar builds (i.e. future hotfixes)
+Older versions might be deleted automatically at some point (TBD)
 
 ```
 Docker Images: <MAJOR>.<MINOR>.<PATCH>-<GIT_SHA>
@@ -34,3 +48,5 @@ Docker Images: <MAJOR>.<MINOR>.<PATCH>-<GIT_SHA>
 Helm Charts: <MAJOR>.<MINOR>.<PATCH>-<HELM_CONTENT_HASH>+<GIT_SHA>
              <MAJOR>.<MINOR>.<PATCH>-latest
 ```
+
+Note: Helm charts will only be updated in the repository if the helm chart content changes (i.e. versions, variables, deployments, ...)
