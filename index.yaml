@@ -1,0 +1,13 @@
+apiVersion: v1
+entries:
+  nuodbaas-webui:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-09-27T12:33:33.534077266Z"
+    description: NuoDBaaS WebUI populated by the OpenAPI spec
+    digest: 749c5bcd1eef559b2ed85a6a368b07e6bdbcad71ebcdbb51fa61fe27cb4eb640
+    name: nuodbaas-webui
+    urls:
+    - nuodbaas-webui-1.0.0-23Sd3pn5rvbVTD06FCsEvA+52260f2.tgz
+    version: 1.0.0-23Sd3pn5rvbVTD06FCsEvA+52260f2
+generated: "2024-09-27T12:33:33.533550335Z"
