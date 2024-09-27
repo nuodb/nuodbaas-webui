@@ -102,8 +102,10 @@ if [ "$1" == "createHelmPackage" ] ; then
         exit 0
     fi
 
-    echo "Applying \"${SNAPSHOT}\" to Helm Chart"
+    echo "Applying \"${SNAPSHOT}\" and \"${VERSION}-latest\" to Helm Chart"
     cat ${CHART_FILE} | sed "s/^version: .*/version: \"${SNAPSHOT}\"/g" > build/${CHART_FILE}
+    (cd build/charts && helm package ${REPOSITORY})
+    cat ${CHART_FILE} | sed "s/^version: .*/version: \"${VERSION}-latest\"/g" > build/${CHART_FILE}
     (cd build/charts && helm package ${REPOSITORY})
     exit 0
 fi
@@ -124,8 +126,8 @@ if [ "$1" == "uploadHelmPackage" ] ; then
 
     # Check if chart exists already (ignoring +* git hash)
     mkdir -p charts
-    NEW_CHART="$(cd build/charts && ls *.tgz | sed "s/\.tgz$//g" | sed "s/\+.*//g")"
-    EXISTING_CHARTS="$(ls *.tgz | sed "s/\.tgz$//g" | sed "s/\+.*//g")"
+    NEW_CHART="$(cd build/charts && ls *.tgz | grep -v -e "-latest" | sed "s/\.tgz$//g" | sed "s/\+.*//g")"
+    EXISTING_CHARTS="$(ls *.tgz | grep -v -e "-latest" | sed "s/\.tgz$//g" | sed "s/\+.*//g")"
     if [ "$(echo "${EXISTING_CHARTS}" | grep -e "^${NEW_CHART}$")" != "" ] ; then
         echo "Chart exists already - not updating"
         git checkout -
