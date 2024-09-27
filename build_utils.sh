@@ -95,7 +95,7 @@ if [ "$1" == "createHelmPackage" ] ; then
             echo "This is the first build with a non-existing helm chart. Publishing chart..."
             SNAPSHOT="${VERSION}"
         fi
-    elif [ "${BRANCH}" == "master" ] || [ "${BRANCH}" == "agr22/DBAAS-458" ]; then
+    elif [ "${BRANCH}" == "master" ] ; then
         SNAPSHOT="${VERSION}-${HELM_HASH}+${GIT_HASH}"
     else
         echo "Personal branch ${BRANCH} - not publishing chart"
