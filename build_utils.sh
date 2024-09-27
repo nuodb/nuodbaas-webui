@@ -25,7 +25,7 @@ set -e
 # $1 = docker image with tag
 function dockerImageExists() {
     FIRST_LINE="$(docker manifest inspect $1 2>&1 | head -1)"
-    if [ "${FIRST_LINE}" == "{" ] ; then
+    if [ $? -eq 0 ] && [ "${FIRST_LINE}" == "{" ] ; then
         return 0
     elif [[ "${FIRST_LINE}" == 'no such manifest'* ]] || [[ "${FIRST_LINE}" == 'manifest unknown'* ]]; then
         return 1
