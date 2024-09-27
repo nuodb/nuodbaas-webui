@@ -36,7 +36,7 @@ function dockerImageExists() {
 
 # $1 = Helm Index yaml location
 # $2 = Helm chart name
-# $2 = Helm chart version
+# $3 = Helm chart version
 function helmChartExists() {
     YAML_CONTENT="$(curl -sL --fail "$1" 2>&1)"
     if [ $? -eq 0 ] ; then
