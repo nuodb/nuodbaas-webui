@@ -13,7 +13,6 @@ else
     RELEASE_BRANCH_VERSION=""
     RELEASE_BRANCH_MAJOR_MINOR=""
 fi
-BRANCH=$(echo $BRANCH | tr -cd '[:alnum:]')
 GIT_HASH="$(git rev-parse --short HEAD)"
 
 function fail() {
@@ -58,7 +57,7 @@ if [ "$1" == "getDockerImageTag" ] ; then
         echo "${DOCKER_REGISTRY}:${VERSION}-${GIT_HASH}"
     elif [ -z "${RELEASE_BRANCH_VERSION}" ] ; then
         # personal branch
-        echo "${DOCKER_REGISTRY}:${BRANCH}"
+        echo "${DOCKER_REGISTRY}:$(echo $BRANCH | tr -cd '[:alnum:]')"
     else
         # release branch
         if dockerImageExists ${DOCKER_REGISTRY}:${VERSION} ; then
