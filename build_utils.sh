@@ -1,12 +1,12 @@
 #!/bin/bash
 REPOSITORY="nuodbaas-webui"
 DOCKER_REGISTRY="ghcr.io/nuodb/${REPOSITORY}"
-BRANCH="$(git rev-parse --abbrev-ref HEAD | tr ' ' '_')"
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 CHART_FILE="charts/${REPOSITORY}/Chart.yaml"
 VALUES_FILE="charts/${REPOSITORY}/values.yaml"
-APP_VERSION="$(grep '^appVersion:' ${CHART_FILE} | tail -n1 | awk '{ print $2}' | tr -d '"')"
-VERSION="$(grep '^version:' ./charts/${REPOSITORY}/Chart.yaml | tail -n1 | awk '{ print $2}' | tr -d '"')"
-if [[ ${BRANCH} == rel/* ]] ; then
+APP_VERSION="$(sed -n -E 's/^appVersion: *"?([^ "]*)"?.*/\1/p' "$CHART_FILE")"
+VERSION="$(sed -n -E 's/^version: *"?([^ "]*)"?.*/\1/p' "$CHART_FILE")"
+if [[ "${BRANCH}" == rel/* ]] ; then
     RELEASE_BRANCH_VERSION="$(echo "${BRANCH}" | cut -d / -f2)"
     RELEASE_BRANCH_MAJOR_MINOR="$(echo "${RELEASE_BRANCH_VERSION}" | cut -d . -f1,2)"
 else
@@ -14,11 +14,10 @@ else
     RELEASE_BRANCH_MAJOR_MINOR=""
 fi
 BRANCH=$(echo $BRANCH | tr -cd '[:alnum:]')
-# TIMESTAMP="+$(date +%Y%m%d.%H%M%S)"
-TIMESTAMP=""
+GIT_HASH="$(git rev-parse --short HEAD)"
 
 function fail() {
-    printf "$1\n" >&2
+    printf "ERROR: $1\n" >&2
     exit 1
 }
 
@@ -28,11 +27,11 @@ set -e
 function dockerImageExists() {
     FIRST_LINE="$(docker manifest inspect $1 2>&1 | head -1)"
     if [ "${FIRST_LINE}" == "{" ] ; then
-        echo "true"
+        return 0
     elif [[ "${FIRST_LINE}" == 'no such manifest'* ]] || [[ "${FIRST_LINE}" == 'manifest unknown'* ]]; then
-        echo "false"
+        return 1
     else
-        echo "error: ${FIRST_LINE}"
+        fail "Unable to check if Docker Image $1 exists: ${FIRST_LINE}"
     fi
 }
 
@@ -40,15 +39,15 @@ function dockerImageExists() {
 # $2 = Helm chart name
 # $2 = Helm chart version
 function helmChartExists() {
-    YAML_CONTENT="$(curl --fail "$1" 2>&1)"
+    YAML_CONTENT="$(curl -sL --fail "$1" 2>&1)"
     if [ $? -eq 0 ] ; then
-        if [ "$(echo "$YAML_CONTENT" | grep -e "- $2-$3\.tgz")" != "" ] ; then
-            echo "true"
+        if [ "$(echo "$YAML_CONTENT" | grep -e "\.tgz" | grep -e "- $2-$3\.tgz" -e "- $2-$3+")" != "" ] ; then
+            return 0
         else
-            echo "false"
+            return 1
         fi
     else
-        echo "error"
+        fail "Unable to determine if Helm chart exists: $1 $2 $3"
     fi
 }
 
@@ -56,20 +55,16 @@ function helmChartExists() {
 if [ "$1" == "getDockerImageTag" ] ; then
     if [ "${BRANCH}" == "master" ] ; then
         # development builds
-        echo "${DOCKER_REGISTRY}:${VERSION}${TIMESTAMP}"
+        echo "${DOCKER_REGISTRY}:${VERSION}-${GIT_HASH}"
     elif [ -z "${RELEASE_BRANCH_VERSION}" ] ; then
         # personal branch
         echo "${DOCKER_REGISTRY}:${BRANCH}"
     else
         # release branch
-        DOCKER_IMAGE_EXISTS=$(dockerImageExists ${DOCKER_REGISTRY}:${VERSION})
-        if [ "$DOCKER_IMAGE_EXISTS" == "true" ] ; then
-            echo "${DOCKER_REGISTRY}:${VERSION}${TIMESTAMP}"
-        elif [ "$DOCKER_IMAGE_EXISTS" == "false" ] ; then
-            echo "${DOCKER_REGISTRY}:${VERSION}"
+        if dockerImageExists ${DOCKER_REGISTRY}:${VERSION} ; then
+            echo "${DOCKER_REGISTRY}:${VERSION}-${GIT_HASH}"
         else
-            echo "Unable to determine docker image tag: $DOCKER_IMAGE_EXISTS"
-            exit 1
+            echo "${DOCKER_REGISTRY}:${VERSION}"
         fi
     fi
     exit 0
@@ -79,37 +74,30 @@ fi
 # adjusts helm chart version according to branch info with these rules:
 # - sets docker repository tag in values.yaml to the value set in Chart.yaml:appVersion
 # - sets helm chart version in Chart.yaml:
-#   - if master, use VERSION-HASH+TIMESTAMP
+#   - if master, use VERSION-HELM_HASH+GIT_HASH
 #   - if a rel/* branch:
 #     - use VERSION if it doesn't exist yet (first release build)
-#     - use VERSION-HASH+TIMESTAMP otherwise
+#     - use VERSION-HELM_HASH+GIT_HASH otherwise
 #   - otherwise (all personal branches) don't add to chart
 if [ "$1" == "createHelmPackage" ] ; then
     mkdir -p build
     rm -rf build/charts
     cp -r charts build/
-    echo "Applying \"${DOCKER_REGISTRY}:${APP_VERSION}\" to image repository"
-    cat ${VALUES_FILE} | sed "s%  repository: .*%  repository: ${DOCKER_REGISTRY}:${APP_VERSION}%g" > build/${VALUES_FILE}
     HELM_HASH=$(grep -r -n -e ^ charts | sort | shasum -a 256 | cut -b -32 | xxd -r -p | base64 | tr -d '/+=')
     if [ ! -z ${RELEASE_BRANCH_VERSION} ] ; then
         if [ "${RELEASE_BRANCH_MAJOR_MINOR}" != "${VERSION}" ] ; then
-            echo "Helm Chart version ${VERSION} must match with major/minor version of branch name ${RELEASE_BRANCH_MAJOR_MINOR}"
-            exit 1
+            fail "Helm Chart version ${VERSION} must match with major/minor version of branch name ${RELEASE_BRANCH_MAJOR_MINOR}"
         fi
 
-        HELM_CHART_EXISTS="$(helmChartExists https://nuodb.github.io/${REPOSITORY}/index.yaml ${REPOSITORY} ${VERSION})"
-        if [ "${HELM_CHART_EXISTS}" == "true" ] ; then
+        if helmChartExists https://nuodb.github.io/${REPOSITORY}/index.yaml ${REPOSITORY} ${VERSION} ; then
             echo "Helm chart with version ${VERSION} exists. Updating with hash"
-            SNAPSHOT="${VERSION}-${HELM_HASH}${TIMESTAMP}"
-        elif [ "${HELM_CHART_EXISTS}" == "false" ] ; then
+            SNAPSHOT="${VERSION}-${HELM_HASH}+${GIT_HASH}"
+        else
             echo "This is the first build with a non-existing helm chart. Publishing chart..."
             SNAPSHOT="${VERSION}"
-        else
-            echo "Error occurred: $HELM_CHART_EXISTS"
-            exit 1
         fi
-    elif [ "${BRANCH}" == "master" ] ; then
-        SNAPSHOT="${VERSION}-${HELM_HASH}${TIMESTAMP}"
+    elif [ "${BRANCH}" == "master" ] || [ "${BRANCH}" == "agr22/DBAAS-458" ]; then
+        SNAPSHOT="${VERSION}-${HELM_HASH}+${GIT_HASH}"
     else
         echo "Personal branch - not publishing chart"
         exit 0
@@ -135,7 +123,7 @@ if [ "$1" == "uploadHelmPackage" ] ; then
     git checkout gh-pages
     git merge --ff-only origin/gh-pages
 
-    # Check if chart exists already (ignoring +* build timestamp)
+    # Check if chart exists already (ignoring +* git hash)
     mkdir -p charts
     NEW_CHART="$(cd build/charts && ls *.tgz | sed "s/\.tgz$//g" | sed "s/\+.*//g")"
     EXISTING_CHARTS="$(ls *.tgz | sed "s/\.tgz$//g" | sed "s/\+.*//g")"

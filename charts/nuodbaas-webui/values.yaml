@@ -4,7 +4,7 @@
 nuodbaasWebui:
   replicaCount: 1
   image:
-    repository: ghcr.io/nuodb/nuodbaas-webui:latest # This Tag is updated from values.yaml:appVersion during build time
+    repository: ghcr.io/nuodb/nuodbaas-webui
     pullPolicy: IfNotPresent
     pullSecrets: []
     tag: ""

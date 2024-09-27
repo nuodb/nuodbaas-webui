@@ -2,7 +2,9 @@ name: Build
 on:
   push:
     branches:
-      - "**"
+      - "master"
+      - "rel/*"
+      - "agr22/DBAAS-458"
 jobs:
   publish_helm_chart:
     name: Publish Helm Chart

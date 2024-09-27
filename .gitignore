@@ -8,3 +8,4 @@ bin/
 selenium-tests/target
 .project
 .classpath
+build
