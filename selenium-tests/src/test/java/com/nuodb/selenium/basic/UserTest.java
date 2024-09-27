@@ -12,6 +12,7 @@ import com.nuodb.selenium.TestRoutines;
 import static com.nuodb.selenium.SeleniumAssert.assertThat;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.net.MalformedURLException;
 import java.util.List;
@@ -62,6 +63,14 @@ public class UserTest extends TestRoutines {
         waitInputElementByName("labels.key").sendKeys(userName);
         waitInputElementByName("labels.value").sendKeys(userName);
         waitElement("add_button_labels").click();
+
+        // verify allowCrossOrganizationAccess / organization / name fields are disabled in edit mode
+        String [] disabledFields = new String[]{"allowCrossOrganizationAccess", "organization", "name"};
+        for(String field : disabledFields ) {
+            assertFalse(waitPresentInputElementByName(field).isEnabled(), "\"" + field + "\" field is not disabled");
+        }
+
+        // save user
         waitElement("create_resource__create_button").click();
         waitRestComplete();
 
