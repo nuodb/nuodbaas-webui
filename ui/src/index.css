@@ -43,3 +43,31 @@ dl.map>div>dt::after {
   display: flex !important;
   flex-direction: column;
 }
+.BuildNumber {
+  padding: 5px;
+  margin: 5px;
+  color: gray;
+  font-size: .75em;
+}
+
+.AbsoluteBottomRight {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+}
+
+.ErrorPage {
+  white-space: pre-wrap;
+  font-family: monospace;
+  margin: 1em;
+}
+
+.ErrorPage>label {
+  display: block;
+  font-family: sans-serif;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-left: 0;
+  margin-right: 0;
+  font-weight: bold;
+}
