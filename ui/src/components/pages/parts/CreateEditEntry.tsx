@@ -268,7 +268,9 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
             })) || [];
         ret = ret.map((key: string) => {
             const formParameter = { ...section.params[key] };
-            const ro = readonly || data && (key in urlParameters || key === "name");
+            const ro = readonly
+                || data && (key in urlParameters || key === "name")
+                || formParameter["x-immutable"] === true
             return (FieldFactory.create({
                 prefix: key,
                 parameter: formParameter,
