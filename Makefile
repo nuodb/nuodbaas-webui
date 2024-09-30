@@ -45,17 +45,6 @@ all: run-integration-tests deploy-image ## build, test + deploy everything
 build-image:  ## build UI and create Docker image
 	@docker build -t "${IMG_REPO}:latest" -f docker/production/Dockerfile .
 
-.PHONY: check-dev-services
-check-dev-services:
-	@if [ "`netstat -a -n | grep ":3000 "`" = "" ] ; then \
-		echo "React UI service is not listening on port 3000. Run it with \"npm start\""; \
-		exit 1; \
-	fi
-	@if [ "`netstat -a -n | grep ":8080 "`" = "" ] ; then \
-		echo "NuoDB control plane is not running on port 8080"; \
-		exit 1; \
-	fi
-
 .PHONY: deploy-image
 deploy-image: build-image ## deploy Docker image to AWS
 	@if [ "${ECR_ACCOUNT_URL}" = "" ] ; then \
@@ -93,8 +82,8 @@ setup-integration-tests: build-image install-crds ## setup containers before run
 
 .PHONY: teardown-integration-tests
 teardown-integration-tests: $(KWOKCTL) ## clean up containers used by integration tests
-	@docker compose -f selenium-tests/compose.yaml down
-	@$(KWOKCTL) delete cluster
+	@docker compose -f selenium-tests/compose.yaml down 2> /dev/null
+	@$(KWOKCTL) delete cluster 2> /dev/null || true
 
 .PHONY: run-integration-tests-only
 run-integration-tests-only: ## integration tests without setup/teardown
@@ -106,19 +95,17 @@ run-integration-tests: build-image setup-integration-tests ## run integration te
 
 ##@ Development Environment
 
-.PHONY: run-dev
-run-dev: check-dev-services install-crds ## launch nginx reverse proxy for development of /ui/ and /nuodb-cp/
-	$(KUBECTL) apply -f docker/development/runtime-config.yaml
-	curl http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true --data-binary '{"password":"passw0rd", "name":"admin", "organization": "acme", "accessRule":{"allow": "all:*"}}' -X PUT -H "Content-Type: application/json"
-	docker run -v `pwd`/docker/development/default.conf:/etc/nginx/conf.d/default.conf --network=host -it nginx:stable-alpine
+.PHONY: start-dev
+start-dev: setup-integration-tests ## launch WebUI/ControlPlane/Proxy for development environment
+	(cd ui && npm install && npm start &)
+	docker run --rm -d --name nuodb-webui-dev -v `pwd`/docker/development/default.conf:/etc/nginx/conf.d/default.conf --network=host -it nginx:stable-alpine
 
-.PHONY: deploy-nuodb-control-plane
-deploy-nuodb-control-plane: ## install NuoDB Control Plane Helm Charts
-	@./nuodb-control-plane-setup.sh install
-
-.PHONY: undeploy-nuodb-control-plane
-undeploy-nuodb-control-plane: ## uninstall NuoDB Control Plane Helm Charts
-	@./nuodb-control-plane-setup.sh uninstall
+.PHONY: stop-dev
+stop-dev: teardown-integration-tests ## stop development environment processes (WebUI/ControlPlane/Proxy)
+	@PID=$(shell netstat -a -n -p 2> /dev/null | sed -n -E "s/.* 0\.0\.0\.0:3000 .* LISTEN .* ([0-9]+)\/node/\1/p")
+	@if [ "${PID}" != "" ] ; then kill -9 ${PID}; fi
+	@PID=$(shell docker ps -aq --filter "name=nuodb-webui-dev")
+	@if [ "${PID}" != "" ] ; then docker stop ${PID}; fi
 
 $(KWOKCTL): $(KUBECTL)
 	mkdir -p bin

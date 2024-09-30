@@ -129,7 +129,6 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
 
         /** get field params for the specified field key (hierarchical ones are separated by period) */
         function getFieldParameters(formParams: FieldParametersType, key: string): FieldParameterType | undefined {
-            console.log("getFieldParameters", key, formParams);
             const posPeriod = key.indexOf(".");
             if (posPeriod === -1) {
                 return formParams[key];
@@ -268,7 +267,9 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
                 return param.readOnly !== true && param.hidden !== true && key !== "resourceVersion"
             })) || [];
         ret = ret.map((key: string) => {
-            let formParameter = { ...section.params[key] };
+            const formParameter = { ...section.params[key] };
+            const ro = readonly
+                || (data && (key in urlParameters || key === "name" || formParameter["x-immutable"] === true))
             return (FieldFactory.create({
                 prefix: key,
                 parameter: formParameter,
@@ -280,7 +281,7 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
                 autoFocus: key === focusField,
                 hideTitle: ret.length === 1,
                 required: false,
-                readonly
+                readonly: ro
             })).show();
         });
         if (ret && ret.length > 0 && section.title) {
@@ -303,7 +304,19 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
                     .filter(key => urlParameters[key].in === "query")
                     .map(key => {
                         let urlParameter = { ...urlParameters[key] };
-                        return (FieldFactory.create({ prefix: key, parameter: urlParameter, values, errors, updateErrors, setValues, autoFocus: key === focusField, required: false, expand: false, hideTitle: false, readonly })).show();
+                        return (FieldFactory.create({
+                            prefix: key,
+                            parameter: urlParameter,
+                            values,
+                            errors,
+                            updateErrors,
+                            setValues,
+                            autoFocus: key === focusField,
+                            required: false,
+                            expand: false,
+                            hideTitle: false,
+                            readonly: readonly || !!data
+                        })).show();
                     }
                     )}
                 {sectionFormParameters.map(section => {
