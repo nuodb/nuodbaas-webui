@@ -2,38 +2,20 @@
 
 User Interface to the NuoDB DBaaS Rest service (nuodb-control-plane)
 
-## Setup in a development environment
+## Setup the development environment
 
-The following steps set up `nuodb-control-plane` as well as `nuodbaas-webui` in debug mode with an `nginx` reverse proxy to work around CORS issues connecting the UI to the REST service.
+The development environment consists of the `nuodb-control-plane` REST server, the `nuodbaas-webui` as a React application and an `nginx` reverse proxy to work around CORS issues connecting the UI to the REST service.
 
-### Clone necessary GIT repository if not done already:
-
-```
-git clone git@github.com:nuodb/nuodbaas-webui
-```
-
-### Setup Control plane (in Kubernetes Cluster)
-
-The NuoDBaaS WebUI needs to connect to the NuoDB Control Plane REST API server to function. Use below script to deploy the Control Plane on the Kubernetes server using helm charts (Prerequisite: helm chart tool + kubectl connected to a Kubernetes server)
+Start the development environment with
 
 ```
-cd nuodbaas-webui
-make deploy-nuodb-control-plane
+make start-dev
 ```
 
-### Setup and run NuoDBaaS WebUI
+To stop the development environment with
 
 ```
-cd nuodbaas-webui/ui
-npm install
-npm start
-```
-
-### Run Reverse proxy
-
-```
-cd nuodbaas-webui
-make run-dev
+make stop-dev
 ```
 
 ### Access the UI
