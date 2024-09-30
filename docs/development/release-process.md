@@ -28,7 +28,7 @@ Follow these steps:
 
 ## Subsequent code changes pushed to master or rel/* branches
 
-All the code changes pushed to the `master` and `rel/*` branches will be published in the docker and helm registries with specific tags.
+All the code changes pushed to the `main` and `rel/*` branches will be published in the docker and helm registries with specific tags.
 
 If code is submitted with a version which doesn't exist in the docker/helm repositories, it is assumed this push is the first release and will have following tags:
 
