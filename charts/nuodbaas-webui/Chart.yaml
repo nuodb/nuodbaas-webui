@@ -3,5 +3,5 @@
 apiVersion: v2
 name: nuodbaas-webui
 description: NuoDBaaS WebUI populated by the OpenAPI spec
-version: "1.0.0-latest"
-appVersion: "1.0.0-latest"
+version: "1.0.0"
+appVersion: "1.0.0"
