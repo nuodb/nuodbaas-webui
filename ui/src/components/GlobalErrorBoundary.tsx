@@ -2,6 +2,8 @@
 
 import React, { ErrorInfo, ReactNode } from "react";
 import Button from '@mui/material/Button'
+import Stacktrace from 'stacktrace-js';
+import BuildNumber from "./pages/parts/BuildNumber";
 
 interface IProps {
     children?: ReactNode
@@ -10,6 +12,7 @@ interface IProps {
 interface IState {
     error: Error | null,
     errorInfo: ErrorInfo | null
+    stack?: string | null
 }
 
 export default class GlobalErrorBoundary extends React.Component<IProps, IState> {
@@ -19,26 +22,34 @@ export default class GlobalErrorBoundary extends React.Component<IProps, IState>
     }
 
     componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-        this.setState({ error, errorInfo });
+        this.setState({ error, errorInfo, stack: this.state.errorInfo && this.state.errorInfo.componentStack });
+        Stacktrace.fromError(error).then(stackArray => {
+            let stack = "";
+            stackArray.forEach(s => {
+                const parts = s.fileName?.split("/");
+                const filename = parts && parts[parts.length - 1];
+                stack += " at " + s.functionName + " " + filename + ":" + s.lineNumber + "\n";
+            })
+            this.setState({ stack });
+        })
     }
 
     render() {
         if (this.state.error || this.state.errorInfo) {
             return (
-                <React.Fragment>
-                    <h2>Error occurred</h2>
+                <div className="ErrorPage">
+                    <label>Error occurred</label>
                     {this.state.error && this.state.error.toString()}
-                    <br />
-                    <h3>Stack</h3>
-                    <div style={{ whiteSpace: "pre-wrap" }}>
-                        {this.state.errorInfo && this.state.errorInfo.componentStack}
-                    </div>
+                    <label>Stack</label>
+                    {this.state.stack}
+                    <label>Build</label>
+                    <BuildNumber />
                     <br />
                     <Button variant="contained" onClick={() => {
                         window.location.href = "/ui";
                     }}>Dismiss</Button>
 
-                </React.Fragment>
+                </div>
             );
         }
 

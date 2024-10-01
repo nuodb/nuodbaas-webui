@@ -52,7 +52,7 @@ function helmChartExists() {
 
 # Returns the docker image location (and tag) based on branch info
 if [ "$1" == "getDockerImageTag" ] ; then
-    if [ "${BRANCH}" == "master" ] ; then
+    if [ "${BRANCH}" == "main" ] ; then
         # development builds
         echo "${DOCKER_REGISTRY}:${VERSION}-${GIT_HASH}"
     elif [ -z "${RELEASE_BRANCH_VERSION}" ] ; then
@@ -73,7 +73,7 @@ fi
 # adjusts helm chart version according to branch info with these rules:
 # - sets docker repository tag in values.yaml to the value set in Chart.yaml:appVersion
 # - sets helm chart version in Chart.yaml:
-#   - if master, use VERSION-HELM_HASH+GIT_HASH
+#   - if main, use VERSION-HELM_HASH+GIT_HASH
 #   - if a rel/* branch:
 #     - use VERSION if it doesn't exist yet (first release build)
 #     - use VERSION-HELM_HASH+GIT_HASH otherwise
@@ -95,7 +95,7 @@ if [ "$1" == "createHelmPackage" ] ; then
             echo "This is the first build with a non-existing helm chart. Publishing chart..."
             SNAPSHOT="${VERSION}"
         fi
-    elif [ "${BRANCH}" == "master" ] ; then
+    elif [ "${BRANCH}" == "main" ] ; then
         SNAPSHOT="${VERSION}-${HELM_HASH}+${GIT_HASH}"
     else
         echo "Personal branch ${BRANCH} - not publishing chart"
