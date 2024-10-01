@@ -15,9 +15,9 @@ jobs:
       - name: Build Image
         run: |
           make build-image
-      # - name: Setup Integration Test Environment
-      #   run: |
-      #     make setup-integration-tests
+      - name: Setup Integration Test Environment
+        run: |
+          make setup-integration-tests
       # - name: Run Integration Tests
       #   run: |
       #     make run-integration-tests-only
