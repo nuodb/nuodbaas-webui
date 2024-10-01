@@ -4,7 +4,45 @@ on:
     branches:
       - "main"
       - "rel/*"
+      - "agr22/DBAAS-458"
 jobs:
+  publish_docker_image:
+    name: Publish Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build Image
+        run: |
+          make build-image
+      # - name: Setup Integration Test Environment
+      #   run: |
+      #     make setup-integration-tests
+      # - name: Run Integration Tests
+      #   run: |
+      #     make run-integration-tests-only
+      # - name: Teardown Integration Test Environment
+      #   if: success() || failure()
+      #   run: |
+      #     make teardown-integration-tests
+      # - name: Deploy Docker image / Helm Charts to ECR
+      #   run: |
+      #     make deploy-image // TODO: implement github version
+      # - name: Save test results
+      #   if: success() || failure()
+      #   run: |
+      #     mkdir -p ~/test-results/junit/
+      #     find ./selenium-tests/target/test-reports -type f -name "*.xml" -exec cp {} ~/test-results/junit/ \;
+      # - store_test_results: // TODO: convert to git action
+      #     path: ~/test-results
+      # - name: Compress Test Results
+      #   if: success() || failure()
+      #   run: |
+      #     tar -cvzf selenium-test-results.tar.gz -C selenium-tests/target/test-results .
+      # - store_artifacts: // TODO: convert to git action
+      #     path: selenium-test-results.tar.gz
+      #     destination: selenium_test_results
+
   publish_helm_chart:
     name: Publish Helm Chart
     runs-on: ubuntu-latest
