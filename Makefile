@@ -74,7 +74,7 @@ install-crds: $(KWOKCTL) $(KUBECTL)
 .PHONY: setup-integration-tests
 setup-integration-tests: build-image install-crds ## setup containers before running integration tests
 	@docker compose -f selenium-tests/compose.yaml up --wait
-	@docker exec -it selenium-tests-nuodb-cp-1 bash -c "curl \
+	@docker exec selenium-tests-nuodb-cp-1 bash -c "curl \
 		http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true \
 		--data-binary \
             '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"acme\", \"accessRule\":{\"allow\": \"all:*\"}}' \
