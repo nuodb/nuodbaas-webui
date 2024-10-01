@@ -26,7 +26,7 @@ Follow these steps:
 - commit and push the branch
 - once pushed, the build process will automatically create and publish the release helm chart / docker image
 
-## Subsequent code changes pushed to master or rel/* branches
+## Subsequent code changes pushed to main or rel/* branches
 
 All the code changes pushed to the `main` and `rel/*` branches will be published in the docker and helm registries with specific tags.
 
