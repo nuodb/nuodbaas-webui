@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class BannerTest extends TestRoutines {
-    private List<String> expectedMenuItems = Arrays.asList("backuppolicies", "backups", "databases", "projects", "users");
+    public static List<String> expectedMenuItems = Arrays.asList("backuppolicies", "backups", "databases", "projects", "users");
 
     @Test
     public void testHorizontalBanner() throws MalformedURLException {

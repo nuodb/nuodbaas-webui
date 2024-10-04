@@ -195,15 +195,8 @@ export default class FieldMap extends FieldBase {
     getDisplayValue() {
         const { prefix, values } = this.props;
         const value = getValue(values, prefix);
-        try {
-            return <dl className="map">{Object.keys(value).map(key => {
-                return <div key={key}><dt>{String(key)}</dt><dd>{getValue(values, prefix + "." + key)}</dd></div>;
-            })}</dl>
-        }
-        catch (ex) {
-            // data is in invalid format - this occurs if data is loaded concurrently while rendering.
-            // It will fix itself during further browser refreshes
-            return null;
-        }
+        return <dl className="map">{Object.keys(value).map(key => {
+            return <div key={key}><dt>{String(key)}</dt><dd>{getValue(values, prefix + "." + key)}</dd></div>;
+        })}</dl>
     }
 }
