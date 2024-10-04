@@ -5,15 +5,15 @@ package com.nuodb.selenium.basic;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.google.common.collect.ImmutableList;
 import com.nuodb.selenium.Constants;
 import com.nuodb.selenium.TestRoutines;
 
 import java.net.MalformedURLException;
-import java.util.Arrays;
 import java.util.List;
 
 public class BannerTest extends TestRoutines {
-    public static List<String> expectedMenuItems = Arrays.asList("backuppolicies", "backups", "databases", "projects", "users");
+    public static final List<String> expectedMenuItems = ImmutableList.of("backuppolicies", "backups", "databases", "projects", "users");
 
     @Test
     public void testHorizontalBanner() throws MalformedURLException {
