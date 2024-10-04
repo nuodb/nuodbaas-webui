@@ -51,7 +51,7 @@ function helmChartExists() {
 }
 
 # Returns the docker image location (and tag) based on branch info
-if [ "$1" == "getDockerImageTag" ] ; then
+function getDockerImageTag() {
     if [ "${BRANCH}" == "main" ] ; then
         # development builds
         echo "${DOCKER_REGISTRY}:${VERSION}-${GIT_HASH}"
@@ -67,6 +67,10 @@ if [ "$1" == "getDockerImageTag" ] ; then
         fi
     fi
     exit 0
+}
+
+if [ "$1" == "getDockerImageTag" ] ; then
+    getDockerImageTag
 fi
 
 # creates helm package
