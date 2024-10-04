@@ -36,7 +36,7 @@ jobs:
           ./build_utils.sh uploadDockerImage
       - name: Upload Test Results
         if: success() || failure()
-        uses: actions/upload-artifact@vv2
+        uses: actions/upload-artifact@v2
         with:
           name: test-results
           path: selenium-tests/target/test-results
