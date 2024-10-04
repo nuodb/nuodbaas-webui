@@ -39,14 +39,14 @@ help: ## Display this help.
 ##@ Production Builds
 
 .PHONY: all
-all: run-integration-tests deploy-image ## build, test + deploy everything
+all: run-integration-tests deploy-image-ecr ## build, test + deploy everything
 
 .PHONY: build-image
 build-image:  ## build UI and create Docker image
-	@docker build -t "${IMG_REPO}:latest" -f docker/production/Dockerfile .
+	@docker build -t "${IMG_REPO}:latest" --build-arg "REACT_APP_GIT_SHA=${SHA}" -f docker/production/Dockerfile .
 
-.PHONY: deploy-image
-deploy-image: build-image ## deploy Docker image to AWS
+.PHONY: deploy-image-ecr
+deploy-image-ecr: build-image ## deploy Docker image to AWS
 	@if [ "${ECR_ACCOUNT_URL}" = "" ] ; then \
 		echo "ECR_ACCOUNT_URL environment variable must be set"; \
 	elif [ "${UNCOMMITTED}" != "" ] ; then \
@@ -74,7 +74,7 @@ install-crds: $(KWOKCTL) $(KUBECTL)
 .PHONY: setup-integration-tests
 setup-integration-tests: build-image install-crds ## setup containers before running integration tests
 	@docker compose -f selenium-tests/compose.yaml up --wait
-	@docker exec -it selenium-tests-nuodb-cp-1 bash -c "curl \
+	@docker exec selenium-tests-nuodb-cp-1 bash -c "curl \
 		http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true \
 		--data-binary \
             '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"acme\", \"accessRule\":{\"allow\": \"all:*\"}}' \
