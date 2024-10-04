@@ -20,7 +20,7 @@ export default function ListResource({ schema }: SchemaType) {
     const path = "/" + useParams()["*"];
     const pageSize = 20;
 
-    const [items, setItems] = useState([]);
+    const [itemsAndPath, setItemsAndPath] = useState({ items: [], path });
     const [page, setPage] = useState(1);
     const [allItems, setAllItems] = useState([]);
     const [createPath, setCreatePath] = useState<string | null>(null);
@@ -65,14 +65,14 @@ export default function ListResource({ schema }: SchemaType) {
                 setAbortController(
                     getResourceEvents(path + "?listAccessible=true&expand=true&offset=" + String(start + (page - 1) * pageSize) + "&limit=" + Math.min(pageSize, end - start) + labelFilter, (data: TempAny) => {
                         if (data.items) {
-                            setItems(data.items);
+                            setItemsAndPath({ items: data.items, path });
                         }
                         else {
-                            setItems([]);
+                            setItemsAndPath({ items: [], path });
                         }
                     }, (error: TempAny) => {
                         Auth.handle401Error(error);
-                        setItems([]);
+                        setItemsAndPath({ items: [], path });
                     })
                 );
             }).catch((reason) => {
@@ -125,7 +125,12 @@ export default function ListResource({ schema }: SchemaType) {
             <Path schema={schema} path={path} filterValues={getFilterValues()} search={search} setSearch={setSearch} setPage={setPage} />
             {createPath && <Button data-testid="list_resource__create_button" variant="outlined" onClick={handleCreate}>Create</Button>}
             {renderPaging()}
-            <Table data-testid="list_resource__table" schema={schema} data={items.filter((d: TempAny) => d.__deleted__ !== true)} path={path} />
+            <Table
+                data-testid="list_resource__table"
+                schema={schema}
+                data={itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true)}
+                path={itemsAndPath.path}
+            />
             {renderPaging()}
         </React.Fragment>
     );
