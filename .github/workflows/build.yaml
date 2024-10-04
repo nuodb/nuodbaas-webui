@@ -26,7 +26,7 @@ jobs:
         run: |
           make run-integration-tests-only
       - name: Teardown Integration Test Environment
-        if: success() || failure()
+        if: !cancelled()
         run: |
           make teardown-integration-tests
       - name: 'Login to GHCR'
