@@ -39,7 +39,7 @@ jobs:
         run: |
           ./build_utils.sh uploadDockerImage
       - name: Upload Test Results
-        if: success() || failure()
+        if: !cancelled()
         uses: actions/upload-artifact@v4
         with:
           name: test-results
