@@ -152,6 +152,21 @@ if [ "$1" == "uploadHelmPackage" ] ; then
     exit 0
 fi
 
+if [ "$1" == "uploadDockerImage" ] ; then
+    DOCKER_IMAGE_TAG=$(getDockerImageTag)
+	if [ "${UNCOMMITTED}" != "" ] ; then
+		echo "Uncommitted changes in GIT. Will not push to GHCR."
+		echo "${UNCOMMITTED}"
+		exit 1
+	else
+		docker tag "nuodbaas-webui:latest" "${DOCKER_IMAGE_TAG}" && \
+        docker push "${DOCKER_IMAGE_TAG}"
+	fi
+
+    exit 0
+fi
+
 echo "$0 getDockerImageTag"
 echo "$0 createHelmPackage"
 echo "$0 uploadHelmPackage"
+echo "$0 uploadDockerImage"

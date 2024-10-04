@@ -27,8 +27,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "export REACT_APP_GIT_SHA=$(git rev-parse HEAD) && react-scripts start",
-    "build": "export REACT_APP_GIT_SHA=$(git rev-parse HEAD) && react-scripts build",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
     "test": "react-scripts test --transformIgnorePatterns \"node_modules/(?!axios)/\"",
     "eject": "react-scripts eject"
   },
