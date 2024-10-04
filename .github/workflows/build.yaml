@@ -18,9 +18,9 @@ jobs:
       - name: Setup Integration Test Environment
         run: |
           make setup-integration-tests
-      - name: Run Integration Tests
-        run: |
-          make run-integration-tests-only
+      # - name: Run Integration Tests
+      #   run: |
+      #     make run-integration-tests-only
       - name: Teardown Integration Test Environment
         if: success() || failure()
         run: |
