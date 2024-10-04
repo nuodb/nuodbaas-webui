@@ -37,10 +37,10 @@ jobs:
       - name: Upload Test Results
         if: success() || failure()
         uses: actions/upload-artifact@v4
-        retention-days: 7
         with:
           name: test-results
           path: selenium-tests/target/test-results
+          retention-days: 7
 
   publish_helm_chart:
     name: Publish Helm Chart
