@@ -2,11 +2,12 @@
 
 FROM node:18-alpine AS build-ui
 WORKDIR /app/
-COPY ui/public/ /app/public
-COPY ui/src/ /app/src
+ARG REACT_APP_GIT_SHA
 COPY ui/package.json /app/
 COPY ui/tsconfig.json /app/
 RUN npm install
+COPY ui/public/ /app/public
+COPY ui/src/ /app/src
 RUN npm run build
 
 FROM nginx:alpine

@@ -67,7 +67,7 @@ jobs:
           command: make teardown-integration-tests
       - run:
           name: Deploy Docker image / Helm Charts to ECR
-          command: make deploy-image
+          command: make deploy-image-ecr
       - run:
           name: Save test results
           command: |
