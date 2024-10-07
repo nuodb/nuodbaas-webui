@@ -160,6 +160,12 @@ function ResponsiveAppBar(resources: string[]) {
               onClose={handleCloseUserMenu}
             >
               <MenuItem onClick={() => {
+                handleCloseNavMenu();
+                navigate("/ui/settings/advanced");
+              }}>
+                <Typography textAlign="center">Settings</Typography>
+              </MenuItem>
+              <MenuItem onClick={() => {
                 handleCloseUserMenu();
                 Auth.logout();
                 window.location.href = "/ui";

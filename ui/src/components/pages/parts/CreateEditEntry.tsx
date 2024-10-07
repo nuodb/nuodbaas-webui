@@ -116,7 +116,7 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
         }
 
         function getCustomForm(path: string) {
-            let customizations = getCustomizations();
+            const customizations = getCustomizations();
             if (customizations && customizations.forms) {
                 for (const sPath of Object.keys(customizations.forms)) {
                     if (matchesPath(path, sPath)) {

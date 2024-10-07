@@ -16,6 +16,7 @@ import NotFound from "./components/pages/NotFound";
 import Dialog from "./components/pages/parts/Dialog";
 import GlobalErrorBoundary from "./components/GlobalErrorBoundary";
 import Auth from "./utils/auth";
+import SettingsAdvanced from './components/pages/SettingsAdvanced';
 
 /**
  * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
@@ -43,6 +44,7 @@ export default function App() {
                 <Route path="/ui/resource/create/*" element={<CreateResource schema={schema} />} />
                 <Route path="/ui/resource/edit/*" element={<EditResource schema={schema} />} />
                 <Route path="/ui/resource/view/*" element={<ViewResource schema={schema} />} />
+                <Route path="/ui/settings/advanced" element={<SettingsAdvanced />} />
                 <Route path="/*" element={<NotFound />} />
               </Routes></React.Fragment>
             :

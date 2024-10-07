@@ -11,7 +11,7 @@ function getCustomizations() {
     "views": {
         "/databases": {
             status: {
-                value: "status.ready ? \"Ready\" : \"Not Ready\"),
+                value: "status.ready),
                 buttons: [
                     {
                         "label": "Start Database",
