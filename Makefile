@@ -102,10 +102,10 @@ start-dev: setup-integration-tests ## launch WebUI/ControlPlane/Proxy for develo
 
 .PHONY: stop-dev
 stop-dev: teardown-integration-tests ## stop development environment processes (WebUI/ControlPlane/Proxy)
-	@PID=$(shell netstat -a -n -p 2> /dev/null | sed -n -E "s/.* 0\.0\.0\.0:3000 .* LISTEN .* ([0-9]+)\/node/\1/p")
-	@if [ "${PID}" != "" ] ; then kill -9 ${PID}; fi
-	@PID=$(shell docker ps -aq --filter "name=nuodb-webui-dev")
-	@if [ "${PID}" != "" ] ; then docker stop ${PID}; fi
+	@PID=$(shell netstat -a -n -p 2> /dev/null | sed -n -E "s/.* 0\.0\.0\.0:3000 .* LISTEN .* ([0-9]+)\/node/\1/p"); \
+	if [ "$$PID" != "" ] ; then kill -9 $$PID; fi
+	@PID=$(shell docker ps -aq --filter "name=nuodb-webui-dev"); \
+	if [ "$$PID" != "" ] ; then docker stop $$PID; fi
 
 $(KWOKCTL): $(KUBECTL)
 	mkdir -p bin

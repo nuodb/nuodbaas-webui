@@ -14,7 +14,8 @@ import FieldFactory from "../../fields/FieldFactory";
 import RestSpinner from "./RestSpinner";
 import { getValue } from "../../fields/utils";
 import Dialog from "./Dialog";
-import { CustomizationsType, TempAny } from "../../../utils/types";
+import { TempAny } from "../../../utils/types";
+import { customEvaluate, getCustomizations } from '../../../utils/Customizations';
 
 /**
  * shows a table with all the "data". Columns are determined by the schema definition for the "path"
@@ -64,13 +65,12 @@ export default function Table(props: TempAny) {
 
     let customFields: TempAny = null;
     function getCustomFields() {
-        const w: TempAny = window;
-        let customizations: CustomizationsType = w["getCustomizations"] && w["getCustomizations"]();
-        if (customFields === null && customizations && customizations.views) {
+        const customizations = getCustomizations();
+        if (customFields === null && customizations && customizations.views && customizations.views) {
             customFields = {};
             for (const sPath of Object.keys(customizations.views)) {
                 if (matchesPath(path, sPath)) {
-                    customFields = customizations.views[sPath];
+                    customFields = customizations.views[sPath].definition;
                     break;
                 }
             }
@@ -137,18 +137,9 @@ export default function Table(props: TempAny) {
                                 let cf = getCustomFields();
 
                                 let value;
-                                if (field in cf && cf[field].value && typeof cf[field].value === "function") {
+                                if (field in cf && cf[field].value) {
                                     try {
-                                        if (field in fieldsSchema) {
-                                            value = FieldFactory.createDisplayValue({
-                                                prefix: field,
-                                                parameter: fieldsSchema[field],
-                                                values: { [field]: cf[field].value(row) }
-                                            });
-                                        }
-                                        else {
-                                            value = showValue(cf[field].value(row));
-                                        }
+                                        value = showValue(customEvaluate(row, cf[field].value));
                                     }
                                     catch (ex) {
                                         const msg = "Error in custom value evaluation for field \"" + field + "\" in row " + String(index + 1);
@@ -172,10 +163,12 @@ export default function Table(props: TempAny) {
 
                                 let buttons: TempAny = [];
                                 if (field in cf && cf[field].buttons) {
+                                    console.log("BUTTON", field, cf[field].buttons);
                                     cf[field].buttons.forEach((button: TempAny) => {
                                         let buttonVisible = false;
                                         try {
-                                            buttonVisible = !button.visible || (typeof button.visible === "function" && button.visible(row));
+                                            console.log("visible", button.visible, "_" + customEvaluate(row, button.visible) + "_", row);
+                                            buttonVisible = !button.visible || customEvaluate(row, button.visible);
                                         }
                                         catch (ex) {
                                             const msg = "Error in checking visibility of button. Field: " + field + " in row " + String(index + 1);

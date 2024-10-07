@@ -1,7 +1,7 @@
 # NuoDBaaS WebUI customizations
 
 The NuoDBaaS WebUI allows for UI customizations to handle special cases which are not defined in the OpenAPI spec file. These are currently action buttons in the views and in the future will be extended to simplified forms.
-The configuration file is currently stored in `public/customizations.js` and is a JavaScript file containing configurations, function callbacks and constants referencing other parts of the file to avoid duplication.
+The configuration file is currently stored in `public/customizations.json` and is a JSON file containing configurations, macros ("value" and "disabled" attributes.
 
 ## Example configuration file
 
@@ -11,7 +11,7 @@ function getCustomizations() {
     "views": {
         "/databases": {
             status: {
-                value: (data) => data.status && (data.status.ready ? "Ready" : "Not Ready"),
+                value: "status.ready ? \"Ready\" : \"Not Ready\"),
                 buttons: [
                     {
                         "label": "Start Database",
@@ -21,7 +21,7 @@ function getCustomizations() {
                                 "path": "/maintenance"
                             }
                         ],
-                        "visible": (data) => data.maintenance ? true : false,
+                        "visible": "maintenance",
                         "confirm": "Do you want to start Database {organization}/{project}/{name}?",
                     },
                 ]
@@ -78,7 +78,7 @@ function getCustomizations() {
 
 ### Explanation of configuration file definition
 
-The NuoDBaaS WebUI will include the `customizations.js` file and call `getCustomizations()` to retrieve the customization definitions and callback functions.
+The NuoDBaaS WebUI will include the `customizations.json` file to retrieve the customization definitions.
 
 - The only root keyword is `views` right now defining view definitions
 - The `views` object contains a list of `RESOURCE_PATH` definition based on the Control Plane Rest API. These paths can have placeholders, i.e. `/databases/{organization}/{project}` which match with the definitions in the OpenAPI spec. All child elements below this resource path define how the view for this resource path is customized.
