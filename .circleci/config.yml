@@ -102,7 +102,7 @@ jobs:
           command: |
             VERSION=$(grep -e "^appVersion:" charts/nuodbaas-webui/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
             SHA=$(git rev-parse --short HEAD)
-            VERSION_SHA=${VERSION}-dev.sha-${SHA}
+            VERSION_SHA=${VERSION}-${SHA}
 
             mkdir -p tmp/repos/$DBAAS_DEPLOY_REPO \
               && cd tmp/repos/$DBAAS_DEPLOY_REPO

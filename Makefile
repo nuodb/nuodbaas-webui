@@ -17,7 +17,7 @@ KUBECTL := bin/kubectl
 IMG_REPO := nuodbaas-webui
 VERSION := $(shell grep -e "^appVersion:" charts/nuodbaas-webui/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
 SHA := $(shell git rev-parse --short HEAD)
-VERSION_SHA ?= ${VERSION}-dev.sha-${SHA}
+VERSION_SHA ?= ${VERSION}-${SHA}
 UNCOMMITTED := $(shell rm -f get_helm.sh && git status --porcelain)
 
 # The help target prints out all targets with their descriptions organized
