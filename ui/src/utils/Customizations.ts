@@ -110,30 +110,67 @@ function isNumericOrPeriod(ch: string) {
 
 /** Splits the formula into the appropriate components as an Array. Each array element has a string representing a name or operator
  * This simplifies processing when passing in the data.
+ * Note: a String value will be prepended with a quote (") to distinguish it from a field variable
  */
-function splitFormulaIntoParts(formula: string) : string[]|null {
+export function splitFormulaIntoParts(formula: string) : string[]|null {
     let name = "";
-    let ret = [];
+    let ret:any[] = [];
 
-    function pushElement(element:string) {
+    function pushElement(element:string|null) {
         if(name !== "") {
             ret.push(name);
             name = "";
         }
-        ret.push(element);
+        if(element !== null) {
+            ret.push(element);
+        }
     }
 
     while(formula !== "") {
         const ch = formula.charAt(0);
         formula = formula.substring(1);
+        const nextChar = formula != "" ? formula.charAt(0) : null;
         if(ch === " ") {
+            pushElement(null);
             continue;
         }
         else if(ch === "!") {
-            pushElement(ch);
+            if(nextChar === "=") {
+                pushElement("!=");
+                formula = formula.substring(1);
+            }
+            else {
+                pushElement(ch);
+            }
+        }
+        else if(ch === "\"") {
+            let str = "\"";
+            while(true) {
+                if(formula === "") {
+                    // string not terminated
+                    return null;
+                }
+                else if(formula.substring(0, 2) === "\\\\") {
+                    str += "\\";
+                    formula = formula.substring(2);
+                }
+                else if(formula.substring(0, 2) === "\\\"") {
+                    str += "\"";
+                    formula = formula.substring(2);
+                }
+                else if(formula.charAt(0) === "\"") {
+                    pushElement(str);
+                    formula = formula.substring(1);
+                    break;
+                }
+                else {
+                    str += formula.charAt(0);
+                    formula = formula.substring(1);
+                }
+            }
         }
         else if("=&|".includes(ch)) {
-            if(formula.length > 0 && formula[0] === ch) {
+            if(nextChar === ch) {
                 formula = formula.substring(1);
             }
             pushElement(ch);
@@ -146,9 +183,7 @@ function splitFormulaIntoParts(formula: string) : string[]|null {
             return null;
         }
     }
-    if(name !== "") {
-        ret.push(name);
-    }
+    pushElement(null);
     return ret;
 }
 
@@ -163,30 +198,43 @@ type FormulaPart = (boolean|string|FormulaPart[])
  * @returns result
  */
 function handleFormula(data: TempAny, parts: FormulaPart[]) : FormulaPart {
+    function value(v:FormulaPart): any {
+        if(typeof v === "string") {
+            if(v.startsWith("\"")) {
+                return v.substring(1);
+            }
+            else if(isAlpha(v.charAt(0))) {
+                return getValue(data, v);
+            }
+        }
+        else if(typeof v === "boolean") {
+            return v;
+        }
+        return null;
+    }
+
     for(let i=0; i<parts.length; i++) {
         if(Array.isArray(parts[i])) {
             parts[i] = handleFormula(data, parts[i] as FormulaPart[]);
         }
     }
     if(parts.length === 1) {
-        if(typeof parts[0] === "string" && isAlpha(parts[0].charAt(0))) {
-            return getValue(data, parts[0]);
-        }
-        else if(typeof parts[0] === "boolean") {
-            return parts[0];
-        }
+        return value(parts[0]);
     }
     if(parts.length === 2 && parts[0] === "!" && (typeof parts[1] === "string")) {
-        return !getValue(data, parts[1]);
+        return !value(parts[1]);
     }
     else if(parts.length === 3 && parts[1] === "&") {
-        return parts[0] && parts[2];
+        return value(parts[0]) && value(parts[2]);
     }
     else if(parts.length === 3 && parts[1] === "|") {
-        return parts[0] || parts[2];
+        return value(parts[0]) || value(parts[2]);
     }
     else if(parts.length === 3 && parts[1] === "=") {
-        return parts[0] === parts[2];
+        return value(parts[0]) === value(parts[2]);
+    }
+    else if(parts.length === 3 && parts[1] === "!=") {
+        return value(parts[0]) !== value(parts[2]);
     }
     else {
         console.log("ERROR: invalid formula", parts);
