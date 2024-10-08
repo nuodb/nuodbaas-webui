@@ -64,6 +64,10 @@ export default function Table(props: TempAny) {
                 }
             })
         }
+        else {
+            tableFields = [...tableFields, ...Object.keys(dataKeys)];
+            dataKeys = {};
+        }
         const cfs = (cv && cv.fields) || null;
         if (cfs) {
             Object.keys(cfs).forEach(key => {

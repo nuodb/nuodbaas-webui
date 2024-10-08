@@ -15,10 +15,7 @@
             ],
             "fields": {
                 "status": {
-                    "value": "status.state"
-                },
-                "buttons": {
-                    "label": "",
+                    "value": "status.state",
                     "buttons": [
                         {
                             "label": "Start Database",
@@ -207,7 +204,7 @@
                 },
                 {
                     "title": "Advanced",
-                    "fiels": {
+                    "fields": {
                         "*": {}
                     }
                 }
