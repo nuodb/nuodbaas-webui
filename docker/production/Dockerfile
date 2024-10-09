@@ -9,6 +9,7 @@ RUN npm install
 COPY ui/public/ /app/public
 COPY ui/src/ /app/src
 RUN npm run build
+RUN npm test -- --watchAll=false
 
 FROM nginx:alpine
 COPY --from=build-ui /app/build /usr/share/nginx/html/ui/
