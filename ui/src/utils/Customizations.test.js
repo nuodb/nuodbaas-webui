@@ -25,6 +25,12 @@ test('Check Formula', () => {
         "field==\"invalidValue\"", false,
         "\"const\" ==\"const\"", true,
         'fieldWithQuote="value\\"quoted\\""', true,
+        "maintenance.isDisabled=false", false,
+        "!maintenance", true,
+        "!!true", true,
+        "!!missingField", false,
+        "!!field", true,
+        "!!\"string\"", true,
     ]
 
     for(let i=0; i<tests.length; i+=2) {

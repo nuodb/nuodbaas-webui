@@ -129,14 +129,14 @@ export function splitFormulaIntoParts(formula: string) : string[]|null {
     while(formula !== "") {
         const ch = formula.charAt(0);
         formula = formula.substring(1);
-        const nextChar = formula != "" ? formula.charAt(0) : null;
+        const nextChar = formula !== "" ? formula.charAt(0) : null;
         if(ch === " ") {
             pushElement(null);
             continue;
         }
         else if(ch === "!") {
-            if(nextChar === "=") {
-                pushElement("!=");
+            if(nextChar === "=" || nextChar === "!") {
+                pushElement(ch + nextChar);
                 formula = formula.substring(1);
             }
             else {
@@ -203,6 +203,12 @@ function handleFormula(data: TempAny, parts: FormulaPart[]) : FormulaPart {
             if(v.startsWith("\"")) {
                 return v.substring(1);
             }
+            else if(v === "true") {
+                return true;
+            }
+            else if(v === "false") {
+                return false;
+            }
             else if(isAlpha(v.charAt(0))) {
                 return getValue(data, v);
             }
@@ -223,6 +229,9 @@ function handleFormula(data: TempAny, parts: FormulaPart[]) : FormulaPart {
     }
     if(parts.length === 2 && parts[0] === "!" && (typeof parts[1] === "string")) {
         return !value(parts[1]);
+    }
+    else if(parts.length === 2 && parts[0] === "!!" && (typeof parts[1] === "string")) {
+        return !!value(parts[1]);
     }
     else if(parts.length === 3 && parts[1] === "&") {
         return value(parts[0]) && value(parts[2]);
