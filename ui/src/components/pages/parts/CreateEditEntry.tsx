@@ -14,7 +14,8 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Auth from "../../../utils/auth";
 import { setValue } from "../../fields/utils";
 import { matchesPath } from "../../../utils/schema";
-import { FieldValuesType, FieldParameterType, TempAny, CustomizationsType, StringMapType, FieldParametersType } from "../../../utils/types";
+import { FieldValuesType, FieldParameterType, TempAny, StringMapType, FieldParametersType } from "../../../utils/types";
+import { getCustomizations } from "../../../utils/Customizations";
 
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
@@ -115,8 +116,7 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
         }
 
         function getCustomForm(path: string) {
-            let w: TempAny = window;
-            let customizations: CustomizationsType = w["getCustomizations"] && w["getCustomizations"]();
+            const customizations = getCustomizations();
             if (customizations && customizations.forms) {
                 for (const sPath of Object.keys(customizations.forms)) {
                     if (matchesPath(path, sPath)) {

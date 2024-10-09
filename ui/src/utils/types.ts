@@ -24,38 +24,6 @@ export type FieldParametersType = {
 
 export type SchemaType = TempAny;
 
-export type CustomFormField = {
-    required: boolean,
-    expand: boolean,
-    hidden: boolean
-}
-
-export type CustomFormSection = {
-    title: string,
-    fields: {
-        [key: string]:CustomFormField
-    }
-}
-
-export type CustomizationsType = {
-    forms: {[key: string]:{
-        sections: [
-            CustomFormSection
-        ],
-    }}
-    views: {[key: string]:{
-        [key:string]:{
-            value: (values: FieldValuesType) => string,
-            buttons: [
-                label: string,
-                patch: any,
-                visible: (values: FieldValuesType) => string,
-                confirm: string
-            ]
-        }
-    }}
-};
-
 export type StringMapType = {
     [key: string]: string
 }

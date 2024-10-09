@@ -74,22 +74,30 @@ function parseSchema(rootSchema:SchemaType, schema:SchemaType, path:string[]) {
 
 /**
  * Checks if both path's match. Placeholders within a path component ("{parameter}") always match.
- * @param {*} path1
- * @param {*} path2
+ * if there is a question mark ("?") in the schema path, everything afterwards could be optionally ignored
+ * Examples: path: /a/b/c matches /a/b/c, /a/b/{param1}, /a/b/{param1}?/{param2}, /a/{param1}/{param2}
+ * @param {*} path
+ * @param {*} schemaPath
  * @returns
  */
-export function matchesPath(path1:string, path2:string) : boolean {
-    let parts1 = path1.split("/");
-    let parts2 = path2.split("/");
-    if(parts1.length !== parts2.length) {
-        return false;
-    }
-    for (let i = 0; i < parts1.length; i++) {
-        if(parts1[i] !== parts2[i] && !parts1[i].startsWith("{") && !parts2[i].startsWith("{")) {
+export function matchesPath(path:string, schemaPath:string) : boolean {
+    let partsPath = path.split("/");
+    let partsSchemaPath = schemaPath.split("/");
+    for (let i = 0; i < partsPath.length; i++) {
+        if(partsSchemaPath.length === i) {
             return false;
         }
+        const p = partsPath[i].endsWith("?") ? partsPath[i].substring(0, partsPath[i].length-1) : partsPath[i];
+        const s = partsSchemaPath[i].endsWith("?") ? partsSchemaPath[i].substring(0, partsSchemaPath[i].length-1) : partsSchemaPath[i];
+        const hasEndMarker = partsSchemaPath[i].endsWith("?");
+        if(p !== s && !s.startsWith("{")) {
+            return false;
+        }
+        if(i === partsPath.length - 1 && hasEndMarker) {
+            return true;
+        }
     }
-    return true;
+    return partsPath.length === partsSchemaPath.length;
 }
 
 /**
@@ -103,7 +111,7 @@ export function getSchemaPath(schema: SchemaType, path:string) : string|null {
     if(!schema) {
         return null
     }
-    const ret = Object.keys(schema).filter(key => matchesPath(key, path));
+    const ret = Object.keys(schema).filter(sPath => matchesPath(path, sPath));
     return ret.length === 1 ? ret[0] : null;
 }
 

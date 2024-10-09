@@ -9,12 +9,13 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { getResourceByPath, getCreatePath, getChild, replaceVariables, matchesPath } from "../../../utils/schema";
+import { getResourceByPath, getCreatePath, getChild, replaceVariables } from "../../../utils/schema";
 import FieldFactory from "../../fields/FieldFactory";
 import RestSpinner from "./RestSpinner";
 import { getValue } from "../../fields/utils";
 import Dialog from "./Dialog";
-import { CustomizationsType, TempAny } from "../../../utils/types";
+import { TempAny } from "../../../utils/types";
+import { CustomViewField, evaluate, getCustomizationsView } from '../../../utils/Customizations';
 
 /**
  * shows a table with all the "data". Columns are determined by the schema definition for the "path"
@@ -43,7 +44,7 @@ export default function Table(props: TempAny) {
             });
         })
 
-        let tableFields = [];
+        let tableFields: string[] = [];
         if ("$ref" in dataKeys) {
             tableFields.push("$ref");
             delete dataKeys["$ref"];
@@ -51,31 +52,47 @@ export default function Table(props: TempAny) {
         if ("resourceVersion" in dataKeys) {
             delete dataKeys["resourceVersion"]
         }
-        let ret = [...tableFields, ...Object.keys(dataKeys)];
-
-        let cf = getCustomFields();
-        Object.keys(cf).forEach(key => {
-            if (!ret.includes(key)) {
-                ret.push(key);
-            }
-        })
-        return ret;
+        const cv = getCustomizationsView(path);
+        if (cv && cv.columns) {
+            cv.columns.forEach(column => {
+                if (column === "*") {
+                    tableFields = [...tableFields, ...Object.keys(dataKeys)];
+                }
+                else {
+                    tableFields.push(column);
+                    delete dataKeys[column];
+                }
+            })
+        }
+        else {
+            tableFields = [...tableFields, ...Object.keys(dataKeys)];
+            dataKeys = {};
+        }
+        const cfs = (cv && cv.fields) || null;
+        if (cfs) {
+            Object.keys(cfs).forEach(key => {
+                if (!tableFields.includes(key) && (!cv || !cv.columns || (!cv.columns.includes(key) && cv.columns.includes("*")))) {
+                    tableFields.push(key);
+                }
+            })
+        }
+        return tableFields;
     }
 
-    let customFields: TempAny = null;
-    function getCustomFields() {
-        const w: TempAny = window;
-        let customizations: CustomizationsType = w["getCustomizations"] && w["getCustomizations"]();
-        if (customFields === null && customizations && customizations.views) {
-            customFields = {};
-            for (const sPath of Object.keys(customizations.views)) {
-                if (matchesPath(path, sPath)) {
-                    customFields = customizations.views[sPath];
-                    break;
-                }
+    function getTableLabels() {
+        const tableFields = getTableFields();
+        const cv = getCustomizationsView(path);
+        return tableFields.map(key => {
+            if (cv && cv.fields && cv.fields[key] && cv.fields[key].label !== undefined) {
+                return cv.fields[key].label;
             }
-        }
-        return customFields || {};
+            else if (key === "$ref") {
+                return "";
+            }
+            else {
+                return key;
+            }
+        });
     }
 
     function showValue(value: TempAny) {
@@ -105,13 +122,14 @@ export default function Table(props: TempAny) {
     }
 
     const tableFields = getTableFields();
+    const tableLabels = getTableLabels();
     const fieldsSchema = getChild(getResourceByPath(schema, getCreatePath(schema, path)), ["get", "responses", "200", "content", "application/json", "schema", "properties"]);
 
     return (<TableContainer component={Paper}>
         <TableMaterial data-testid={props["data-testid"]} sx={{ minWidth: 650 }}>
             <TableHead>
                 <TableRow>
-                    {tableFields.map(field => <TableCell key={field}>{field === "$ref" ? "" : field}</TableCell>)}
+                    {tableFields.map((field, index) => <TableCell key={field}>{tableLabels[index]}</TableCell>)}
                 </TableRow>
             </TableHead>
             <TableBody>
@@ -134,21 +152,13 @@ export default function Table(props: TempAny) {
                                     }}>Delete</Button>}</TableCell>;
                             }
                             else {
-                                let cf = getCustomFields();
+                                const cv = getCustomizationsView(path)
+                                const cf: CustomViewField | null = (cv && cv.fields && cv.fields[field]) || null;
 
                                 let value;
-                                if (field in cf && cf[field].value && typeof cf[field].value === "function") {
+                                if (cf && cf.value) {
                                     try {
-                                        if (field in fieldsSchema) {
-                                            value = FieldFactory.createDisplayValue({
-                                                prefix: field,
-                                                parameter: fieldsSchema[field],
-                                                values: { [field]: cf[field].value(row) }
-                                            });
-                                        }
-                                        else {
-                                            value = showValue(cf[field].value(row));
-                                        }
+                                        value = showValue(evaluate(row, cf.value));
                                     }
                                     catch (ex) {
                                         const msg = "Error in custom value evaluation for field \"" + field + "\" in row " + String(index + 1);
@@ -171,11 +181,11 @@ export default function Table(props: TempAny) {
                                 }
 
                                 let buttons: TempAny = [];
-                                if (field in cf && cf[field].buttons) {
-                                    cf[field].buttons.forEach((button: TempAny) => {
+                                if (cf && cf.buttons) {
+                                    cf.buttons.forEach((button: TempAny) => {
                                         let buttonVisible = false;
                                         try {
-                                            buttonVisible = !button.visible || (typeof button.visible === "function" && button.visible(row));
+                                            buttonVisible = !button.visible || evaluate(row, button.visible);
                                         }
                                         catch (ex) {
                                             const msg = "Error in checking visibility of button. Field: " + field + " in row " + String(index + 1);
