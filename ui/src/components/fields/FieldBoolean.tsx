@@ -5,15 +5,16 @@ import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
 import { getValue, setValue } from "./utils"
-import FieldBase from "./FieldBase"
+import FieldBase, { FieldBaseType, FieldProps } from "./FieldBase"
+import { ReactNode } from 'react'
 
-export default class FieldBoolean extends FieldBase {
+export default function FieldBoolean(props: FieldProps): FieldBaseType {
 
     /**
      * show Field of type Boolean using the values and schema definition
      */
-    show() {
-        const { prefix, values, required, setValues, autoFocus, readonly } = this.props;
+    function show(): ReactNode {
+        const { prefix, values, required, setValues, autoFocus, readonly } = props;
         let value = getValue(values, prefix);
         return <FormControl key={prefix} fullWidth>
             <InputLabel id={"label_" + prefix}>{prefix}</InputLabel>
@@ -21,7 +22,7 @@ export default class FieldBoolean extends FieldBase {
                 let v = { ...values };
                 setValue(v, prefix, input.value);
                 setValues(v);
-            }} onBlur={() => this.validate()} disabled={readonly}>
+            }} onBlur={() => FieldBase(props).validate()} disabled={readonly}>
                 <MenuItem value="true">True</MenuItem>
                 <MenuItem value="false">False</MenuItem>
             </Select>
@@ -29,9 +30,11 @@ export default class FieldBoolean extends FieldBase {
         </FormControl>;
     }
 
-    getDisplayValue() {
-        const { prefix, values } = this.props;
+    function getDisplayValue(): ReactNode {
+        const { prefix, values } = props;
         const value = getValue(values, prefix);
         return value ? "true" : "false";
     }
+
+    return { ...FieldBase(props), show, getDisplayValue };
 }

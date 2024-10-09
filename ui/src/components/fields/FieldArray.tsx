@@ -9,19 +9,19 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import FieldBase from './FieldBase'
+import FieldBase, { FieldBaseType, FieldProps } from './FieldBase'
 import FieldFactory from "./FieldFactory"
 import FieldMessage from "./FieldMessage";
 
-export default class FieldArray extends FieldBase {
+export default function FieldArray(props: FieldProps): FieldBaseType {
     /**
      * show Field of type Array using the values and schema definition
      * @returns
      */
-    show() {
-        const { prefix, parameter, values, errors, required, setValues, updateErrors, readonly } = this.props;
+    function show(): ReactNode {
+        const { prefix, parameter, values, errors, required, setValues, updateErrors, readonly } = props;
         if (!parameter.items) {
-            return new FieldMessage({ ...this.props, message: "\"items\" attribute missing in schema definition" }).show();
+            return FieldMessage({ ...props, message: "\"items\" attribute missing in schema definition" }).show();
         }
         let ret = [];
         let value = getValue(values, prefix);
@@ -29,7 +29,7 @@ export default class FieldArray extends FieldBase {
             for (let i = 0; i < value.length; i++) {
                 let prefixKey = prefix + "." + i;
                 const field = FieldFactory.create({
-                    ...this.props,
+                    ...props,
                     prefix: prefixKey, parameter: parameter.items, values, errors, required: (i === 0 && required), setValues: (vs) => {
                         vs = { ...vs };
                         let v = getValue(values, prefixKey);
@@ -49,7 +49,7 @@ export default class FieldArray extends FieldBase {
             let nextIndex = value === null ? 0 : value.length;
             let prefixKey = prefix + "." + nextIndex;
             let field = FieldFactory.create({
-                ...this.props,
+                ...props,
                 prefix: prefixKey, parameter: parameter.items, values, setValues: (vs) => {
                     vs = { ...vs };
                     let v = getValue(values, prefixKey);
@@ -78,9 +78,11 @@ export default class FieldArray extends FieldBase {
         </TableContainer>;
     }
 
-    getDisplayValue(): ReactNode {
-        const { prefix, values } = this.props;
+    function getDisplayValue(): ReactNode {
+        const { prefix, values } = props;
         const value = getValue(values, prefix);
         return value && value.map((v: string, index: number) => <div key={index}>{v}</div>);
     }
+
+    return { ...FieldBase(props), show, getDisplayValue };
 }

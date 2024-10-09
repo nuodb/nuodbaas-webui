@@ -56,30 +56,31 @@ export interface FieldProps extends FieldPropsValidate {
     message?: string;
 }
 
+export interface FieldBaseType {
+    props: FieldProps,
+    validate: (prefix?: string, parameter?: FieldParameterType, value?: string) => boolean,
+    show: () => ReactNode,
+    getDisplayValue: () => ReactNode,
+}
+
 /**
  * Base class for all the Field* classes. Performs general field validation and text display of the field
  */
-export default abstract class FieldBase {
-
-    props: FieldProps;
-
-    constructor(props: FieldProps) {
-        this.props = props;
-    }
+export default function FieldBase(props: FieldProps): FieldBaseType {
 
     /** validate field and set error state
-     * prefix - field name to validate (separated by period on hierarchical fields). Defaults to this.props.prefix
-     * parameter - schema definition for this field. Defaults to this.props.parameter
+     * prefix - field name to validate (separated by period on hierarchical fields). Defaults to props.prefix
+     * parameter - schema definition for this field. Defaults to props.parameter
      * value - value to check. if undefined, defaults to the value for "prefix"
      * @returns true if validation passed.
      */
-    validate(prefix?: string, parameter?: FieldParameterType, value?: string): boolean {
-        const { values, updateErrors } = this.props;
+    function validate(prefix?: string, parameter?: FieldParameterType, value?: string): boolean {
+        const { values, updateErrors } = props;
         if (!prefix) {
-            prefix = this.props.prefix;
+            prefix = props.prefix;
         }
         if (!parameter) {
-            parameter = this.props.parameter;
+            parameter = props.parameter;
         }
         if (value === undefined) {
             value = getValue(values, prefix);
@@ -106,14 +107,16 @@ export default abstract class FieldBase {
     /**
      * shows field. Must be implemented
      */
-    abstract show(): ReactNode;
+    function show(): ReactNode {
+        throw new Error("show() must be implemented");
+    };
 
     /**
      * shows display value of the field (read only)
      * @returns display value
      */
-    getDisplayValue(): ReactNode {
-        const { prefix, values } = this.props;
+    function getDisplayValue(): ReactNode {
+        const { prefix, values } = props;
         let value = getValue(values, prefix);
         if (value === undefined || value === null) {
             return "";
@@ -127,4 +130,6 @@ export default abstract class FieldBase {
         }
         return String(value);
     }
+
+    return { props, validate, show, getDisplayValue }
 }
