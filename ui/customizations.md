@@ -1,7 +1,7 @@
 # NuoDBaaS WebUI customizations
 
 The NuoDBaaS WebUI allows for UI customizations to handle special cases which are not defined in the OpenAPI spec file. These are currently action buttons in the views and in the future will be extended to simplified forms.
-The configuration file is currently stored in `public/customizations.json` and is a JSON file containing configurations, macros ("value" and "disabled" attributes.
+The configuration file is currently stored in `public/customizations.json` and is a JSON file containing configurations, macros ("value" and "disabled" attributes).
 
 ## Example configuration file
 
@@ -11,7 +11,7 @@ function getCustomizations() {
     "views": {
         "/databases": {
             status: {
-                value: "status.ready),
+                value: "status.ready",
                 buttons: [
                     {
                         "label": "Start Database",
