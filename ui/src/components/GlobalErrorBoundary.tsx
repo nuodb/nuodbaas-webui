@@ -1,9 +1,9 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { ErrorInfo, ReactNode } from "react";
+import Button from "./controls/Button";
 import Stacktrace from 'stacktrace-js';
 import BuildNumber from "./pages/parts/BuildNumber";
-import Button from "./controls/Button";
 
 interface IProps {
     children?: ReactNode

@@ -1,6 +1,8 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
 import { useNavigate } from 'react-router-dom';
+import Button from '../../controls/Button';
+import { TableBody, TableCell, Table as TableCustom, TableHead, TableRow } from '../../controls/Table';
 import { getResourceByPath, getCreatePath, getChild, replaceVariables } from "../../../utils/schema";
 import FieldFactory from "../../fields/FieldFactory";
 import RestSpinner from "./RestSpinner";
@@ -8,8 +10,6 @@ import { getValue } from "../../fields/utils";
 import Dialog from "./Dialog";
 import { TempAny } from "../../../utils/types";
 import { CustomViewField, evaluate, getCustomizationsView } from '../../../utils/Customizations';
-import Button from '../../controls/Button';
-import { TableBody, TableCell, Table as TableCustom, TableHead, TableRow } from '../../controls/Table';
 
 /**
  * shows a table with all the "data". Columns are determined by the schema definition for the "path"

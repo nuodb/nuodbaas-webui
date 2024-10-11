@@ -5,13 +5,13 @@ import { useNavigate } from "react-router-dom";
 import FieldFactory from "../../fields/FieldFactory";
 import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultValue, submitForm } from "../../../utils/schema";
 import RestSpinner from "./RestSpinner";
+import Button from "../../controls/Button";
+import Accordion from "../../controls/Accordion";
 import Auth from "../../../utils/auth";
 import { setValue } from "../../fields/utils";
 import { matchesPath } from "../../../utils/schema";
 import { FieldValuesType, FieldParameterType, TempAny, StringMapType, FieldParametersType } from "../../../utils/types";
-import { getCustomizations, isMaterial } from "../../../utils/Customizations";
-import Button from "../../controls/Button";
-import Accordion from "../../controls/Accordion";
+import { getCustomizations } from "../../../utils/Customizations";
 
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
@@ -281,17 +281,9 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
             })).show();
         });
         if (ret && ret.length > 0 && section.title) {
-            if (isMaterial()) {
-                ret = <Accordion key={"section-" + section.title.toLowerCase()} data-testid={"section-" + section.title.toLowerCase()} summary={section.title}>
-                    {ret}
-                </Accordion>;
-            }
-            else {
-                ret = <details key={"section-" + section.title.toLowerCase()}>
-                    <summary data-testid={"section-" + section.title.toLowerCase()} key={"section-" + section.title.toLowerCase()}>{section.title}</summary>
-                    {ret}
-                </details>
-            }
+            ret = <Accordion key={"section-" + section.title.toLowerCase()} data-testid={"section-" + section.title.toLowerCase()} summary={section.title}>
+                {ret}
+            </Accordion>;
         }
         return ret;
     }

@@ -13,10 +13,10 @@ import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
+import Button from "../../controls/Button";
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import { SchemaType } from "../../../utils/types";
-import Button from "../../controls/Button";
 
 function ResponsiveAppBar(resources: string[]) {
   const navigate = useNavigate();

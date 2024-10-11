@@ -6,7 +6,6 @@ import FieldFactory from "./FieldFactory";
 import { getDefaultValue } from "../../utils/schema";
 import { setValue, getValue } from "./utils";
 import FieldMessage from "./FieldMessage";
-import { isMaterial } from "../../utils/Customizations";
 import Accordion from "../controls/Accordion";
 
 export default function FieldObject(props: FieldProps): FieldBaseType {
@@ -31,17 +30,9 @@ export default function FieldObject(props: FieldProps): FieldBaseType {
         if (hideTitle) {
             return ret;
         }
-        if (isMaterial()) {
-            return <Accordion data-testid={"section-" + prefix} className="FieldObjectSection" key={prefix} defaultExpanded={!!expand} summary={prefix}>
-                {ret}
-            </Accordion>
-        }
-        else {
-            return <details key={prefix} className="FieldBase FieldObject">
-                <summary>{prefix}</summary>
-                {ret}
-            </details>
-        }
+        return <Accordion data-testid={"section-" + prefix} className="FieldObjectSection" key={prefix} defaultExpanded={!!expand} summary={prefix}>
+            {ret}
+        </Accordion>
     }
 
     function validate(): boolean {

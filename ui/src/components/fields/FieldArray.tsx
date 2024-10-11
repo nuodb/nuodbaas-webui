@@ -2,11 +2,10 @@
 
 import { ReactNode } from "react";
 import { setValue, getValue } from "./utils";
+import { Table, TableBody, TableCell, TableHead, TableRow } from "../controls/Table";
 import FieldBase, { FieldBaseType, FieldProps } from './FieldBase'
 import FieldFactory from "./FieldFactory"
 import FieldMessage from "./FieldMessage";
-import { isMaterial } from "../../utils/Customizations";
-import { Table, TableBody, TableCell, TableHead, TableRow } from "../controls/Table";
 
 export default function FieldArray(props: FieldProps): FieldBaseType {
     /**
@@ -32,18 +31,11 @@ export default function FieldArray(props: FieldProps): FieldBaseType {
                         setValues(vs)
                     }, updateErrors
                 });
-                if (isMaterial()) {
-                    ret.push(<TableRow key={prefixKey}>
-                        <TableCell>
-                            {field.show()}
-                        </TableCell>
-                    </TableRow>);
-                }
-                else {
-                    ret.push(<tr key={prefixKey}>
-                        <td>{field.show()}</td>
-                    </tr>);
-                }
+                ret.push(<TableRow key={prefixKey}>
+                    <TableCell>
+                        {field.show()}
+                    </TableCell>
+                </TableRow>);
             }
         }
 
@@ -59,46 +51,23 @@ export default function FieldArray(props: FieldProps): FieldBaseType {
                     setValues(vs);
                 }, updateErrors
             });
-            if (isMaterial()) {
-                ret.push(<TableRow key={prefixKey}>
-                    <TableCell>
-                        {field.show()}
-                    </TableCell>
-                </TableRow>);
-            }
-            else {
-                ret.push(<tr key={prefixKey}>
-                    <td>
-                        {field.show()}
-                    </td>
-                </tr>);
-            }
+            ret.push(<TableRow key={prefixKey}>
+                <TableCell>
+                    {field.show()}
+                </TableCell>
+            </TableRow>);
         }
 
-        if (isMaterial()) {
-            return <Table key={prefix}>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>{prefix.split(".").slice(-1)[0]}</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {ret}
-                </TableBody>
-            </Table>;
-        }
-        else {
-            return <table key={prefix} className="FieldBase FieldArray">
-                <thead>
-                    <tr>
-                        <th>{prefix.split(".").slice(-1)[0]}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {ret}
-                </tbody>
-            </table>
-        }
+        return <Table key={prefix}>
+            <TableHead>
+                <TableRow>
+                    <TableCell>{prefix.split(".").slice(-1)[0]}</TableCell>
+                </TableRow>
+            </TableHead>
+            <TableBody>
+                {ret}
+            </TableBody>
+        </Table>;
     }
 
     function getDisplayValue(): ReactNode {
