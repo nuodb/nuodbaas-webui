@@ -22,7 +22,7 @@ export type TextFieldProps = {
 
 export default function TextField(props: TextFieldProps): JSX.Element {
     if (isMaterial()) {
-        return <MuiTextField fullWidth={true} name={props.id} {...props} error={!!props.error} helperText={props.error} label={props.id} />
+        return <MuiTextField fullWidth={true} {...props} name={props.id} error={!!props.error} helperText={props.error} label={props.id} />
     }
     else {
         return <div>

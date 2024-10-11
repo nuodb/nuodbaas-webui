@@ -26,7 +26,7 @@ export default function Select(props: SelectProps): JSX.Element {
     if (isMaterial()) {
         return <FormControl key={id} fullWidth>
             <InputLabel id={"label_" + id}>{id}</InputLabel>
-            <MuiSelect labelId={"label_" + id} label={id} {...props}>
+            <MuiSelect labelId={"label_" + id} name={id} label={id} {...props}>
                 {children}
             </MuiSelect>
             {required && <span>Required</span>}
