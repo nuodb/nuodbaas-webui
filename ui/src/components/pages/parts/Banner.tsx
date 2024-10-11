@@ -125,8 +125,8 @@ function ResponsiveAppBar(resources: string[]) {
             {resources.map((resource: string, index: number) => (
               <Button
                 data-testid={"menu-button-" + index}
+                className="BannerItem"
                 key={resource}
-                style={{ color: "white" }}
                 onClick={() => {
                   handleCloseNavMenu();
                   navigate("/ui/resource/list/" + resource);

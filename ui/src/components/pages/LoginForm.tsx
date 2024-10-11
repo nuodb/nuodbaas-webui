@@ -5,7 +5,6 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import Auth from "../../utils/auth";
 import Button from '../controls/Button';
 import TextField from '../controls/TextField';
-import Container from '@mui/material/Container'
 import BuildNumber from "./parts/BuildNumber"
 
 interface Props {
@@ -39,7 +38,7 @@ export default function LoginForm({ setIsLoggedIn }: Props) {
 
     return (
         <React.Fragment>
-            <Container maxWidth="sm">
+            <div className="ContainerSM">
                 <h3>NuoDB Login</h3>
                 <form>
                     <div className="fields">
@@ -50,7 +49,7 @@ export default function LoginForm({ setIsLoggedIn }: Props) {
                         <Button data-testid="login_button" variant="contained" type="submit" onClick={handleLogin}>Login</Button>
                     </div>
                 </form>
-            </Container>
+            </div>
             <BuildNumber className="AbsoluteBottomRight BuildNumber" />
         </React.Fragment>
     );

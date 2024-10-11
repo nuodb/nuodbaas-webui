@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { LOCAL_USER_SETTINGS } from "../../utils/Customizations";
 import axios from "axios";
 import FieldSelect from "../fields/FieldSelect";
-import Container from "@mui/material/Container";
 import Button from "../controls/Button";
 
 export default function Settings() {
@@ -72,7 +71,7 @@ export default function Settings() {
     }
 
     return (
-        <Container maxWidth="sm">
+        <div className="ContainerSM">
             <h1>Settings</h1>
             {advanced ? renderAdvanced() : renderBasic()}
             <div style={{ color: "red" }}>{error}</div>
@@ -99,6 +98,6 @@ export default function Settings() {
                     setAdvanced(true);
                 }}>Advanced</Button>
             }
-        </Container >
+        </div >
     );
 }

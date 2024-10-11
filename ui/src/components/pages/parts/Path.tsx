@@ -4,10 +4,7 @@ import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Button from "../../controls/Button"
 import Breadcrumbs from '@mui/material/Breadcrumbs'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
+import Select, { SelectOption } from "../../controls/Select"
 import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography';
 import TextField from "../../controls/TextField"
@@ -63,29 +60,24 @@ export default function Path({ schema, path, filterValues, search, setSearch, se
     function renderFilter() {
         if (filterField && Array.isArray(filterField)) {
             // last path is not a variable but a list of constant paths - provide user an option to select those
-            return <FormControl>
-                <Select labelId="filter_label" id="filter" value={"__select__"} label={filterField} onChange={({ target }) => {
+            return <Select id="filter" value={"__select__"} onChange={({ target }) => {
                     navigate("/ui/resource/list" + path + "/" + target.value);
                 }}>
-                    <MenuItem value={"__select__"}>--- Select ---</MenuItem>
-                    {filterField.map((ff: string) => <MenuItem key={ff} value={ff}>{ff}</MenuItem>)}
-                </Select>
-            </FormControl>;
+                <SelectOption value={"__select__"}>--- Select ---</SelectOption>
+                {filterField.map((ff: string) => <SelectOption key={ff} value={ff}>{ff}</SelectOption>)}
+            </Select>;
         }
 
-        if (!filterValues || filterValues.length === 0) {
+        if (!filterValues || filterValues.length === 0 || !filterField) {
             return null;
         }
 
-        return <FormControl>
-            <InputLabel id="filter_label">{filterField}</InputLabel>
-            <Select labelId="filter_label" id="filter" value={"__all__"} label={filterField} onChange={({ target }) => {
+        return <Select id={filterField} value={"__all__"} onChange={({ target }) => {
                 navigate("/ui/resource/list" + path + "/" + target.value);
             }}>
-                <MenuItem value={"__all__"}>--- All ---</MenuItem>
-                {filterValues && filterValues.map((fv: string) => <MenuItem key={fv} value={fv}>{fv}</MenuItem>)}
-            </Select>
-        </FormControl>;
+            <SelectOption value="__all__">--- All ---</SelectOption>
+            {filterValues && filterValues.map((fv: string) => <SelectOption key={fv} value={fv}>{fv}</SelectOption>)}
+        </Select>;
     }
 
     function handleSearch() {

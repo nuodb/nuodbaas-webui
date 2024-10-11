@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import FieldFactory from "../../fields/FieldFactory";
 import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultValue, submitForm } from "../../../utils/schema";
 import RestSpinner from "./RestSpinner";
-import Container from '@mui/material/Container'
 import Auth from "../../../utils/auth";
 import { setValue } from "../../fields/utils";
 import { matchesPath } from "../../../utils/schema";
@@ -297,7 +296,7 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
         return ret;
     }
 
-    return <Container maxWidth="sm">
+    return <div className="ContainerSM">
         <RestSpinner />
         <form>
             {!readonly && <h1>{(data && "Edit") || "Create"} entry for {path}</h1>}
@@ -369,5 +368,5 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
                 </React.Fragment>}
             </div>
         </form>
-    </Container>
+    </div>
 }

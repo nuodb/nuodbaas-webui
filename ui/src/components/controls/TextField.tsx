@@ -25,9 +25,11 @@ export default function TextField(props: TextFieldProps): JSX.Element {
         return <MuiTextField fullWidth={true} name={props.id} {...props} error={!!props.error} helperText={props.error} label={props.id} />
     }
     else {
-        return <div className="FieldBase FieldString" key={props.id}>
-            <label>{props.id}</label>
-            <input name={props.id} {...props} />
+        return <div>
+            <div className="FieldBase FieldString" key={props.id}>
+                <label>{props.id}</label>
+                <input name={props.id} {...props} />
+            </div>
             {props.error !== "" && <div className="FieldError">{props.error}</div>}
         </div>
     }
