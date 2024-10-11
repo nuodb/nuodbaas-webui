@@ -11,6 +11,5 @@ test('Check Login Form', async () => {
   await act(async () => {
     render(<App />);
   });
-  const linkElement = screen.getAllByText(/Login/i);
-  expect(linkElement[0]).toBeInTheDocument();
+  screen.getAllByText(/Login/i);
 });
