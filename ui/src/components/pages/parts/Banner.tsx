@@ -13,10 +13,10 @@ import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import { SchemaType } from "../../../utils/types";
+import Button from "../../controls/Button";
 
 function ResponsiveAppBar(resources: string[]) {
   const navigate = useNavigate();
@@ -126,11 +126,11 @@ function ResponsiveAppBar(resources: string[]) {
               <Button
                 data-testid={"menu-button-" + index}
                 key={resource}
+                style={{ color: "white" }}
                 onClick={() => {
                   handleCloseNavMenu();
                   navigate("/ui/resource/list/" + resource);
                 }}
-                sx={{ my: 2, color: 'white', display: 'block' }}
               >
                 {resource}
               </Button>
@@ -160,8 +160,8 @@ function ResponsiveAppBar(resources: string[]) {
               onClose={handleCloseUserMenu}
             >
               <MenuItem onClick={() => {
-                handleCloseNavMenu();
-                navigate("/ui/settings/advanced");
+                handleCloseUserMenu();
+                navigate("/ui/settings");
               }}>
                 <Typography textAlign="center">Settings</Typography>
               </MenuItem>

@@ -6,16 +6,13 @@ import FieldFactory from "../../fields/FieldFactory";
 import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultValue, submitForm } from "../../../utils/schema";
 import RestSpinner from "./RestSpinner";
 import Container from '@mui/material/Container'
-import Button from '@mui/material/Button'
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import Auth from "../../../utils/auth";
 import { setValue } from "../../fields/utils";
 import { matchesPath } from "../../../utils/schema";
 import { FieldValuesType, FieldParameterType, TempAny, StringMapType, FieldParametersType } from "../../../utils/types";
-import { getCustomizations } from "../../../utils/Customizations";
+import { getCustomizations, isMaterial } from "../../../utils/Customizations";
+import Button from "../../controls/Button";
+import Accordion from "../../controls/Accordion";
 
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
@@ -285,12 +282,17 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
             })).show();
         });
         if (ret && ret.length > 0 && section.title) {
-            ret = <Accordion key={"section-" + section.title.toLowerCase()} className="advancedCard">
-                <AccordionSummary data-testid={"section-" + section.title.toLowerCase()} className="SectionSummary" expandIcon={<ArrowDropDownIcon />}>{section.title}</AccordionSummary>
-                <AccordionDetails>
+            if (isMaterial()) {
+                ret = <Accordion key={"section-" + section.title.toLowerCase()} data-testid={"section-" + section.title.toLowerCase()} summary={section.title}>
                     {ret}
-                </AccordionDetails>
-            </Accordion>;
+                </Accordion>;
+            }
+            else {
+                ret = <details key={"section-" + section.title.toLowerCase()}>
+                    <summary data-testid={"section-" + section.title.toLowerCase()} key={"section-" + section.title.toLowerCase()}>{section.title}</summary>
+                    {ret}
+                </details>
+            }
         }
         return ret;
     }

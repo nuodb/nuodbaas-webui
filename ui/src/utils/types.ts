@@ -15,7 +15,8 @@ export type FieldParameterType = {
     in?: string,
     items?: FieldParameterType,
     properties?: FieldParametersType,
-    additionalProperties?: FieldParameterType
+    additionalProperties?: FieldParameterType,
+    enums?: {key: string, label: string}[]
 };
 
 export type FieldParametersType = {

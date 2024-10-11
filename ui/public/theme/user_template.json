@@ -1,0 +1,90 @@
+{
+    "copyright": "(C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.",
+    "views": {
+        "/databases?/{organization}?/{project}": {
+            "columns": [
+                "organization",
+                "project",
+                "name",
+                "labels",
+                "tier",
+                "properties",
+                "status",
+                "*",
+                "buttons"
+            ],
+            "fields": {
+                "status": {
+                    "value": "status.state",
+                    "buttons": [
+                        {
+                            "label": "Start Database",
+                            "patch": [
+                                {
+                                    "op": "remove",
+                                    "path": "/maintenance"
+                                }
+                            ],
+                            "visible": "maintenance.isDisabled",
+                            "confirm": "Do you want to start Database {organization}/{project}/{name}?"
+                        },
+                        {
+                            "label": "Stop Database",
+                            "patch": [
+                                {
+                                    "op": "add",
+                                    "path": "/maintenance",
+                                    "value": {
+                                        "isDisabled": true
+                                    }
+                                }
+                            ],
+                            "visible": "!maintenance",
+                            "confirm": "Do you want to stop Database {organization}/{project}/{name}?"
+                        },
+                        {
+                            "label": "Stop Database",
+                            "patch": [
+                                {
+                                    "op": "replace",
+                                    "path": "/maintenance",
+                                    "value": {
+                                        "isDisabled": true
+                                    }
+                                }
+                            ],
+                            "visible": "maintenance.isDisabled=false",
+                            "confirm": "Do you want to stop Database {organization}/{project}/{name}?"
+                        }
+                    ]
+                }
+            }
+        },
+        "/backuppolicies?/{organization}": {
+            "columns": [
+                "organization",
+                "name",
+                "labels",
+                "frequency",
+                "selector",
+                "properties",
+                "show",
+                "*"
+            ],
+            "fields": {
+                "show": {
+                    "buttons": [
+                        {
+                            "label": "Show Databases",
+                            "link": "/ui/resource/list/backuppolicies/{organization}/{name}/databases"
+                        },
+                        {
+                            "label": "Show Backups",
+                            "link": "/ui/resource/list/backuppolicies/{organization}/{name}/backups"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

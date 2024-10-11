@@ -9,19 +9,19 @@ import FieldBase, { FieldBaseType, FieldProps } from "./FieldBase"
 import { ReactNode } from 'react'
 import { isMaterial } from '../../utils/Customizations'
 
-export default function FieldBoolean(props: FieldProps): FieldBaseType {
+export default function FieldSelect(props: FieldProps): FieldBaseType {
 
     /**
      * show Field of type Boolean using the values and schema definition
      */
     function show(): ReactNode {
-        const { prefix, values, required, setValues, autoFocus, readonly } = props;
+        const { prefix, values, parameter, required, setValues, autoFocus, readonly } = props;
         let value = getValue(values, prefix);
 
         const fieldProps = {
             id: prefix,
             name: prefix,
-            value: String(value || false),
+            value,
             autoFocus,
             onChange: (e: any) => {
                 let v = { ...values };
@@ -31,23 +31,22 @@ export default function FieldBoolean(props: FieldProps): FieldBaseType {
             onBlur: () => FieldBase(props).validate(),
             disabled: readonly
         };
-
         if (isMaterial()) {
             return <FormControl key={prefix} fullWidth>
                 <InputLabel id={"label_" + prefix}>{prefix}</InputLabel>
-                <Select labelId={"label_" + prefix} label={prefix} {...fieldProps}>
-                    <MenuItem value="true">True</MenuItem>
-                    <MenuItem value="false">False</MenuItem>
+                <Select labelId={"label_" + prefix} {...fieldProps} label={prefix}>
+                    <MenuItem key="selectItem" value="">--- Select Item ---</MenuItem>
+                    {parameter && parameter.enums && parameter.enums.map(e => <MenuItem key={e.key} value={e.key}>{e.label}</MenuItem>)}
                 </Select>
                 {required && <span>Required</span>}
             </FormControl>;
         }
         else {
-            return <div className="FieldBase FieldBoolean" key={prefix}>
+            return <div className="FieldBase FieldSelect" key={prefix}>
                 <label id={"label_" + prefix}>{prefix}</label>
                 <select {...fieldProps}>
-                    <option value="true">True</option>
-                    <option value="false">False</option>
+                    <option key="selectItem" value="">--- Select Item ---</option>
+                    {parameter && parameter.enums && parameter.enums.map(e => <option key={e.key} value={e.key}>{e.label}</option>)}
                 </select>
                 {required && <span>Required</span>}
             </div>;

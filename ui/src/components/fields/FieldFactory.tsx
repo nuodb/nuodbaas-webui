@@ -10,10 +10,10 @@ import FieldArray from "./FieldArray";
 import FieldInteger from "./FieldInteger";
 import FieldMessage from "./FieldMessage";
 import FieldDateTime from "./FieldDateTime";
-import FieldBase, { FieldBaseType, FieldProps, FieldPropsDisplay, FieldPropsValidate } from "./FieldBase";
+import { FieldBaseType, FieldProps, FieldPropsDisplay, FieldPropsValidate } from "./FieldBase";
 import { ReactNode } from "react";
 
-/** Factory class to create components based on the field type */
+/** Factory function to create components based on the field type */
 const FieldFactory = {
     create: (props: FieldProps): FieldBaseType => {
         props = { ...props };

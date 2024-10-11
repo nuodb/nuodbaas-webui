@@ -1,6 +1,5 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
-import Button from '@mui/material/Button';
 import DialogMaterial from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -8,6 +7,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { TempAny } from '../../../utils/types';
 import { Component, ReactNode } from 'react';
+import Button from '../../controls/Button';
 
 let s_instance: Dialog | null = null;
 

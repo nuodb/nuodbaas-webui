@@ -1,9 +1,9 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
 import FieldBase, { FieldBaseType, FieldProps } from "./FieldBase";
-import TextField from '@mui/material/TextField'
 import { getValue, setValue } from "./utils"
 import { ReactNode } from "react";
+import TextField from "../controls/TextField";
 
 export default function FieldDateTime(props: FieldProps): FieldBaseType {
     /**
@@ -20,15 +20,12 @@ export default function FieldDateTime(props: FieldProps): FieldBaseType {
         let error = (errors && (prefix in errors) && errors[prefix]) || "";
         return <TextField
             key={prefix}
-            fullWidth={true}
             required={required}
             id={prefix}
-            name={prefix}
             label={prefix}
             value={editValue}
             autoFocus={autoFocus}
-            error={error !== ""}
-            helperText={error}
+            error={error}
             onChange={({ currentTarget: input }) => {
                 let v = { ...values };
                 setValue(v, "_" + prefix, input.value);

@@ -1,18 +1,12 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
 import { setValue, getValue } from "./utils";
-import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
-import Card from '@mui/material/Card';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
+import TextField from "../controls/TextField";
+import Button from "../controls/Button";
 import FieldBase, { FieldBaseType, FieldProps } from "./FieldBase"
 import { TempAny } from "../../utils/types";
 import { ReactNode } from "react";
+import { Table, TableBody, TableCell, TableHead, TableRow } from "../controls/Table";
 
 export default function FieldMap(props: FieldProps): FieldBaseType {
 
@@ -68,21 +62,17 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
             let prefixKeyValue = prefix + "." + i + ".value";
             let prefixKey = prefix + "." + valueKeys[i];
             let errorValue = (errors && (prefixKeyValue in errors) && errors[prefixKeyValue]) || "";
-            rows.push(<TableRow key={prefixKeyLabel} className="verticalAlignTop">
+            rows.push(<TableRow key={prefixKeyLabel}>
                 <TableCell>
                     <TextField
-                        fullWidth={true}
                         disabled={true}
                         id={prefixKeyLabel}
-                        name={prefixKeyLabel}
                         label={prefixKeyLabel}
                         value={valueKeys[i]} />
                 </TableCell>
                 <TableCell>
                     <TextField
-                        fullWidth={true}
                         id={prefixKeyValue}
-                        name={prefixKeyValue}
                         label={prefixKeyValue}
                         value={getValue(values, prefix)[valueKeys[i]]}
                         onChange={({ currentTarget: input }) => {
@@ -90,8 +80,7 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
                             setValue(v, prefixKey, input.value);
                             setValues(v)
                         }}
-                        error={errorValue !== ""}
-                        helperText={errorValue}
+                        error={errorValue}
                         onBlur={event => FieldBase(props).validate(prefixKeyValue, getValue(values, prefix)[valueKeys[i]])} />
                 </TableCell>
                 <TableCell><Button onClick={() => {
@@ -109,26 +98,22 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
         let prefixValueLabel = prefix + ".value"
         let errorKey = (errors && (prefixKeyLabel in errors) && errors[prefixKeyLabel]) || "";
         let errorValue = (errors && (prefixValueLabel in errors) && errors[prefixValueLabel]) || "";
-        !readonly && rows.push(<TableRow key={prefixKeyLabel} className="verticalAlignTop">
+        !readonly && rows.push(<TableRow key={prefixKeyLabel}>
             <TableCell>
                 <TextField
-                    fullWidth={true}
                     id={prefixKeyLabel}
-                    name={prefixKeyLabel}
                     label={"new key"}
                     defaultValue=""
                     onBlur={() => validateNewKey()}
-                    error={errorKey !== ""} helperText={errorKey} />
+                    error={errorKey} />
             </TableCell>
             <TableCell>
                 <TextField
-                    fullWidth={true}
                     id={prefixValueLabel}
-                    name={prefixValueLabel}
                     label={"new value"}
                     defaultValue=""
                     onBlur={() => validateNewValue()}
-                    error={errorValue !== ""} helperText={errorValue} />
+                    error={errorValue} />
             </TableCell>
             <TableCell>
                 <Button data-testid={"add_button_" + prefix} onClick={() => {
@@ -157,20 +142,18 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
         </TableRow>);
 
         return (
-            <TableContainer key={prefix} component={Card}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>{lastPrefix} Key</TableCell>
-                            <TableCell>{lastPrefix} Value</TableCell>
-                            <TableCell></TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {rows}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+            <Table key={prefix}>
+                <TableHead>
+                    <TableRow>
+                        <TableCell>{lastPrefix} Key</TableCell>
+                        <TableCell>{lastPrefix} Value</TableCell>
+                        <TableCell></TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {rows}
+                </TableBody>
+            </Table>
         );
     }
 

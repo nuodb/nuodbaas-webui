@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import Button from '@mui/material/Button'
+import Button from "../../controls/Button"
 import Breadcrumbs from '@mui/material/Breadcrumbs'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
@@ -10,7 +10,7 @@ import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography';
-import TextField from '@mui/material/TextField'
+import TextField from "../../controls/TextField"
 import { styled } from '@mui/material';
 import RestSpinner from './RestSpinner';
 import { getFilterField, getSchemaPath } from "../../../utils/schema";
@@ -50,7 +50,7 @@ export function parseSearch(search: string) {
 
 export default function Path({ schema, path, filterValues, search, setSearch, setPage }: TempAny) {
     const [searchField, setSearchField] = useState(search);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState(undefined);
 
     const navigate = useNavigate();
 
@@ -94,7 +94,7 @@ export default function Path({ schema, path, filterValues, search, setSearch, se
             setError(parsed["error"]);
         }
         else {
-            setError(null);
+            setError(undefined);
             setSearch(searchField);
             setPage(1);
         }
@@ -130,11 +130,9 @@ export default function Path({ schema, path, filterValues, search, setSearch, se
         <RestSpinner />
         {setSearch && <React.Fragment>
             <TextField
-                fullWidth={true}
                 required={false}
                 data-testid="searchField"
                 id="search"
-                name="search"
                 label={"search, i.e. \"somename\" or \"labels=key=value,!otherkey name=abc\""}
                 value={searchField}
                 onChange={({ currentTarget: input }) => {
@@ -145,8 +143,7 @@ export default function Path({ schema, path, filterValues, search, setSearch, se
                         handleSearch();
                     }
                 }}
-                error={error !== null}
-                helperText={error}
+                error={error}
             />
             <Button data-testid="searchButton" onClick={handleSearch}
             >Search</Button>

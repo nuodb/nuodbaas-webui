@@ -64,7 +64,7 @@ export interface FieldBaseType {
 }
 
 /**
- * Base class for all the Field* classes. Performs general field validation and text display of the field
+ * Base function for all the Field* functions. Performs general field validation and text display of the field
  */
 export default function FieldBase(props: FieldProps): FieldBaseType {
 

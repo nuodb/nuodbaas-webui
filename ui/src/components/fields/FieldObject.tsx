@@ -5,14 +5,11 @@ import FieldBase, { FieldBaseType, FieldProps } from "./FieldBase";
 import FieldFactory from "./FieldFactory";
 import { getDefaultValue } from "../../utils/schema";
 import { setValue, getValue } from "./utils";
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import FieldMessage from "./FieldMessage";
+import { isMaterial } from "../../utils/Customizations";
+import Accordion from "../controls/Accordion";
 
 export default function FieldObject(props: FieldProps): FieldBaseType {
-
     /**
      * show Field of type Object using the values and schema definition
      * @returns
@@ -34,12 +31,17 @@ export default function FieldObject(props: FieldProps): FieldBaseType {
         if (hideTitle) {
             return ret;
         }
-        return <Accordion className="gap" key={prefix} defaultExpanded={!!expand} style={{ gap: "1em" }}>
-            <AccordionSummary data-testid={"section-" + prefix} className="FieldObjectSection" expandIcon={<ArrowDropDownIcon />}>{prefix}</AccordionSummary>
-            <AccordionDetails className="AccordionDetails">
+        if (isMaterial()) {
+            return <Accordion data-testid={"section-" + prefix} className="FieldObjectSection" key={prefix} defaultExpanded={!!expand} summary={prefix}>
                 {ret}
-            </AccordionDetails>
-        </Accordion>
+            </Accordion>
+        }
+        else {
+            return <details key={prefix} className="FieldBase FieldObject">
+                <summary>{prefix}</summary>
+                {ret}
+            </details>
+        }
     }
 
     function validate(): boolean {

@@ -16,7 +16,8 @@ import NotFound from "./components/pages/NotFound";
 import Dialog from "./components/pages/parts/Dialog";
 import GlobalErrorBoundary from "./components/GlobalErrorBoundary";
 import Auth from "./utils/auth";
-import SettingsAdvanced from './components/pages/SettingsAdvanced';
+import Settings from './components/pages/Settings';
+import Customizations from './utils/Customizations';
 
 /**
  * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
@@ -28,33 +29,35 @@ export default function App() {
   return (
     <div className="App">
       <GlobalErrorBoundary>
-        <CssBaseline />
-        <Dialog />
-        <BrowserRouter>
-          {isLoggedIn
-            ?
-            <React.Fragment>
-              <Schema setSchema={setSchema} />
-              {schema && <Banner schema={schema} />}
+        <Customizations>
+          <CssBaseline />
+          <Dialog />
+          <BrowserRouter>
+            {isLoggedIn
+              ?
+              <React.Fragment>
+                <Schema setSchema={setSchema} />
+                {schema && <Banner schema={schema} />}
+                <Routes>
+                  <Route path="/" element={<Navigate to="/ui" />} />
+                  <Route path="/ui" element={<Home schema={schema} />} />
+                  <Route path="/ui/error" element={<ErrorPage />} />
+                  <Route path="/ui/resource/list/*" element={<ListResource schema={schema} />} />
+                  <Route path="/ui/resource/create/*" element={<CreateResource schema={schema} />} />
+                  <Route path="/ui/resource/edit/*" element={<EditResource schema={schema} />} />
+                  <Route path="/ui/resource/view/*" element={<ViewResource schema={schema} />} />
+                  <Route path="/ui/settings" element={<Settings />} />
+                  <Route path="/*" element={<NotFound />} />
+                </Routes></React.Fragment>
+              :
               <Routes>
-                <Route path="/" element={<Navigate to="/ui" />} />
-                <Route path="/ui" element={<Home schema={schema} />} />
+                <Route path="/ui/login" element={<LoginForm setIsLoggedIn={setIsLoggedIn} />} />
                 <Route path="/ui/error" element={<ErrorPage />} />
-                <Route path="/ui/resource/list/*" element={<ListResource schema={schema} />} />
-                <Route path="/ui/resource/create/*" element={<CreateResource schema={schema} />} />
-                <Route path="/ui/resource/edit/*" element={<EditResource schema={schema} />} />
-                <Route path="/ui/resource/view/*" element={<ViewResource schema={schema} />} />
-                <Route path="/ui/settings/advanced" element={<SettingsAdvanced />} />
-                <Route path="/*" element={<NotFound />} />
-              </Routes></React.Fragment>
-            :
-            <Routes>
-              <Route path="/ui/login" element={<LoginForm setIsLoggedIn={setIsLoggedIn} />} />
-              <Route path="/ui/error" element={<ErrorPage />} />
-              <Route path="/*" element={<Navigate to={"/ui/login?redirect=" + encodeURIComponent(window.location.pathname)} />} />
-            </Routes>
-          }
-        </BrowserRouter>
+                <Route path="/*" element={<Navigate to={"/ui/login?redirect=" + encodeURIComponent(window.location.pathname)} />} />
+              </Routes>
+            }
+          </BrowserRouter>
+        </Customizations>
       </GlobalErrorBoundary>
     </div>
   );
