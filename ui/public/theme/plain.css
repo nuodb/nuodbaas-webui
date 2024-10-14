@@ -2,21 +2,43 @@
 .FieldError {
     color: red;
 }
-.FieldString {
+.FieldString,
+.FieldSelect {
     position: relative;
     border: 1px solid;
     margin: 5px;
 }
 
-.FieldString>label {
+.FieldString>label,
+.FieldSelect>label {
     position: absolute;
     top: -15px;
     left: 10px;
     background-color: white;
+    font-size: 1rem;
 }
 
-.FieldString>input {
+.FieldString>input,
+.FieldSelect>select {
     border: none;
+    padding: 10px;
     left: 0px;
     width: 100%;
+}
+.BannerItem {
+    cursor: pointer;
+    background-color: transparent;
+    font-family: Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 500;
+    font-size: 0.875rem;
+    letter-spacing: 0.02857em;
+    text-transform: uppercase;
+    min-width: 64px;
+    color: white;
+    display: block;
+    outline: 0px;
+    border-width: 0px;
+    margin: 16px 0px;
+    text-decoration: none;
+    padding: 6px 8px;
 }

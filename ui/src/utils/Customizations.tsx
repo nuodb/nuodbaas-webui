@@ -305,12 +305,7 @@ export default function Customizations(props: CustomizationsProps): JSX.Element 
 
         // loading theme + user CSS files
         const themeCss = document.getElementById("theme_stylesheet");
-        if (themeCss && mergedJson?.theme?.type) {
-            themeCss?.setAttribute("href", "/ui/theme/" + mergedJson.theme.type + ".css");
-        }
-        else {
-            themeCss?.setAttribute("href", "");
-        }
+        themeCss?.setAttribute("href", "/ui/theme/" + (mergedJson?.theme?.type || "material") + ".css");
 
         const userCss = document.getElementById("user_stylesheet");
         if (userCss && mergedJson?.theme?.css) {
