@@ -16,6 +16,10 @@ export type FieldParameterType = {
     items?: FieldParameterType,
     properties?: FieldParametersType,
     additionalProperties?: FieldParameterType
+    schema?: {
+        default: boolean|string,
+        type: string
+    }
 };
 
 export type FieldParametersType = {
