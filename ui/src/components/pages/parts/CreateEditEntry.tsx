@@ -5,12 +5,8 @@ import { useNavigate } from "react-router-dom";
 import FieldFactory from "../../fields/FieldFactory";
 import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultValue, submitForm } from "../../../utils/schema";
 import RestSpinner from "./RestSpinner";
-import Container from '@mui/material/Container'
-import Button from '@mui/material/Button'
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import Button from "../../controls/Button";
+import Accordion from "../../controls/Accordion";
 import Auth from "../../../utils/auth";
 import { setValue } from "../../fields/utils";
 import { matchesPath } from "../../../utils/schema";
@@ -285,17 +281,14 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
             })).show();
         });
         if (ret && ret.length > 0 && section.title) {
-            ret = <Accordion key={"section-" + section.title.toLowerCase()} className="advancedCard">
-                <AccordionSummary data-testid={"section-" + section.title.toLowerCase()} className="SectionSummary" expandIcon={<ArrowDropDownIcon />}>{section.title}</AccordionSummary>
-                <AccordionDetails>
-                    {ret}
-                </AccordionDetails>
+            ret = <Accordion key={"section-" + section.title.toLowerCase()} data-testid={"section-" + section.title.toLowerCase()} summary={section.title}>
+                {ret}
             </Accordion>;
         }
         return ret;
     }
 
-    return <Container maxWidth="sm">
+    return <div className="ContainerSM">
         <RestSpinner />
         <form>
             {!readonly && <h1>{(data && "Edit") || "Create"} entry for {path}</h1>}
@@ -367,5 +360,5 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
                 </React.Fragment>}
             </div>
         </form>
-    </Container>
+    </div>
 }

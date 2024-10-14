@@ -1,27 +1,23 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
 import { ReactNode } from "react";
-import FieldBase from "./FieldBase";
+import FieldBase, { FieldBaseType, FieldProps } from "./FieldBase";
 import FieldFactory from "./FieldFactory";
 import { getDefaultValue } from "../../utils/schema";
 import { setValue, getValue } from "./utils";
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import FieldMessage from "./FieldMessage";
+import Accordion from "../controls/Accordion";
 
-export default class FieldObject extends FieldBase {
-
+export default function FieldObject(props: FieldProps): FieldBaseType {
     /**
      * show Field of type Object using the values and schema definition
      * @returns
      */
-    show() {
-        const { prefix, parameter, values, errors, required, setValues, updateErrors, expand, hideTitle } = this.props;
+    function show(): ReactNode {
+        const { prefix, parameter, values, errors, required, setValues, updateErrors, expand, hideTitle } = props;
         const properties = parameter.properties;
         if (!properties) {
-            return new FieldMessage({ ...this.props, message: "\"properties\" attribute missing from schema for field \"" + prefix + "\"" }).show();
+            return FieldMessage({ ...props, message: "\"properties\" attribute missing from schema for field \"" + prefix + "\"" }).show();
         }
         let ret = Object.keys(properties).map(key => {
             let prefixKey = prefix ? (prefix + "." + key) : key;
@@ -29,46 +25,45 @@ export default class FieldObject extends FieldBase {
             if (defaultValue !== null) {
                 setValue(values, prefixKey, defaultValue);
             }
-            return <div key={key} className="gap">{(FieldFactory.create({ ...this.props, prefix: prefixKey, parameter: properties[key], values, errors, required, setValues, updateErrors, expand: false })).show()}</div>
+            return <div key={key} className="gap">{(FieldFactory.create({ ...props, prefix: prefixKey, parameter: properties[key], values, errors, required, setValues, updateErrors, expand: false })).show()}</div>
         });
         if (hideTitle) {
             return ret;
         }
-        return <Accordion className="gap" key={prefix} defaultExpanded={!!expand} style={{ gap: "1em" }}>
-            <AccordionSummary data-testid={"section-" + prefix} className="FieldObjectSection" expandIcon={<ArrowDropDownIcon />}>{prefix}</AccordionSummary>
-            <AccordionDetails className="AccordionDetails">
-                {ret}
-            </AccordionDetails>
+        return <Accordion data-testid={"section-" + prefix} className="FieldObjectSection" key={prefix} defaultExpanded={!!expand} summary={prefix}>
+            {ret}
         </Accordion>
     }
 
-    validate() {
-        const { prefix, parameter, values, updateErrors } = this.props;
+    function validate(): boolean {
+        const { prefix, parameter, values, updateErrors } = props;
         const properties = parameter.properties;
         const value = values[prefix];
         let success = true;
         if (properties && value) {
             // validate objects (hierarchical fields)
             Object.keys(value).forEach(subKey => {
-                const field = FieldFactory.create({ ...this.props, prefix: prefix + "." + subKey, parameter: properties[subKey], values, updateErrors });
+                const field = FieldFactory.create({ ...props, prefix: prefix + "." + subKey, parameter: properties[subKey], values, updateErrors });
                 success = field.validate() && success;
             });
         }
         return success;
     }
 
-    getDisplayValue(): ReactNode {
-        const { prefix, parameter, values } = this.props;
+    function getDisplayValue(): ReactNode {
+        const { prefix, parameter, values } = props;
         const properties = parameter.properties;
         if (!properties) {
-            return new FieldMessage({ ...this.props, message: "\"properties\" attribute missing from schema for field \"" + prefix + "\"" }).show();
+            return FieldMessage({ ...props, message: "\"properties\" attribute missing from schema for field \"" + prefix + "\"" }).show();
         }
         return <dl className="map">
             {Object.keys(properties).map(key => {
                 const prefixKey = prefix ? (prefix + "." + key) : key;
-                const field = FieldFactory.create({ ...this.props, prefix: prefixKey, parameter: properties[key], values });
+                const field = FieldFactory.create({ ...props, prefix: prefixKey, parameter: properties[key], values });
                 return <div key={key}><dt>{String(key)}</dt><dd>{field.getDisplayValue()}</dd></div>;
             })}
         </dl>
     }
+
+    return { ...FieldBase(props), show, validate, getDisplayValue };
 }

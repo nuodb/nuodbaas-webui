@@ -1,6 +1,6 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
-import Button from '@mui/material/Button';
+import Button from '../../controls/Button';
 import DialogMaterial from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';

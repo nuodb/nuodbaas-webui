@@ -147,6 +147,7 @@ public class TestRoutines extends SeleniumTestHelper {
         List<WebElement> deleteButtons = buttonsCell.get(0).findElements(By.xpath("button[@data-testid='delete_button']"));
         assertEquals(1, deleteButtons.size());
         deleteButtons.get(0).click();
+        waitElement("dialog_button_yes").click();
         createdResources.get(resource).remove(name);
     }
 

@@ -5,7 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Table from "./parts/Table";
 import { getResourceEvents, getCreatePath, getResourceByPath, getFilterField } from "../../utils/schema";
 import RestSpinner from "./parts/RestSpinner";
-import Button from '@mui/material/Button'
+import Button from "../controls/Button";
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
 import Path, { parseSearch } from './parts/Path'

@@ -13,7 +13,7 @@ import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
+import Button from "../../controls/Button";
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import { SchemaType } from "../../../utils/types";
@@ -125,12 +125,12 @@ function ResponsiveAppBar(resources: string[]) {
             {resources.map((resource: string, index: number) => (
               <Button
                 data-testid={"menu-button-" + index}
+                className="BannerItem"
                 key={resource}
                 onClick={() => {
                   handleCloseNavMenu();
                   navigate("/ui/resource/list/" + resource);
                 }}
-                sx={{ my: 2, color: 'white', display: 'block' }}
               >
                 {resource}
               </Button>
@@ -160,8 +160,8 @@ function ResponsiveAppBar(resources: string[]) {
               onClose={handleCloseUserMenu}
             >
               <MenuItem onClick={() => {
-                handleCloseNavMenu();
-                navigate("/ui/settings/advanced");
+                handleCloseUserMenu();
+                navigate("/ui/settings");
               }}>
                 <Typography textAlign="center">Settings</Typography>
               </MenuItem>
