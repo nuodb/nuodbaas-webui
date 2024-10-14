@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import Button from '@mui/material/Button'
+import Button from "../controls/Button";
 
 export default function ErrorPage() {
     const navigate = useNavigate();
@@ -11,7 +11,7 @@ export default function ErrorPage() {
         <React.Fragment>
             <h1>Error occurred</h1>
             <div>{searchParams.get("msg") || "Unknown Error occurred"}</div>
-            <Button variant="contained" onClick={()=>{
+            <Button onClick={() => {
                 navigate("/ui");
             }}>Dismiss</Button>
         </React.Fragment>

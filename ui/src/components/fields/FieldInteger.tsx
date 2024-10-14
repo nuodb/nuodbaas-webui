@@ -1,23 +1,26 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
-import TextField from '@mui/material/TextField'
+import TextField from "../controls/TextField";
 import { getValue, setValue } from "./utils"
-import FieldBase from "./FieldBase"
+import FieldBase, { FieldBaseType, FieldProps } from "./FieldBase"
+import { ReactNode } from 'react';
 
-export default class FieldInteger extends FieldBase {
+export default function FieldInteger(props: FieldProps): FieldBaseType {
 
     /**
      * show Field of type Integer using the values and schema definition
      * @returns
      */
-    show() {
-        const { prefix, values, required, setValues, autoFocus, readonly } = this.props;
+    function show(): ReactNode {
+        const { prefix, values, required, setValues, autoFocus, readonly } = props;
         let value = String(getValue(values, prefix) || "");
 
-        return <TextField key={prefix} required={required} id={prefix} name={prefix} label={prefix} value={value} autoFocus={autoFocus} onChange={({ currentTarget: input }) => {
+        return <TextField key={prefix} required={required} id={prefix} label={prefix} value={value} autoFocus={autoFocus} onChange={({ currentTarget: input }) => {
             let v = { ...values };
             setValue(values, prefix, input.value);
             setValues(v);
         }} disabled={readonly} />
     }
+
+    return { ...FieldBase(props), show };
 }

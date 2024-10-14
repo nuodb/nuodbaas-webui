@@ -1,14 +1,8 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
 import { useNavigate } from 'react-router-dom';
-import Button from '@mui/material/Button';
-import TableMaterial from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
+import Button from '../../controls/Button';
+import { TableBody, TableCell, Table as TableCustom, TableHead, TableRow } from '../../controls/Table';
 import { getResourceByPath, getCreatePath, getChild, replaceVariables } from "../../../utils/schema";
 import FieldFactory from "../../fields/FieldFactory";
 import RestSpinner from "./RestSpinner";
@@ -125,8 +119,7 @@ export default function Table(props: TempAny) {
     const tableLabels = getTableLabels();
     const fieldsSchema = getChild(getResourceByPath(schema, getCreatePath(schema, path)), ["get", "responses", "200", "content", "application/json", "schema", "properties"]);
 
-    return (<TableContainer component={Paper}>
-        <TableMaterial data-testid={props["data-testid"]} sx={{ minWidth: 650 }}>
+    return (<TableCustom data-testid={props["data-testid"]}>
             <TableHead>
                 <TableRow>
                     {tableFields.map((field, index) => <TableCell key={field}>{tableLabels[index]}</TableCell>)}
@@ -134,21 +127,23 @@ export default function Table(props: TempAny) {
             </TableHead>
             <TableBody>
                 {data.map((row: TempAny, index: number) => (
-                    <TableRow key={row["$ref"] || index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                    <TableRow key={row["$ref"] || index}>
                         {tableFields.map(field => {
                             if (field === "$ref") {
                                 return <TableCell key={field}>
                                     <Button data-testid="edit_button" variant="text" onClick={() =>
                                         navigate("/ui/resource/edit" + path + "/" + row[field])
                                     }>Edit</Button>
-                                    {("delete" in (getResourceByPath(schema, path + "/" + row[field]) || {})) && <Button data-testid="delete_button" variant="text" onClick={() => {
-                                        RestSpinner.delete(path + "/" + row[field])
-                                            .then(() => {
-                                                window.location.reload();
-                                            }).catch((error) => {
-                                                RestSpinner.toastError("Unable to delete " + path + "/" + row[field], error);
-                                            });
-                                        window.location.reload();
+                                    {(("delete" in getResourceByPath(schema, path + "/" + row[field]))) && <Button data-testid="delete_button" variant="text" onClick={async () => {
+                                        if ("yes" === await Dialog.confirm("Deleting user " + row[field], "Do you really want to delete user " + row[field] + "?")) {
+                                            RestSpinner.delete(path + "/" + row[field])
+                                                .then(() => {
+                                                    window.location.reload();
+                                                }).catch((error) => {
+                                                    RestSpinner.toastError("Unable to delete " + path + "/" + row[field], error);
+                                                });
+                                            window.location.reload();
+                                        }
                                     }}>Delete</Button>}</TableCell>;
                             }
                             else {
@@ -225,7 +220,6 @@ export default function Table(props: TempAny) {
                     </TableRow>
                 ))}
             </TableBody>
-        </TableMaterial>
-    </TableContainer>
+    </TableCustom>
     );
 }

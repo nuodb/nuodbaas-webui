@@ -10,12 +10,12 @@ import FieldArray from "./FieldArray";
 import FieldInteger from "./FieldInteger";
 import FieldMessage from "./FieldMessage";
 import FieldDateTime from "./FieldDateTime";
-import FieldBase, { FieldProps, FieldPropsDisplay, FieldPropsValidate } from "./FieldBase";
+import { FieldBaseType, FieldProps, FieldPropsDisplay, FieldPropsValidate } from "./FieldBase";
 import { ReactNode } from "react";
 
-/** Factory class to create components based on the field type */
-export default class FieldFactory {
-    static create(props: FieldProps): FieldBase {
+/** Factory function to create components based on the field type */
+const FieldFactory = {
+    create: (props: FieldProps): FieldBaseType => {
         props = { ...props };
         let leftOvers = JSON.parse(JSON.stringify(props.parameter));
         if (!("schema" in leftOvers)) {
@@ -50,21 +50,21 @@ export default class FieldFactory {
         }
 
         if (type === "string" && format === "date-time") {
-            return new FieldDateTime(props);
+            return FieldDateTime(props);
         }
         else if (type === "string") {
             if (props.prefix === "resourceVersion") {
-                return new FieldHidden(props);
+                return FieldHidden(props);
             }
             else if (props.parameter["x-tf-sensitive"] === true) {
-                return new FieldPassword(props);
+                return FieldPassword(props);
             }
             else {
-                return new FieldString(props);
+                return FieldString(props);
             }
         }
         else if (type === "boolean") {
-            return new FieldBoolean(props);
+            return FieldBoolean(props);
         }
         else if (type === "object") {
             if (props.parameter["properties"]) {
@@ -72,28 +72,28 @@ export default class FieldFactory {
                     props.expand = props.parameter.expand;
                 }
 
-                return new FieldObject(props);
+                return FieldObject(props);
             }
             else if (props.parameter["additionalProperties"]) {
-                return new FieldMap(props);
+                return FieldMap(props);
             }
             else {
-                return new FieldMessage({ ...props, message: "ERROR: Invalid object" });
+                return FieldMessage({ ...props, message: "ERROR: Invalid object" });
             }
         }
         else if (type === "array") {
-            return new FieldArray(props);
+            return FieldArray(props);
         }
         else if (type === "integer") {
-            return new FieldInteger(props);
+            return FieldInteger(props);
         }
         else {
-            return new FieldMessage({ ...props, message: "Invalid type " + String(type) + " " + JSON.stringify(props.parameter) + " " + JSON.stringify(leftOvers) });
+            return FieldMessage({ ...props, message: "Invalid type " + String(type) + " " + JSON.stringify(props.parameter) + " " + JSON.stringify(leftOvers) });
         }
-    }
+    },
 
-    static createDisplayValue(props: FieldPropsDisplay): ReactNode {
-        return this.create({
+    createDisplayValue: (props: FieldPropsDisplay): ReactNode => {
+        return FieldFactory.create({
             setValues: () => { },
             errors: {},
             updateErrors: () => { },
@@ -104,10 +104,12 @@ export default class FieldFactory {
             readonly: true,
             ...props
         }).getDisplayValue();
-    }
+    },
 
-    static validateProps(props: FieldPropsValidate): boolean {
-        const field: FieldBase = FieldFactory.create({ errors: {}, required: false, autoFocus: false, expand: false, hideTitle: false, readonly: true, ...props });
+    validateProps: (props: FieldPropsValidate): boolean => {
+        const field: FieldBaseType = FieldFactory.create({ errors: {}, required: false, autoFocus: false, expand: false, hideTitle: false, readonly: true, ...props });
         return field.validate();
     }
 }
+
+export default FieldFactory;

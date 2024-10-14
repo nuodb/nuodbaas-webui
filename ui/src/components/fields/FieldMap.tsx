@@ -1,28 +1,23 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
 import { setValue, getValue } from "./utils";
-import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
-import Card from '@mui/material/Card';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import FieldBase from "./FieldBase"
+import TextField from "../controls/TextField";
+import Button from "../controls/Button";
+import FieldBase, { FieldBaseType, FieldProps } from "./FieldBase"
 import { TempAny } from "../../utils/types";
+import { ReactNode } from "react";
+import { Table, TableBody, TableCell, TableHead, TableRow } from "../controls/Table";
 
-export default class FieldMap extends FieldBase {
+export default function FieldMap(props: FieldProps): FieldBaseType {
 
-    validateNewKey() {
-        const { prefix, parameter, updateErrors } = this.props;
+    function validateNewKey(): boolean {
+        const { prefix, parameter, updateErrors } = props;
         let prefixKeyLabel = prefix + ".key";
         let prefixValueLabel = prefix + ".value";
         let keyElement = document.getElementById(prefixKeyLabel) as HTMLInputElement;
         let valueElement = document.getElementById(prefixValueLabel) as HTMLInputElement;
         if ((keyElement && keyElement.value !== "") || (valueElement && valueElement.value !== "")) {
-            return super.validate(prefixKeyLabel, parameter, keyElement.value);
+            return FieldBase(props).validate(prefixKeyLabel, parameter, keyElement.value);
         }
 
         updateErrors(prefixKeyLabel, null);
@@ -30,14 +25,14 @@ export default class FieldMap extends FieldBase {
         return true;
     }
 
-    validateNewValue() {
-        const { prefix, parameter, updateErrors } = this.props;
+    function validateNewValue(): boolean {
+        const { prefix, parameter, updateErrors } = props;
         let prefixKeyLabel = prefix + ".key";
         let prefixValueLabel = prefix + ".value";
         let keyElement = document.getElementById(prefixKeyLabel) as HTMLInputElement;
         let valueElement = document.getElementById(prefixValueLabel) as HTMLInputElement;
         if ((keyElement && keyElement.value !== "") || (valueElement && valueElement.value !== "")) {
-            return super.validate(prefixValueLabel, parameter["additionalProperties"], valueElement.value);
+            return FieldBase(props).validate(prefixValueLabel, parameter["additionalProperties"], valueElement.value);
         }
 
         updateErrors(prefixKeyLabel, null);
@@ -57,8 +52,8 @@ export default class FieldMap extends FieldBase {
      * @param setValues - callback to update field value
      * @returns
      */
-    show() {
-        const { prefix, values, errors, setValues, readonly } = this.props;
+    function show(): ReactNode {
+        const { prefix, values, errors, setValues, readonly } = props;
 
         let valueKeys = Object.keys(getValue(values, prefix) || {});
         let rows = [];
@@ -67,21 +62,17 @@ export default class FieldMap extends FieldBase {
             let prefixKeyValue = prefix + "." + i + ".value";
             let prefixKey = prefix + "." + valueKeys[i];
             let errorValue = (errors && (prefixKeyValue in errors) && errors[prefixKeyValue]) || "";
-            rows.push(<TableRow key={prefixKeyLabel} className="verticalAlignTop">
+            rows.push(<TableRow key={prefixKeyLabel}>
                 <TableCell>
                     <TextField
-                        fullWidth={true}
                         disabled={true}
                         id={prefixKeyLabel}
-                        name={prefixKeyLabel}
                         label={prefixKeyLabel}
                         value={valueKeys[i]} />
                 </TableCell>
                 <TableCell>
                     <TextField
-                        fullWidth={true}
                         id={prefixKeyValue}
-                        name={prefixKeyValue}
                         label={prefixKeyValue}
                         value={getValue(values, prefix)[valueKeys[i]]}
                         onChange={({ currentTarget: input }) => {
@@ -89,9 +80,8 @@ export default class FieldMap extends FieldBase {
                             setValue(v, prefixKey, input.value);
                             setValues(v)
                         }}
-                        error={errorValue !== ""}
-                        helperText={errorValue}
-                        onBlur={event => super.validate(prefixKeyValue, getValue(values, prefix)[valueKeys[i]])} />
+                        error={errorValue}
+                        onBlur={event => FieldBase(props).validate(prefixKeyValue, getValue(values, prefix)[valueKeys[i]])} />
                 </TableCell>
                 <TableCell><Button onClick={() => {
                     let v = { ...values };
@@ -108,26 +98,22 @@ export default class FieldMap extends FieldBase {
         let prefixValueLabel = prefix + ".value"
         let errorKey = (errors && (prefixKeyLabel in errors) && errors[prefixKeyLabel]) || "";
         let errorValue = (errors && (prefixValueLabel in errors) && errors[prefixValueLabel]) || "";
-        !readonly && rows.push(<TableRow key={prefixKeyLabel} className="verticalAlignTop">
+        !readonly && rows.push(<TableRow key={prefixKeyLabel}>
             <TableCell>
                 <TextField
-                    fullWidth={true}
                     id={prefixKeyLabel}
-                    name={prefixKeyLabel}
                     label={"new key"}
                     defaultValue=""
-                    onBlur={() => this.validateNewKey()}
-                    error={errorKey !== ""} helperText={errorKey} />
+                    onBlur={() => validateNewKey()}
+                    error={errorKey} />
             </TableCell>
             <TableCell>
                 <TextField
-                    fullWidth={true}
                     id={prefixValueLabel}
-                    name={prefixValueLabel}
                     label={"new value"}
                     defaultValue=""
-                    onBlur={() => this.validateNewValue()}
-                    error={errorValue !== ""} helperText={errorValue} />
+                    onBlur={() => validateNewValue()}
+                    error={errorValue} />
             </TableCell>
             <TableCell>
                 <Button data-testid={"add_button_" + prefix} onClick={() => {
@@ -137,7 +123,7 @@ export default class FieldMap extends FieldBase {
                         return;
                     }
 
-                    if (!this.validateNewKey() || !this.validateNewValue()) {
+                    if (!validateNewKey() || !validateNewValue()) {
                         return;
                     }
 
@@ -156,25 +142,23 @@ export default class FieldMap extends FieldBase {
         </TableRow>);
 
         return (
-            <TableContainer key={prefix} component={Card}>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>{lastPrefix} Key</TableCell>
-                            <TableCell>{lastPrefix} Value</TableCell>
-                            <TableCell></TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {rows}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+            <Table key={prefix}>
+                <TableHead>
+                    <TableRow>
+                        <TableCell>{lastPrefix} Key</TableCell>
+                        <TableCell>{lastPrefix} Value</TableCell>
+                        <TableCell></TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {rows}
+                </TableBody>
+            </Table>
         );
     }
 
-    validate() {
-        const { prefix, parameter, values } = this.props;
+    function validate(): boolean {
+        const { prefix, parameter, values } = props;
 
         let value = values[prefix];
         let success = true;
@@ -183,20 +167,22 @@ export default class FieldMap extends FieldBase {
             if (value) {
                 Object.values(value).forEach((v: TempAny, index: number) => {
                     const fieldKey = prefix + "." + index + ".value";
-                    success = super.validate(fieldKey, parameter["additionalProperties"], v) && success;
+                    success = FieldBase(props).validate(fieldKey, parameter["additionalProperties"], v) && success;
                 })
             }
         }
-        success = this.validateNewKey() && success;
-        success = this.validateNewValue() && success;
+        success = validateNewKey() && success;
+        success = validateNewValue() && success;
         return success;
     }
 
-    getDisplayValue() {
-        const { prefix, values } = this.props;
+    function getDisplayValue(): ReactNode {
+        const { prefix, values } = props;
         const value = getValue(values, prefix);
         return <dl className="map">{Object.keys(value).map(key => {
             return <div key={key}><dt>{String(key)}</dt><dd>{getValue(values, prefix + "." + key)}</dd></div>;
         })}</dl>
     }
+
+    return { ...FieldBase(props), show, validate, getDisplayValue }
 }

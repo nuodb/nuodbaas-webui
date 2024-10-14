@@ -1,16 +1,17 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
-import FieldBase from "./FieldBase";
-import TextField from '@mui/material/TextField'
+import FieldBase, { FieldBaseType, FieldProps } from "./FieldBase";
 import { getValue, setValue } from "./utils"
+import { ReactNode } from "react";
+import TextField from "../controls/TextField";
 
-export default class FieldDateTime extends FieldBase {
+export default function FieldDateTime(props: FieldProps): FieldBaseType {
     /**
      * show Field of type DateTime using the values and schema definition
      * @returns
      */
-    show() {
-        const { prefix, values, errors, required, setValues, autoFocus, updateErrors, readonly } = this.props;
+    function show(): ReactNode {
+        const { prefix, values, errors, required, setValues, autoFocus, updateErrors, readonly } = props;
         let value = getValue(values, prefix);
         let editValue = getValue(values, "_" + prefix);
         if (editValue === null) {
@@ -19,15 +20,12 @@ export default class FieldDateTime extends FieldBase {
         let error = (errors && (prefix in errors) && errors[prefix]) || "";
         return <TextField
             key={prefix}
-            fullWidth={true}
             required={required}
             id={prefix}
-            name={prefix}
             label={prefix}
             value={editValue}
             autoFocus={autoFocus}
-            error={error !== ""}
-            helperText={error}
+            error={error}
             onChange={({ currentTarget: input }) => {
                 let v = { ...values };
                 setValue(v, "_" + prefix, input.value);
@@ -61,18 +59,18 @@ export default class FieldDateTime extends FieldBase {
      * The "_<prefix>" field stores temporarily the entered value and will be cleared when exiting
      *    the field and the field is in the correct date/time format.
      */
-    validate() {
-        const { prefix, values, updateErrors } = this.props;
+    function validate(): boolean {
+        const { prefix, values, updateErrors } = props;
         let editValue = getValue(values, "_" + prefix);
         if (editValue !== null) {
             updateErrors(prefix, "Field \"" + prefix + "\" has invalid date/time format");
             return false;
         }
-        return super.validate();
+        return FieldBase(props).validate();
     }
 
-    getDisplayValue() {
-        const value = String(super.getDisplayValue());
+    function getDisplayValue(): ReactNode {
+        const value = String(FieldBase(props).getDisplayValue());
         if (!value) {
             return value;
         }
@@ -83,4 +81,6 @@ export default class FieldDateTime extends FieldBase {
         }
         return value;
     }
+
+    return { ...FieldBase(props), show, validate, getDisplayValue };
 }

@@ -1,7 +1,7 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { ErrorInfo, ReactNode } from "react";
-import Button from '@mui/material/Button'
+import Button from "./controls/Button";
 import Stacktrace from 'stacktrace-js';
 import BuildNumber from "./pages/parts/BuildNumber";
 
@@ -45,10 +45,9 @@ export default class GlobalErrorBoundary extends React.Component<IProps, IState>
                     <label>Build</label>
                     <BuildNumber />
                     <br />
-                    <Button variant="contained" onClick={() => {
+                    <Button onClick={() => {
                         window.location.href = "/ui";
                     }}>Dismiss</Button>
-
                 </div>
             );
         }
