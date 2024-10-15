@@ -6,11 +6,10 @@ import Table from "./parts/Table";
 import { getResourceEvents, getCreatePath, getResourceByPath, getFilterField } from "../../utils/schema";
 import RestSpinner from "./parts/RestSpinner";
 import Button from "../controls/Button";
-import Pagination from '@mui/material/Pagination';
-import Stack from '@mui/material/Stack';
 import Path, { parseSearch } from './parts/Path'
 import Auth from "../../utils/auth"
 import { SchemaType, TempAny } from "../../utils/types";
+import Pagination from "../controls/Pagination";
 
 /**
  * handles all the /resource/list/* requests to list a resource
@@ -96,14 +95,9 @@ export default function ListResource({ schema }: SchemaType) {
 
     function renderPaging() {
         const lastPage = Math.ceil(allItems.length / pageSize);
-        if (lastPage <= 1) {
-            return null;
-        }
-        return <Stack spacing={2} style={{ alignItems: "center" }}>
-            <Pagination count={lastPage} page={page} onChange={(event, page) => {
+        return <Pagination count={lastPage} page={page} setPage={(page) => {
                 setPage(page);
-            }} />
-        </Stack>;
+        }} />;
     }
 
     function getFilterValues() {

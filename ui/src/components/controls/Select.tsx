@@ -33,7 +33,7 @@ export default function Select(props: SelectProps): JSX.Element {
         </FormControl >;
     }
     else {
-        return <div className="FieldBase FieldSelect" key={id}>
+        return <div className="NuoFieldBase NuoFieldSelect" key={id}>
             <label id={"label_" + id}>{id}</label>
             <select name={id} {...props}>
                 {children}
