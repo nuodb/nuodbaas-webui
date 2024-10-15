@@ -7,6 +7,7 @@ import { getResourceEvents, getCreatePath, getResourceByPath, getFilterField } f
 import RestSpinner from "./parts/RestSpinner";
 import Button from "../controls/Button";
 import Path, { parseSearch } from './parts/Path'
+import Auth from "../../utils/auth"
 import { SchemaType, TempAny } from "../../utils/types";
 import Pagination from "../controls/Pagination";
 
