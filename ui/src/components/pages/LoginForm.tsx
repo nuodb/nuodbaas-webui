@@ -44,7 +44,7 @@ export default function LoginForm({ setIsLoggedIn }: Props) {
                     <div className="fields">
                         <TextField required data-testid="organization" id="organization" label="Organization" value={organization} onChange={(event) => setOrganization(event.target.value)} />
                         <TextField required data-testid="username" id="username" label="Username" value={username} onChange={(event) => setUsername(event.target.value)} />
-                        <TextField required data-testid="password" id="password" type="password" label="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+                        <TextField required data-testid="password" id="password" type="password" label="Password" value={password} onChange={(event) => setPassword(event.target.value)} />
                         {error && <h3 data-testid="error_message" style={{ color: "red" }}>{error}</h3>}
                         <Button data-testid="login_button" variant="contained" type="submit" onClick={handleLogin}>Login</Button>
                     </div>

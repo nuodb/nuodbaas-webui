@@ -502,19 +502,28 @@ export async function submitForm(urlParameters: FieldParametersType, formParamet
         path = path.substring(0, posBracketStart+1) + "name" + path.substring(posBracketEnd);
     }
 
-    queryParameters.forEach((query, index) => {
-        if(index === 0) {
-            path += "?";
+    // replace variables within the path
+    Object.keys(values).forEach(key => {
+        path = path.replace("{" + key + "}", String(values[key]));
+    });
+
+    // add query parameters to path
+    queryParameters.forEach((query) => {
+        let queryValue = undefined;
+        if(query in values) {
+            queryValue = values[query];
         }
         else {
-            path += "&";
+            queryValue = urlParameters[query]?.schema?.default;
         }
-        path += encodeURIComponent(query) + "={" + query + "}";
+        if(queryValue !== undefined) {
+            path += path.includes("?") ? "&" : "?";
+            path += encodeURIComponent(query) + "=" + encodeURIComponent(queryValue);
+        }
     })
 
     values = {...values};
     Object.keys(values).forEach(key => {
-        path = path.replace("{" + key + "}", String(values[key]));
         if(!(key in formParameters)) {
             //remove fields which are not used as form parameter
             delete values[key];
