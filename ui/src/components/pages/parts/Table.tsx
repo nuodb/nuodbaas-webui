@@ -1,6 +1,7 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
 import { useNavigate } from 'react-router-dom';
+import { withTranslation } from "react-i18next";
 import Button from '../../controls/Button';
 import { TableBody, TableCell, Table as TableCustom, TableHead, TableRow } from '../../controls/Table';
 import { getResourceByPath, getCreatePath, getChild, replaceVariables } from "../../../utils/schema";
@@ -16,8 +17,8 @@ import { CustomViewField, evaluate, getCustomizationsView } from '../../../utils
  * @param {*} param0
  * @returns
  */
-export default function Table(props: TempAny) {
-    const { schema, data, path } = props;
+function Table(props: TempAny) {
+    const { schema, data, path, t } = props;
     let navigate = useNavigate();
 
     /**
@@ -84,7 +85,7 @@ export default function Table(props: TempAny) {
                 return "";
             }
             else {
-                return key;
+                return t("resource.label." + key, key);
             }
         });
     }
@@ -133,7 +134,7 @@ export default function Table(props: TempAny) {
                                 return <TableCell key={field}>
                                     <Button data-testid="edit_button" variant="text" onClick={() =>
                                         navigate("/ui/resource/edit" + path + "/" + row[field])
-                                    }>Edit</Button>
+                                    }>{t("button.edit")}</Button>
                                     {(("delete" in getResourceByPath(schema, path + "/" + row[field]))) && <Button data-testid="delete_button" variant="text" onClick={async () => {
                                         if ("yes" === await Dialog.confirm("Deleting user " + row[field], "Do you really want to delete user " + row[field] + "?")) {
                                             RestSpinner.delete(path + "/" + row[field])
@@ -144,7 +145,7 @@ export default function Table(props: TempAny) {
                                                 });
                                             window.location.reload();
                                         }
-                                    }}>Delete</Button>}</TableCell>;
+                                    }}>{t("button.delete")}</Button>}</TableCell>;
                             }
                             else {
                                 const cv = getCustomizationsView(path)
@@ -223,3 +224,5 @@ export default function Table(props: TempAny) {
     </TableCustom>
     );
 }
+
+export default withTranslation()(Table);

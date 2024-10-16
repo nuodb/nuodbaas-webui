@@ -1,0 +1,28 @@
+{
+    "copyright": "(C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.",
+    "button": {
+        "create": "Create",
+        "create.resource": "Create {{resource}}",
+        "delete": "Delete",
+        "edit": "Edit",
+        "search": "Search"
+    },
+    "control": {
+        "select.item.all": "--- All ---",
+        "select.item.select": "--- Select ---"
+    },
+    "resource": {
+        "label": {
+            "backuppolicies": "Backup Policies",
+            "backups": "Backups",
+            "databases": "Databases",
+            "projects": "Projects",
+            "users": "Users",
+            "users_one": "User",
+            "organization": "Organization",
+            "accessRule": "Access Rule",
+            "name": "Name",
+            "labels": "Labels"
+        }
+    }
+}
