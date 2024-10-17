@@ -9,8 +9,12 @@ export type PaginationProps = {
     page: number,
     setPage: (page: number) => void
 }
-export default function Pagination(props: PaginationProps): JSX.Element {
+export default function Pagination(props: PaginationProps): JSX.Element | null {
     const { count, page, setPage } = props;
+
+    if (count === 0) {
+        return null;
+    }
 
     if (isMaterial()) {
         return <MuiStack spacing={2} style={{ alignItems: "center" }}>

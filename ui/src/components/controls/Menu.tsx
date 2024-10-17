@@ -44,7 +44,7 @@ export default function Menu(props: MenuProps): JSX.Element {
                 open={Boolean(anchor)}
                 onClose={() => setAnchor(null)}
             >
-                {items.map(item => <MenuItem data-testid={item.id} onClick={() => {
+                {items.map(item => <MenuItem key={item.id} data-testid={item.id} onClick={() => {
                     setAnchor(null);
                     item.onClick();
                 }}>{item.label}</MenuItem>)}
