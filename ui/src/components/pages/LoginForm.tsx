@@ -38,7 +38,7 @@ export default function LoginForm({ setIsLoggedIn }: Props) {
 
     return (
         <React.Fragment>
-            <div className="ContainerSM">
+            <div className="NuoContainerSM">
                 <h3>NuoDB Login</h3>
                 <form>
                     <div className="fields">

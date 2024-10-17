@@ -288,7 +288,7 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
         return ret;
     }
 
-    return <div className="ContainerSM">
+    return <div className="NuoContainerSM">
         <RestSpinner />
         <form>
             {!readonly && <h1>{(data && "Edit") || "Create"} entry for {path}</h1>}

@@ -1,6 +1,25 @@
 /* (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved. */
-.ContainerSM {
+.NuoContainerSM {
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
+}
+.NuoBanner {
+    width: 100%;
+    padding-left: 24px;
+    padding-right: 24px;
+    background-color: rgb(25, 118, 210);
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px;
+    color: white;
+    position: static;
+}
+
+.NuoBannerItems {
+    flex: 1 0 auto;
+    display: flex;
+}
+
+.NuoBannerSettings {
+    flex: 0 0 auto;
+    display: flex;
 }

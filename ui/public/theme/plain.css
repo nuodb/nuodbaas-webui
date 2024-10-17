@@ -1,16 +1,15 @@
-/* (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved. */
-.FieldError {
+.NuoFieldError {
     color: red;
 }
-.FieldString,
-.FieldSelect {
+.NuoFieldString,
+.NuoFieldSelect {
     position: relative;
     border: 1px solid;
     margin: 5px;
 }
 
-.FieldString>label,
-.FieldSelect>label {
+.NuoFieldString>label,
+.NuoFieldSelect>label {
     position: absolute;
     top: -15px;
     left: 10px;
@@ -18,14 +17,20 @@
     font-size: 1rem;
 }
 
-.FieldString>input,
-.FieldSelect>select {
+.NuoFieldString>input,
+.NuoFieldSelect>select {
     border: none;
     padding: 10px;
     left: 0px;
     width: 100%;
 }
-.BannerItem {
+.NuoBannerMenu {
+    flex-direction: row;
+    display: flex;
+}
+
+.NuoBannerItem,
+.NuoBannerMenu>button {
     cursor: pointer;
     background-color: transparent;
     font-family: Roboto, Helvetica, Arial, sans-serif;
@@ -41,4 +46,56 @@
     margin: 16px 0px;
     text-decoration: none;
     padding: 6px 8px;
+}
+.NuoPagination {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.NuoPaginationItem {
+    padding: 5px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.NuoPaginationItemSelected {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.NuoMenuPopup {
+    list-style: none;
+    margin: 5px;
+    padding: 8px 0px;
+    position: absolute;
+    outline: 0px;
+    color: black;
+    background-color: white;
+}
+
+.NuoAlignRight {
+    left: auto;
+    right: 0;
+}
+
+.NuoAlignLeft {
+    left: 0;
+    right: auto;
+}
+
+.NuoMenuPopupItem {
+    margin: 0px;
+    padding: 5px;
+    font-family: Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.5;
+    letter-spacing: 0.00938em;
+    text-align: center;
+    cursor: pointer;
+}
+
+.NuoMenuPopupItem:hover {
+    background-color: lightgray;
 }
