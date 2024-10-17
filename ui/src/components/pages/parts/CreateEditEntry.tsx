@@ -12,11 +12,12 @@ import { setValue } from "../../fields/utils";
 import { matchesPath } from "../../../utils/schema";
 import { FieldValuesType, FieldParameterType, TempAny, StringMapType, FieldParametersType } from "../../../utils/types";
 import { getCustomizations } from "../../../utils/Customizations";
+import { withTranslation } from "react-i18next";
 
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
  */
-export default function CreateEditEntry({ schema, path, data, readonly }: TempAny) {
+function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
     const navigate = useNavigate();
 
     const [formParameters, setFormParameters] = useState<FieldParametersType>({});
@@ -92,7 +93,7 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
             Object.keys(params).forEach(key => {
                 let parameter = params[key];
                 if (parameter && fieldName === null && key in values) {
-                    if (FieldFactory.validateProps({ prefix: key, parameter, values, updateErrors, setValues })) {
+                    if (FieldFactory.validateProps({ prefix: key, label: t("field.label." + key, key), parameter, values, updateErrors, setValues, t })) {
                         fieldName = key;
                     }
                 }
@@ -235,7 +236,7 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
         setFocus(v, formParams);
         setFormParameters(formParams);
         setSectionFormParameters(sectionFormParams);
-    }, [schema, path, data]);
+    }, [schema, path, data, t]);
 
     function getParentPath(path: string) {
         let lastSlash = path.lastIndexOf("/");
@@ -251,7 +252,7 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
         let success = true;
         Object.keys(formParameters).forEach((key: string) => {
             let parameter: TempAny = formParameters[key];
-            success = FieldFactory.validateProps({ prefix: key, parameter, values, updateErrors, setValues }) && success;
+            success = FieldFactory.validateProps({ prefix: key, label: t("field.label." + key), parameter, values, updateErrors, setValues, t }) && success;
         });
         return success;
     }
@@ -268,6 +269,7 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
                 || (data && (key in urlParameters || key === "name" || formParameter["x-immutable"] === true))
             return (FieldFactory.create({
                 prefix: key,
+                label: t("field.label." + key, key),
                 parameter: formParameter,
                 values,
                 errors,
@@ -277,7 +279,8 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
                 autoFocus: key === focusField,
                 hideTitle: ret.length === 1,
                 required: false,
-                readonly: ro
+                readonly: ro,
+                t
             })).show();
         });
         if (ret && ret.length > 0 && section.title) {
@@ -299,6 +302,7 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
                         let urlParameter = { ...urlParameters[key] };
                         return (FieldFactory.create({
                             prefix: key,
+                            label: t("field.label." + key, key),
                             parameter: urlParameter,
                             values,
                             errors,
@@ -308,7 +312,8 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
                             required: false,
                             expand: false,
                             hideTitle: false,
-                            readonly: readonly || !!data
+                            readonly: readonly || !!data,
+                            t
                         })).show();
                     }
                     )}
@@ -362,3 +367,5 @@ export default function CreateEditEntry({ schema, path, data, readonly }: TempAn
         </form>
     </div>
 }
+
+export default withTranslation()(CreateEditEntry);

@@ -18,11 +18,26 @@
             "databases": "Databases",
             "projects": "Projects",
             "users": "Users",
-            "users_one": "User",
+            "users_one": "User"
+        }
+    },
+    "field": {
+        "label": {
+            "allowCrossOrganizationAccess": "Allow Cross-Organization Access",
+            "password": "Password",
             "organization": "Organization",
             "accessRule": "Access Rule",
             "name": "Name",
-            "labels": "Labels"
+            "labels": "Labels",
+            "sla": "SLA",
+            "tier": "Tier"
+        }
+    },
+    "form": {
+        "settings": {
+            "label": {
+                "theme": "Theme"
+            }
         }
     }
 }

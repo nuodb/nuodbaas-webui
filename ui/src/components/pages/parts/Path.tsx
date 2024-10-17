@@ -73,7 +73,7 @@ function Path({ schema, path, filterValues, search, setSearch, setPage, t }: Tem
             return null;
         }
 
-        return <Select id={filterField} label={t("resource.label." + filterField, filterField)} value={"__all__"} onChange={({ target }) => {
+        return <Select id={filterField} label={t("field.label." + filterField, filterField)} value={"__all__"} onChange={({ target }) => {
                 navigate("/ui/resource/list" + path + "/" + target.value);
             }}>
             <SelectOption value="__all__">{t("control.select.item.all")}</SelectOption>

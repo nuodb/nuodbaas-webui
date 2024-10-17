@@ -17,6 +17,9 @@ const resources = {
   },
   fake: {
     translation: createFake(translationEN)
+  },
+  keysasvalues: {
+    translation: createKeysAsValues(translationEN)
   }
 };
 
@@ -106,7 +109,7 @@ function createFake(translations: KeyValue) {
       if(typeof element === "string") {
         obj[key] = replaceString(element);
       }
-      else if(typeof element === "object" && !Array.isArray(element) && element !== null) {
+      else if(typeof element === "object" && !Array.isArray(element)) {
         replaceRecursive(element);
       }
     })
@@ -114,5 +117,23 @@ function createFake(translations: KeyValue) {
 
   translations = JSON.parse(JSON.stringify(translations));
   replaceRecursive(translations);
+  return translations;
+}
+
+function createKeysAsValues(translations: KeyValue) {
+  function replaceRecursive(obj: KeyValue, prefix: string) {
+    Object.keys(obj).forEach((key:string) => {
+      const element = obj[key];
+      if(typeof element === "string") {
+        obj[key] = "[[" + prefix + key + "]]";
+      }
+      else if(typeof element === "object" && !Array.isArray(element)) {
+        replaceRecursive(element, prefix + key + ".");
+      }
+    })
+  }
+
+  translations = JSON.parse(JSON.stringify(translations));
+  replaceRecursive(translations, "");
   return translations;
 }

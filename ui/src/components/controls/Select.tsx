@@ -26,8 +26,8 @@ export default function Select(props: SelectProps): JSX.Element {
     const { id, label, required, children } = props;
     if (isMaterial()) {
         return <FormControl key={id} fullWidth>
-            <InputLabel id={"label_" + id}>{label !== undefined ? label : id}</InputLabel>
-            <MuiSelect labelId={"label_" + id} name={id} label={id} {...props}>
+            <InputLabel id={"label_" + id}>{label}</InputLabel>
+            <MuiSelect labelId={"label_" + id} name={id} label={label} {...props}>
                 {children}
             </MuiSelect>
             {required && <span>Required</span>}
@@ -35,7 +35,7 @@ export default function Select(props: SelectProps): JSX.Element {
     }
     else {
         return <div className="FieldBase FieldSelect" key={id}>
-            <label id={"label_" + id}>{label !== undefined ? label : id}</label>
+            <label id={"label_" + id}>{label}</label>
             <select name={id} {...props}>
                 {children}
             </select>

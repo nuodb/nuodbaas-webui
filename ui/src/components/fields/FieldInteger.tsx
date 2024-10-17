@@ -12,10 +12,10 @@ export default function FieldInteger(props: FieldProps): FieldBaseType {
      * @returns
      */
     function show(): ReactNode {
-        const { prefix, values, required, setValues, autoFocus, readonly } = props;
+        const { prefix, label, values, required, setValues, autoFocus, readonly } = props;
         let value = String(getValue(values, prefix) || "");
 
-        return <TextField key={prefix} required={required} id={prefix} label={prefix} value={value} autoFocus={autoFocus} onChange={({ currentTarget: input }) => {
+        return <TextField key={prefix} required={required} id={prefix} label={label} value={value} autoFocus={autoFocus} onChange={({ currentTarget: input }) => {
             let v = { ...values };
             setValue(values, prefix, input.value);
             setValues(v);

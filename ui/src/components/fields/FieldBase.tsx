@@ -8,12 +8,18 @@ export interface FieldPropsDisplay {
     /** contains field name (hierarchical fields are separated by period) */
     prefix: string,
 
+    /** contains label */
+    label: string,
+
     /** schema definition for this field */
     parameter: FieldParameterType,
 
     /** contains object with ALL values (and field names) of this form (not just this field).
      *  the key is the field name (name is separated by period if the field is hierarchical) */
     values: FieldValuesType,
+
+    /** translation function */
+    t: any;
 }
 
 export interface FieldPropsValidate extends FieldPropsDisplay {

@@ -85,7 +85,7 @@ function Table(props: TempAny) {
                 return "";
             }
             else {
-                return t("resource.label." + key, key);
+                return t("field.label." + key, key);
             }
         });
     }
@@ -167,8 +167,10 @@ function Table(props: TempAny) {
                                     if (fieldsSchema && field in fieldsSchema) {
                                         value = FieldFactory.createDisplayValue({
                                             prefix: field,
+                                            label: t("field.label." + field, field),
                                             parameter: fieldsSchema[field],
-                                            values: row
+                                            values: row,
+                                            t
                                         });
                                     }
                                     else {
