@@ -131,11 +131,12 @@ function Table(props: TempAny) {
                     <TableRow key={row["$ref"] || index}>
                         {tableFields.map(field => {
                             if (field === "$ref") {
+                                const resource = getResourceByPath(schema, path + "/" + row[field])
                                 return <TableCell key={field}>
                                     <Button data-testid="edit_button" variant="text" onClick={() =>
                                         navigate("/ui/resource/edit" + path + "/" + row[field])
                                     }>{t("button.edit")}</Button>
-                                    {(("delete" in getResourceByPath(schema, path + "/" + row[field]))) && <Button data-testid="delete_button" variant="text" onClick={async () => {
+                                    {(resource && ("delete" in resource)) && <Button data-testid="delete_button" variant="text" onClick={async () => {
                                         if ("yes" === await Dialog.confirm("Deleting user " + row[field], "Do you really want to delete user " + row[field] + "?")) {
                                             RestSpinner.delete(path + "/" + row[field])
                                                 .then(() => {

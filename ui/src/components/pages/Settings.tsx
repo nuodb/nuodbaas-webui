@@ -56,7 +56,7 @@ function Settings({ t }: SettingsProps) {
                 type: "select",
                 enums: [
                     { key: "material", label: "Material UI" },
-                    { key: "plain", label: "plain" },
+                    { key: "plain", label: "plain" }
                 ]
             },
             t
@@ -78,7 +78,7 @@ function Settings({ t }: SettingsProps) {
     }
 
     return (
-        <div className="ContainerSM">
+        <div className="NuoContainerSM">
             <h1>Settings</h1>
             {advanced ? renderAdvanced() : renderBasic()}
             <div style={{ color: "red" }}>{error}</div>
