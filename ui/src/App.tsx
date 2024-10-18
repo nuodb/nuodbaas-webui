@@ -1,6 +1,7 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { useState } from 'react';
+import './utils/i18n';
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import LoginForm from "./components/pages/LoginForm";
 import Home from "./components/pages/Home";

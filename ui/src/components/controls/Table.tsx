@@ -11,6 +11,7 @@ type TableProps = {
 
 type ChildProps = {
     children?: ReactNode,
+    "data-testid"?: string,
 }
 
 export function Table(props: TableProps): JSX.Element {
@@ -50,12 +51,12 @@ export function TableRow(props: ChildProps): JSX.Element {
 
 export function TableCell(props: ChildProps): JSX.Element {
     if (isMaterial()) {
-        return <MuiTableCell>
+        return <MuiTableCell data-testid={props["data-testid"]}>
             {props.children}
         </MuiTableCell>
     }
     else {
-        return <td>{props.children}</td>
+        return <td data-testid={props["data-testid"]}>{props.children}</td>
     }
 }
 

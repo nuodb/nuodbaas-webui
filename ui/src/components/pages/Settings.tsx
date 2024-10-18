@@ -6,8 +6,13 @@ import { LOCAL_USER_SETTINGS } from "../../utils/Customizations";
 import axios from "axios";
 import FieldSelect from "../fields/FieldSelect";
 import Button from "../controls/Button";
+import { withTranslation } from "react-i18next";
 
-export default function Settings() {
+type SettingsProps = {
+    t: any
+};
+
+function Settings({ t }: SettingsProps) {
     const navigate = useNavigate();
     let [settings, setSettings] = useState("");
     let [advanced, setAdvanced] = useState(false);
@@ -46,13 +51,15 @@ export default function Settings() {
                 setSettings(JSON.stringify(jsonSettings, null, 2));
             },
             prefix: "theme",
+            label: t("form.settings.label.theme"),
             parameter: {
                 type: "select",
                 enums: [
                     { key: "material", label: "Material UI" },
                     { key: "plain", label: "plain" }
                 ]
-            }
+            },
+            t
 
         }).show();
     }
@@ -101,3 +108,5 @@ export default function Settings() {
         </div >
     );
 }
+
+export default withTranslation()(Settings)

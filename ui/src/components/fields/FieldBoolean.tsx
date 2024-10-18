@@ -11,9 +11,9 @@ export default function FieldBoolean(props: FieldProps): FieldBaseType {
      * show Field of type Boolean using the values and schema definition
      */
     function show(): ReactNode {
-        const { prefix, values, required, setValues, autoFocus, readonly } = props;
+        const { prefix, label, values, required, setValues, autoFocus, readonly } = props;
         let value = getValue(values, prefix);
-        return <Select id={prefix} value={String(value || false)} autoFocus={autoFocus} required={required} onChange={({ target: input }) => {
+        return <Select id={prefix} key={prefix} label={label} value={String(value || false)} autoFocus={autoFocus} required={required} onChange={({ target: input }) => {
                 let v = { ...values };
             setValue(v, prefix, input.value);
                 setValues(v);

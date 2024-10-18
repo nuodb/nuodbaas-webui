@@ -11,10 +11,10 @@ export default function FieldSelect(props: FieldProps): FieldBaseType {
      * show Field of type Boolean using the values and schema definition
      */
     function show(): ReactNode {
-        const { prefix, values, parameter, required, setValues, autoFocus, readonly } = props;
+        const { prefix, label, values, parameter, required, setValues, autoFocus, readonly } = props;
         let value = getValue(values, prefix);
 
-        return <Select id={prefix} value={value} autoFocus={autoFocus} required={required} onChange={(e: any) => {
+        return <Select id={prefix} key={prefix} label={label} value={value} autoFocus={autoFocus} required={required} onChange={(e: any) => {
             let v = { ...values };
             setValue(v, prefix, e.target.value);
             setValues(v);
