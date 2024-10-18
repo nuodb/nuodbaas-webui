@@ -26,11 +26,11 @@ export default function TextField(props: TextFieldProps): JSX.Element {
     }
     else {
         return <div>
-            <div className="FieldBase FieldString" key={props.id}>
+            <div className="NuoFieldBase NuoFieldString" key={props.id}>
                 <label>{props.id}</label>
                 <input name={props.id} {...props} />
             </div>
-            {props.error !== "" && <div className="FieldError">{props.error}</div>}
+            {props.error !== "" && <div className="NuoFieldError">{props.error}</div>}
         </div>
     }
 }

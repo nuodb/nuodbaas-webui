@@ -2,3 +2,6 @@
 .BannerItem {
     color: white !important;
 }
+.NuoBannerMenu>button {
+    color: white !important;
+}
