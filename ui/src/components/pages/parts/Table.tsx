@@ -123,7 +123,7 @@ function Table(props: TempAny) {
     return (<TableCustom data-testid={props["data-testid"]}>
             <TableHead>
                 <TableRow>
-                    {tableFields.map((field, index) => <TableCell key={field}>{tableLabels[index]}</TableCell>)}
+                {tableFields.map((field, index) => <TableCell key={field} data-testid={field}>{tableLabels[index]}</TableCell>)}
                 </TableRow>
             </TableHead>
             <TableBody>

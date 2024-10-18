@@ -115,8 +115,8 @@ function ListResource({ schema, t }: SchemaType) {
         return [...filterValues];
     }
 
-    const createPath0 = createPath?.replace(/^\//, "").split("/")[0];
-    const createLabel = t('button.create.resource', { resource: t("resource.label." + createPath0 + "_one", createPath0) });
+    const createPathFirstPart = createPath?.replace(/^\//, "").split("/")[0];
+    const createLabel = t('button.create.resource', { resource: t("resource.label." + createPathFirstPart + "_one", createPathFirstPart) });
     return (
         <React.Fragment>
             <Path schema={schema} path={path} filterValues={getFilterValues()} search={search} setSearch={setSearch} setPage={setPage} />
