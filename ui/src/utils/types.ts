@@ -32,3 +32,8 @@ export type SchemaType = TempAny;
 export type StringMapType = {
     [key: string]: string
 }
+
+export type TableColumnType = {
+    id: string,
+    selected: boolean
+};

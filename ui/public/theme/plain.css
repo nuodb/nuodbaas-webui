@@ -63,39 +63,3 @@
 .NuoPaginationItemSelected {
     background-color: rgba(0, 0, 0, 0.08);
 }
-
-.NuoMenuPopup {
-    list-style: none;
-    margin: 5px;
-    padding: 8px 0px;
-    position: absolute;
-    outline: 0px;
-    color: black;
-    background-color: white;
-}
-
-.NuoAlignRight {
-    left: auto;
-    right: 0;
-}
-
-.NuoAlignLeft {
-    left: 0;
-    right: auto;
-}
-
-.NuoMenuPopupItem {
-    margin: 0px;
-    padding: 5px;
-    font-family: Roboto, Helvetica, Arial, sans-serif;
-    font-weight: 400;
-    font-size: 1rem;
-    line-height: 1.5;
-    letter-spacing: 0.00938em;
-    text-align: center;
-    cursor: pointer;
-}
-
-.NuoMenuPopupItem:hover {
-    background-color: lightgray;
-}

@@ -117,6 +117,7 @@ function ListResource({ schema, t }: SchemaType) {
 
     const createPathFirstPart = createPath?.replace(/^\//, "").split("/")[0];
     const createLabel = t('button.create.resource', { resource: t("resource.label." + createPathFirstPart + "_one", createPathFirstPart) });
+    const dataNotDeleted = itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true);
     return (
         <React.Fragment>
             <Path schema={schema} path={path} filterValues={getFilterValues()} search={search} setSearch={setSearch} setPage={setPage} />
@@ -125,7 +126,7 @@ function ListResource({ schema, t }: SchemaType) {
             <Table
                 data-testid="list_resource__table"
                 schema={schema}
-                data={itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true)}
+                data={dataNotDeleted}
                 path={itemsAndPath.path}
             />
             {renderPaging()}

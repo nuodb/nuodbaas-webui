@@ -270,7 +270,7 @@ function isObject(item: any): boolean {
  * @param merged object where data is merged into
  * @param data object to apply to the merged object
  */
-function mergeRecursive(merged: any, data: any): any {
+export function mergeRecursive(merged: any, data: any): void {
     for (const key in data) {
         if (isObject(data[key])) {
             if (!merged[key]) {
@@ -281,6 +281,13 @@ function mergeRecursive(merged: any, data: any): any {
             merged[key] = data[key];
         }
     }
+}
+
+export function mergeCustomizations(data: any): void {
+    const custom = JSON.parse(localStorage.getItem(LOCAL_USER_SETTINGS) || "{}");
+    mergeRecursive(custom, data);
+    localStorage.setItem(LOCAL_USER_SETTINGS, JSON.stringify(custom, null, 2));
+    mergeRecursive(mergedJson, custom);
 }
 
 type CustomizationsProps = {
