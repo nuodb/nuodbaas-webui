@@ -11,6 +11,8 @@ services:
       - nginx
     networks:
       - kwok-kwok
+    environment:
+      - SE_VNC_NO_PASSWORD=true
     healthcheck:
       test: curl --fail http://selenium:4444/ || exit 1
       interval: 5s

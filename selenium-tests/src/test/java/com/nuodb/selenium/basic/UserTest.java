@@ -40,7 +40,7 @@ public class UserTest extends TestRoutines {
 
         // verify user is gone
         waitRestComplete();
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", userName, "0");
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", userName, MENU_COLUMN);
         assertEquals(0, buttonsCell.size());
     }
 
@@ -52,11 +52,9 @@ public class UserTest extends TestRoutines {
         clickUsersMenu();
 
         // find user and start edit mode
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", userName, "0");
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", userName, MENU_COLUMN);
         assertEquals(1, buttonsCell.size());
-        List<WebElement> editButtons = buttonsCell.get(0).findElements(By.xpath("button[@data-testid='edit_button']"));
-        assertEquals(1, editButtons.size());
-        editButtons.get(0).click();
+        clickPopupMenu(buttonsCell.get(0), "edit_button");
 
         // edit user and save
         waitElement("section-labels").click();
