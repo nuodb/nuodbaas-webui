@@ -7,6 +7,7 @@ import { FormControl, InputLabel, MenuItem, Select as MuiSelect } from '@mui/mat
 export type SelectProps = {
     "data-testid"?: string,
     id: string,
+    label?: string,
     value: string,
     children: ReactNode,
     required?: boolean,
@@ -22,11 +23,11 @@ export type SelectOptionProps = {
 }
 
 export default function Select(props: SelectProps): JSX.Element {
-    const { id, required, children } = props;
+    const { id, label, required, children } = props;
     if (isMaterial()) {
         return <FormControl key={id} fullWidth>
-            <InputLabel id={"label_" + id}>{id}</InputLabel>
-            <MuiSelect labelId={"label_" + id} name={id} label={id} {...props}>
+            <InputLabel id={"label_" + id}>{label}</InputLabel>
+            <MuiSelect labelId={"label_" + id} name={id} label={label} {...props}>
                 {children}
             </MuiSelect>
             {required && <span>Required</span>}
@@ -34,7 +35,7 @@ export default function Select(props: SelectProps): JSX.Element {
     }
     else {
         return <div className="NuoFieldBase NuoFieldSelect" key={id}>
-            <label id={"label_" + id}>{id}</label>
+            <label id={"label_" + id}>{label}</label>
             <select name={id} {...props}>
                 {children}
             </select>

@@ -14,7 +14,7 @@ export default function FieldObject(props: FieldProps): FieldBaseType {
      * @returns
      */
     function show(): ReactNode {
-        const { prefix, parameter, values, errors, required, setValues, updateErrors, expand, hideTitle } = props;
+        const { prefix, parameter, values, errors, required, setValues, updateErrors, expand, hideTitle, t } = props;
         const properties = parameter.properties;
         if (!properties) {
             return FieldMessage({ ...props, message: "\"properties\" attribute missing from schema for field \"" + prefix + "\"" }).show();
@@ -30,7 +30,7 @@ export default function FieldObject(props: FieldProps): FieldBaseType {
         if (hideTitle) {
             return ret;
         }
-        return <Accordion data-testid={"section-" + prefix} className="FieldObjectSection" key={prefix} defaultExpanded={!!expand} summary={prefix}>
+        return <Accordion data-testid={"section-" + prefix} className="FieldObjectSection" key={prefix} defaultExpanded={!!expand} summary={t("field.label." + prefix, prefix)}>
             {ret}
         </Accordion>
     }

@@ -24,8 +24,8 @@ export default function Accordion(props: AccordionProps): JSX.Element {
         </MuiAccordion>;
     }
     else {
-        return <details key={props.key}>
-            <summary data-testid={props["data-testid"]} key={props.key}>{props.summary}</summary>
+        return <details>
+            <summary data-testid={props["data-testid"]}>{props.summary}</summary>
             {props.children}
         </details>
     }

@@ -1,6 +1,7 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { useState } from "react"
+import { withTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom"
 import Button from "../../controls/Button"
 import Breadcrumbs from '@mui/material/Breadcrumbs'
@@ -45,7 +46,7 @@ export function parseSearch(search: string) {
     return ret;
 }
 
-export default function Path({ schema, path, filterValues, search, setSearch, setPage }: TempAny) {
+function Path({ schema, path, filterValues, search, setSearch, setPage, t }: TempAny) {
     const [searchField, setSearchField] = useState(search);
     const [error, setError] = useState(undefined);
 
@@ -60,10 +61,10 @@ export default function Path({ schema, path, filterValues, search, setSearch, se
     function renderFilter() {
         if (filterField && Array.isArray(filterField)) {
             // last path is not a variable but a list of constant paths - provide user an option to select those
-            return <Select id="filter" value={"__select__"} onChange={({ target }) => {
+            return <Select id="filter" label="" value={"__select__"} onChange={({ target }) => {
                     navigate("/ui/resource/list" + path + "/" + target.value);
                 }}>
-                <SelectOption value={"__select__"}>--- Select ---</SelectOption>
+                <SelectOption value={"__select__"}>{t("control.select.item.select")}</SelectOption>
                 {filterField.map((ff: string) => <SelectOption key={ff} value={ff}>{ff}</SelectOption>)}
             </Select>;
         }
@@ -72,10 +73,10 @@ export default function Path({ schema, path, filterValues, search, setSearch, se
             return null;
         }
 
-        return <Select id={filterField} value={"__all__"} onChange={({ target }) => {
+        return <Select id={filterField} label={t("field.label." + filterField, filterField)} value={"__all__"} onChange={({ target }) => {
                 navigate("/ui/resource/list" + path + "/" + target.value);
             }}>
-            <SelectOption value="__all__">--- All ---</SelectOption>
+            <SelectOption value="__all__">{t("control.select.item.all")}</SelectOption>
             {filterValues && filterValues.map((fv: string) => <SelectOption key={fv} value={fv}>{fv}</SelectOption>)}
         </Select>;
     }
@@ -99,6 +100,9 @@ export default function Path({ schema, path, filterValues, search, setSearch, se
     return <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
         <StyledBreadcrumbs data-testid="path_component" separator=">" aria-label="resources" style={{ fontSize: "2em", padding: "20px", display: "flex", flexWrap: "nowrap" }}>
             {pathParts && pathParts.map((p: string, index: number) => {
+                if (index === 0) {
+                    p = t("resource.label." + p, p);
+                }
                 if (index === pathParts.length - 1) {
                     return <Typography key={index} color="text.primary" style={{ fontSize: "1em" }}>{p}</Typography>
                 }
@@ -138,8 +142,10 @@ export default function Path({ schema, path, filterValues, search, setSearch, se
                 error={error}
             />
             <Button data-testid="searchButton" onClick={handleSearch}
-            >Search</Button>
+            >{t("button.search")}</Button>
         </React.Fragment>
         }
     </div>;
 }
+
+export default withTranslation()(Path);

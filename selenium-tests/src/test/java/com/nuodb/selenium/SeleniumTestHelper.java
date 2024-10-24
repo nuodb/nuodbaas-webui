@@ -184,7 +184,7 @@ public class SeleniumTestHelper {
     public List<WebElement> waitTableElements(String tableId, String searchColumn, String searchValue, String resultColumn) {
         WebElement table = waitElementPresent(tableId);
         WebElement thead = table.findElement(By.tagName("thead"));
-        List<String> headers = thead.findElements(By.tagName("th")).stream().map(head -> head.getText()).toList();
+        List<String> headers = thead.findElements(By.tagName("th")).stream().map(head -> head.getAttribute("data-testid")).toList();
         int sColumn = getColumn(headers, searchColumn);
         int rColumn = Integer.MAX_VALUE;
         rColumn = getColumn(headers, resultColumn);
