@@ -133,8 +133,6 @@ public class TestRoutines extends SeleniumTestHelper {
         assertEquals(1, menuToggles.size());
         menuToggles.get(0).click();
         WebElement parent = menuToggles.get(0).findElement(By.xpath(".."));
-        String id = parent.getTagName();
-        System.out.println(id);
         List<WebElement> menuItems = parent.findElements(By.xpath(".//div[@data-testid='" + dataTestId + "']"));
         assertEquals(1, menuItems.size());
         menuItems.get(0).click();

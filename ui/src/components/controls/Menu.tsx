@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Button from './Button';
 
-import { PopupMenuIcon } from "../../resources/icons/PopupMenuIcon";
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { MenuItemProps, MenuProps } from '../../utils/types';
 
 export default function Menu(props: MenuProps): JSX.Element {
@@ -109,7 +109,7 @@ export default function Menu(props: MenuProps): JSX.Element {
 
     let { children } = props;
     if (popup && !children) {
-        children = <PopupMenuIcon />
+        children = <MoreVertIcon />
     }
 
     if (children) {
