@@ -1,15 +1,35 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
 import { withTranslation } from "react-i18next";
-import { TableColumnType, TempAny } from "../../../utils/types";
+import { MenuItemProps, TempAny } from "../../../utils/types";
 import { mergeCustomizations } from "../../../utils/Customizations";
 import Menu from "../../controls/Menu";
+import { getSchema, getSchemaPath } from "../../../utils/schema";
 
-function saveColumns(cols: TableColumnType[], path: string) {
+async function saveColumns(cols: MenuItemProps[], path: string) {
+
+    // find appropriate schema path - the longest path with these conditions:
+    // - is a view path (doesn't have a "delete" method (or no "put" / "patch"))
+    // - schema path ends with a "{variable}" component (ignoring first path component)
+    // It makes all the variable components optional (prepends with "?")
+    const schema = await getSchema();
+    let p = path;
+    let schemaPath;
+    let sp;
+    while ((sp = getSchemaPath(schema, p)) && (sp.endsWith("}") || sp.split("/").length === 2) && (!("delete" in schema[sp]))) {
+        schemaPath = sp;
+        p = p + "/next";
+    }
+    if (!schemaPath) {
+        schemaPath = path;
+    }
+    schemaPath = schemaPath.replaceAll("/{", "?/{");
+
+    // merge columns into the customizations
     mergeCustomizations({
         views: {
-            "/users?/{organization}": {
-                columns: cols.map(col => col.id).filter(col => col != "$ref")
+            [schemaPath]: {
+                columns: cols.filter(col => col.id !== "$ref" && col.selected).map(col => col.id)
             }
         }
     });
@@ -21,7 +41,14 @@ function saveColumns(cols: TableColumnType[], path: string) {
  * @returns
  */
 function TableSettingsColumns(props: TempAny) {
-    const { data, path, columns, setColumns, t } = props;
+    const { path, columns, setColumns, t } = props;
+
+    function handleSelection(index: number) {
+        let cols = [...columns];
+        cols[index].selected = !cols[index].selected;
+        saveColumns(cols, path);
+        setColumns(cols);
+    }
 
     /**
      * Find all fields to be shown in the table
@@ -29,23 +56,21 @@ function TableSettingsColumns(props: TempAny) {
      * @returns
      */
 
-    const items = columns.filter((column: TableColumnType) => column.id !== "$ref").map((column: { id: string, selected: boolean }, index: number) => {
+    const items = columns.filter((column: MenuItemProps) => column.id !== "$ref").map((column: MenuItemProps, index: number) => {
         return {
             id: column.id,
+            selected: column.selected,
             label: <div key={column.id} style={{ display: "flex", flexDirection: "row" }
             }>
-                <input type="checkbox" id={column.id} checked={column.selected} onChange={() => {
-                    let cols = [...columns];
-                    cols.push()
-                    cols[index].selected = !cols[index].selected;
-                    saveColumns(cols, path);
-                    setColumns(cols);
-                }} />
-                <label htmlFor={column.id}>{t("field.label." + column.id, column.id)}</label>
+                <input type="checkbox" id={column.id} checked={column.selected} onChange={() => handleSelection(index)} />
+                <label htmlFor={column.id} onClick={() => handleSelection(index)}>{t("field.label." + column.id, column.id)}</label>
             </div >
         }
     });
-    return <Menu popup={true} draggable={true} items={items} setItems={setColumns} align="right" />;
+    return <Menu popup={true} draggable={true} items={items} setItems={(items) => {
+        saveColumns(items, path);
+        setColumns(items);
+    }} align="right" />;
 }
 
 export default withTranslation()(TableSettingsColumns);

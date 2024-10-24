@@ -1,5 +1,7 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
+import { ReactNode } from "react";
+
 // the TempAny type allows us to temporarily declare variables as "any" type,
 // so we can easily find them in source control and fix in future PR's
 export type TempAny = any;
@@ -33,7 +35,21 @@ export type StringMapType = {
     [key: string]: string
 }
 
-export type TableColumnType = {
+export type MenuItemProps = {
+    "data-testid"?: string,
     id: string,
-    selected: boolean
+    label: ReactNode,
+    selected?: boolean,
+    onClick?: () => void
+}
+
+export type MenuProps = {
+    "data-testid"?: string,
+    align?: "left" | "right",
+    popup?: boolean,
+    draggable?: boolean,
+    children?: ReactNode,
+    items: MenuItemProps[],
+    setItems?: (items: MenuItemProps[]) => void,
+    className?: string
 };

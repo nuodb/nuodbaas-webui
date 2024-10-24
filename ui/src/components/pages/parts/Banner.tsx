@@ -46,6 +46,7 @@ function ResponsiveAppBar(resources: string[]) {
             <Menu
               items={resources.map((resource: string, index: number) => {
                 return {
+                  "data-testid": "menu-label-" + index,
                   id: "menu-label-" + index,
                   label: resource,
                   onClick: () => navigate("/ui/resource/list/" + resource)

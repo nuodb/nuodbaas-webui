@@ -24,7 +24,7 @@ public class DatabaseTest extends TestRoutines {
         String databaseName = createDatabase(projectName);
 
         // verify database was created
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", databaseName, "0");
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
         assertEquals(1, buttonsCell.size());
     }
 
@@ -40,7 +40,7 @@ public class DatabaseTest extends TestRoutines {
 
         // verify database is gone
         waitRestComplete();
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", databaseName, "0");
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
         assertEquals(0, buttonsCell.size());
     }
 
@@ -52,11 +52,9 @@ public class DatabaseTest extends TestRoutines {
         String databaseName = createDatabase(projectName);
 
         // find database and start edit mode
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", databaseName, "0");
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
         assertEquals(1, buttonsCell.size());
-        List<WebElement> editButtons = buttonsCell.get(0).findElements(By.xpath("button[@data-testid='edit_button']"));
-        assertEquals(1, editButtons.size());
-        editButtons.get(0).click();
+        clickPopupMenu(buttonsCell.get(0), "edit_button");
 
         // edit database and save
         waitInputElementByName("labels.key").sendKeys(projectName);

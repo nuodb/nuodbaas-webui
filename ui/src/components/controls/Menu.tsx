@@ -1,26 +1,10 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
-import { ReactNode, useState } from 'react';
+import { useState } from 'react';
 import Button from './Button';
 
 import { PopupMenuIcon } from "../../resources/icons/PopupMenuIcon";
-
-type MenuItemProps = {
-    id: string,
-    label: ReactNode,
-    onClick?: () => void
-}
-
-type MenuProps = {
-    "data-testid"?: string,
-    align?: "left" | "right",
-    popup?: boolean,
-    draggable?: boolean,
-    children?: ReactNode,
-    items: MenuItemProps[],
-    setItems?: (items: MenuItemProps[]) => void,
-    className?: string
-};
+import { MenuItemProps, MenuProps } from '../../utils/types';
 
 export default function Menu(props: MenuProps): JSX.Element {
     const { align, popup, items, setItems, className, draggable } = props;
@@ -68,13 +52,12 @@ export default function Menu(props: MenuProps): JSX.Element {
         if (!target?.parentNode?.children) {
             return;
         }
-        let newItems: any[] = [];
+        let newItems: MenuItemProps[] = [];
         Array.from(target.parentNode.children).forEach((child: any) => {
-            console.log("child", child);
-            newItems.push(items.find(item => item.id === child.getAttribute("id")));
+            const newItem = items.find(item => item.id === child.getAttribute("id"));
+            newItem && newItems.push(newItem);
         })
         if (setItems) {
-            console.log(items, newItems);
             setItems(newItems);
         }
     }
@@ -93,18 +76,21 @@ export default function Menu(props: MenuProps): JSX.Element {
     function popupMenu(items: MenuItemProps[]) {
         const rect = anchor?.getBoundingClientRect();
         const x = align === "right" ? rect?.right : rect?.left;
-        return <div style={{ display: anchor ? "block" : "none", position: "fixed", right: 0, left: 0, top: 0, bottom: 0, backgroundColor: "transparent", zIndex: 1 }} onClick={() => setAnchor(null)}>
-            <div style={{ position: "absolute", right: x, left: x, top: rect?.bottom, bottom: rect?.bottom }}>
+        return <div
+            style={{ display: anchor ? "block" : "none", position: "fixed", right: 0, left: 0, top: 0, bottom: 0, backgroundColor: "transparent", zIndex: 1 }}
+            onClick={() => setAnchor(null)}>
+            <div style={{ position: "fixed", right: x, left: x, top: rect?.bottom, bottom: rect?.bottom, zIndex: 2 }}>
                 <div id="NuoMenuPopup" className={"NuoMenuPopup " + (align === "right" ? " NuoAlignRight" : " NuoAlignLeft")}>
-                    {items.map(item => <div
+                    {items.map(item => <div style={{ zIndex: 2 }}
                         id={item.id}
+                        data-testid={item["data-testid"]}
                         draggable={draggable}
                         onDrop={dndDrop}
                         onDragOver={dndOver}
                         onDragStart={dndStart}
                         key={item.id}
                         className="NuoMenuPopupItem"
-                        onClick={() => item.onClick && item.onClick()}>
+                        onClick={(e) => { e.stopPropagation(); item.onClick && item.onClick(); }}>
                         {item.label}
                     </div>)}
                 </div></div>
@@ -128,9 +114,11 @@ export default function Menu(props: MenuProps): JSX.Element {
 
     if (children) {
         return <>
-            <div style={{ display: "flex", justifyContent: align === "left" ? "start" : "end" }} className="NuoMenuToggle" onClick={(event) => {
+            <div data-testid="menu-toggle" style={{ display: "flex", justifyContent: align === "left" ? "start" : "end" }} className="NuoMenuToggle" onClick={(event) => {
                 setAnchor(event.currentTarget)
-            }}><>{children}</></div>
+            }}>
+                <>{children}</>
+            </div>
             {popupMenu(items)}
         </>;
     }

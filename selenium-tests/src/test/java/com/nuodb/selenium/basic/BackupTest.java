@@ -24,7 +24,7 @@ public class BackupTest extends TestRoutines {
         String backupName = createBackup(projectName, databaseName);
 
         // verify that backup was created
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", backupName, "0");
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", backupName, MENU_COLUMN);
         assertEquals(1, buttonsCell.size());
     }
 
@@ -41,7 +41,7 @@ public class BackupTest extends TestRoutines {
 
         // verify backup is gone
         waitRestComplete();
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", backupName, "0");
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", backupName, MENU_COLUMN);
         assertEquals(0, buttonsCell.size());
     }
 
@@ -54,11 +54,9 @@ public class BackupTest extends TestRoutines {
         String backupName = createBackup(projectName, databaseName);
 
         // find backup and start edit mode
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", backupName, "0");
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", backupName, MENU_COLUMN);
         assertEquals(1, buttonsCell.size());
-        List<WebElement> editButtons = buttonsCell.get(0).findElements(By.xpath("button[@data-testid='edit_button']"));
-        assertEquals(1, editButtons.size());
-        editButtons.get(0).click();
+        clickPopupMenu(buttonsCell.get(0), "edit_button");
 
         // edit backup and save
         waitElement("section-advanced").click();

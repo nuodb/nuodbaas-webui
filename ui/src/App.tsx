@@ -19,7 +19,6 @@ import GlobalErrorBoundary from "./components/GlobalErrorBoundary";
 import Auth from "./utils/auth";
 import Settings from './components/pages/Settings';
 import Customizations from './utils/Customizations';
-import TmpResource from './components/pages/TmpResource';
 
 /**
  * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
@@ -49,7 +48,6 @@ export default function App() {
                   <Route path="/ui/resource/edit/*" element={<EditResource schema={schema} />} />
                   <Route path="/ui/resource/view/*" element={<ViewResource schema={schema} />} />
                   <Route path="/ui/settings" element={<Settings />} />
-                  <Route path="/tmp" element={<TmpResource />} />
                   <Route path="/*" element={<NotFound />} />
                 </Routes></React.Fragment>
               :
