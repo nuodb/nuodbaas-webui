@@ -90,7 +90,7 @@ export default function Menu(props: MenuProps): JSX.Element {
                         onDragStart={dndStart}
                         key={item.id}
                         className="NuoMenuPopupItem"
-                        onClick={(e) => { e.stopPropagation(); item.onClick && item.onClick(); }}>
+                        onClick={(e) => { e.stopPropagation(); setAnchor(null); item.onClick && item.onClick(); }}>
                         {item.label}
                     </div>)}
                 </div></div>

@@ -2,6 +2,7 @@
 
 import Auth from "../../../utils/auth";
 import { useNavigate } from 'react-router-dom';
+import { withTranslation } from "react-i18next";
 
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -15,7 +16,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { SchemaType } from "../../../utils/types";
 import Menu from "../../controls/Menu";
 
-function ResponsiveAppBar(resources: string[]) {
+function ResponsiveAppBar(resources: string[], t: any) {
   const navigate = useNavigate();
 
   return (
@@ -48,7 +49,7 @@ function ResponsiveAppBar(resources: string[]) {
                 return {
                   "data-testid": "menu-label-" + index,
                   id: "menu-label-" + index,
-                  label: resource,
+                  label: t("resource.label." + resource, resource),
                   onClick: () => navigate("/ui/resource/list/" + resource)
                 };
               })}
@@ -89,7 +90,7 @@ function ResponsiveAppBar(resources: string[]) {
                 return {
                   id: "menu-button-" + index,
                   className: "NuoBannerItem",
-                  label: resource,
+                  label: t("resource.label." + resource, resource),
                   onClick: () => {
                   navigate("/ui/resource/list/" + resource);
                   }
@@ -103,14 +104,14 @@ function ResponsiveAppBar(resources: string[]) {
               align="right"
               items={[
                 {
-                  label: "Settings",
+                  label: t("button.settings"),
                   id: "settings",
                   onClick: () => {
                     navigate("/ui/settings");
                   }
                 },
                 {
-                  label: "Logout",
+                  label: t("button.logout"),
                   id: "logout",
                   onClick: () => {
                     Auth.logout();
@@ -119,7 +120,7 @@ function ResponsiveAppBar(resources: string[]) {
                 }
               ]}
             >
-              <Tooltip title="Open settings">
+              <Tooltip title={t("hint.open.settings")}>
                 <IconButton sx={{ p: 0 }}>
                   <Avatar>{Auth.getAvatarText()}</Avatar>
                 </IconButton>
@@ -133,10 +134,11 @@ function ResponsiveAppBar(resources: string[]) {
 }
 
 interface Props {
-  schema: SchemaType
+  schema: SchemaType,
+  t: any
 }
 
-export default function Banner({ schema }: Props) {
+function Banner({ schema, t }: Props) {
 
   if (!schema) {
     return null;
@@ -149,5 +151,7 @@ export default function Banner({ schema }: Props) {
     return path;
   });
 
-  return ResponsiveAppBar(resources);
+  return ResponsiveAppBar(resources, t);
 }
+
+export default withTranslation()(Banner);

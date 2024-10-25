@@ -49,6 +49,7 @@
     letter-spacing: 0.00938em;
     text-align: left;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .NuoMenuPopupItem:hover {

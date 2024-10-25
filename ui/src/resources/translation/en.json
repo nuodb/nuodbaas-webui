@@ -5,7 +5,16 @@
         "create.resource": "Create {{resource}}",
         "delete": "Delete",
         "edit": "Edit",
-        "search": "Search"
+        "search": "Search",
+        "start.database": "Start Database",
+        "stop.database": "Stop Database",
+        "show.databases": "Show Databases",
+        "show.backups": "Show Backups",
+        "settings": "Settings",
+        "logout": "Logout"
+    },
+    "hint": {
+        "open.settings": "Open Settings"
     },
     "control": {
         "select.item.all": "--- All ---",
@@ -30,7 +39,13 @@
             "name": "Name",
             "labels": "Labels",
             "sla": "SLA",
-            "tier": "Tier"
+            "tier": "Tier",
+            "properties": "Properties",
+            "project": "Project",
+            "status": "Status",
+            "database": "Database",
+            "frequency": "Frequency",
+            "selector": "Selector"
         }
     },
     "form": {

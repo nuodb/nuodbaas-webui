@@ -10,55 +10,54 @@
                 "tier",
                 "properties",
                 "status",
-                "*",
-                "buttons"
+                "*"
             ],
             "fields": {
                 "status": {
-                    "value": "status.state",
-                    "buttons": [
-                        {
-                            "label": "Start Database",
-                            "patch": [
-                                {
-                                    "op": "remove",
-                                    "path": "/maintenance"
-                                }
-                            ],
-                            "visible": "maintenance.isDisabled",
-                            "confirm": "Do you want to start Database {organization}/{project}/{name}?"
-                        },
-                        {
-                            "label": "Stop Database",
-                            "patch": [
-                                {
-                                    "op": "add",
-                                    "path": "/maintenance",
-                                    "value": {
-                                        "isDisabled": true
-                                    }
-                                }
-                            ],
-                            "visible": "!maintenance",
-                            "confirm": "Do you want to stop Database {organization}/{project}/{name}?"
-                        },
-                        {
-                            "label": "Stop Database",
-                            "patch": [
-                                {
-                                    "op": "replace",
-                                    "path": "/maintenance",
-                                    "value": {
-                                        "isDisabled": true
-                                    }
-                                }
-                            ],
-                            "visible": "maintenance.isDisabled=false",
-                            "confirm": "Do you want to stop Database {organization}/{project}/{name}?"
-                        }
-                    ]
+                    "value": "status.state"
                 }
-            }
+            },
+            "menu": [
+                {
+                    "label": "button.start.database",
+                    "patch": [
+                        {
+                            "op": "remove",
+                            "path": "/maintenance"
+                        }
+                    ],
+                    "visible": "maintenance.isDisabled",
+                    "confirm": "Do you want to start Database {organization}/{project}/{name}?"
+                },
+                {
+                    "label": "button.stop.database",
+                    "patch": [
+                        {
+                            "op": "add",
+                            "path": "/maintenance",
+                            "value": {
+                                "isDisabled": true
+                            }
+                        }
+                    ],
+                    "visible": "!maintenance",
+                    "confirm": "Do you want to stop Database {organization}/{project}/{name}?"
+                },
+                {
+                    "label": "button.stop.database",
+                    "patch": [
+                        {
+                            "op": "replace",
+                            "path": "/maintenance",
+                            "value": {
+                                "isDisabled": true
+                            }
+                        }
+                    ],
+                    "visible": "maintenance.isDisabled=false",
+                    "confirm": "Do you want to stop Database {organization}/{project}/{name}?"
+                }
+            ]
         },
         "/backuppolicies?/{organization}": {
             "columns": [
@@ -68,23 +67,26 @@
                 "frequency",
                 "selector",
                 "properties",
-                "show",
                 "*"
             ],
-            "fields": {
-                "show": {
-                    "buttons": [
-                        {
-                            "label": "Show Databases",
-                            "link": "/ui/resource/list/backuppolicies/{organization}/{name}/databases"
-                        },
-                        {
-                            "label": "Show Backups",
-                            "link": "/ui/resource/list/backuppolicies/{organization}/{name}/backups"
-                        }
-                    ]
+            "menu": [
+                {
+                    "label": "button.show.databases",
+                    "link": "/ui/resource/list/backuppolicies/{organization}/{name}/databases"
+                },
+                {
+                    "label": "button.show.backups",
+                    "link": "/ui/resource/list/backuppolicies/{organization}/{name}/backups"
                 }
-            }
+            ]
+        },
+        "/projects?/{organization}": {
+            "menu": [
+                {
+                    "label": "Show Databases",
+                    "link": "/ui/resource/list/databases/{organization}/{name}"
+                }
+            ]
         }
     },
     "forms": {
