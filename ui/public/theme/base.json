@@ -19,7 +19,7 @@
             },
             "menu": [
                 {
-                    "label": "button.start.database",
+                    "label": "confirm.start.database.title",
                     "patch": [
                         {
                             "op": "remove",
@@ -27,10 +27,10 @@
                         }
                     ],
                     "visible": "maintenance.isDisabled",
-                    "confirm": "Do you want to start Database {organization}/{project}/{name}?"
+                    "confirm": "confirm.start.database.body"
                 },
                 {
-                    "label": "button.stop.database",
+                    "label": "confirm.stop.database.title",
                     "patch": [
                         {
                             "op": "add",
@@ -41,10 +41,10 @@
                         }
                     ],
                     "visible": "!maintenance",
-                    "confirm": "Do you want to stop Database {organization}/{project}/{name}?"
+                    "confirm": "confirm.stop.database.body"
                 },
                 {
-                    "label": "button.stop.database",
+                    "label": "confirm.stop.database.title",
                     "patch": [
                         {
                             "op": "replace",
@@ -55,7 +55,7 @@
                         }
                     ],
                     "visible": "maintenance.isDisabled=false",
-                    "confirm": "Do you want to stop Database {organization}/{project}/{name}?"
+                    "confirm": "confirm.stop.database.body"
                 }
             ]
         },
@@ -83,7 +83,7 @@
         "/projects?/{organization}": {
             "menu": [
                 {
-                    "label": "Show Databases",
+                    "label": "button.show.databases",
                     "link": "/ui/resource/list/databases/{organization}/{name}"
                 }
             ]
@@ -103,7 +103,7 @@
                     }
                 },
                 {
-                    "title": "Advanced",
+                    "title": "section.title.advanced",
                     "fields": {
                         "*": {}
                     }
@@ -119,7 +119,7 @@
                     }
                 },
                 {
-                    "title": "Access/Deny Rules",
+                    "title": "section.title.access.deny.rules",
                     "fields": {
                         "accessRule": {
                             "expand": false
@@ -127,19 +127,19 @@
                     }
                 },
                 {
-                    "title": "Labels",
+                    "title": "section.title.labels",
                     "fields": {
                         "labels": {}
                     }
                 },
                 {
-                    "title": "Change Password",
+                    "title": "section.title.change.password",
                     "fields": {
                         "password": {}
                     }
                 },
                 {
-                    "title": "Advanced",
+                    "title": "section.title.advanced",
                     "fields": {
                         "*": {}
                     }
@@ -157,7 +157,7 @@
                     }
                 },
                 {
-                    "title": "Advanced",
+                    "title": "section.title.advanced",
                     "fields": {
                         "*": {}
                     }
@@ -175,7 +175,7 @@
                     }
                 },
                 {
-                    "title": "Advanced",
+                    "title": "section.title.advanced",
                     "fields": {
                         "*": {}
                     }
@@ -205,7 +205,7 @@
                     }
                 },
                 {
-                    "title": "Advanced",
+                    "title": "section.title.advanced",
                     "fields": {
                         "*": {}
                     }
@@ -223,26 +223,26 @@
                     }
                 },
                 {
-                    "title": "Database Selection",
+                    "title": "section.title.database.selection",
                     "fields": {
                         "selector": {}
                     }
                 },
                 {
-                    "title": "Database Retention",
+                    "title": "section.title.database.retention",
                     "fields": {
                         "retention": {}
                     }
                 },
                 {
-                    "title": "Labels",
+                    "title": "section.title.labels",
                     "fields": {
                         "labels": {},
                         "properties": {}
                     }
                 },
                 {
-                    "title": "Advanced",
+                    "title": "section.title.advanced",
                     "fields": {
                         "*": {}
                     }

@@ -9,7 +9,7 @@ ARCH := $(shell uname -m | sed "s/x86_64/amd64/g")
 
 KWOKCTL_VERSION ?= 0.5.1
 KUBECTL_VERSION ?= 1.28.3
-NUODB_CP_VERSION ?= 2.6.0
+NUODB_CP_VERSION ?= 2.7.0
 
 KWOKCTL := bin/kwokctl
 KUBECTL := bin/kubectl

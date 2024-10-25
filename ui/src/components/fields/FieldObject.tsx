@@ -51,7 +51,7 @@ export default function FieldObject(props: FieldProps): FieldBaseType {
     }
 
     function getDisplayValue(): ReactNode {
-        const { prefix, parameter, values } = props;
+        const { prefix, parameter, values, t } = props;
         const properties = parameter.properties;
         if (!properties) {
             return FieldMessage({ ...props, message: "\"properties\" attribute missing from schema for field \"" + prefix + "\"" }).show();
@@ -60,7 +60,7 @@ export default function FieldObject(props: FieldProps): FieldBaseType {
             {Object.keys(properties).map(key => {
                 const prefixKey = prefix ? (prefix + "." + key) : key;
                 const field = FieldFactory.create({ ...props, prefix: prefixKey, parameter: properties[key], values });
-                return <div key={key}><dt>{String(key)}</dt><dd>{field.getDisplayValue()}</dd></div>;
+                return <div key={key}><dt>{t("field.label." + prefixKey, prefixKey)}</dt><dd>{field.getDisplayValue()}</dd></div>;
             })}
         </dl>
     }

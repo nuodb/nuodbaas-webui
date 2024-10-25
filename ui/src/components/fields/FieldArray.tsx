@@ -13,7 +13,7 @@ export default function FieldArray(props: FieldProps): FieldBaseType {
      * @returns
      */
     function show(): ReactNode {
-        const { prefix, parameter, values, errors, required, setValues, updateErrors, readonly } = props;
+        const { prefix, parameter, values, errors, required, setValues, updateErrors, readonly, t } = props;
         if (!parameter.items) {
             return FieldMessage({ ...props, message: "\"items\" attribute missing in schema definition" }).show();
         }
@@ -61,7 +61,7 @@ export default function FieldArray(props: FieldProps): FieldBaseType {
         return <Table key={prefix}>
             <TableHead>
                 <TableRow>
-                    <TableCell>{prefix.split(".").slice(-1)[0]}</TableCell>
+                    <TableCell>{t("field.label." + prefix, prefix)}</TableCell>
                 </TableRow>
             </TableHead>
             <TableBody>

@@ -132,13 +132,15 @@ function Table(props: TempAny) {
         }
     }
 
-    async function handleDelete(ref: string) {
-        if ("yes" === await Dialog.confirm("Deleting user " + ref, "Do you really want to delete user " + ref + "?")) {
-            RestSpinner.delete(path + "/" + ref)
+    async function handleDelete(row: TempAny) {
+        const createPathFirstPart = path?.replace(/^\//, "").split("/")[0];
+        row = { ...row, resources_one: t("resource.label." + createPathFirstPart + "_one", createPathFirstPart) };
+        if ("yes" === await Dialog.confirm(t("confirm.delete.resource.title", row), t("confirm.delete.resource.body", row), t)) {
+            RestSpinner.delete(path + "/" + row["$ref"])
                 .then(() => {
                     window.location.reload();
                 }).catch((error) => {
-                    RestSpinner.toastError("Unable to delete " + path + "/" + ref, error);
+                    RestSpinner.toastError("Unable to delete " + path + "/" + row["$ref"], error);
                 });
             window.location.reload();
         }
@@ -160,7 +162,7 @@ function Table(props: TempAny) {
             buttons.push({
                 "data-testid": "delete_button",
                 id: "delete",
-                onClick: () => handleDelete(row["$ref"]),
+                onClick: () => handleDelete(row),
                 label: t("button.delete")
             });
         }
@@ -184,10 +186,10 @@ function Table(props: TempAny) {
                         id: menu.label,
                         label: t(menu.label),
                         onClick: async () => {
-                            let label = replaceVariables(menu.label, row);
+                            let label = t(menu.label, row);
                             if (menu.confirm) {
-                                let confirm = replaceVariables(menu.confirm, row);
-                                if ("yes" !== await Dialog.confirm(label, confirm)) {
+                                let confirm = t(menu.confirm, row);
+                                if ("yes" !== await Dialog.confirm(label, confirm, t)) {
                                     return;
                                 }
                             }

@@ -224,7 +224,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
                             }
                         })
                     }
-                    sectionFormParams.push({ title: section.title, params });
+                    sectionFormParams.push({ title: t(section.title), params });
                 }
             });
         }
@@ -294,7 +294,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
     return <div className="NuoContainerSM">
         <RestSpinner />
         <form>
-            {!readonly && <h1>{(data && "Edit") || "Create"} entry for {path}</h1>}
+            {!readonly && <h1>{data ? t("text.edit.entry.for.path", { path }) : t("text.create.entry.for.path", { path })}</h1>}
             <div className="fields">
                 {urlParameters && Object.keys(urlParameters)
                     .filter(key => urlParameters[key].in === "query")
@@ -354,7 +354,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
                                 updateErrors("_errorDetail", null);
                             }
                         });
-                }}>{(data && "Save") || "Create"}</Button>}
+                }}>{(data && t("button.save")) || t("button.create")}</Button>}
                 {readonly && <React.Fragment>
                     <Button variant="contained" onClick={() => {
                         navigate("/ui/resource/edit" + path);

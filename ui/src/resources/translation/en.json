@@ -6,12 +6,16 @@
         "delete": "Delete",
         "edit": "Edit",
         "search": "Search",
+        "save": "Save",
+        "yes": "Yes",
+        "no": "No",
         "start.database": "Start Database",
         "stop.database": "Stop Database",
         "show.databases": "Show Databases",
         "show.backups": "Show Backups",
         "settings": "Settings",
-        "logout": "Logout"
+        "logout": "Logout",
+        "add": "Add"
     },
     "hint": {
         "open.settings": "Open Settings"
@@ -20,14 +24,26 @@
         "select.item.all": "--- All ---",
         "select.item.select": "--- Select ---"
     },
+    "confirm": {
+        "start.database.title": "Start Database",
+        "start.database.body": "Do you want to start Database {{organization}}/{{project}}/{{name}}?",
+        "stop.database.title": "Stop Database",
+        "stop.database.body": "Do you want to stop Database {{organization}}/{{project}}/{{name}}?",
+        "delete.resource.title": "Deleting {{resources_one}} {{name}}",
+        "delete.resource.body": "Do you really want to delete {{resources_one}} {{name}}?"
+    },
     "resource": {
         "label": {
-            "backuppolicies": "Backup Policies",
-            "backups": "Backups",
-            "databases": "Databases",
-            "projects": "Projects",
-            "users": "Users",
-            "users_one": "User"
+            "backuppolicies": "backup policies",
+            "backuppolicies_one": "backup policy",
+            "backups": "backups",
+            "backups_one": "backup",
+            "databases": "databases",
+            "databases_one": "database",
+            "projects": "projects",
+            "projects_one": "project",
+            "users": "users",
+            "users_one": "user"
         }
     },
     "field": {
@@ -36,6 +52,8 @@
             "password": "Password",
             "organization": "Organization",
             "accessRule": "Access Rule",
+            "accessRule.allow": "Allow",
+            "accessRule.deny": "Deny",
             "name": "Name",
             "labels": "Labels",
             "sla": "SLA",
@@ -46,6 +64,12 @@
             "database": "Database",
             "frequency": "Frequency",
             "selector": "Selector"
+        },
+        "map": {
+            "header.label.key": "Key",
+            "header.label.value": "Value",
+            "hint.new.key": "new key",
+            "hint.new.value": "new value"
         }
     },
     "form": {
@@ -53,6 +77,20 @@
             "label": {
                 "theme": "Theme"
             }
+        }
+    },
+    "text": {
+        "edit.entry.for.path": "Edit entry for {{path}}",
+        "create.entry.for.path": "Create entry for {{path}}"
+    },
+    "section": {
+        "title": {
+            "advanced": "Advanced",
+            "access.deny.rules": "Access/Deny Rules",
+            "labels": "Labels",
+            "change.password": "Change Password",
+            "database.selection": "Database Selection",
+            "database.retention": "Database Retention"
         }
     }
 }
