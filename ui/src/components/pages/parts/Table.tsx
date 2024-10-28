@@ -248,6 +248,9 @@ function Table(props: TempAny) {
     const tableLabels = getTableLabels();
     const fieldsSchema = getChild(getResourceByPath(schema, getCreatePath(schema, path)), ["get", "responses", "200", "content", "application/json", "schema", "properties"]);
     const visibleColumns = columns.filter(col => col.selected);
+    if (visibleColumns.length === 0) {
+        return <div data-testid="table_nodata" className="NuoTableNoData">No Data</div>
+    }
     return (<TableCustom data-testid={props["data-testid"]}>
         <TableHead>
             <TableRow>

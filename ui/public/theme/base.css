@@ -64,3 +64,7 @@
     left: 0;
     right: auto;
 }
+.NuoTableNoData {
+    font-size: 1.25em;
+    padding: 25px;
+}
