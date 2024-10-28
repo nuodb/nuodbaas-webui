@@ -9,8 +9,28 @@ import FieldFactory from "../../fields/FieldFactory";
 import RestSpinner from "./RestSpinner";
 import { getValue } from "../../fields/utils";
 import Dialog from "./Dialog";
-import { TempAny } from "../../../utils/types";
+import { MenuItemProps, TempAny } from "../../../utils/types";
 import { CustomViewField, evaluate, getCustomizationsView } from '../../../utils/Customizations';
+import Menu from '../../controls/Menu';
+import TableSettingsColumns from './TableSettingsColumns';
+import { useEffect, useState } from 'react';
+
+function getFlattenedKeys(obj: TempAny, prefix?: string): string[] {
+    let ret: string[] = [];
+    Object.keys(obj).forEach((key: string) => {
+        if (key !== "$ref" && key !== "resourceVersion") {
+            const newPrefix = prefix ? prefix + "." + key : key;
+            if (typeof obj[key] === "object" && !Array.isArray(obj[key])) {
+                ret.push(newPrefix);
+                ret = [...ret, ...getFlattenedKeys(obj[key], newPrefix)];
+            }
+            else {
+                ret.push(newPrefix);
+            }
+        }
+    })
+    return ret;
+}
 
 /**
  * shows a table with all the "data". Columns are determined by the schema definition for the "path"
@@ -19,6 +39,7 @@ import { CustomViewField, evaluate, getCustomizationsView } from '../../../utils
  */
 function Table(props: TempAny) {
     const { schema, data, path, t } = props;
+    const [columns, setColumns] = useState<MenuItemProps[]>([]);
     let navigate = useNavigate();
 
     /**
@@ -26,68 +47,64 @@ function Table(props: TempAny) {
      * - checks all data rows/columns for available fields ignoring "resourceVersion"
      * @returns
      */
-    function getTableFields() {
+    useEffect(() => {
+        function getLabel(field: string) {
+            if (cv && cv.fields && cv.fields[field] && cv.fields[field].label !== undefined) {
+                return cv.fields[field].label;
+            }
+            else {
+                return t("field.label." + field, field);
+            }
+        }
+
         let resourcesByPath = getResourceByPath(schema, path);
         let methodSchema = resourcesByPath["get"];
         if (!methodSchema || !data) {
-            return [];
+            return;
         }
-        let dataKeys: TempAny = {};
-        data.forEach((row: TempAny) => {
-            Object.keys(row).forEach((key: TempAny) => {
-                dataKeys[key] = "";
-            });
-        })
 
-        let tableFields: string[] = [];
-        if ("$ref" in dataKeys) {
-            tableFields.push("$ref");
-            delete dataKeys["$ref"];
-        }
-        if ("resourceVersion" in dataKeys) {
-            delete dataKeys["resourceVersion"]
-        }
+        let cols: MenuItemProps[] = [];
+
         const cv = getCustomizationsView(path);
         if (cv && cv.columns) {
-            cv.columns.forEach(column => {
-                if (column === "*") {
-                    tableFields = [...tableFields, ...Object.keys(dataKeys)];
-                }
-                else {
-                    tableFields.push(column);
-                    delete dataKeys[column];
-                }
-            })
-        }
-        else {
-            tableFields = [...tableFields, ...Object.keys(dataKeys)];
-            dataKeys = {};
+            cols = [...cols, ...cv.columns.map(column => { return { id: column, selected: true, label: getLabel(column) } })];
         }
         const cfs = (cv && cv.fields) || null;
         if (cfs) {
-            Object.keys(cfs).forEach(key => {
-                if (!tableFields.includes(key) && (!cv || !cv.columns || (!cv.columns.includes(key) && cv.columns.includes("*")))) {
-                    tableFields.push(key);
+            Object.keys(cfs).forEach(field => {
+                if (!cols.find(col => col.id === field)) {
+                    cols.push({ id: field, selected: false, label: getLabel(field) });
                 }
             })
         }
-        return tableFields;
+
+        data.forEach((row: TempAny) => {
+            getFlattenedKeys(row).forEach((key: TempAny) => {
+                if (!cols.find(col => col.id === key)) {
+                    cols.push({ id: key, selected: !cv?.columns && !key.includes("."), label: getLabel(key) });
+                }
+            });
+        })
+
+        setColumns(cols);
+    }, [data, path, schema, t]);
+
+    type TableLabelsType = {
+        [key: string]: string
     }
 
-    function getTableLabels() {
-        const tableFields = getTableFields();
+    function getTableLabels(): TableLabelsType {
+        let ret: TableLabelsType = {};
         const cv = getCustomizationsView(path);
-        return tableFields.map(key => {
-            if (cv && cv.fields && cv.fields[key] && cv.fields[key].label !== undefined) {
-                return cv.fields[key].label;
-            }
-            else if (key === "$ref") {
-                return "";
+        columns.forEach(column => {
+            if (cv && cv.fields && cv.fields[column.id] && cv.fields[column.id].label !== undefined) {
+                ret[column.id] = cv.fields[column.id].label;
             }
             else {
-                return t("field.label." + key, key);
+                ret[column.id] = t("field.label." + column.id, column.id);
             }
         });
+        return ret;
     }
 
     function showValue(value: TempAny) {
@@ -116,115 +133,144 @@ function Table(props: TempAny) {
         }
     }
 
-    const tableFields = getTableFields();
+    async function handleDelete(ref: string) {
+        if ("yes" === await Dialog.confirm("Deleting user " + ref, "Do you really want to delete user " + ref + "?")) {
+            RestSpinner.delete(path + "/" + ref)
+                .then(() => {
+                    window.location.reload();
+                }).catch((error) => {
+                    RestSpinner.toastError("Unable to delete " + path + "/" + ref, error);
+                });
+            window.location.reload();
+        }
+    }
+
+    function renderMenuCell(cellId: string, ref: string) {
+        const buttons: MenuItemProps[] = [
+            {
+                "data-testid": "edit_button",
+                id: "edit",
+                label: t("button.edit"),
+                onClick: () => {
+                    navigate("/ui/resource/edit" + path + "/" + ref)
+                }
+            }
+        ];
+        const resource = getResourceByPath(schema, path + "/" + ref)
+        if (resource && ("delete" in resource)) {
+            buttons.push({
+                "data-testid": "delete_button",
+                id: "delete",
+                onClick: () => handleDelete(ref),
+                label: t("button.delete")
+            });
+        }
+        return <TableCell key={cellId}>
+            <Menu popup={true} items={buttons} align="right" />
+        </TableCell>;
+
+    }
+
+    function renderDataCell(fieldName: string, row: TempAny) {
+        const cv = getCustomizationsView(path)
+        const cf: CustomViewField | null = (cv && cv.fields && cv.fields[fieldName]) || null;
+
+        let value;
+        if (cf && cf.value) {
+            try {
+                value = showValue(evaluate(row, cf.value));
+            }
+            catch (ex) {
+                const msg = "Error in custom value evaluation for field \"" + fieldName + "\"";
+                RestSpinner.toastError(msg, String(ex));
+                console.log(msg, ex, row);
+                value = ""
+            }
+        }
+        else {
+            if (fieldsSchema && fieldName in fieldsSchema) {
+                value = FieldFactory.createDisplayValue({
+                    prefix: fieldName,
+                    label: t("field.label." + fieldName, fieldName),
+                    parameter: fieldsSchema[fieldName],
+                    values: row,
+                    t
+                });
+            }
+            else {
+                value = showValue(getValue(row, fieldName));
+            }
+        }
+
+        let buttons: TempAny = [];
+        if (cf && cf.buttons) {
+            cf.buttons.forEach((button: TempAny) => {
+                let buttonVisible = false;
+                try {
+                    buttonVisible = !button.visible || evaluate(row, button.visible);
+                }
+                catch (ex) {
+                    const msg = "Error in checking visibility of button. Field: " + fieldName;
+                    RestSpinner.toastError(msg, String(ex));
+                    console.log(msg, ex, row);
+                }
+
+                if (buttonVisible) {
+                    buttons.push(<Button key={button.label} variant="outlined" onClick={async () => {
+                        let label = replaceVariables(button.label, row);
+                        if (button.confirm) {
+                            let confirm = replaceVariables(button.confirm, row);
+                            if ("yes" !== await Dialog.confirm(label, confirm)) {
+                                return;
+                            }
+                        }
+                        if (button.patch) {
+                            RestSpinner.patch(path + "/" + row["$ref"], button.patch)
+                                .catch((error) => {
+                                    RestSpinner.toastError("Unable to update " + path + "/" + row["$ref"], error);
+                                })
+                        }
+                        else if (button.link) {
+                            const link = replaceVariables(button.link, row);
+                            if (!link.startsWith("//") && link.indexOf("://") === -1) {
+                                navigate(link);
+                            }
+                        }
+                    }}>{button.label}</Button>)
+                }
+            })
+        }
+
+        return <TableCell key={fieldName}>{value}{buttons}</TableCell>;
+
+    }
+
     const tableLabels = getTableLabels();
     const fieldsSchema = getChild(getResourceByPath(schema, getCreatePath(schema, path)), ["get", "responses", "200", "content", "application/json", "schema", "properties"]);
-
-    return (<TableCustom data-testid={props["data-testid"]}>
+    const visibleColumns = columns.filter(col => col.selected);
+    return (<>
+        <TableCustom data-testid={props["data-testid"]}>
             <TableHead>
                 <TableRow>
-                {tableFields.map((field, index) => <TableCell key={field} data-testid={field}>{tableLabels[index]}</TableCell>)}
+                    {visibleColumns.map((column, index) => <TableCell key={column.id} data-testid={column.id}>
+                        {tableLabels[column.id]}
+                    </TableCell>)}
+                    <TableCell key="$ref" data-testid="$ref">
+                        {data.length > 0 && <TableSettingsColumns data={data} path={path} columns={columns} setColumns={setColumns} />}
+                    </TableCell>
                 </TableRow>
             </TableHead>
             <TableBody>
                 {data.map((row: TempAny, index: number) => (
                     <TableRow key={row["$ref"] || index}>
-                        {tableFields.map(field => {
-                            if (field === "$ref") {
-                                const resource = getResourceByPath(schema, path + "/" + row[field])
-                                return <TableCell key={field}>
-                                    <Button data-testid="edit_button" variant="text" onClick={() =>
-                                        navigate("/ui/resource/edit" + path + "/" + row[field])
-                                    }>{t("button.edit")}</Button>
-                                    {(resource && ("delete" in resource)) && <Button data-testid="delete_button" variant="text" onClick={async () => {
-                                        if ("yes" === await Dialog.confirm("Deleting user " + row[field], "Do you really want to delete user " + row[field] + "?")) {
-                                            RestSpinner.delete(path + "/" + row[field])
-                                                .then(() => {
-                                                    window.location.reload();
-                                                }).catch((error) => {
-                                                    RestSpinner.toastError("Unable to delete " + path + "/" + row[field], error);
-                                                });
-                                            window.location.reload();
-                                        }
-                                    }}>{t("button.delete")}</Button>}</TableCell>;
-                            }
-                            else {
-                                const cv = getCustomizationsView(path)
-                                const cf: CustomViewField | null = (cv && cv.fields && cv.fields[field]) || null;
-
-                                let value;
-                                if (cf && cf.value) {
-                                    try {
-                                        value = showValue(evaluate(row, cf.value));
-                                    }
-                                    catch (ex) {
-                                        const msg = "Error in custom value evaluation for field \"" + field + "\" in row " + String(index + 1);
-                                        RestSpinner.toastError(msg, String(ex));
-                                        console.log(msg, ex, row);
-                                        value = ""
-                                    }
-                                }
-                                else {
-                                    if (fieldsSchema && field in fieldsSchema) {
-                                        value = FieldFactory.createDisplayValue({
-                                            prefix: field,
-                                            label: t("field.label." + field, field),
-                                            parameter: fieldsSchema[field],
-                                            values: row,
-                                            t
-                                        });
-                                    }
-                                    else {
-                                        value = showValue(getValue(row, field));
-                                    }
-                                }
-
-                                let buttons: TempAny = [];
-                                if (cf && cf.buttons) {
-                                    cf.buttons.forEach((button: TempAny) => {
-                                        let buttonVisible = false;
-                                        try {
-                                            buttonVisible = !button.visible || evaluate(row, button.visible);
-                                        }
-                                        catch (ex) {
-                                            const msg = "Error in checking visibility of button. Field: " + field + " in row " + String(index + 1);
-                                            RestSpinner.toastError(msg, String(ex));
-                                            console.log(msg, ex, row);
-                                        }
-
-                                        if (buttonVisible) {
-                                            buttons.push(<Button key={button.label} variant="outlined" onClick={async () => {
-                                                let label = replaceVariables(button.label, row);
-                                                if (button.confirm) {
-                                                    let confirm = replaceVariables(button.confirm, row);
-                                                    if ("yes" !== await Dialog.confirm(label, confirm)) {
-                                                        return;
-                                                    }
-                                                }
-                                                if (button.patch) {
-                                                    RestSpinner.patch(path + "/" + row["$ref"], button.patch)
-                                                        .catch((error) => {
-                                                            RestSpinner.toastError("Unable to update " + path + "/" + row["$ref"], error);
-                                                        })
-                                                }
-                                                else if (button.link) {
-                                                    const link = replaceVariables(button.link, row);
-                                                    if (!link.startsWith("//") && link.indexOf("://") === -1) {
-                                                        navigate(link);
-                                                    }
-                                                }
-                                            }}>{button.label}</Button>)
-                                        }
-                                    })
-                                }
-
-                                return <TableCell key={field}>{value}{buttons}</TableCell>;
-                            }
-                        })}
+                        {visibleColumns.map(column => renderDataCell(column.id, row))}
+                        {renderMenuCell("$ref", row["$ref"])}
                     </TableRow>
                 ))}
             </TableBody>
-    </TableCustom>
+        </TableCustom>
+        {data.length === 0 && <div data-testid="table_nodata" className="NuoTableNoData">No Data</div>}
+    </>
     );
 }
 

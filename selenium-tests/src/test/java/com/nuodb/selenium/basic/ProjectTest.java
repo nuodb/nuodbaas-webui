@@ -39,7 +39,7 @@ public class ProjectTest extends TestRoutines {
 
         // verify project is gone
         waitRestComplete();
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", projectName, "0");
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", projectName, MENU_COLUMN);
         assertEquals(0, buttonsCell.size());
 
     }
@@ -52,11 +52,9 @@ public class ProjectTest extends TestRoutines {
         clickProjectsMenu();
 
         // find project and start edit mode
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", projectName, "0");
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", projectName, MENU_COLUMN);
         assertEquals(1, buttonsCell.size());
-        List<WebElement> editButtons = buttonsCell.get(0).findElements(By.xpath("button[@data-testid='edit_button']"));
-        assertEquals(1, editButtons.size());
-        editButtons.get(0).click();
+        clickPopupMenu(buttonsCell.get(0), "edit_button");
 
         // edit project and save
         replaceInputElementByName("tier", "n0.small");

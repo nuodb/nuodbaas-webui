@@ -45,6 +45,7 @@ public class TestRoutines extends SeleniumTestHelper {
     public static final String CP_AUTHORIZATION = "Basic " + Base64.getEncoder().encodeToString(
         (CP_USERNAME + ":" + Constants.ADMIN_PASSWORD)
         .getBytes(StandardCharsets.UTF_8));
+    public static final String MENU_COLUMN = "$ref";
 
     private static final int MAX_RETRIES = 10;
     private static final Duration RETRY_WAIT_TIME = Duration.ofMillis(500);
@@ -127,6 +128,16 @@ public class TestRoutines extends SeleniumTestHelper {
         waitElement("rest_spinner__complete");
     }
 
+    public void clickPopupMenu(WebElement element, String dataTestId) {
+        List<WebElement> menuToggles = element.findElements(By.xpath("div[@data-testid='menu-toggle']"));
+        assertEquals(1, menuToggles.size());
+        menuToggles.get(0).click();
+        WebElement parent = menuToggles.get(0).findElement(By.xpath(".."));
+        List<WebElement> menuItems = parent.findElements(By.xpath(".//div[@data-testid='" + dataTestId + "']"));
+        assertEquals(1, menuItems.size());
+        menuItems.get(0).click();
+    }
+
     private void createResource(Resource resource, String name, String ...fieldValueList) {
         clickMenuItem(resource.name());
 
@@ -142,11 +153,9 @@ public class TestRoutines extends SeleniumTestHelper {
 
     public void deleteResource(Resource resource, String name) {
         clickMenuItem(resource.name());
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", name, "0");
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", name, MENU_COLUMN);
         assertEquals(1, buttonsCell.size());
-        List<WebElement> deleteButtons = buttonsCell.get(0).findElements(By.xpath("button[@data-testid='delete_button']"));
-        assertEquals(1, deleteButtons.size());
-        deleteButtons.get(0).click();
+        clickPopupMenu(buttonsCell.get(0), "delete_button");
         waitElement("dialog_button_yes").click();
         createdResources.get(resource).remove(name);
     }
