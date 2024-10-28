@@ -87,24 +87,34 @@ public class DatabaseTest extends TestRoutines {
        String projectName = createProject();
        String databaseName = createDatabase(projectName);
 
-       // find database and "Stop Database" button
-       WebElement stopButton = findSingleDatabaseButton(databaseName, "stop database");
-
        // perform "Stop Database" action
-       stopButton.click();
+       List<WebElement> menuCells = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
+       assertEquals(1, menuCells.size());
+       clickPopupMenu(menuCells.get(0), "confirm.stop.database.title");
        waitElement("dialog_button_yes").click();
        waitRestComplete();
 
-       // find database and "Start Database" button
-       WebElement startButton = findSingleDatabaseButton(databaseName, "start database");
+       // TODO(agr22) - workaround to refresh view - we're still running on Control Plane 2.6 for this integration test
+       clickMenu("projects");
+       clickMenu("databases");
 
        // perform "Start Database" action
-       startButton.click();
+       menuCells = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
+       assertEquals(1, menuCells.size());
+       clickPopupMenu(menuCells.get(0), "confirm.start.database.title");
        waitElement("dialog_button_yes").click();
        waitRestComplete();
 
+       // TODO(agr22) - workaround to refresh view - we're still running on Control Plane 2.6 for this integration test
+       clickMenu("projects");
+       clickMenu("databases");
+
        // find database and "Stop Database" button
-       findSingleDatabaseButton(databaseName, "stop database");
+       menuCells = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
+       assertEquals(1, menuCells.size());
+       clickPopupMenu(menuCells.get(0), "confirm.stop.database.title");
+       waitElement("dialog_button_no").click();
+       waitRestComplete();
 
   }
 }

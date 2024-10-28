@@ -197,7 +197,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
         const customForm = getCustomForm(path);
         if (customForm && customForm.sections) {
             sectionFormParams = [];
-            customForm.sections.forEach((section: TempAny) => {
+            customForm.sections.forEach((section: TempAny, index: number) => {
                 if (section.fields) {
                     let params = {};
                     let hasWildcard = false;
@@ -224,7 +224,8 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
                             }
                         })
                     }
-                    sectionFormParams.push({ title: t(section.title), params });
+                    const id = section?.title?.toLowerCase()?.replaceAll(".", "-") || "section-" + index;
+                    sectionFormParams.push({ id, title: t(section.title), params });
                 }
             });
         }
@@ -284,7 +285,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
             })).show();
         });
         if (ret && ret.length > 0 && section.title) {
-            ret = <Accordion key={"section-" + section.title.toLowerCase()} data-testid={"section-" + section.title.toLowerCase()} summary={section.title}>
+            ret = <Accordion key={section.id || "section-" + section.title.toLowerCase()} data-testid={section.id || "section-" + section.title.toLowerCase()} summary={section.title}>
                 {ret}
             </Accordion>;
         }

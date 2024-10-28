@@ -18,7 +18,7 @@ import { withTranslation } from "react-i18next";
 function ListResource({ schema, t }: SchemaType) {
     const navigate = useNavigate();
     const path = "/" + useParams()["*"];
-    const pageSize = 20;
+    const pageSize = 2;
 
     const [itemsAndPath, setItemsAndPath] = useState({ items: [], path });
     const [page, setPage] = useState(1);
@@ -81,6 +81,10 @@ function ListResource({ schema, t }: SchemaType) {
         }
         setCreatePath(getCreatePath(schema, path));
     }, [page, path, schema, search]);
+
+    useEffect(() => {
+        setPage(1);
+    }, [path, schema, search]);
 
     useEffect(() => {
         return () => {

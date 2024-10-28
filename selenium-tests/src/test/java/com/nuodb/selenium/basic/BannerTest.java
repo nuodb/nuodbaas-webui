@@ -19,12 +19,10 @@ public class BannerTest extends TestRoutines {
     public void testHorizontalBanner() throws MalformedURLException {
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
 
-        // get all the menu item labels
-        List<String> menuItems = getTextList("menu-button-", expectedMenuItems.size());
-        for(int i=0; i<menuItems.size(); i++) {
-            menuItems.set(i, menuItems.get(i).toLowerCase());
+        // make sure all menu items are present
+        for(String menuItem : expectedMenuItems) {
+            waitElement("menu-button-" + menuItem);
         }
-        Assertions.assertTrue(menuItems.containsAll(expectedMenuItems), "Expected: " + expectedMenuItems + ", Actual: " + menuItems);
     }
 
     @Test
@@ -33,8 +31,9 @@ public class BannerTest extends TestRoutines {
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
         click("menu-appbar");
 
-        // get all the menu item labels
-        List<String> menuItems = getTextList("menu-label-", expectedMenuItems.size());
-        Assertions.assertTrue(menuItems.containsAll(expectedMenuItems), "Expected: " + expectedMenuItems + ", Actual: " + menuItems);
+        // make sure all menu items are present
+        for(String menuItem : expectedMenuItems) {
+            waitElement("menu-label-" + menuItem);
+        }
     }
 }

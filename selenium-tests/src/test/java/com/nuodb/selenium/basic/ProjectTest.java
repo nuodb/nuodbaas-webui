@@ -17,10 +17,6 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 public class ProjectTest extends TestRoutines {
-    private void clickProjectsMenu() {
-        clickMenuItem("projects");
-    }
-
     @Test
     public void testCreateProject() throws MalformedURLException {
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
@@ -32,7 +28,7 @@ public class ProjectTest extends TestRoutines {
         // Setup and list projects
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
         String projectName = createProject();
-        clickProjectsMenu();
+        clickMenu("projects");
 
         // find project and delete
         deleteProject(projectName);
@@ -49,7 +45,7 @@ public class ProjectTest extends TestRoutines {
         // Setup and list projects
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
         String projectName = createProject();
-        clickProjectsMenu();
+        clickMenu("projects");
 
         // find project and start edit mode
         List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", projectName, MENU_COLUMN);
@@ -58,7 +54,7 @@ public class ProjectTest extends TestRoutines {
 
         // edit project and save
         replaceInputElementByName("tier", "n0.small");
-        waitElement("section-advanced").click();
+        waitElement("section-title-advanced").click();
         waitElement("section-maintenance").click();
         replaceInputElementByName("maintenance.expiresIn", "30d");
         waitElement("create_resource__create_button").click();

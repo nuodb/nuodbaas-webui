@@ -47,8 +47,8 @@ function ResponsiveAppBar(resources: string[], t: any) {
             <Menu
               items={resources.map((resource: string, index: number) => {
                 return {
-                  "data-testid": "menu-label-" + index,
-                  id: "menu-label-" + index,
+                  "data-testid": "menu-label-" + resource,
+                  id: "menu-label-" + resource,
                   label: t("resource.label." + resource, resource),
                   onClick: () => navigate("/ui/resource/list/" + resource)
                 };
@@ -88,7 +88,7 @@ function ResponsiveAppBar(resources: string[], t: any) {
               className="NuoBannerMenu"
               items={resources.map((resource: string, index: number) => {
                 return {
-                  id: "menu-button-" + index,
+                  id: "menu-button-" + resource,
                   className: "NuoBannerItem",
                   label: t("resource.label." + resource, resource),
                   onClick: () => {

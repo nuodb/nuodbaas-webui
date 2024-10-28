@@ -59,7 +59,7 @@ public class BackupTest extends TestRoutines {
         clickPopupMenu(buttonsCell.get(0), "edit_button");
 
         // edit backup and save
-        waitElement("section-advanced").click();
+        waitElement("section-title-advanced").click();
         sleep(200); // wait for section to expand
         waitInputElementByName("labels.key").sendKeys(projectName);
         waitInputElementByName("labels.value").sendKeys(databaseName);

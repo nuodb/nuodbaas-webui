@@ -263,7 +263,7 @@ public class SeleniumTestHelper {
     }
 
     public void login(String organization, String username, String password) {
-        get("/ui/");
+        get("/ui/?lng=fake");
         sendKeys("organization", organization);
         sendKeys("username", username);
         sendKeys("password", password);
