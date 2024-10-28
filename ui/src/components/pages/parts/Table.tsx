@@ -255,7 +255,7 @@ function Table(props: TempAny) {
     const tableLabels = getTableLabels();
     const fieldsSchema = getChild(getResourceByPath(schema, getCreatePath(schema, path)), ["get", "responses", "200", "content", "application/json", "schema", "properties"]);
     const visibleColumns = columns.filter(col => col.selected);
-    return (<>
+    return (
         <TableCustom data-testid={props["data-testid"]}>
             <TableHead>
                 <TableRow>
@@ -263,7 +263,7 @@ function Table(props: TempAny) {
                         {tableLabels[column.id]}
                     </TableCell>)}
                     <TableCell key="$ref" data-testid="$ref">
-                        <TableSettingsColumns data={data} path={path} columns={columns} setColumns={setColumns} />
+                        {data.length > 0 && <TableSettingsColumns data={data} path={path} columns={columns} setColumns={setColumns} />}
                     </TableCell>
                 </TableRow>
             </TableHead>
@@ -274,10 +274,9 @@ function Table(props: TempAny) {
                         {renderMenuCell(row)}
                     </TableRow>
                 ))}
+                {data.length === 0 && <div data-testid="table_nodata" className="NuoTableNoData">{t("text.no.data")}</div>}
             </TableBody>
         </TableCustom>
-        {data.length === 0 && <div data-testid="table_nodata" className="NuoTableNoData">No Data</div>}
-    </>
     );
 }
 
