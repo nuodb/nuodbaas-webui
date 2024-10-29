@@ -70,7 +70,7 @@ install-crds: $(KWOKCTL) $(KUBECTL)
 	@$(KUBECTL) apply -f selenium-tests/files/nuodb-cp-runtime-config.yaml --context kwok-kwok -n default
 	@curl -L https://github.com/nuodb/nuodb-cp-releases/releases/download/v$(NUODB_CP_VERSION)/nuodb-cp-crd-$(NUODB_CP_VERSION).tgz | \
 		tar -xzf - --wildcards nuodb-cp-crd/templates/*.yaml && ls nuodb-cp-crd/templates/*.yaml | while read line; do $(KUBECTL) apply -f $$line --context kwok-kwok -n default ; done
-	@rm -rf nuodb-cp-cr
+	@rm -rf nuodb-cp-crd
 
 .PHONY: setup-integration-tests
 setup-integration-tests: build-image install-crds ## setup containers before running integration tests
