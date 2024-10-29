@@ -9,7 +9,7 @@ ARCH := $(shell uname -m | sed "s/x86_64/amd64/g")
 
 KWOKCTL_VERSION ?= 0.5.1
 KUBECTL_VERSION ?= 1.28.3
-NUODB_CP_VERSION ?= 2.6.0
+NUODB_CP_VERSION ?= 2.7.0
 
 KWOKCTL := bin/kwokctl
 KUBECTL := bin/kubectl
@@ -69,7 +69,7 @@ install-crds: $(KWOKCTL) $(KUBECTL)
 	@$(KWOKCTL) get kubeconfig | sed "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kwok-kwok-kube-apiserver:6443/g" > selenium-tests/files/kubeconfig
 	@$(KUBECTL) apply -f selenium-tests/files/nuodb-cp-runtime-config.yaml --context kwok-kwok -n default
 	@curl -L https://github.com/nuodb/nuodb-cp-releases/releases/download/v$(NUODB_CP_VERSION)/nuodb-cp-crd-$(NUODB_CP_VERSION).tgz | \
-		tar -axzOf - --wildcards nuodb-cp-crd/templates/*.yaml | $(KUBECTL) apply -f - --context kwok-kwok -n default
+		tar -xzf - --wildcards nuodb-cp-crd/templates/*.yaml && ls nuodb-cp-crd/templates/*.yaml | while read line; do $(KUBECTL) apply -f $$line --context kwok-kwok -n default ; done
 
 .PHONY: setup-integration-tests
 setup-integration-tests: build-image install-crds ## setup containers before running integration tests
