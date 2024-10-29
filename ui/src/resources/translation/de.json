@@ -1,6 +1,97 @@
 {
     "copyright": "(C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.",
-    "button.create": "Erstellen",
-    "button.edit": "Bearbeiten",
-    "button.delete": "Löschen"
+    "button": {
+        "create": "Erstellen",
+        "create.resource": "{{resource}} erstellen",
+        "delete": "Löschen",
+        "edit": "Bearbeiten",
+        "search": "Suchen",
+        "save": "Speichern",
+        "yes": "Ja",
+        "no": "Nein",
+        "start.database": "Datenbank starten",
+        "stop.database": "Datenbak stoppen",
+        "show.databases": "Datenbanken anzeigen",
+        "show.backups": "Sicherungen anzeigen",
+        "settings": "Einstellungen",
+        "logout": "Ausloggen",
+        "add": "Hinzufügen"
+    },
+    "hint": {
+        "open.settings": "Einstellungen öffnen"
+    },
+    "control": {
+        "select.item.all": "--- Alle ---",
+        "select.item.select": "--- Auswählen ---"
+    },
+    "confirm": {
+        "start.database.title": "Datenbank starten",
+        "start.database.body": "Möchten sie die Datenbank {{organization}}/{{project}}/{{name}} starten?",
+        "stop.database.title": "Datenbank stoppen",
+        "stop.database.body": "Möchten sie die Datenbank {{organization}}/{{project}}/{{name}} stoppen?",
+        "delete.resource.title": "{{resources_one}} {{name}} löschen",
+        "delete.resource.body": "Wollen sie wirklich die {{resources_one}} {{name}} löschen?"
+    },
+    "resource": {
+        "label": {
+            "backuppolicies": "Backup Einstellungen",
+            "backuppolicies_one": "Backup Einstellung",
+            "backups": "Backups",
+            "backups_one": "Backup",
+            "databases": "Datenbanken",
+            "databases_one": "Datenbank",
+            "projects": "Projekte",
+            "projects_one": "Projekt",
+            "users": "Benutzer",
+            "users_one": "Benutzer"
+        }
+    },
+    "field": {
+        "label": {
+            "allowCrossOrganizationAccess": "Zugriff über Organisationen erlauben",
+            "password": "Kennwort",
+            "organization": "Organisation",
+            "accessRule": "Zugriffsregeln",
+            "accessRule.allow": "Erlauben",
+            "accessRule.deny": "Ablehnen",
+            "name": "Name",
+            "labels": "Etiketten",
+            "sla": "SLA",
+            "tier": "Tier",
+            "properties": "Eigenschaften",
+            "project": "Projekt",
+            "status": "Status",
+            "database": "Datenbank",
+            "frequency": "Frequenz",
+            "selector": "Auswahl"
+        },
+        "map": {
+            "header.label.key": "Schlüssel",
+            "header.label.value": "Wert",
+            "hint.new.key": "Neuer Schlüssel",
+            "hint.new.value": "Neuer Wert"
+        }
+    },
+    "form": {
+        "settings": {
+            "label": {
+                "theme": "Thema"
+            }
+        }
+    },
+    "text": {
+        "edit.entry.for.path": "Eintrag für {{path}} bearbeiten",
+        "create.entry.for.path": "Eintrag für {{path}} erstellen",
+        "no.data": "Keine Daten"
+    },
+    "section": {
+        "title": {
+            "advanced": "Erweiterte Einstellungen",
+            "access.deny.rules": "Zugriffsregeln",
+            "labels": "Etiketten",
+            "change.password": "Passwort ändern",
+            "database.selection": "Datenbank Auswahl",
+            "database.retention": "Datenbank beibehalten"
+        }
+    }
 }

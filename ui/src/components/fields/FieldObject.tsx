@@ -25,7 +25,18 @@ export default function FieldObject(props: FieldProps): FieldBaseType {
             if (defaultValue !== null) {
                 setValue(values, prefixKey, defaultValue);
             }
-            return <div key={key} className="gap">{(FieldFactory.create({ ...props, prefix: prefixKey, parameter: properties[key], values, errors, required, setValues, updateErrors, expand: false })).show()}</div>
+            return <div key={key} className="gap">{(FieldFactory.create({
+                ...props,
+                prefix: prefixKey,
+                parameter: properties[key],
+                values,
+                errors,
+                required,
+                setValues,
+                updateErrors,
+                expand: false,
+                label: t("field.label." + prefixKey, prefixKey)
+            })).show()}</div>
         });
         if (hideTitle) {
             return ret;

@@ -9,10 +9,12 @@ ARCH := $(shell uname -m | sed "s/x86_64/amd64/g")
 
 KWOKCTL_VERSION ?= 0.5.1
 KUBECTL_VERSION ?= 1.28.3
+HELM_VERSION ?= 3.16.2
 NUODB_CP_VERSION ?= 2.7.0
 
 KWOKCTL := bin/kwokctl
 KUBECTL := bin/kubectl
+HELM := bin/helm
 
 IMG_REPO := nuodbaas-webui
 VERSION := $(shell grep -e "^appVersion:" charts/nuodbaas-webui/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
@@ -64,12 +66,12 @@ deploy-image-ecr: build-image ## deploy Docker image to AWS
 	fi
 
 .PHONY: install-crds
-install-crds: $(KWOKCTL) $(KUBECTL)
+install-crds: $(KWOKCTL) $(KUBECTL) $(HELM)
 	@$(KWOKCTL) create cluster --wait 120s
 	@$(KWOKCTL) get kubeconfig | sed "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kwok-kwok-kube-apiserver:6443/g" > selenium-tests/files/kubeconfig
 	@$(KUBECTL) apply -f selenium-tests/files/nuodb-cp-runtime-config.yaml --context kwok-kwok -n default
 	@curl -L https://github.com/nuodb/nuodb-cp-releases/releases/download/v$(NUODB_CP_VERSION)/nuodb-cp-crd-$(NUODB_CP_VERSION).tgz | \
-		tar -xzf - --wildcards nuodb-cp-crd/templates/*.yaml && ls nuodb-cp-crd/templates/*.yaml | while read line; do $(KUBECTL) apply -f $$line --context kwok-kwok -n default ; done
+		tar -xzf - --wildcards nuodb-cp-crd && $(HELM) install -n default nuodb-cp-crd ./nuodb-cp-crd
 	@rm -rf nuodb-cp-crd
 
 .PHONY: setup-integration-tests
@@ -117,3 +119,8 @@ $(KUBECTL):
 	mkdir -p bin
 	curl -L -s https://storage.googleapis.com/kubernetes-release/release/v$(KUBECTL_VERSION)/bin/$(OS)/$(ARCH)/kubectl -o $(KUBECTL)
 	chmod +x $(KUBECTL)
+
+$(HELM):
+	mkdir -p bin
+	curl -L -s https://get.helm.sh/helm-v$(HELM_VERSION)-$(OS)-$(ARCH).tar.gz | tar -xzf - -O $(OS)-$(ARCH)/helm > $(HELM)
+	chmod +x $(HELM)
