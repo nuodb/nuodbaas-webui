@@ -61,6 +61,7 @@
             "properties": "Eigenschaften",
             "project": "Projekt",
             "status": "Status",
+            "state": "Status",
             "database": "Datenbank",
             "frequency": "Frequenz",
             "selector": "Auswahl"

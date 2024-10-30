@@ -9,11 +9,11 @@
                 "labels",
                 "tier",
                 "properties",
-                "status",
+                "state",
                 "*"
             ],
             "fields": {
-                "status": {
+                "state": {
                     "value": "status.state"
                 }
             },
