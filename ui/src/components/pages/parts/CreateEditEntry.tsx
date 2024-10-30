@@ -295,7 +295,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
     return <div className="NuoContainerSM">
         <RestSpinner />
         <form>
-            {!readonly && <h1>{data ? t("text.edit.entry.for.path", { path }) : t("text.create.entry.for.path", { path })}</h1>}
+            {!readonly && <h1>{data ? t("text.editEntryForPath", { path }) : t("text.createEntryForPath", { path })}</h1>}
             <div className="fields">
                 {urlParameters && Object.keys(urlParameters)
                     .filter(key => urlParameters[key].in === "query")

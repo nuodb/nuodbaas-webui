@@ -274,7 +274,7 @@ function Table(props: TempAny) {
                         {renderMenuCell(row)}
                     </TableRow>
                 ))}
-                {data.length === 0 && <div data-testid="table_nodata" className="NuoTableNoData">{t("text.no.data")}</div>}
+                {data.length === 0 && <div data-testid="table_nodata" className="NuoTableNoData">{t("text.noData")}</div>}
             </TableBody>
         </TableCustom>
     );

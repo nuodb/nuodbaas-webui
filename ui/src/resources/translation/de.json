@@ -80,9 +80,9 @@
         }
     },
     "text": {
-        "edit.entry.for.path": "Eintrag für {{path}} bearbeiten",
-        "create.entry.for.path": "Eintrag für {{path}} erstellen",
-        "no.data": "Keine Daten"
+        "editEntryForPath": "Eintrag für {{path}} bearbeiten",
+        "createEntryForPath": "Eintrag für {{path}} erstellen",
+        "noData": "Keine Daten"
     },
     "section": {
         "title": {

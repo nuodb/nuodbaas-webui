@@ -70,8 +70,7 @@ install-crds: $(KWOKCTL) $(KUBECTL) $(HELM)
 	@$(KWOKCTL) create cluster --wait 120s
 	@$(KWOKCTL) get kubeconfig | sed "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kwok-kwok-kube-apiserver:6443/g" > selenium-tests/files/kubeconfig
 	@$(KUBECTL) apply -f selenium-tests/files/nuodb-cp-runtime-config.yaml --context kwok-kwok -n default
-	@curl -L https://github.com/nuodb/nuodb-cp-releases/releases/download/v$(NUODB_CP_VERSION)/nuodb-cp-crd-$(NUODB_CP_VERSION).tgz | \
-		tar -xzf - --wildcards nuodb-cp-crd && $(HELM) install -n default nuodb-cp-crd ./nuodb-cp-crd
+	@$(HELM) install -n default nuodb-cp-crd nuodb-cp-crd --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION)
 	@rm -rf nuodb-cp-crd
 
 .PHONY: setup-integration-tests

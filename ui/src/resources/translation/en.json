@@ -94,9 +94,9 @@
         }
     },
     "text": {
-        "edit.entry.for.path": "Edit entry for {{path}}",
-        "create.entry.for.path": "Create entry for {{path}}",
-        "no.data": "No Data"
+        "editEntryForPath": "Edit entry for {{path}}",
+        "createEntryForPath": "Create entry for {{path}}",
+        "noData": "No Data"
     },
     "section": {
         "title": {
