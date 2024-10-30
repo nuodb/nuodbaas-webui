@@ -2,7 +2,6 @@
 
 import { useNavigate } from 'react-router-dom';
 import { withTranslation } from "react-i18next";
-import Button from '../../controls/Button';
 import { TableBody, TableCell, Table as TableCustom, TableHead, TableRow } from '../../controls/Table';
 import { getResourceByPath, getCreatePath, getChild, replaceVariables } from "../../../utils/schema";
 import FieldFactory from "../../fields/FieldFactory";
@@ -133,39 +132,86 @@ function Table(props: TempAny) {
         }
     }
 
-    async function handleDelete(ref: string) {
-        if ("yes" === await Dialog.confirm("Deleting user " + ref, "Do you really want to delete user " + ref + "?")) {
-            RestSpinner.delete(path + "/" + ref)
+    async function handleDelete(row: TempAny) {
+        const createPathFirstPart = path?.replace(/^\//, "").split("/")[0];
+        row = { ...row, resources_one: t("resource.label." + createPathFirstPart + "_one", createPathFirstPart) };
+        if ("yes" === await Dialog.confirm(t("confirm.delete.resource.title", row), t("confirm.delete.resource.body", row), t)) {
+            RestSpinner.delete(path + "/" + row["$ref"])
                 .then(() => {
                     window.location.reload();
                 }).catch((error) => {
-                    RestSpinner.toastError("Unable to delete " + path + "/" + ref, error);
+                    RestSpinner.toastError("Unable to delete " + path + "/" + row["$ref"], error);
                 });
             window.location.reload();
         }
     }
 
-    function renderMenuCell(cellId: string, ref: string) {
+    function renderMenuCell(row: any) {
         const buttons: MenuItemProps[] = [
             {
                 "data-testid": "edit_button",
                 id: "edit",
                 label: t("button.edit"),
                 onClick: () => {
-                    navigate("/ui/resource/edit" + path + "/" + ref)
+                    navigate("/ui/resource/edit" + path + "/" + row["$ref"])
                 }
             }
         ];
-        const resource = getResourceByPath(schema, path + "/" + ref)
+        const resource = getResourceByPath(schema, path + "/" + row["$ref"])
         if (resource && ("delete" in resource)) {
             buttons.push({
                 "data-testid": "delete_button",
                 id: "delete",
-                onClick: () => handleDelete(ref),
+                onClick: () => handleDelete(row),
                 label: t("button.delete")
             });
         }
-        return <TableCell key={cellId}>
+
+        const cv = getCustomizationsView(path)
+        if (cv && cv.menu) {
+            cv.menu.forEach((menu: TempAny) => {
+                let menuVisible = false;
+                try {
+                    menuVisible = !menu.visible || evaluate(row, menu.visible);
+                }
+                catch (ex) {
+                    const msg = "Error in checking visibility of button.";
+                    RestSpinner.toastError(msg, String(ex));
+                    console.log(msg, ex, row);
+                }
+
+                if (menuVisible) {
+                    buttons.push({
+                        "data-testid": menu.label,
+                        id: menu.label,
+                        label: t(menu.label),
+                        onClick: async () => {
+                            let label = t(menu.label, row);
+                            if (menu.confirm) {
+                                let confirm = t(menu.confirm, row);
+                                if ("yes" !== await Dialog.confirm(label, confirm, t)) {
+                                    return;
+                                }
+                            }
+                            if (menu.patch) {
+                                RestSpinner.patch(path + "/" + row["$ref"], menu.patch)
+                                    .catch((error) => {
+                                        RestSpinner.toastError("Unable to update " + path + "/" + row["$ref"], error);
+                                    })
+                            }
+                            else if (menu.link) {
+                                const link = replaceVariables(menu.link, row);
+                                if (!link.startsWith("//") && link.indexOf("://") === -1) {
+                                    navigate(link);
+                                }
+                            }
+                        }
+                    });
+                }
+            })
+        }
+
+        return <TableCell key={row["$ref"]}>
             <Menu popup={true} items={buttons} align="right" />
         </TableCell>;
 
@@ -202,53 +248,14 @@ function Table(props: TempAny) {
             }
         }
 
-        let buttons: TempAny = [];
-        if (cf && cf.buttons) {
-            cf.buttons.forEach((button: TempAny) => {
-                let buttonVisible = false;
-                try {
-                    buttonVisible = !button.visible || evaluate(row, button.visible);
-                }
-                catch (ex) {
-                    const msg = "Error in checking visibility of button. Field: " + fieldName;
-                    RestSpinner.toastError(msg, String(ex));
-                    console.log(msg, ex, row);
-                }
-
-                if (buttonVisible) {
-                    buttons.push(<Button key={button.label} variant="outlined" onClick={async () => {
-                        let label = replaceVariables(button.label, row);
-                        if (button.confirm) {
-                            let confirm = replaceVariables(button.confirm, row);
-                            if ("yes" !== await Dialog.confirm(label, confirm)) {
-                                return;
-                            }
-                        }
-                        if (button.patch) {
-                            RestSpinner.patch(path + "/" + row["$ref"], button.patch)
-                                .catch((error) => {
-                                    RestSpinner.toastError("Unable to update " + path + "/" + row["$ref"], error);
-                                })
-                        }
-                        else if (button.link) {
-                            const link = replaceVariables(button.link, row);
-                            if (!link.startsWith("//") && link.indexOf("://") === -1) {
-                                navigate(link);
-                            }
-                        }
-                    }}>{button.label}</Button>)
-                }
-            })
-        }
-
-        return <TableCell key={fieldName}>{value}{buttons}</TableCell>;
+        return <TableCell key={fieldName}>{value}</TableCell>;
 
     }
 
     const tableLabels = getTableLabels();
     const fieldsSchema = getChild(getResourceByPath(schema, getCreatePath(schema, path)), ["get", "responses", "200", "content", "application/json", "schema", "properties"]);
     const visibleColumns = columns.filter(col => col.selected);
-    return (<>
+    return (
         <TableCustom data-testid={props["data-testid"]}>
             <TableHead>
                 <TableRow>
@@ -264,13 +271,12 @@ function Table(props: TempAny) {
                 {data.map((row: TempAny, index: number) => (
                     <TableRow key={row["$ref"] || index}>
                         {visibleColumns.map(column => renderDataCell(column.id, row))}
-                        {renderMenuCell("$ref", row["$ref"])}
+                        {renderMenuCell(row)}
                     </TableRow>
                 ))}
+                {data.length === 0 && <div data-testid="table_nodata" className="NuoTableNoData">{t("text.noData")}</div>}
             </TableBody>
         </TableCustom>
-        {data.length === 0 && <div data-testid="table_nodata" className="NuoTableNoData">No Data</div>}
-    </>
     );
 }
 

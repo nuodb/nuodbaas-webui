@@ -71,7 +71,7 @@ public class TestRoutines extends SeleniumTestHelper {
                     }
                 }
             }
-            catch(IOException e) {
+            catch(IOException|RuntimeException e) {
                 e.printStackTrace();
             }
         }
@@ -108,11 +108,11 @@ public class TestRoutines extends SeleniumTestHelper {
         }
         return sb.toString();
     }
-    public void clickMenuItem(String item) {
+    public void clickMenu(String resource) {
         final int maxRetries = 3;
         for(int retry=0; retry<3; retry++) {
             try {
-                findElementFromList("menu-button-", item).click();
+                waitElement("menu-button-" + resource).click();
                 break;
             }
             catch(StaleElementReferenceException e) {
@@ -139,7 +139,7 @@ public class TestRoutines extends SeleniumTestHelper {
     }
 
     private void createResource(Resource resource, String name, String ...fieldValueList) {
-        clickMenuItem(resource.name());
+        clickMenu(resource.name());
 
         WebElement createButton = waitElement("list_resource__create_button");
         createButton.click();
@@ -152,7 +152,7 @@ public class TestRoutines extends SeleniumTestHelper {
     }
 
     public void deleteResource(Resource resource, String name) {
-        clickMenuItem(resource.name());
+        clickMenu(resource.name());
         List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", name, MENU_COLUMN);
         assertEquals(1, buttonsCell.size());
         clickPopupMenu(buttonsCell.get(0), "delete_button");

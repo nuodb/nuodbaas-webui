@@ -14,10 +14,6 @@ import java.io.IOException;
 import java.util.List;
 
 public class SearchTest extends TestRoutines {
-    public void clickUsersMenu() {
-        clickMenuItem("users");
-    }
-
     @Test
     public void testSearch() throws IOException {
         String body = """
@@ -41,7 +37,7 @@ public class SearchTest extends TestRoutines {
 
         // verify we have full page of users
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
-        clickUsersMenu();
+        clickMenu("users");
         waitRestComplete();
         List<WebElement> nameCell = waitTableElements("list_resource__table", "name", null, "name");
         assertEquals(20, nameCell.size());

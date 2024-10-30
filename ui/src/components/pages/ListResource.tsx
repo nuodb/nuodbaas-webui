@@ -83,6 +83,10 @@ function ListResource({ schema, t }: SchemaType) {
     }, [page, path, schema, search]);
 
     useEffect(() => {
+        setPage(1);
+    }, [path, schema, search]);
+
+    useEffect(() => {
         return () => {
             if (abortController) {
                 abortController.abort();

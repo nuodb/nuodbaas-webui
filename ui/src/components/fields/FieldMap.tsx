@@ -53,7 +53,7 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
      * @returns
      */
     function show(): ReactNode {
-        const { prefix, values, errors, setValues, readonly } = props;
+        const { prefix, values, errors, setValues, readonly, t } = props;
 
         let valueKeys = Object.keys(getValue(values, prefix) || {});
         let rows = [];
@@ -67,13 +67,13 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
                     <TextField
                         disabled={true}
                         id={prefixKeyLabel}
-                        label={prefixKeyLabel}
+                        label=""
                         value={valueKeys[i]} />
                 </TableCell>
                 <TableCell>
                     <TextField
                         id={prefixKeyValue}
-                        label={prefixKeyValue}
+                        label=""
                         value={getValue(values, prefix)[valueKeys[i]]}
                         onChange={({ currentTarget: input }) => {
                             let v = { ...values };
@@ -87,12 +87,9 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
                     let v = { ...values };
                     setValue(v, prefixKey, null);
                     setValues(v);
-                }}>Delete</Button></TableCell>
+                }}>{t("button.delete")}</Button></TableCell>
             </TableRow>);
         }
-
-        let prefixParts = prefix.split(".");
-        let lastPrefix = prefixParts[prefixParts.length - 1];
 
         let prefixKeyLabel = prefix + ".key";
         let prefixValueLabel = prefix + ".value"
@@ -102,7 +99,7 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
             <TableCell>
                 <TextField
                     id={prefixKeyLabel}
-                    label={"new key"}
+                    label={t("field.map.hint.new.key")}
                     defaultValue=""
                     onBlur={() => validateNewKey()}
                     error={errorKey} />
@@ -110,7 +107,7 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
             <TableCell>
                 <TextField
                     id={prefixValueLabel}
-                    label={"new value"}
+                    label={t("field.map.hint.new.value")}
                     defaultValue=""
                     onBlur={() => validateNewValue()}
                     error={errorValue} />
@@ -137,7 +134,7 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
                     valueElement.value = "";
                     setValue(values, prefix, value);
                     setValues(values);
-                }}>Add</Button>
+                }}>{t("button.add")}</Button>
             </TableCell>
         </TableRow>);
 
@@ -145,8 +142,8 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
             <Table key={prefix}>
                 <TableHead>
                     <TableRow>
-                        <TableCell>{lastPrefix} Key</TableCell>
-                        <TableCell>{lastPrefix} Value</TableCell>
+                        <TableCell>{t("field.map.header.label.key")}</TableCell>
+                        <TableCell>{t("field.map.header.label.value")}</TableCell>
                         <TableCell></TableCell>
                     </TableRow>
                 </TableHead>

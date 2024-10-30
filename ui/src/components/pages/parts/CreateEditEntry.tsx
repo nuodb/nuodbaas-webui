@@ -197,7 +197,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
         const customForm = getCustomForm(path);
         if (customForm && customForm.sections) {
             sectionFormParams = [];
-            customForm.sections.forEach((section: TempAny) => {
+            customForm.sections.forEach((section: TempAny, index: number) => {
                 if (section.fields) {
                     let params = {};
                     let hasWildcard = false;
@@ -224,7 +224,8 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
                             }
                         })
                     }
-                    sectionFormParams.push({ title: section.title, params });
+                    const id = section?.title?.toLowerCase()?.replaceAll(".", "-") || "section-" + index;
+                    sectionFormParams.push({ id, title: t(section.title), params });
                 }
             });
         }
@@ -284,7 +285,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
             })).show();
         });
         if (ret && ret.length > 0 && section.title) {
-            ret = <Accordion key={"section-" + section.title.toLowerCase()} data-testid={"section-" + section.title.toLowerCase()} summary={section.title}>
+            ret = <Accordion key={section.id || "section-" + section.title.toLowerCase()} data-testid={section.id || "section-" + section.title.toLowerCase()} summary={section.title}>
                 {ret}
             </Accordion>;
         }
@@ -294,7 +295,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
     return <div className="NuoContainerSM">
         <RestSpinner />
         <form>
-            {!readonly && <h1>{(data && "Edit") || "Create"} entry for {path}</h1>}
+            {!readonly && <h1>{data ? t("text.editEntryForPath", { path }) : t("text.createEntryForPath", { path })}</h1>}
             <div className="fields">
                 {urlParameters && Object.keys(urlParameters)
                     .filter(key => urlParameters[key].in === "query")
@@ -354,7 +355,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
                                 updateErrors("_errorDetail", null);
                             }
                         });
-                }}>{(data && "Save") || "Create"}</Button>}
+                }}>{(data && t("button.save")) || t("button.create")}</Button>}
                 {readonly && <React.Fragment>
                     <Button variant="contained" onClick={() => {
                         navigate("/ui/resource/edit" + path);

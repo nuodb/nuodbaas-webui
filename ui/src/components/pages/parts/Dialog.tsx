@@ -37,13 +37,24 @@ export default class Dialog extends Component<IProps, IState> {
         s_instance = this;
     }
 
-    static confirm = (title: string, body: ReactNode) => {
+    static confirm = (title: string, body: ReactNode, t: any) => {
         return new Promise((resolve, reject) => {
             if (s_instance === null) {
                 reject("Dialog not initialized");
                 return;
             }
-            s_instance.setState({ dialogs: [...s_instance.state.dialogs, { title, body, buttons: ["yes", "no"], resolve, reject }] });
+            s_instance.setState({
+                dialogs: [...s_instance.state.dialogs, {
+                    title,
+                    body,
+                    buttons: [
+                        { id: "yes", label: t("button.yes") },
+                        { id: "no", label: t("button.no") }
+                    ],
+                    resolve,
+                    reject
+                }]
+            });
         });
     }
 
@@ -65,7 +76,7 @@ export default class Dialog extends Component<IProps, IState> {
                     <DialogContentText>{dialog.body}</DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    {dialog.buttons.map((button: string) => <Button key={button} data-testid={"dialog_button_" + button.replaceAll(" ", "_").toLowerCase()} onClick={() => this.handleClose(button)}>{button}</Button>)}
+                    {dialog.buttons.map((button: { id: string, label: string }) => <Button key={button.id} data-testid={"dialog_button_" + button.id} onClick={() => this.handleClose(button.id)}>{button.label}</Button>)}
                 </DialogActions>
             </DialogMaterial>;
         });

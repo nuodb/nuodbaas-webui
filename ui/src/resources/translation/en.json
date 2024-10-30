@@ -5,20 +5,47 @@
         "create.resource": "Create {{resource}}",
         "delete": "Delete",
         "edit": "Edit",
-        "search": "Search"
+        "search": "Search",
+        "save": "Save",
+        "yes": "Yes",
+        "no": "No",
+        "true": "True",
+        "false": "False",
+        "start.database": "Start Database",
+        "stop.database": "Stop Database",
+        "show.databases": "Show Databases",
+        "show.backups": "Show Backups",
+        "settings": "Settings",
+        "logout": "Logout",
+        "add": "Add"
+    },
+    "hint": {
+        "open.settings": "Open Settings"
     },
     "control": {
         "select.item.all": "--- All ---",
         "select.item.select": "--- Select ---"
     },
+    "confirm": {
+        "start.database.title": "Start Database",
+        "start.database.body": "Do you want to start Database {{organization}}/{{project}}/{{name}}?",
+        "stop.database.title": "Stop Database",
+        "stop.database.body": "Do you want to stop Database {{organization}}/{{project}}/{{name}}?",
+        "delete.resource.title": "Deleting {{resources_one}} {{name}}",
+        "delete.resource.body": "Do you really want to delete {{resources_one}} {{name}}?"
+    },
     "resource": {
         "label": {
-            "backuppolicies": "Backup Policies",
-            "backups": "Backups",
-            "databases": "Databases",
-            "projects": "Projects",
-            "users": "Users",
-            "users_one": "User"
+            "backuppolicies": "backup policies",
+            "backuppolicies_one": "backup policy",
+            "backups": "backups",
+            "backups_one": "backup",
+            "databases": "databases",
+            "databases_one": "database",
+            "projects": "projects",
+            "projects_one": "project",
+            "users": "users",
+            "users_one": "user"
         }
     },
     "field": {
@@ -27,10 +54,37 @@
             "password": "Password",
             "organization": "Organization",
             "accessRule": "Access Rule",
+            "accessRule.allow": "Allow",
+            "accessRule.deny": "Deny",
             "name": "Name",
             "labels": "Labels",
             "sla": "SLA",
-            "tier": "Tier"
+            "tier": "Tier",
+            "properties": "Properties",
+            "project": "Project",
+            "status": "Status",
+            "state": "State",
+            "database": "Database",
+            "frequency": "Frequency",
+            "selector": "Selector",
+            "retention": "Retention",
+            "retention.hourly": "Hourly",
+            "retention.daily": "Daily",
+            "retention.weekly": "Weekly",
+            "retention.monthly": "Monthly",
+            "retention.yearly": "Yearly",
+            "retention.settings.dayOfWeek": "Day of week",
+            "retention.settings.month": "Month",
+            "retention.settings.relativeToLast": "Relative to last",
+            "retention.settings.promoteLatestToHourly": "Promote latest to hourly",
+            "retention.settings.promoteLatestToDaily": "Promote latest to daily",
+            "retention.settings.promoteLatestToMonthly": "Promote latest to monthly"
+        },
+        "map": {
+            "header.label.key": "Key",
+            "header.label.value": "Value",
+            "hint.new.key": "new key",
+            "hint.new.value": "new value"
         }
     },
     "form": {
@@ -38,6 +92,21 @@
             "label": {
                 "theme": "Theme"
             }
+        }
+    },
+    "text": {
+        "editEntryForPath": "Edit entry for {{path}}",
+        "createEntryForPath": "Create entry for {{path}}",
+        "noData": "No Data"
+    },
+    "section": {
+        "title": {
+            "advanced": "Advanced",
+            "access.deny.rules": "Access/Deny Rules",
+            "labels": "Labels",
+            "change.password": "Change Password",
+            "database.selection": "Database Selection",
+            "database.retention": "Database Retention"
         }
     }
 }

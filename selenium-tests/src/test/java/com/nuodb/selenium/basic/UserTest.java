@@ -18,10 +18,6 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 public class UserTest extends TestRoutines {
-    public void clickUsersMenu() {
-        clickMenuItem("users");
-    }
-
     @Test
     public void testCreateUser() throws MalformedURLException {
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
@@ -33,7 +29,7 @@ public class UserTest extends TestRoutines {
         // Setup and list users
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
         String userName = createUser();
-        clickUsersMenu();
+        clickMenu("users");
 
         // find user and delete
         deleteUser(userName);
@@ -49,7 +45,7 @@ public class UserTest extends TestRoutines {
         // Setup and list users
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
         String userName = createUser();
-        clickUsersMenu();
+        clickMenu("users");
 
         // find user and start edit mode
         List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", userName, MENU_COLUMN);
@@ -57,7 +53,7 @@ public class UserTest extends TestRoutines {
         clickPopupMenu(buttonsCell.get(0), "edit_button");
 
         // edit user and save
-        waitElement("section-labels").click();
+        waitElement("section-title-labels").click();
         waitInputElementByName("labels.key").sendKeys(userName);
         waitInputElementByName("labels.value").sendKeys(userName);
         waitElement("add_button_labels").click();

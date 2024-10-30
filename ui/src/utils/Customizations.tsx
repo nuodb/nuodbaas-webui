@@ -30,21 +30,23 @@ export type CustomForms = {
 };
 
 export type CustomViewField = {
-    label: string;
+    label: string,
     value: string,
-    buttons: [
-        label: string,
-        patch: any,
-        visible: string,
-        confirm: string
-    ]
+};
+
+export type CustomViewMenu = {
+    label: string,
+    patch: any,
+    visible: string,
+    confirm: string,
 };
 
 export type CustomViewFields = { [key: string]: CustomViewField }
 
 export type CustomView = {
     columns?: string[],
-    fields?: CustomViewFields
+    fields?: CustomViewFields,
+    menu?: CustomViewMenu[]
 };
 
 export type CustomViews = { [key: string]: CustomView }

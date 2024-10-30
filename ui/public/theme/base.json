@@ -9,56 +9,55 @@
                 "labels",
                 "tier",
                 "properties",
-                "status",
-                "*",
-                "buttons"
+                "state",
+                "*"
             ],
             "fields": {
-                "status": {
-                    "value": "status.state",
-                    "buttons": [
-                        {
-                            "label": "Start Database",
-                            "patch": [
-                                {
-                                    "op": "remove",
-                                    "path": "/maintenance"
-                                }
-                            ],
-                            "visible": "maintenance.isDisabled",
-                            "confirm": "Do you want to start Database {organization}/{project}/{name}?"
-                        },
-                        {
-                            "label": "Stop Database",
-                            "patch": [
-                                {
-                                    "op": "add",
-                                    "path": "/maintenance",
-                                    "value": {
-                                        "isDisabled": true
-                                    }
-                                }
-                            ],
-                            "visible": "!maintenance",
-                            "confirm": "Do you want to stop Database {organization}/{project}/{name}?"
-                        },
-                        {
-                            "label": "Stop Database",
-                            "patch": [
-                                {
-                                    "op": "replace",
-                                    "path": "/maintenance",
-                                    "value": {
-                                        "isDisabled": true
-                                    }
-                                }
-                            ],
-                            "visible": "maintenance.isDisabled=false",
-                            "confirm": "Do you want to stop Database {organization}/{project}/{name}?"
-                        }
-                    ]
+                "state": {
+                    "value": "status.state"
                 }
-            }
+            },
+            "menu": [
+                {
+                    "label": "confirm.start.database.title",
+                    "patch": [
+                        {
+                            "op": "remove",
+                            "path": "/maintenance"
+                        }
+                    ],
+                    "visible": "maintenance.isDisabled",
+                    "confirm": "confirm.start.database.body"
+                },
+                {
+                    "label": "confirm.stop.database.title",
+                    "patch": [
+                        {
+                            "op": "add",
+                            "path": "/maintenance",
+                            "value": {
+                                "isDisabled": true
+                            }
+                        }
+                    ],
+                    "visible": "!maintenance",
+                    "confirm": "confirm.stop.database.body"
+                },
+                {
+                    "label": "confirm.stop.database.title",
+                    "patch": [
+                        {
+                            "op": "replace",
+                            "path": "/maintenance",
+                            "value": {
+                                "isDisabled": true
+                            }
+                        }
+                    ],
+                    "visible": "maintenance.isDisabled=false",
+                    "confirm": "confirm.stop.database.body"
+                }
+            ]
         },
         "/backuppolicies?/{organization}": {
             "columns": [
@@ -68,23 +67,26 @@
                 "frequency",
                 "selector",
                 "properties",
-                "show",
                 "*"
             ],
-            "fields": {
-                "show": {
-                    "buttons": [
-                        {
-                            "label": "Show Databases",
-                            "link": "/ui/resource/list/backuppolicies/{organization}/{name}/databases"
-                        },
-                        {
-                            "label": "Show Backups",
-                            "link": "/ui/resource/list/backuppolicies/{organization}/{name}/backups"
-                        }
-                    ]
+            "menu": [
+                {
+                    "label": "button.show.databases",
+                    "link": "/ui/resource/list/backuppolicies/{organization}/{name}/databases"
+                },
+                {
+                    "label": "button.show.backups",
+                    "link": "/ui/resource/list/backuppolicies/{organization}/{name}/backups"
                 }
-            }
+            ]
+        },
+        "/projects?/{organization}": {
+            "menu": [
+                {
+                    "label": "button.show.databases",
+                    "link": "/ui/resource/list/databases/{organization}/{name}"
+                }
+            ]
         }
     },
     "forms": {
@@ -101,7 +103,7 @@
                     }
                 },
                 {
-                    "title": "Advanced",
+                    "title": "section.title.advanced",
                     "fields": {
                         "*": {}
                     }
@@ -117,7 +119,7 @@
                     }
                 },
                 {
-                    "title": "Access/Deny Rules",
+                    "title": "section.title.access.deny.rules",
                     "fields": {
                         "accessRule": {
                             "expand": false
@@ -125,19 +127,19 @@
                     }
                 },
                 {
-                    "title": "Labels",
+                    "title": "section.title.labels",
                     "fields": {
                         "labels": {}
                     }
                 },
                 {
-                    "title": "Change Password",
+                    "title": "section.title.change.password",
                     "fields": {
                         "password": {}
                     }
                 },
                 {
-                    "title": "Advanced",
+                    "title": "section.title.advanced",
                     "fields": {
                         "*": {}
                     }
@@ -155,7 +157,7 @@
                     }
                 },
                 {
-                    "title": "Advanced",
+                    "title": "section.title.advanced",
                     "fields": {
                         "*": {}
                     }
@@ -173,7 +175,7 @@
                     }
                 },
                 {
-                    "title": "Advanced",
+                    "title": "section.title.advanced",
                     "fields": {
                         "*": {}
                     }
@@ -203,7 +205,7 @@
                     }
                 },
                 {
-                    "title": "Advanced",
+                    "title": "section.title.advanced",
                     "fields": {
                         "*": {}
                     }
@@ -221,26 +223,26 @@
                     }
                 },
                 {
-                    "title": "Database Selection",
+                    "title": "section.title.database.selection",
                     "fields": {
                         "selector": {}
                     }
                 },
                 {
-                    "title": "Database Retention",
+                    "title": "section.title.database.retention",
                     "fields": {
                         "retention": {}
                     }
                 },
                 {
-                    "title": "Labels",
+                    "title": "section.title.labels",
                     "fields": {
                         "labels": {},
                         "properties": {}
                     }
                 },
                 {
-                    "title": "Advanced",
+                    "title": "section.title.advanced",
                     "fields": {
                         "*": {}
                     }
