@@ -31,7 +31,7 @@ export default function Menu(props: MenuProps): JSX.Element {
 
     if (children) {
         return <>
-            <div onClick={(event) => {
+            <div data-testid="menu-toggle" onClick={(event) => {
                 PopupMenu.showMenu(props, event.currentTarget)
             }}>
                 <>{children}</>
@@ -164,7 +164,6 @@ export class PopupMenu extends Component<{}, PopupState> {
         const rect = anchor.getBoundingClientRect();
         const x = this.state.align === "right" ? rect?.right : rect?.left;
         return <div
-            data-testid="menu-toggle"
             style={{
                 justifyContent: this.state.align === "left" ? "start" : "end",
                 position: "fixed",
@@ -178,7 +177,7 @@ export class PopupMenu extends Component<{}, PopupState> {
             className="NuoMenuToggle"
             onClick={() => this.setState({ anchor: null })}>
             <div style={{ position: "fixed", right: x, left: x, top: rect?.bottom, bottom: rect?.bottom, zIndex: 102 }}>
-                <div id="NuoMenuPopup" className={"NuoMenuPopup " + (this.state.align === "right" ? " NuoAlignRight" : " NuoAlignLeft")}>
+                <div id="NuoMenuPopup" data-testid="menu-popup" className={"NuoMenuPopup " + (this.state.align === "right" ? " NuoAlignRight" : " NuoAlignLeft")}>
                     {this.state.items.map((item: MenuItemProps) => <div style={{ zIndex: 102 }}
                         id={item.id}
                         data-testid={item["data-testid"]}
