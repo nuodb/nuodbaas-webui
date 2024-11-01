@@ -1,6 +1,3 @@
-import { Card, Table as MuiTable, TableHead as MuiTableHead, TableRow as MuiTableRow, TableCell as MuiTableCell, TableBody as MuiTableBody } from '@mui/material';
-import TableContainer from '@mui/material/TableContainer';
-import { isMaterial } from '../../utils/Customizations';
 import { ReactNode } from "react";
 
 type TableProps = {
@@ -11,62 +8,30 @@ type TableProps = {
 
 type ChildProps = {
     children?: ReactNode,
+    className?: string,
     "data-testid"?: string,
 }
 
 export function Table(props: TableProps): JSX.Element {
-    if (isMaterial()) {
-        return <TableContainer data-testid={props["data-testid"]} component={Card}>
-            <MuiTable>
-                {props.children}
-            </MuiTable>
-        </TableContainer>
-    }
-    else {
-        return <table data-testid={props["data-testid"]}>{props.children}</table>
-    }
+    return <div className="NuoTableContainer"><table data-testid={props["data-testid"]} className="NuoTableTable">{props.children}</table></div>
 }
 
 export function TableHead(props: ChildProps): JSX.Element {
-    if (isMaterial()) {
-        return <MuiTableHead>
-            {props.children}
-        </MuiTableHead>
-    }
-    else {
-        return <thead>{props.children}</thead>
-    }
+    return <thead className="NuoTableThead">{props.children}</thead>
 }
 
 export function TableRow(props: ChildProps): JSX.Element {
-    if (isMaterial()) {
-        return <MuiTableRow>
-            {props.children}
-        </MuiTableRow>
-    }
-    else {
-        return <tr>{props.children}</tr>
-    }
+    return <tr className="NuoTableTr">{props.children}</tr>
 }
 
 export function TableCell(props: ChildProps): JSX.Element {
-    if (isMaterial()) {
-        return <MuiTableCell data-testid={props["data-testid"]}>
-            {props.children}
-        </MuiTableCell>
-    }
-    else {
-        return <td data-testid={props["data-testid"]}>{props.children}</td>
-    }
+    return <td data-testid={props["data-testid"]} className={["NuoTableTd", props.className].join(" ")}>{props.children}</td>
+}
+
+export function TableTh(props: ChildProps): JSX.Element {
+    return <th data-testid={props["data-testid"]} className={["NuoTableTh", props.className].join(" ")}>{props.children}</th>
 }
 
 export function TableBody(props: ChildProps): JSX.Element {
-    if (isMaterial()) {
-        return <MuiTableBody>
-            {props.children}
-        </MuiTableBody>
-    }
-    else {
-        return <tbody>{props.children}</tbody>
-    }
+    return <tbody className="NuoTableTbody">{props.children}</tbody>
 }

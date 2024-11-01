@@ -45,6 +45,7 @@ function ResponsiveAppBar(resources: string[], t: any) {
 
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <Menu
+              align="left"
               items={resources.map((resource: string, index: number) => {
                 return {
                   "data-testid": "menu-label-" + resource,

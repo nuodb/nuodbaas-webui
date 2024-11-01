@@ -46,7 +46,7 @@ export type MenuItemProps = {
 export type MenuProps = {
     "data-testid"?: string,
     align?: "left" | "right",
-    popup?: boolean,
+    popupId?: string,
     draggable?: boolean,
     children?: ReactNode,
     items: MenuItemProps[],
