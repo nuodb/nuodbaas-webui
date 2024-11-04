@@ -80,11 +80,43 @@
             "retention.settings.promoteLatestToDaily": "Promote latest to daily",
             "retention.settings.promoteLatestToMonthly": "Promote latest to monthly"
         },
+        "enum": {
+            "theme.material": "Material UI",
+            "theme.plain": "plain",
+            "retention.settings": {
+                "dayOfWeek": {
+                    "Sunday": "Sunday",
+                    "Monday": "Monday",
+                    "Tuesday": "Tuesday",
+                    "Wednesday": "Wednesday",
+                    "Thursday": "Thursday",
+                    "Friday": "Friday",
+                    "Saturday": "Saturday"
+                },
+                "month": {
+                    "January": "January",
+                    "February": "February",
+                    "March": "March",
+                    "April": "April",
+                    "May": "May",
+                    "June": "June",
+                    "July": "July",
+                    "August": "August",
+                    "September": "September",
+                    "October": "October",
+                    "November": "November",
+                    "December": "December"
+                }
+            }
+        },
         "map": {
             "header.label.key": "Key",
             "header.label.value": "Value",
             "hint.new.key": "new key",
             "hint.new.value": "new value"
+        },
+        "select": {
+            "selectItem": "--- Select Item ---"
         }
     },
     "form": {
