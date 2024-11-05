@@ -18,7 +18,7 @@ import FieldSelect from "./FieldSelect";
 const FieldFactory = {
     create: (props: FieldProps): FieldBaseType => {
         props = { ...props };
-        let leftOvers = JSON.parse(JSON.stringify(props.parameter));
+        let leftOvers = JSON.parse(JSON.stringify(props.parameter || {}));
         if (!("schema" in leftOvers)) {
             leftOvers["schema"] = {};
         }

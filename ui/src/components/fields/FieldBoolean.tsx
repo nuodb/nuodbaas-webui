@@ -24,9 +24,9 @@ export default function FieldBoolean(props: FieldProps): FieldBaseType {
     }
 
     function getDisplayValue(): ReactNode {
-        const { prefix, values } = props;
+        const { prefix, values, t } = props;
         const value = getValue(values, prefix);
-        return value ? "true" : "false";
+        return value ? t("button.true") : t("button.false");
     }
 
     return { ...FieldBase(props), show, getDisplayValue };

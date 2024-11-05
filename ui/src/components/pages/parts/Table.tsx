@@ -6,7 +6,6 @@ import { TableBody, TableCell, Table as TableCustom, TableHead, TableRow } from 
 import { getResourceByPath, getCreatePath, getChild, replaceVariables } from "../../../utils/schema";
 import FieldFactory from "../../fields/FieldFactory";
 import RestSpinner from "./RestSpinner";
-import { getValue } from "../../fields/utils";
 import Dialog from "./Dialog";
 import { MenuItemProps, TempAny } from "../../../utils/types";
 import { CustomViewField, evaluate, getCustomizationsView } from '../../../utils/Customizations';
@@ -217,6 +216,20 @@ function Table(props: TempAny) {
 
     }
 
+    /* gets the schema of the specified field.
+       If the field is hierarchical, it will find the schema of the right most field.
+       Returns defaults if not found. */
+    function getFieldSchema(fieldName: string) {
+        const fieldsSchema = getChild(getResourceByPath(schema, getCreatePath(schema, path)), ["get", "responses", "200", "content", "application/json", "schema", "properties"]);
+        let fs = fieldsSchema;
+        let fn = fieldName;
+        while (fs && fn.includes(".") && fn.split(".")[0] in fs) {
+            fs = fs[fn.split(".")[0]].properties;
+            fn = fn.substring(fn.indexOf(".") + 1);
+        }
+        return fs[fn] || {};
+    }
+
     function renderDataCell(fieldName: string, row: TempAny) {
         const cv = getCustomizationsView(path)
         const cf: CustomViewField | null = (cv && cv.fields && cv.fields[fieldName]) || null;
@@ -234,18 +247,13 @@ function Table(props: TempAny) {
             }
         }
         else {
-            if (fieldsSchema && fieldName in fieldsSchema) {
-                value = FieldFactory.createDisplayValue({
-                    prefix: fieldName,
-                    label: t("field.label." + fieldName, fieldName),
-                    parameter: fieldsSchema[fieldName],
-                    values: row,
-                    t
-                });
-            }
-            else {
-                value = showValue(getValue(row, fieldName));
-            }
+            value = FieldFactory.createDisplayValue({
+                prefix: fieldName,
+                label: t("field.label." + fieldName, fieldName),
+                parameter: getFieldSchema(fieldName),
+                values: row,
+                t
+            });
         }
 
         return <TableCell key={fieldName}>{value}</TableCell>;
@@ -253,7 +261,6 @@ function Table(props: TempAny) {
     }
 
     const tableLabels = getTableLabels();
-    const fieldsSchema = getChild(getResourceByPath(schema, getCreatePath(schema, path)), ["get", "responses", "200", "content", "application/json", "schema", "properties"]);
     const visibleColumns = columns.filter(col => col.selected);
     return (
         <TableCustom data-testid={props["data-testid"]}>
