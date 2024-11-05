@@ -60,14 +60,13 @@ function TableSettingsColumns(props: TempAny) {
         return {
             id: column.id,
             selected: column.selected,
-            label: <div key={column.id} style={{ display: "flex", flexDirection: "row" }
-            }>
+            label: <div key={column.id} className="NuoTableSettingsItem">
                 <input type="checkbox" id={column.id} checked={column.selected} onChange={() => handleSelection(index)} />
                 <label htmlFor={column.id} onClick={() => handleSelection(index)}>{t("field.label." + column.id, column.id)}</label>
             </div >
         }
     });
-    return <Menu popup={true} draggable={true} items={items} setItems={(items) => {
+    return <Menu popupId={"tableColumnsMenu"} draggable={true} items={items} setItems={(items) => {
         saveColumns(items, path);
         setColumns(items);
     }} align="right" />;

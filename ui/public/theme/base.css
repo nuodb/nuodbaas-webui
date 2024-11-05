@@ -40,6 +40,9 @@
 }
 
 .NuoMenuPopupItem {
+    display: flex;
+        flex-direction: row;
+        justify-content: space-between;
     margin: 0px;
     padding: 5px 10px;
     font-family: Roboto, Helvetica, Arial, sans-serif;
@@ -52,6 +55,11 @@
     white-space: nowrap;
 }
 
+.NuoMenuPopupItem>svg {
+    display: flex;
+    flex: 0 0 auto;
+    opacity: 0.5;
+}
 .NuoMenuPopupItem:hover {
     background-color: lightgray;
 }
@@ -68,4 +76,94 @@
 .NuoTableNoData {
     font-size: 1.25em;
     padding: 25px;
+}
+.NuoTableContainer {
+    box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+    background-color: #fff;
+    color: rgba(0, 0, 0, 0.87);
+    -webkit-transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    border-radius: 4px;
+    box-shadow: var(--Paper-shadow);
+    background-image: var(--Paper-overlay);
+    overflow: hidden;
+    width: 100%;
+    overflow-x: auto;
+}
+
+.NuoTableTable {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    text-indent: initial;
+    unicode-bidi: isolate;
+    border-color: gray;
+}
+
+.NuoTableThead {
+    vertical-align: middle;
+    unicode-bidi: isolate;
+    border-color: inherit;
+}
+
+.NuoTableTr {
+    color: inherit;
+    display: table-row;
+    vertical-align: middle;
+    outline: 0;
+    unicode-bidi: isolate;
+    border-color: inherit;
+}
+
+.NuoTableSettingsItem {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+}
+
+.NuoTableSettingsItem>label {
+    display: flex;
+    flex: 1 1 auto;
+}
+
+.NuoTableTh,
+.NuoTableTd {
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    font-size: 0.875rem;
+    letter-spacing: 0.0108em;
+    display: table-cell;
+    padding: 16px;
+    vertical-align: inherit;
+    border-bottom: 1px solid rgba(224, 224, 224, 1);
+    color: rgba(0, 0, 0, 0.87);
+    unicode-bidi: isolate;
+    text-align: left;
+}
+
+.NuoTableTh {
+    line-height: 1.5rem;
+    font-weight: 500;
+}
+
+.NuoTableTd {
+    font-weight: 400;
+    line-height: 1.43;
+}
+
+.NuoTableTbody {
+    display: table-row-group;
+    vertical-align: middle;
+    unicode-bidi: isolate;
+    border-color: inherit;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.NuoTableMenuCell {
+    position: sticky;
+    right: 0;
+    text-align: right;
+    background-color: rgba(255, 255, 255, 0.8);
+    ;
 }

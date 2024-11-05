@@ -2,7 +2,7 @@
 
 import { useNavigate } from 'react-router-dom';
 import { withTranslation } from "react-i18next";
-import { TableBody, TableCell, Table as TableCustom, TableHead, TableRow } from '../../controls/Table';
+import { TableBody, TableTh, TableCell, Table as TableCustom, TableHead, TableRow } from '../../controls/Table';
 import { getResourceByPath, getCreatePath, getChild, replaceVariables } from "../../../utils/schema";
 import FieldFactory from "../../fields/FieldFactory";
 import RestSpinner from "./RestSpinner";
@@ -211,8 +211,8 @@ function Table(props: TempAny) {
             })
         }
 
-        return <TableCell key={row["$ref"]}>
-            <Menu popup={true} items={buttons} align="right" />
+        return <TableCell key={row["$ref"]} className="NuoTableMenuCell">
+            <Menu popupId={"row_menu_" + row["$ref"]} items={buttons} align="right" />
         </TableCell>;
 
     }
@@ -259,12 +259,12 @@ function Table(props: TempAny) {
         <TableCustom data-testid={props["data-testid"]}>
             <TableHead>
                 <TableRow>
-                    {visibleColumns.map((column, index) => <TableCell key={column.id} data-testid={column.id}>
+                    {visibleColumns.map((column, index) => <TableTh key={column.id} data-testid={column.id}>
                         {tableLabels[column.id]}
-                    </TableCell>)}
-                    <TableCell key="$ref" data-testid="$ref">
+                    </TableTh>)}
+                    <TableTh key="$ref" data-testid="$ref" className="NuoTableMenuCell">
                         {data.length > 0 && <TableSettingsColumns data={data} path={path} columns={columns} setColumns={setColumns} />}
-                    </TableCell>
+                    </TableTh>
                 </TableRow>
             </TableHead>
             <TableBody>
@@ -274,7 +274,7 @@ function Table(props: TempAny) {
                         {renderMenuCell(row)}
                     </TableRow>
                 ))}
-                {data.length === 0 && <div data-testid="table_nodata" className="NuoTableNoData">{t("text.noData")}</div>}
+                {data.length === 0 && <tr><td><div data-testid="table_nodata" className="NuoTableNoData">{t("text.noData")}</div></td></tr>}
             </TableBody>
         </TableCustom>
     );

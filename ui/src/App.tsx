@@ -19,6 +19,7 @@ import GlobalErrorBoundary from "./components/GlobalErrorBoundary";
 import Auth from "./utils/auth";
 import Settings from './components/pages/Settings';
 import Customizations from './utils/Customizations';
+import { PopupMenu } from './components/controls/Menu';
 
 /**
  * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
@@ -32,6 +33,7 @@ export default function App() {
       <GlobalErrorBoundary>
         <Customizations>
           <CssBaseline />
+          <PopupMenu />
           <Dialog />
           <BrowserRouter>
             {isLoggedIn
