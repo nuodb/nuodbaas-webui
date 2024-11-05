@@ -12,12 +12,13 @@ import FieldMessage from "./FieldMessage";
 import FieldDateTime from "./FieldDateTime";
 import { FieldBaseType, FieldProps, FieldPropsDisplay, FieldPropsValidate } from "./FieldBase";
 import { ReactNode } from "react";
+import FieldSelect from "./FieldSelect";
 
 /** Factory function to create components based on the field type */
 const FieldFactory = {
     create: (props: FieldProps): FieldBaseType => {
         props = { ...props };
-        let leftOvers = JSON.parse(JSON.stringify(props.parameter));
+        let leftOvers = JSON.parse(JSON.stringify(props.parameter || {}));
         if (!("schema" in leftOvers)) {
             leftOvers["schema"] = {};
         }
@@ -58,6 +59,9 @@ const FieldFactory = {
             }
             else if (props.parameter["x-tf-sensitive"] === true) {
                 return FieldPassword(props);
+            }
+            else if (props.parameter.enum) {
+                return FieldSelect(props);
             }
             else {
                 return FieldString(props);

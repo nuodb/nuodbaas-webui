@@ -54,10 +54,7 @@ function Settings({ t }: SettingsProps) {
             label: t("form.settings.label.theme"),
             parameter: {
                 type: "select",
-                enums: [
-                    { key: "material", label: "Material UI" },
-                    { key: "plain", label: "plain" }
-                ]
+                enum: ["material", "plain"]
             },
             t
 
