@@ -4,6 +4,7 @@ on:
     branches:
       - "main"
       - "rel/*"
+      - "agr22/DBAAS-520"
 jobs:
   publish_docker_image:
     name: Publish Docker Image
