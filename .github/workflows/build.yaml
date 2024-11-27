@@ -6,8 +6,8 @@ on:
       - "rel/*"
       - "agr22/DBAAS-520"
 jobs:
-  publish_docker_image:
-    name: Publish Docker Image
+  publish_docker_image_and_helm:
+    name: Publish Docker Image and helm charts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -46,15 +46,6 @@ jobs:
           name: test-results
           path: selenium-tests/target/test-results
           retention-days: 7
-
-  publish_helm_chart:
-    name: Publish Helm Chart
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Configure Git
         run: |
           git config user.name "$GITHUB_ACTOR"
