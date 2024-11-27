@@ -111,6 +111,11 @@ if [ "$1" == "createHelmPackage" ] ; then
     (cd build/charts && helm package ${REPOSITORY})
     cat ${CHART_FILE} | sed "s/^version: .*/version: \"${VERSION}-latest\"/g" > build/${CHART_FILE}
     (cd build/charts && helm package ${REPOSITORY})
+
+    echo "Create tgz file from static files"
+    mkdir -p build/static_files
+    docker run nuodbaas-webui tgz_static > build/static_files/${REPOSITORY}-html-${SNAPSHOT}.tgz
+    cp build/static_files/${REPOSITORY}-html-${SNAPSHOT}.tgz build/static_files/${REPOSITORY}-html-${VERSION}-latest.tgz
     exit 0
 fi
 
@@ -142,6 +147,7 @@ if [ "$1" == "uploadHelmPackage" ] ; then
         # Update index with new Helm charts
         mv build/charts/*.tgz ./
         helm repo index .
+        mv static_files/*.tgz ./
 
         git add index.yaml *.tgz
         git commit -m "Add chart ${NEW_CHART} to index"
