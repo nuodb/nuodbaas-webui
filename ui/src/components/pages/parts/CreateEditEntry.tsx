@@ -93,7 +93,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
             Object.keys(params).forEach(key => {
                 let parameter = params[key];
                 if (parameter && fieldName === null && key in values) {
-                    if (FieldFactory.validateProps({ prefix: key, label: t("field.label." + key, key), parameter, values, updateErrors, setValues, t })) {
+                    if (FieldFactory.validateProps({ path, prefix: key, label: t("field.label." + key, key), parameter, values, updateErrors, setValues, t })) {
                         fieldName = key;
                     }
                 }
@@ -253,7 +253,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
         let success = true;
         Object.keys(formParameters).forEach((key: string) => {
             let parameter: TempAny = formParameters[key];
-            success = FieldFactory.validateProps({ prefix: key, label: t("field.label." + key), parameter, values, updateErrors, setValues, t }) && success;
+            success = FieldFactory.validateProps({ path, prefix: key, label: t("field.label." + key), parameter, values, updateErrors, setValues, t }) && success;
         });
         return success;
     }
@@ -269,6 +269,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
             const ro = readonly
                 || (data && (key in urlParameters || key === "name" || formParameter["x-immutable"] === true))
             return (FieldFactory.create({
+                path,
                 prefix: key,
                 label: t("field.label." + key, key),
                 parameter: formParameter,
@@ -302,6 +303,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
                     .map(key => {
                         let urlParameter = { ...urlParameters[key] };
                         return (FieldFactory.create({
+                            path,
                             prefix: key,
                             label: t("field.label." + key, key),
                             parameter: urlParameter,

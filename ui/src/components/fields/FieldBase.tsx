@@ -5,6 +5,9 @@ import { getValue } from "./utils";
 import { FieldValuesType, FieldParameterType } from "../../utils/types";
 
 export interface FieldPropsDisplay {
+    /** contains resource path */
+    path: string,
+
     /** contains field name (hierarchical fields are separated by period) */
     prefix: string,
 

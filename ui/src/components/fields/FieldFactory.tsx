@@ -13,6 +13,7 @@ import FieldDateTime from "./FieldDateTime";
 import { FieldBaseType, FieldProps, FieldPropsDisplay, FieldPropsValidate } from "./FieldBase";
 import { ReactNode } from "react";
 import FieldSelect from "./FieldSelect";
+import FieldCrontab from "./FieldCrontab";
 
 /** Factory function to create components based on the field type */
 const FieldFactory = {
@@ -62,6 +63,9 @@ const FieldFactory = {
             }
             else if (props.parameter.enum) {
                 return FieldSelect(props);
+            }
+            else if (props.prefix === "frequency" && (props.path === "/backuppolicies" || props.path.startsWith("/backuppolicies/"))) {
+                return FieldCrontab(props);
             }
             else {
                 return FieldString(props);

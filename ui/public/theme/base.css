@@ -167,3 +167,34 @@
     background-color: rgba(255, 255, 255, 0.8);
     ;
 }
+.NuoCrontabContainer {
+    display: flex;
+    flex-direction: row;
+}
+
+.NuoFieldCrontab {
+    position: relative;
+    border: 1px solid;
+    padding: 10px;
+    color: rgba(0, 0, 0, 0.23);
+    border-radius: 4px;
+}
+
+.NuoFieldCrontab>div,
+.NuoFieldCrontab>select {
+    margin: 10px;
+}
+
+.NuoFieldCrontab>div {
+    width: calc(100% - 20px);
+}
+
+.NuoFieldCrontab>label {
+    position: absolute;
+    top: -15px;
+    left: 10px;
+    background-color: white;
+    font-size: 1rem;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    font-weight: 400;
+}
