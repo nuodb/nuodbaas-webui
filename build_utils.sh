@@ -147,15 +147,17 @@ if [ "$1" == "uploadHelmPackage" ] ; then
         # Update index with new Helm charts
         mv build/charts/*.tgz ./
         helm repo index .
-        mv static_files/*.tgz ./
+        git add index.yaml
+    fi
 
-        git add index.yaml *.tgz
-        git commit -m "Add chart ${NEW_CHART} to index"
+    mv static_files/*.tgz ./
 
-        # Push change unless DRY_RUN=true
-        if [ "$DRY_RUN" != true ]; then
-            git push
-        fi
+    git add *.tgz
+    git commit -m "Add chart ${NEW_CHART} to index"
+
+    # Push change unless DRY_RUN=true
+    if [ "$DRY_RUN" != true ]; then
+        git push
     fi
 
     git checkout -
