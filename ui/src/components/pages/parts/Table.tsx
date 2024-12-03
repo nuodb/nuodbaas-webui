@@ -248,6 +248,7 @@ function Table(props: TempAny) {
         }
         else {
             value = FieldFactory.createDisplayValue({
+                path: path,
                 prefix: fieldName,
                 label: t("field.label." + fieldName, fieldName),
                 parameter: getFieldSchema(fieldName),
