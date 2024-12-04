@@ -139,8 +139,7 @@ if [ "$1" == "uploadHelmPackage" ] ; then
     EXISTING_CHARTS="$(ls *.tgz | grep -v -e "-latest" | sed "s/\.tgz$//g" | sed "s/\+.*//g")"
     if [ "$(echo "${EXISTING_CHARTS}" | grep -e "^${NEW_CHART}$")" != "" ] ; then
         echo "Chart exists already - not updating"
-        git checkout -
-        exit 0
+        COMMIT_MSG="Add static file `ls static_files/*.tgz | sed "s/static_files\///g"`"
     else
         echo "Updating index with chart ${NEW_CHART}"
 
@@ -148,12 +147,13 @@ if [ "$1" == "uploadHelmPackage" ] ; then
         mv build/charts/*.tgz ./
         helm repo index .
         git add index.yaml
+        COMMIT_MSG="Add static files + chart ${NEW_CHART} to index"
     fi
 
     mv static_files/*.tgz ./
 
     git add *.tgz
-    git commit -m "Add chart ${NEW_CHART} to index"
+    git commit -m "${COMMIT_MSG}"
 
     # Push change unless DRY_RUN=true
     if [ "$DRY_RUN" != true ]; then

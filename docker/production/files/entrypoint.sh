@@ -2,7 +2,7 @@
 # (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
 if [ "$1" == "tgz_static" ] ; then
-    echo "Exctract static files from image" 1>&2
+    echo "Extract static files from image" 1>&2
     cd /usr/share/nginx/html
     tar -czf - -C /usr/share/nginx/html *
     exit $?
