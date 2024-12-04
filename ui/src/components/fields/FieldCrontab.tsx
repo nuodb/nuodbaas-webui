@@ -4,6 +4,8 @@ import { getValue, setValue } from "./utils"
 import FieldBase, { FieldBaseType, FieldProps } from "./FieldBase"
 import { ReactNode } from 'react';
 import Select, { SelectOption } from "../controls/Select";
+import TextField from "../controls/TextField";
+import { FieldParameterType } from "../../utils/types";
 
 export default function FieldCrontab(props: FieldProps): FieldBaseType {
 
@@ -11,7 +13,8 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
      * show Field of type Boolean using the values and schema definition
      */
     function show(): ReactNode {
-        const { prefix, label, values, parameter, required, setValues, autoFocus, readonly, t } = props;
+        const { prefix, label, values, setValues, errors, autoFocus, readonly, required, t } = props;
+        let error = (errors && (prefix in errors) && errors[prefix]) || "";
         let value = getValue(values, prefix) || "";
         const parts = value.split(" ");
         let frequency = "";
@@ -26,22 +29,11 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
         }
         else {
             frequency = "other";
-            minute = parts[0] || "*";
-            hour = parts[1] || "*";
-            dayOfMonth = parts[2] || "*";
-            month = parts[3] || "*";
-            weekday = parts[4] || "*";
-        }
-
-        function renderNumbersOptions(from: number, to: number, labels?: string[]) {
-            let ret = [];
-            ret.push(<SelectOption key="*" value="*">{t("field.crontab.any")}</SelectOption>);
-            for (let i = from; i <= to; i++) {
-                const item = String(i);
-                const label = labels ? labels[i - from] : item;
-                ret.push(<SelectOption key={item} value={item}>{label}</SelectOption>);
-            }
-            return ret;
+            minute = parts[0];
+            hour = parts[1];
+            dayOfMonth = parts[2];
+            month = parts[3];
+            weekday = parts[4];
         }
 
         function setPart(index: number, partValue: string) {
@@ -52,9 +44,13 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
             setValues(v);
         }
 
-        return <div className={isOther && "NuoFieldCrontab" || ""}>
+        function handleBlur() {
+            FieldBase(props).validate() && validate();
+        }
+
+        return <div className={(isOther && "NuoFieldCrontab") || ""}>
             <label id={"label_" + prefix}>{isOther && label}</label>
-            <Select id={prefix} key={prefix} label={!isOther && label || ""} value={frequency} autoFocus={autoFocus} onChange={(e: any) => {
+            <Select id={prefix} key={prefix} label={(!isOther && label) || ""} value={frequency} required={required} autoFocus={autoFocus} onChange={(e: any) => {
                 let v = { ...values };
                 if (e.target.value === "other") {
                     setValue(v, prefix, "* * * * *");
@@ -63,7 +59,7 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
                     setValue(v, prefix, e.target.value);
                 }
                 setValues(v);
-            }} onBlur={() => FieldBase(props).validate()} disabled={readonly}>
+            }} onBlur={handleBlur} disabled={readonly}>
                 <SelectOption value="">{t("field.select.selectItem")}</SelectOption>
                 <SelectOption value="@hourly">@hourly</SelectOption>
                 <SelectOption value="@daily">@daily</SelectOption>
@@ -73,52 +69,23 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
                 <SelectOption value="other">Other</SelectOption>
             </Select>
             {parts.length === 5 && <div className="NuoCrontabContainer">
-                <Select id={prefix} key={prefix} label={t("field.crontab.minute")} value={minute} autoFocus={autoFocus} onChange={(e: any) => {
+                <TextField key={prefix} id={prefix} label={t("field.crontab.minute")} value={minute} required={true} onChange={(e: any) => {
                     setPart(0, e.target.value);
-                }} onBlur={() => FieldBase(props).validate()} disabled={readonly}>
-                    {renderNumbersOptions(0, 59)}
-                </Select>
-                <Select id={prefix} key={prefix} label={t("field.crontab.hour")} value={hour} autoFocus={autoFocus} onChange={(e: any) => {
+                }} onBlur={handleBlur} disabled={readonly} />
+                <TextField key={prefix} id={prefix} label={t("field.crontab.hour")} value={hour} required={true} onChange={(e: any) => {
                     setPart(1, e.target.value);
-                }} onBlur={() => FieldBase(props).validate()} disabled={readonly}>
-                    {renderNumbersOptions(0, 59)}
-                </Select>
-                <Select id={prefix} key={prefix} label={t("field.crontab.dayOfMonth")} value={dayOfMonth} autoFocus={autoFocus} onChange={(e: any) => {
+                }} onBlur={handleBlur} disabled={readonly} />
+                <TextField key={prefix} id={prefix} label={t("field.crontab.dayOfMonth")} value={dayOfMonth} required={true} onChange={(e: any) => {
                     setPart(2, e.target.value);
-                }} onBlur={() => FieldBase(props).validate()} disabled={readonly}>
-                    {renderNumbersOptions(1, 31)}
-                </Select>
-                <Select id={prefix} key={prefix} label={t("field.crontab.month")} value={month} autoFocus={autoFocus} onChange={(e: any) => {
+                }} onBlur={handleBlur} disabled={readonly} />
+                <TextField key={prefix} id={prefix} label={t("field.crontab.month")} value={month} required={true} onChange={(e: any) => {
                     setPart(3, e.target.value);
-                }} onBlur={() => FieldBase(props).validate()} disabled={readonly}>
-                    {renderNumbersOptions(1, 12, [
-                        t("field.crontab.january"),
-                        t("field.crontab.february"),
-                        t("field.crontab.march"),
-                        t("field.crontab.april"),
-                        t("field.crontab.may"),
-                        t("field.crontab.june"),
-                        t("field.crontab.july"),
-                        t("field.crontab.august"),
-                        t("field.crontab.september"),
-                        t("field.crontab.october"),
-                        t("field.crontab.november"),
-                        t("field.crontab.december"),
-                    ])}
-                </Select>
-                <Select id={prefix} key={prefix} label={t("field.crontab.weekday")} value={weekday} autoFocus={autoFocus} onChange={(e: any) => {
+                }} onBlur={handleBlur} disabled={readonly} />
+                <TextField key={prefix} id={prefix} label={t("field.crontab.weekday")} value={weekday} required={true} onChange={(e: any) => {
                     setPart(4, e.target.value);
-                }} onBlur={() => FieldBase(props).validate()} disabled={readonly}>
-                    {renderNumbersOptions(0, 6, [
-                        t("field.crontab.sunday"),
-                        t("field.crontab.monday"),
-                        t("field.crontab.tuesday"),
-                        t("field.crontab.wednesday"),
-                        t("field.crontab.thursday"),
-                        t("field.crontab.friday"),
-                        t("field.crontab.saturday")
-                    ])}
-                </Select></div>}
+                }} onBlur={handleBlur} disabled={readonly} />
+            </div>}
+            <div className="NuoError">{error}</div>
         </div>;
     }
 
@@ -126,6 +93,46 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
         const { prefix, values, t } = props;
         const value = getValue(values, prefix);
         return t("field.enum." + prefix + "." + value, prefix + "." + value);
+    }
+
+    /** validate field and set error state
+ * prefix - field name to validate (separated by period on hierarchical fields). Defaults to props.prefix
+ * parameter - schema definition for this field. Defaults to props.parameter
+ * value - value to check. if undefined, defaults to the value for "prefix"
+ * @returns true if validation passed.
+ */
+    function validate(prefix?: string, parameter?: FieldParameterType, value?: string): boolean {
+        const { values, updateErrors } = props;
+        if (!prefix) {
+            prefix = props.prefix;
+        }
+        if (value === undefined) {
+            value = getValue(values, prefix);
+        }
+        if (!value) {
+            if (parameter?.required) {
+                updateErrors(prefix, "Field " + prefix + " is required");
+                return false;
+            }
+            else {
+                updateErrors(prefix, null);
+                return true;
+            }
+        }
+
+        if (["@hourly", "@daily", "@weekly", "@monthly", "@yearly"].includes(value)) {
+            updateErrors(prefix, null);
+            return true;
+        }
+
+        const parts = value.split(" ");
+        if (parts.length !== 5 || !parts[0] || !parts[1] || !parts[2] || !parts[3] || !parts[4]) {
+            updateErrors(prefix, "All fields need to be filled out");
+            return false;
+        }
+
+        updateErrors(prefix, null);
+        return true;
     }
 
     return { ...FieldBase(props), show, getDisplayValue };
