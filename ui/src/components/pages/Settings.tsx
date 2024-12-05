@@ -34,6 +34,7 @@ function Settings({ t }: SettingsProps) {
         const jsonSettings = JSON.parse(settings || "{}");
         const theme = (jsonSettings.theme && jsonSettings.theme.type) || "material";
         return FieldSelect({
+            path: "",
             errors: {},
             required: false,
             autoFocus: false,

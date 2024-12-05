@@ -27,7 +27,7 @@ export default function Select(props: SelectProps): JSX.Element {
     if (isMaterial()) {
         return <FormControl key={id} fullWidth>
             <InputLabel id={"label_" + id}>{label}</InputLabel>
-            <MuiSelect labelId={"label_" + id} name={id} label={label} {...props}>
+            <MuiSelect labelId={"label_" + id} name={id} label={label} {...props} value={props.value || ""}>
                 {children}
             </MuiSelect>
             {required && <span>Required</span>}
@@ -36,7 +36,7 @@ export default function Select(props: SelectProps): JSX.Element {
     else {
         return <div className="NuoFieldBase NuoFieldSelect" key={id}>
             <label id={"label_" + id}>{label}</label>
-            <select name={id} {...props}>
+            <select name={id} {...props} value={props.value || ""}>
                 {children}
             </select>
             {required && <span>Required</span>}

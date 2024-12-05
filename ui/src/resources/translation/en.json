@@ -86,6 +86,13 @@
             "retention.settings.promoteLatestToDaily": "Promote latest to daily",
             "retention.settings.promoteLatestToMonthly": "Promote latest to monthly"
         },
+        "crontab": {
+            "minute": "Minute",
+            "hour": "Hour",
+            "dayOfMonth": "Day",
+            "month": "Month",
+            "weekday": "Weekday"
+        },
         "enum": {
             "theme.material": "Material UI",
             "theme.plain": "plain",
