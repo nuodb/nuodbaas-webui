@@ -18,22 +18,12 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
         let value = getValue(values, prefix) || "";
         const parts = value.split(" ");
         let frequency = "";
-        let minute = "";
-        let hour = "";
-        let dayOfMonth = "";
-        let month = "";
-        let weekday = "";
         const isOther = parts.length !== 1;
         if (!isOther) {
             frequency = parts[0];
         }
         else {
             frequency = "other";
-            minute = parts[0];
-            hour = parts[1];
-            dayOfMonth = parts[2];
-            month = parts[3];
-            weekday = parts[4];
         }
 
         function setPart(index: number, partValue: string) {
@@ -48,7 +38,7 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
             FieldBase(props).validate() && validate();
         }
 
-        return <div className={(isOther && "NuoFieldCrontab") || ""}>
+        return <div key={prefix} className={(isOther && "NuoFieldCrontab") || ""}>
             <label id={"label_" + prefix}>{isOther && label}</label>
             <Select id={prefix} key={prefix} label={(!isOther && label) || ""} value={frequency} required={required} autoFocus={autoFocus} onChange={(e: any) => {
                 let v = { ...values };
@@ -68,22 +58,21 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
                 <SelectOption value="@yearly">@yearly</SelectOption>
                 <SelectOption value="other">Other</SelectOption>
             </Select>
-            {parts.length === 5 && <div className="NuoCrontabContainer">
-                <TextField key={prefix} id={prefix} label={t("field.crontab.minute")} value={minute} required={true} onChange={(e: any) => {
-                    setPart(0, e.target.value);
-                }} onBlur={handleBlur} disabled={readonly} />
-                <TextField key={prefix} id={prefix} label={t("field.crontab.hour")} value={hour} required={true} onChange={(e: any) => {
-                    setPart(1, e.target.value);
-                }} onBlur={handleBlur} disabled={readonly} />
-                <TextField key={prefix} id={prefix} label={t("field.crontab.dayOfMonth")} value={dayOfMonth} required={true} onChange={(e: any) => {
-                    setPart(2, e.target.value);
-                }} onBlur={handleBlur} disabled={readonly} />
-                <TextField key={prefix} id={prefix} label={t("field.crontab.month")} value={month} required={true} onChange={(e: any) => {
-                    setPart(3, e.target.value);
-                }} onBlur={handleBlur} disabled={readonly} />
-                <TextField key={prefix} id={prefix} label={t("field.crontab.weekday")} value={weekday} required={true} onChange={(e: any) => {
-                    setPart(4, e.target.value);
-                }} onBlur={handleBlur} disabled={readonly} />
+            {isOther && <div className="NuoCrontabContainer">
+                {["minute", "hour", "dayOfMonth", "month", "weekday"].map((fieldname, index) => (
+                    <TextField
+                        key={prefix + "-" + fieldname}
+                        id={prefix + "-" + fieldname}
+                        label={t("field.crontab." + fieldname)}
+                        value={parts[index]}
+                        required={true}
+                        onChange={(e: any) => {
+                            setPart(index, e.target.value.replaceAll(" ", ""));
+                        }}
+                        onBlur={handleBlur}
+                        disabled={readonly}
+                    />
+                ))}
             </div>}
             <div className="NuoError">{error}</div>
         </div>;
@@ -135,5 +124,5 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
         return true;
     }
 
-    return { ...FieldBase(props), show, getDisplayValue };
+    return { ...FieldBase(props), show, validate, getDisplayValue };
 }
