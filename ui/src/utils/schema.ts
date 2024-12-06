@@ -275,14 +275,14 @@ export function getResourceEvents(path: string, multiResolve: TempAny, multiReje
         let mergedData: TempAny = {};
         let buffer = Uint8Array.of();
         for await (let chunk of response) {
-            while(chunk.length > 0) {
-                let posNewline = chunk.indexOf("\n".charCodeAt(0));
+            buffer = concatChunks(buffer, chunk);
+            while(buffer.length > 0) {
+                let posNewline = buffer.indexOf("\n".charCodeAt(0));
                 if(posNewline === -1) {
-                    buffer = concatChunks(buffer, chunk);
                     break;
                 }
-                let line = new TextDecoder().decode(concatChunks(buffer, chunk.slice(0, posNewline)));
-                chunk = chunk.slice(posNewline+1);
+                let line = new TextDecoder().decode(buffer.slice(0, posNewline));
+                buffer = buffer.slice(posNewline+1);
                 if(line.startsWith("event: ")) {
                     event = line.substring("event: ".length);
                 }
