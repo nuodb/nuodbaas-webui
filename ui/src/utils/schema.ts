@@ -378,6 +378,13 @@ export function getResourceEvents(path: string, multiResolve: TempAny, multiReje
                 .then(data => multiResolve(data))
                 .catch(reason => multiReject(reason));
         }
+        else if(error.status) {
+            console.log("ERROR", error);
+            RestSpinner.toastError("Cannot retrieve resource for path " + path, error.status + " " + error.message);
+        }
+        else {
+            //request was aborted. Ignore.
+        }
       });
 
       return eventsAbortController;
