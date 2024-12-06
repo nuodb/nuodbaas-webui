@@ -73,7 +73,9 @@ export default function FieldArray(props: FieldProps): FieldBaseType {
     function getDisplayValue(): ReactNode {
         const { prefix, values } = props;
         const value = getValue(values, prefix);
-        return value && value.map((v: string, index: number) => <div key={index}>{v}</div>);
+        return value && value.map((v: string, index: number) => {
+            return <div key={index}>{String(v)}</div>;
+        });
     }
 
     return { ...FieldBase(props), show, getDisplayValue };

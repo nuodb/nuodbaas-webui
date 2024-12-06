@@ -220,14 +220,14 @@ function Table(props: TempAny) {
        If the field is hierarchical, it will find the schema of the right most field.
        Returns defaults if not found. */
     function getFieldSchema(fieldName: string) {
-        const fieldsSchema = getChild(getResourceByPath(schema, getCreatePath(schema, path)), ["get", "responses", "200", "content", "application/json", "schema", "properties"]);
+        const fieldsSchema = getChild(getResourceByPath(schema, getCreatePath(schema, path) || path), ["get", "responses", "200", "content", "application/json", "schema", "properties"]);
         let fs = fieldsSchema;
         let fn = fieldName;
         while (fs && fn.includes(".") && fn.split(".")[0] in fs) {
             fs = fs[fn.split(".")[0]].properties;
             fn = fn.substring(fn.indexOf(".") + 1);
         }
-        return fs[fn] || {};
+        return (fs && fs[fn]) || {};
     }
 
     function renderDataCell(fieldName: string, row: TempAny) {
