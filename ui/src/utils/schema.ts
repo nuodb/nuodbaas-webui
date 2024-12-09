@@ -372,14 +372,18 @@ export function getResourceEvents(path: string, multiResolve: TempAny, multiReje
         }
       })
       .catch((error) => {
-        if(error.name === "AbortError" || error.name === "CanceledError") {
-            return;
+        if(error.status === 404) {
+            // fall back to non-streaming request
+            RestSpinner.get(path)
+                .then(data => multiResolve(data))
+                .catch(reason => multiReject(reason));
         }
-
-        // fall back to non-streaming request
-        RestSpinner.get(path)
-            .then(data => multiResolve(data))
-            .catch(reason => multiReject(reason));
+        else if(error.status) {
+            RestSpinner.toastError("Cannot retrieve resource for path " + path, error.status + " " + error.message);
+        }
+        else {
+            //request was aborted. Ignore.
+        }
       });
 
       return eventsAbortController;
