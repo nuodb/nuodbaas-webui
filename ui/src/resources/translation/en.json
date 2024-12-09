@@ -19,7 +19,9 @@
         "show.backups": "Show Backups",
         "settings": "Settings",
         "logout": "Logout",
-        "add": "Add"
+        "add": "Add",
+        "copy": "Copy",
+        "copied": "Copied!"
     },
     "hint": {
         "open.settings": "Open Settings"
@@ -142,8 +144,17 @@
         }
     },
     "dialog": {
-        "title": {
-            "dbConnectionInfo": "Database Connection info for {{dbName}}"
+        "dbConnectionInfo": {
+            "title": "Database Connection info for {{dbName}}",
+            "label": {
+                "database": "Database",
+                "sqlEndpoint": "SQL Endpoint",
+                "certificate": "Certificate",
+                "codeSamples": "Code Samples",
+                "nuosql": "Command Line (nuosql)",
+                "jdbc": "JDBC",
+                "nodejs": "NodeJS"
+            }
         }
     },
     "text": {

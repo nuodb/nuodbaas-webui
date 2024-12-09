@@ -6,11 +6,12 @@ import Accordion from '../../controls/Accordion'
 
 type DbConnectionInfoProps = {
     data: TempAny
+    t: TempAny
 }
 
 let copiedTimeout: NodeJS.Timeout | undefined = undefined;
 
-export default function DbConnectionInfo({ data }: DbConnectionInfoProps) {
+export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
     const dbName = data.name;
     const sqlEndpoint = data?.status?.sqlEndpoint;
     const caPem = data?.status?.caPem;
@@ -82,7 +83,7 @@ export default function DbConnectionInfo({ data }: DbConnectionInfoProps) {
                     })
                 }}
             >
-                {copiedField === fieldname ? "Copied!" : "Copy"}
+                {copiedField === fieldname ? t("button.copied") : t("button.copy")}
             </button>
         </fieldset>
     }
@@ -103,7 +104,7 @@ export default function DbConnectionInfo({ data }: DbConnectionInfoProps) {
                     })
                 }}
             >
-                {copiedField === summary ? "Copied!" : "Copy"}
+                {copiedField === summary ? t("button.copied") : t("button.copy")}
             </button>
             <textarea disabled={true} className="NuoDbConnectionInfoSample">
                 {lines.join("\n")}
@@ -112,13 +113,13 @@ export default function DbConnectionInfo({ data }: DbConnectionInfoProps) {
     }
 
     return <div className="NuoDbConnectionInfo">
-        {renderCopyField("Database", dbName)}
-        {renderCopyField("SQL Endpoint", sqlEndpoint)}
-        {renderCopyField("Certificate", caPem)}
-        <Accordion summary="Code Samples" defaultExpanded={true}>
-            {renderCopyCode("Command Line (nuosql)", nuosql)}
-            {renderCopyCode("JDBC", jdbc)}
-            {renderCopyCode("NodeJS", nodejs)}
+        {renderCopyField(t("dialog.dbConnectionInfo.label.database"), dbName)}
+        {renderCopyField(t("dialog.dbConnectionInfo.label.sqlEndpoint"), sqlEndpoint)}
+        {renderCopyField(t("dialog.dbConnectionInfo.label.certificate"), caPem)}
+        <Accordion summary={t("dialog.dbConnectionInfo.label.codeSamples")} defaultExpanded={true}>
+            {renderCopyCode(t("dialog.dbConnectionInfo.label.nuosql"), nuosql)}
+            {renderCopyCode(t("dialog.dbConnectionInfo.label.jdbc"), jdbc)}
+            {renderCopyCode(t("dialog.dbConnectionInfo.label.nodejs"), nodejs)}
         </Accordion>
     </div>
 }

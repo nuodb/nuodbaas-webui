@@ -11,7 +11,7 @@ type CustomDialogProps = {
 }
 export default function CustomDialog({ dialog, data, t }: CustomDialogProps) {
     if (dialog === "DbConnectionInfo") {
-        Dialog.ok(t("dialog.title.dbConnectionInfo", { dbName: data.name }), <DbConnectionInfo data={data} />, t);
+        Dialog.ok(t("dialog.dbConnectionInfo.title", { dbName: data.name }), <DbConnectionInfo data={data} t={t} />, t);
     }
     else {
         Dialog.ok(t("label.invalid.dialog", dialog), data, t);
