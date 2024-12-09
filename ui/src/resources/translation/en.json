@@ -9,8 +9,10 @@
         "save": "Save",
         "yes": "Yes",
         "no": "No",
+        "ok": "Ok",
         "true": "True",
         "false": "False",
+        "db.connection.info": "Show DB Connection Info",
         "start.database": "Start Database",
         "stop.database": "Stop Database",
         "show.databases": "Show Databases",
@@ -137,6 +139,11 @@
             "label": {
                 "theme": "Theme"
             }
+        }
+    },
+    "dialog": {
+        "title": {
+            "dbConnectionInfo": "Database Connection info for {{dbName}}"
         }
     },
     "text": {

@@ -58,6 +58,26 @@ export default class Dialog extends Component<IProps, IState> {
         });
     }
 
+    static ok = (title: string, body: ReactNode, t: any) => {
+        return new Promise((resolve, reject) => {
+            if (s_instance === null) {
+                reject("Dialog not initialized");
+                return;
+            }
+            s_instance.setState({
+                dialogs: [...s_instance.state.dialogs, {
+                    title,
+                    body,
+                    buttons: [
+                        { id: "ok", label: t("button.ok") }
+                    ],
+                    resolve,
+                    reject
+                }]
+            });
+        });
+    }
+
     handleClose(button: string) {
         let dialogs = [...this.state.dialogs];
         const lastItem: TempAny = dialogs.pop();
