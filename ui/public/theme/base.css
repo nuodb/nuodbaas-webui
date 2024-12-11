@@ -228,10 +228,6 @@ code {
     height: 25px;
 }
 
-.NuoDbConnectionInfo>textarea {
-    color: green;
-}
-
 .NuoDbConnectionInfoSample {
     width: 100%;
     height: 300px;

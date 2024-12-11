@@ -151,9 +151,10 @@
                 "sqlEndpoint": "SQL Endpoint",
                 "certificate": "Certificate",
                 "codeSamples": "Code Samples",
+                "description": "Following samples require the NuoDB client library which can be downloaded from [here](https://github.com/nuodb/nuodb-client/releases). Fill in database username + password and run the samples below from within the extracted NuoDB client library directory.",
                 "nuosql": "Command Line (nuosql)",
-                "jdbc": "JDBC",
-                "nodejs": "NodeJS"
+                "jdbc": "Java (JDBC)",
+                "cpp": "C++"
             }
         }
     },

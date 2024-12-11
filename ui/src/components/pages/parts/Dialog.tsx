@@ -4,7 +4,6 @@ import Button from '../../controls/Button';
 import DialogMaterial from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { TempAny } from '../../../utils/types';
 import { Component, ReactNode } from 'react';
@@ -93,7 +92,7 @@ export default class Dialog extends Component<IProps, IState> {
             >
                 <DialogTitle>{dialog.title}</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>{dialog.body}</DialogContentText>
+                    {dialog.body}
                 </DialogContent>
                 <DialogActions>
                     {dialog.buttons.map((button: { id: string, label: string }) => <Button key={button.id} data-testid={"dialog_button_" + button.id} onClick={() => this.handleClose(button.id)}>{button.label}</Button>)}
