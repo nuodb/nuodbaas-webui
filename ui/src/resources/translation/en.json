@@ -9,15 +9,19 @@
         "save": "Save",
         "yes": "Yes",
         "no": "No",
+        "ok": "Ok",
         "true": "True",
         "false": "False",
+        "db.connection.info": "Show DB Connection Info",
         "start.database": "Start Database",
         "stop.database": "Stop Database",
         "show.databases": "Show Databases",
         "show.backups": "Show Backups",
         "settings": "Settings",
         "logout": "Logout",
-        "add": "Add"
+        "add": "Add",
+        "copy": "Copy",
+        "copied": "Copied!"
     },
     "hint": {
         "open.settings": "Open Settings"
@@ -136,6 +140,21 @@
         "settings": {
             "label": {
                 "theme": "Theme"
+            }
+        }
+    },
+    "dialog": {
+        "dbConnectionInfo": {
+            "title": "Database Connection info for {{dbName}}",
+            "label": {
+                "database": "Database",
+                "sqlEndpoint": "SQL Endpoint",
+                "certificate": "Certificate",
+                "codeSamples": "Code Samples",
+                "description": "Following samples require the NuoDB client library which can be downloaded from [here](https://github.com/nuodb/nuodb-client/releases). Fill in database username + password and run the samples below from within the extracted NuoDB client library directory.",
+                "nuosql": "Command Line (nuosql)",
+                "jdbc": "Java (JDBC)",
+                "cpp": "C++"
             }
         }
     },

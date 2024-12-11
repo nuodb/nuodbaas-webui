@@ -4,7 +4,6 @@ import Button from '../../controls/Button';
 import DialogMaterial from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { TempAny } from '../../../utils/types';
 import { Component, ReactNode } from 'react';
@@ -58,6 +57,26 @@ export default class Dialog extends Component<IProps, IState> {
         });
     }
 
+    static ok = (title: string, body: ReactNode, t: any) => {
+        return new Promise((resolve, reject) => {
+            if (s_instance === null) {
+                reject("Dialog not initialized");
+                return;
+            }
+            s_instance.setState({
+                dialogs: [...s_instance.state.dialogs, {
+                    title,
+                    body,
+                    buttons: [
+                        { id: "ok", label: t("button.ok") }
+                    ],
+                    resolve,
+                    reject
+                }]
+            });
+        });
+    }
+
     handleClose(button: string) {
         let dialogs = [...this.state.dialogs];
         const lastItem: TempAny = dialogs.pop();
@@ -73,7 +92,7 @@ export default class Dialog extends Component<IProps, IState> {
             >
                 <DialogTitle>{dialog.title}</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>{dialog.body}</DialogContentText>
+                    {dialog.body}
                 </DialogContent>
                 <DialogActions>
                     {dialog.buttons.map((button: { id: string, label: string }) => <Button key={button.id} data-testid={"dialog_button_" + button.id} onClick={() => this.handleClose(button.id)}>{button.label}</Button>)}

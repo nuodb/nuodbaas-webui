@@ -12,6 +12,7 @@ import { CustomViewField, evaluate, getCustomizationsView } from '../../../utils
 import Menu from '../../controls/Menu';
 import TableSettingsColumns from './TableSettingsColumns';
 import { useEffect, useState } from 'react';
+import CustomDialog from '../custom/CustomDialog';
 
 function getFlattenedKeys(obj: TempAny, prefix?: string): string[] {
     let ret: string[] = [];
@@ -203,6 +204,9 @@ function Table(props: TempAny) {
                                 if (!link.startsWith("//") && link.indexOf("://") === -1) {
                                     navigate(link);
                                 }
+                            }
+                            else if (menu.dialog) {
+                                CustomDialog({ dialog: menu.dialog, data: row, t });
                             }
                         }
                     });

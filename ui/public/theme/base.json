@@ -19,6 +19,10 @@
             },
             "menu": [
                 {
+                    "label": "button.db.connection.info",
+                    "dialog": "DbConnectionInfo"
+                },
+                {
                     "label": "confirm.start.database.title",
                     "patch": [
                         {
