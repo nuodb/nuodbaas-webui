@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { TempAny } from '../../../utils/types'
 import Accordion from '../../controls/Accordion'
+import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
+import Tooltip from '@mui/material/Tooltip';
 
 type DbConnectionInfoProps = {
     data: TempAny
@@ -15,17 +17,18 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
     const dbName = data.name;
     const sqlEndpoint = data?.status?.sqlEndpoint;
     const caPem = data?.status?.caPem;
+    const port = window.location.port;
 
     const [copiedField, setCopiedField] = useState("");
 
     const nuosql = [
-        "export DB_USER=\"<db username, i.e. 'dba'>\"",
-        "export DB_PASSWORD=\"<db password>\"",
-        "echo \"select tables\" | bin/nuosql " + dbName + "@" + sqlEndpoint + ":443 \\",
+        "DB_USER=\"<db username, i.e. 'dba'>\"",
+        "DB_PASSWORD=\"<db password>\"",
+        "CA_PEM=\"" + caPem + "\"",
+        "echo \"select tables\" | bin/nuosql " + dbName + "@" + sqlEndpoint + ":" + port + " \\",
         "--user \"$DB_USER\" \\",
         "--password \"$DB_PASSWORD\" \\",
-        "--connection-property verifyHostname=false \\",
-        "--connection-property trustedCertificates=\"" + caPem + "\""
+        "--connection-property trustedCertificates=\"$CA_PEM\""
     ];
 
     const jdbcJava = [
@@ -41,12 +44,14 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
         "    final static String DB_USERNAME = \"<db username, i.e. 'dba'>\";",
         "    final static String DB_PASSWORD = \"<db password>\";",
         "    final static String JKS_PATH = \"nuodb.jks\";",
-        "    final static String JKS_ALIAS = \"" + dbName + "\";",
         "    final static String JKS_PASSWORD = \"passw0rd\";",
+        "    final static String JKS_PATH_URLENCODED =  URLEncoder.encode(JKS_PATH, StandardCharsets.UTF_8.name());",
+        "    final static String JKS_PASSWORD_URLENCODED = URLEncoder.encode(JKS_PASSWORD, StandardCharsets.UTF_8.name());",
+        "    final static String JDBC_URL = \"jdbc:com.nuodb://" + sqlEndpoint + ":" + port + "/" + dbName + "?trustStorePassword=\" + JKS_PASSWORD_URLENCODED + \"&trustStore=\" + JKS_PATH_URLENCODED;",
         "",
         "    public static void main(String[] args) throws Exception {",
         "        DataSource dataSource = new DataSource();",
-        "        dataSource.setUrl(\"jdbc:com.nuodb://" + sqlEndpoint + ":443/" + dbName + "?verifyHostname=false&trustStorePassword=\" + URLEncoder.encode(JKS_PASSWORD, StandardCharsets.UTF_8.name()) + \"&trustStore=\" + URLEncoder.encode(JKS_PATH, StandardCharsets.UTF_8.name()));",
+        "        dataSource.setUrl(JDBC_URL);",
         "        dataSource.setUser(DB_USERNAME);",
         "        dataSource.setPassword(DB_PASSWORD);",
         "        Connection conn = dataSource.getConnection();",
@@ -73,7 +78,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
         "#define DB_USERNAME \"<db username, i.e. 'dba'>\"",
         "#define DB_PASSWORD \"<db password>\"",
         "",
-        "#define DB_CONNECTION \"" + dbName + "@" + sqlEndpoint + ":443\"",
+        "#define DB_CONNECTION \"" + dbName + "@" + sqlEndpoint + ":" + port + "\"",
         "#define DB_TRUSTED_CERTIFICATE \"" + caPem.replaceAll("\n", "\\n") + "\"",
         "",
         "#include <stdlib.h>",
@@ -135,14 +140,8 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
     function renderCopyField(fieldname: string, value: string) {
         return <fieldset key={fieldname}>
             <label htmlFor={fieldname}>{fieldname}</label>
-            {value.includes("\n") ?
-                <textarea name={fieldname} disabled={true} value={value}></textarea>
-                :
-                <input name={fieldname} disabled={true} value={value} />
-            }
-            <button className="NuoCopyButton"
-                disabled={copiedField === fieldname}
-                onClick={() => {
+            <Tooltip title={copiedField === fieldname ? t("button.copied") : t("button.copy")}>
+                <ContentCopyOutlinedIcon className="NuoCopyButton" onClick={() => {
                     navigator.clipboard.writeText(value).then(() => {
                         setCopiedField(fieldname);
                         if (copiedTimeout) {
@@ -152,18 +151,20 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
                             setCopiedField("");
                         }, 2000);
                     })
-                }}
-            >
-                {copiedField === fieldname ? t("button.copied") : t("button.copy")}
-            </button>
+                }} />
+            </Tooltip>
+            {value.includes("\n") ?
+                <textarea name={fieldname} disabled={true} value={value}></textarea>
+                :
+                <input name={fieldname} disabled={true} value={value} />
+            }
         </fieldset>
     }
 
     function renderCopyCode(summary: string, lines: string[]) {
         return <Accordion summary={summary}>
-            <button className="NuoCopyButton"
-                disabled={copiedField === summary}
-                onClick={() => {
+            <Tooltip title={copiedField === summary ? t("button.copied") : t("button.copy")}>
+                <ContentCopyOutlinedIcon className="NuoCopyButton" onClick={() => {
                     navigator.clipboard.writeText(lines.join("\n")).then(() => {
                         setCopiedField(summary);
                         if (copiedTimeout) {
@@ -173,10 +174,8 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
                             setCopiedField("");
                         }, 2000);
                     })
-                }}
-            >
-                {copiedField === summary ? t("button.copied") : t("button.copy")}
-            </button>
+                }} />
+            </Tooltip>
             <textarea disabled={true} className="NuoDbConnectionInfoSample" value={lines.join("\n")}></textarea>
         </Accordion>
     }
