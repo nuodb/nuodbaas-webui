@@ -4,7 +4,6 @@ import Button from '../../controls/Button';
 import DialogMaterial from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { TempAny } from '../../../utils/types';
 import { Component, ReactNode } from 'react';
@@ -28,6 +27,11 @@ interface IState {
     dialogs?: DialogProps[]
 }
 
+type ButtonProps = {
+    id: string,
+    label: string;
+};
+
 export default class Dialog extends Component<IProps, IState> {
     state = {
         dialogs: []
@@ -38,6 +42,20 @@ export default class Dialog extends Component<IProps, IState> {
     }
 
     static confirm = (title: string, body: ReactNode, t: any) => {
+        return Dialog.show(title, body, [
+            { id: "yes", label: t("button.yes") },
+            { id: "no", label: t("button.no") }
+        ], t);
+    }
+
+    static okCancel = (title: string, body: ReactNode, t: any) => {
+        return Dialog.show(title, body, [
+            { id: "ok", label: t("button.ok") },
+            { id: "cancel", label: t("button.cancel") }
+        ], t);
+    }
+
+    static show = (title: string, body: ReactNode, buttons: ButtonProps[], t: any) => {
         return new Promise((resolve, reject) => {
             if (s_instance === null) {
                 reject("Dialog not initialized");
@@ -47,10 +65,7 @@ export default class Dialog extends Component<IProps, IState> {
                 dialogs: [...s_instance.state.dialogs, {
                     title,
                     body,
-                    buttons: [
-                        { id: "yes", label: t("button.yes") },
-                        { id: "no", label: t("button.no") }
-                    ],
+                    buttons,
                     resolve,
                     reject
                 }]
@@ -69,11 +84,10 @@ export default class Dialog extends Component<IProps, IState> {
         return this.state.dialogs.map((dialog: DialogProps, index: number) => {
             return <DialogMaterial key={index}
                 open={true}
-                onClose={() => this.handleClose(dialog.buttons[dialog.buttons.length - 1])}
             >
                 <DialogTitle>{dialog.title}</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>{dialog.body}</DialogContentText>
+                    {dialog.body}
                 </DialogContent>
                 <DialogActions>
                     {dialog.buttons.map((button: { id: string, label: string }) => <Button key={button.id} data-testid={"dialog_button_" + button.id} onClick={() => this.handleClose(button.id)}>{button.label}</Button>)}

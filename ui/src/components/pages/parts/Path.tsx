@@ -129,7 +129,7 @@ function Path({ schema, path, filterValues, search, setSearch, setPage, t }: Tem
                 required={false}
                 data-testid="searchField"
                 id="search"
-                label={"search, i.e. \"somename\" or \"labels=key=value,!otherkey name=abc\""}
+                label={"search, i.e. \"somename\" or \"label=key=value,!otherkey name=abc\""}
                 value={searchField}
                 onChange={({ currentTarget: input }) => {
                     setSearchField(input.value);
