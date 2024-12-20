@@ -13,10 +13,13 @@ let s_instance: Dialog | null = null;
 interface IProps {
 }
 
+type MaxWidthType = "xs" | "sm" | "md" | "lg" | "xl";
+
 interface DialogProps {
     buttons?: TempAny
     title?: string
     body?: ReactNode,
+    maxWidth?: MaxWidthType,
     resolve: TempAny,
     reject: TempAny
 }
@@ -41,21 +44,27 @@ export default class Dialog extends Component<IProps, IState> {
         s_instance = this;
     }
 
-    static confirm = (title: string, body: ReactNode, t: any) => {
+    static confirm = (title: string, body: ReactNode, t: any, maxWidth?: MaxWidthType) => {
         return Dialog.show(title, body, [
             { id: "yes", label: t("button.yes") },
             { id: "no", label: t("button.no") }
-        ], t);
+        ], t, maxWidth);
     }
 
-    static okCancel = (title: string, body: ReactNode, t: any) => {
+    static okCancel = (title: string, body: ReactNode, t: any, maxWidth?: MaxWidthType) => {
         return Dialog.show(title, body, [
             { id: "ok", label: t("button.ok") },
             { id: "cancel", label: t("button.cancel") }
-        ], t);
+        ], t, maxWidth);
     }
 
-    static show = (title: string, body: ReactNode, buttons: ButtonProps[], t: any) => {
+    static ok = (title: string, body: ReactNode, t: any, maxWidth?: MaxWidthType) => {
+        return Dialog.show(title, body, [
+            { id: "ok", label: t("button.ok") }
+        ], t, maxWidth);
+    }
+
+    static show = (title: string, body: ReactNode, buttons: ButtonProps[], t: any, maxWidth?: MaxWidthType) => {
         return new Promise((resolve, reject) => {
             if (s_instance === null) {
                 reject("Dialog not initialized");
@@ -66,6 +75,7 @@ export default class Dialog extends Component<IProps, IState> {
                     title,
                     body,
                     buttons,
+                    maxWidth,
                     resolve,
                     reject
                 }]
@@ -82,7 +92,7 @@ export default class Dialog extends Component<IProps, IState> {
 
     render() {
         return this.state.dialogs.map((dialog: DialogProps, index: number) => {
-            return <DialogMaterial key={index}
+            return <DialogMaterial key={index} maxWidth={dialog.maxWidth}
                 open={true}
             >
                 <DialogTitle>{dialog.title}</DialogTitle>
