@@ -112,6 +112,13 @@ function ResponsiveAppBar(resources: string[], t: any) {
                   }
                 },
                 {
+                  label: t("button.automation"),
+                  id: "automation",
+                  onClick: () => {
+                    navigate("/ui/automation");
+                  }
+                },
+                {
                   label: t("button.logout"),
                   id: "logout",
                   onClick: () => {

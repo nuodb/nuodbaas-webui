@@ -18,8 +18,10 @@ import Dialog from "./components/pages/parts/Dialog";
 import GlobalErrorBoundary from "./components/GlobalErrorBoundary";
 import Auth from "./utils/auth";
 import Settings from './components/pages/Settings';
+import Automation from './components/pages/Automation';
 import Customizations from './utils/Customizations';
 import { PopupMenu } from './components/controls/Menu';
+import RestSpinner from './components/pages/parts/RestSpinner';
 
 /**
  * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
@@ -35,6 +37,7 @@ export default function App() {
           <CssBaseline />
           <PopupMenu />
           <Dialog />
+          <RestSpinner />
           <BrowserRouter>
             {isLoggedIn
               ?
@@ -50,6 +53,7 @@ export default function App() {
                   <Route path="/ui/resource/edit/*" element={<EditResource schema={schema} />} />
                   <Route path="/ui/resource/view/*" element={<ViewResource schema={schema} />} />
                   <Route path="/ui/settings" element={<Settings />} />
+                  <Route path="/ui/automation" element={<Automation />} />
                   <Route path="/*" element={<NotFound />} />
                 </Routes></React.Fragment>
               :

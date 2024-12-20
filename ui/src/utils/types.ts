@@ -6,6 +6,10 @@ import { ReactNode } from "react";
 // so we can easily find them in source control and fix in future PR's
 export type TempAny = any;
 
+export type JsonType = {
+    [key: string]: JsonType
+} | JsonType[] | string | number | boolean | null;
+
 export type FieldValuesType = TempAny;
 
 export type FieldParameterType = {
@@ -53,3 +57,12 @@ export type MenuProps = {
     setItems?: (items: MenuItemProps[]) => void,
     className?: string
 };
+
+export type RestMethodType = "get" | "put" | "delete" | "patch";
+export type RestLogEntry = {
+    timestamp: Date,
+    method: RestMethodType,
+    url: string,
+    success: boolean
+    body?: JsonType,
+}

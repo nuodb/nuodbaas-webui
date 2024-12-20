@@ -5,19 +5,23 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Snackbar from '@mui/material/Snackbar';
 import axios from "axios";
 import Auth from "../../../utils/auth";
-import { TempAny } from "../../../utils/types";
+import { JsonType, RestLogEntry, RestMethodType } from "../../../utils/types";
 
 let instance: RestSpinner | null = null;
 
 interface State {
     pendingRequests: number,
-    errorMessage?: string | null
+    errorMessage?: string | null,
+    isRecording: boolean,
+    log: RestLogEntry[]
 }
 
 export default class RestSpinner extends React.Component {
     state: State = {
         pendingRequests: 0,
-        errorMessage: null
+        errorMessage: null,
+        isRecording: false,
+        log: []
     }
 
     componentDidMount() {
@@ -49,6 +53,45 @@ export default class RestSpinner extends React.Component {
         });
     }
 
+    static setIsRecording(isRecording: boolean) {
+        if (instance === null) {
+            return;
+        }
+        instance.setState({ isRecording });
+    }
+
+    static isRecording() {
+        if (instance === null) {
+            return false;
+        }
+        return instance.state.isRecording;
+    }
+
+    static log(method: RestMethodType, url: string, success: boolean, body?: JsonType) {
+        if (instance === null || !instance.state.isRecording) {
+            return;
+        }
+        instance.setState((prevState: State) => {
+            let log = [...prevState.log];
+            log.push({ timestamp: new Date(), method, url, body, success });
+            return { log };
+        })
+    }
+
+    static getLog(): RestLogEntry[] {
+        if (instance === null) {
+            return [];
+        }
+        return [...instance.state.log];
+    }
+
+    static clearLog() {
+        if (instance === null) {
+            return;
+        }
+        instance.setState({ log: [] });
+    }
+
     render(): ReactNode {
         return <React.Fragment>
             <Snackbar
@@ -69,10 +112,13 @@ export default class RestSpinner extends React.Component {
     static async get(path: string) {
         return new Promise((resolve, reject) => {
             RestSpinner.incrementPending();
-            axios.get(Auth.getNuodbCpRestUrl(path), { headers: Auth.getHeaders() })
+            const url = Auth.getNuodbCpRestUrl(path);
+            axios.get(url, { headers: Auth.getHeaders() })
                 .then(response => {
+                    RestSpinner.log("get", url, true);
                     resolve(response.data);
                 }).catch(reason => {
+                    RestSpinner.log("get", url, false);
                     reject(reason);
                 }).finally(() => {
                     RestSpinner.decrementPending();
@@ -80,20 +126,23 @@ export default class RestSpinner extends React.Component {
         })
     }
 
-    static async getStream(path: string, eventsAbortController: TempAny) {
+    static async getStream(path: string, eventsAbortController: AbortController) {
         return new Promise((resolve, reject) => {
             RestSpinner.incrementPending();
+            const url = Auth.getNuodbCpRestUrl(path);
             axios({
                 headers: { ...Auth.getHeaders(), 'Accept': 'text/event-stream' },
                 method: 'get',
-                url: Auth.getNuodbCpRestUrl(path),
+                url: url,
                 responseType: 'stream',
                 adapter: 'fetch',
                 signal: eventsAbortController.signal
             })
                 .then(async response => {
+                    RestSpinner.log("get", url, true);
                     resolve(response.data);
                 }).catch(reason => {
+                    RestSpinner.log("get", url, false);
                     reject(reason);
                 }).finally(() => {
                     RestSpinner.decrementPending();
@@ -101,13 +150,16 @@ export default class RestSpinner extends React.Component {
         })
     }
 
-    static async put(path: string, data: TempAny) {
+    static async put(path: string, data: JsonType) {
         return new Promise((resolve, reject) => {
             RestSpinner.incrementPending();
-            axios.put(Auth.getNuodbCpRestUrl(path), data, { headers: Auth.getHeaders() })
+            const url = Auth.getNuodbCpRestUrl(path);
+            axios.put(url, data, { headers: Auth.getHeaders() })
                 .then(response => {
+                    RestSpinner.log("put", url, true, data);
                     resolve(response.data);
                 }).catch(error => {
+                    RestSpinner.log("put", url, false, data);
                     return reject(error);
                 }).finally(() => {
                     RestSpinner.decrementPending();
@@ -118,10 +170,13 @@ export default class RestSpinner extends React.Component {
     static async delete(path: string) {
         return new Promise((resolve, reject) => {
             RestSpinner.incrementPending();
-            axios.delete(Auth.getNuodbCpRestUrl(path), { headers: Auth.getHeaders() })
+            const url = Auth.getNuodbCpRestUrl(path);
+            axios.delete(url, { headers: Auth.getHeaders() })
                 .then(response => {
+                    RestSpinner.log("delete", url, true);
                     resolve(response.data);
                 }).catch(reason => {
+                    RestSpinner.log("delete", url, false);
                     reject(reason);
                 }).finally(() => {
                     RestSpinner.decrementPending();
@@ -129,13 +184,16 @@ export default class RestSpinner extends React.Component {
         });
     }
 
-    static async patch(path: string, data: TempAny) {
+    static async patch(path: string, data: JsonType) {
         return new Promise((resolve, reject) => {
             RestSpinner.incrementPending();
-            axios.patch(Auth.getNuodbCpRestUrl(path), data, { headers: { ...Auth.getHeaders(), "Content-Type": "application/json-patch+json" } })
+            const url = Auth.getNuodbCpRestUrl(path);
+            axios.patch(url, data, { headers: { ...Auth.getHeaders(), "Content-Type": "application/json-patch+json" } })
                 .then(response => {
+                    RestSpinner.log("patch", url, true, data);
                     resolve(response.data);
                 }).catch(error => {
+                    RestSpinner.log("patch", url, false, data);
                     reject(error);
                 }).finally(() => {
                     RestSpinner.decrementPending();
