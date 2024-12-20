@@ -81,7 +81,7 @@ function CalendarPopup(props: CalendarPopupProps): JSX.Element {
                 <div className="NuoCalendarPrevNext">
                     <div className="NuoCalendarCell" onClick={() => {
                         if (selectedMonth === 0) {
-                            setSelectedMonth(12);
+                            setSelectedMonth(11);
                             setSelectedYear(selectedYear - 1);
                         }
                         else {
@@ -143,7 +143,7 @@ function CalendarPopup(props: CalendarPopupProps): JSX.Element {
                 <select value={getHours() % 12} onChange={(event) => {
                     setHours(getHours() - (getHours() % 12) + parseInt(event.currentTarget.value));
                 }}>
-                    {arrayFromTo(0, 11).map(hour => <option key={hour} value={hour}>{twoDigits(hour === 0 ? 12 : hour)}</option>)}
+                    {arrayFromTo(1, 12).map(hour => <option key={hour} value={hour % 12}>{twoDigits(hour)}</option>)}
                 </select>:
                 <select value={getMinutes()} onChange={(event) => {
                     setMinutes(parseInt(event.currentTarget.value));
@@ -196,6 +196,8 @@ export default function FieldDateTime(props: FieldProps): FieldBaseType {
                     let v = { ...values };
                     selectedValue.setMilliseconds(0);
                     setValue(v, prefix, selectedValue.toISOString().replaceAll(".000Z", "Z"));
+                    setValue(v, "_" + prefix);
+                    updateErrors(prefix, null);
                     setValues(v);
                 }
             }}
