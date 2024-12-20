@@ -122,6 +122,17 @@
     flex: 1 1 auto;
 }
 
+.NuoRow {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+}
+
+.NuoColumn {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
 .NuoTableSettingsItem>label {
     display: flex;
     flex: 1 1 auto;
@@ -204,6 +215,73 @@
     font-weight: 400;
     font-size: 0.75rem;
 }
+.NuoCalendar {
+    display: flex;
+    flex-direction: row;
+}
+
+.NuoCalendarDate,
+.NuoCalendarTime {
+    display: flex;
+    flex-direction: column;
+}
+
+.NuoCalendarTime {
+    border-left: solid;
+    border-color: lightgray;
+    padding: 0 10px;
+}
+
+.NuoCalendarTime>label:not(:first-child) {
+    margin-top: 10px;
+}
+
+.NuoCalendarMonthYear,
+.NuoCalendarWeekdays {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 auto;
+}
+
+.NuoCalendarMonthYear>select {
+    display: flex;
+    flex: 1 1 auto;
+    margin: 3px;
+    color: rgba(0, 0, 0, 0.87);
+    border-radius: 3px;
+    text-align: center;
+}
+
+.NuoCalendarPrevNext {
+    display: flex;
+    flex-direction: row;
+    flex: 0 0 auto;
+}
+
+.NuoCalendarCell,
+.NuoCalendarCellHeader,
+.NuoCalendarCellSelected {
+    display: flex;
+    flex: 0 0 auto;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 5px;
+    text-align: center;
+    vertical-align: center;
+    cursor: pointer;
+}
+
+.NuoCalendarCellSelected {
+    background-color: lightgray;
+    border-radius: 20px;
+}
+
+.NuoCalendarCellHeader {
+    color: lightgray;
+}
+
 code {
     white-space: pre-line;
 }

@@ -30,6 +30,11 @@ interface IState {
     dialogs?: DialogProps[]
 }
 
+type ButtonProps = {
+    id: string,
+    label: string;
+};
+
 export default class Dialog extends Component<IProps, IState> {
     state = {
         dialogs: []
@@ -40,28 +45,26 @@ export default class Dialog extends Component<IProps, IState> {
     }
 
     static confirm = (title: string, body: ReactNode, t: any, maxWidth?: MaxWidthType) => {
-        return new Promise((resolve, reject) => {
-            if (s_instance === null) {
-                reject("Dialog not initialized");
-                return;
-            }
-            s_instance.setState({
-                dialogs: [...s_instance.state.dialogs, {
-                    title,
-                    body,
-                    buttons: [
-                        { id: "yes", label: t("button.yes") },
-                        { id: "no", label: t("button.no") }
-                    ],
-                    maxWidth,
-                    resolve,
-                    reject
-                }]
-            });
-        });
+        return Dialog.show(title, body, [
+            { id: "yes", label: t("button.yes") },
+            { id: "no", label: t("button.no") }
+        ], t, maxWidth);
+    }
+
+    static okCancel = (title: string, body: ReactNode, t: any, maxWidth?: MaxWidthType) => {
+        return Dialog.show(title, body, [
+            { id: "ok", label: t("button.ok") },
+            { id: "cancel", label: t("button.cancel") }
+        ], t, maxWidth);
     }
 
     static ok = (title: string, body: ReactNode, t: any, maxWidth?: MaxWidthType) => {
+        return Dialog.show(title, body, [
+            { id: "ok", label: t("button.ok") }
+        ], t, maxWidth);
+    }
+
+    static show = (title: string, body: ReactNode, buttons: ButtonProps[], t: any, maxWidth?: MaxWidthType) => {
         return new Promise((resolve, reject) => {
             if (s_instance === null) {
                 reject("Dialog not initialized");
@@ -71,9 +74,7 @@ export default class Dialog extends Component<IProps, IState> {
                 dialogs: [...s_instance.state.dialogs, {
                     title,
                     body,
-                    buttons: [
-                        { id: "ok", label: t("button.ok") }
-                    ],
+                    buttons,
                     maxWidth,
                     resolve,
                     reject
@@ -93,7 +94,6 @@ export default class Dialog extends Component<IProps, IState> {
         return this.state.dialogs.map((dialog: DialogProps, index: number) => {
             return <DialogMaterial key={index} maxWidth={dialog.maxWidth}
                 open={true}
-                onClose={() => this.handleClose(dialog.buttons[dialog.buttons.length - 1])}
             >
                 <DialogTitle>{dialog.title}</DialogTitle>
                 <DialogContent>
