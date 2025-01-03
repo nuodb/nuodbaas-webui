@@ -60,7 +60,7 @@ export type MenuProps = {
 
 export type RestMethodType = "get" | "put" | "delete" | "patch";
 export type RestLogEntry = {
-    timestamp: Date,
+    timestamp: string,
     method: RestMethodType,
     url: string,
     success: boolean

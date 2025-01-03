@@ -3,8 +3,8 @@
 import Button from "../controls/Button";
 import { withTranslation } from "react-i18next";
 import RestSpinner from "./parts/RestSpinner";
-import { useState } from "react";
-import { RestLogEntry } from "../../utils/types";
+import { useEffect, useState } from "react";
+import { JsonType, RestLogEntry } from "../../utils/types";
 import { Tooltip } from "@mui/material";
 import Accordion from "../controls/Accordion";
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
@@ -18,43 +18,70 @@ let copiedTimeout: NodeJS.Timeout | undefined = undefined;
 
 function Automation({ t }: AutomationProps) {
     const [isRecording, setIsRecording] = useState(RestSpinner.isRecording());
-    const [log, setLog] = useState<RestLogEntry[]>([])
-    const [selectedLogEntry, setSelectedLogEntry] = useState(-1);
+    const [log, setLog] = useState<RestLogEntry[]>([]);
+    const [selectedTimestamp, setSelectedTimestamp] = useState(""); //using the timestamp (millisecond granularity) as unique key
     const [hideGetRequests, setHideGetRequests] = useState(true);
+    const [convertUpdateToPatch, setConvertUpdateToPatch] = useState(false);
     const [copiedField, setCopiedField] = useState("");
 
-    const filteredLog = log.map((entry, index) => ({ ...entry, index }))
-        .filter(entry => hideGetRequests ? entry.method !== "get" : true);
+    useEffect(() => {
+        const initialLog = RestSpinner.getLog();
+        setLog(initialLog);
+        setSelectedTimestamp(initialLog.length > 0 ? initialLog[0].timestamp : "");
+    }, []);
+
+    const filteredLog = log.filter(entry => hideGetRequests ? entry.method !== "get" : true);
     const token = Auth.getCredentials()?.token;
 
+    let selectedLogEntry = filteredLog.find(fl => fl.timestamp === selectedTimestamp);
+    if (!selectedLogEntry && filteredLog.length > 0) {
+        selectedLogEntry = filteredLog[0];
+    }
+
     return (
-        <div className="NuoContainerSM">
-            <h1>Automation</h1>
-            <Button disabled={isRecording} variant="contained" onClick={(event) => {
-                setLog([]);
-                setSelectedLogEntry(-1);
-                setIsRecording(true);
-                RestSpinner.setIsRecording(true);
-            }}>Start Recording</Button>&nbsp;
+        <div className="NuoContainerLG">
+            <h1>{t("dialog.automation.title")}</h1>
+            <div className="NuoButtons">
+                <Button disabled={isRecording} variant="contained" onClick={(event) => {
+                    RestSpinner.clearLog();
+                    setIsRecording(true);
+                    RestSpinner.setIsRecording(true);
+                }}>{t("dialog.automation.startRecording")}</Button>
             <Button disabled={!isRecording} variant="contained" onClick={(event) => {
                 setIsRecording(false);
                 RestSpinner.setIsRecording(false);
-                setLog(RestSpinner.getLog());
-                RestSpinner.clearLog();
-            }}>Stop Recording</Button>
-            <select size={20} onChange={(event) => {
-                setSelectedLogEntry(event.currentTarget.selectedIndex);
-            }}>
-                {filteredLog.map(entry => (
-                    <option key={entry.index} value={entry.index}>
-                        {entry.timestamp.toLocaleTimeString() + " " + entry.method + " " + entry.url}
-                    </option>
-                ))}
-            </select>
-            <label><input type="checkbox" checked={hideGetRequests} onChange={() => setHideGetRequests(!hideGetRequests)} />Hide GET requests</label>
-            {selectedLogEntry >= 0 && selectedLogEntry < log.length &&
-                <textarea value={JSON.stringify(log[selectedLogEntry], null, 2)} readOnly={true} disabled={true} rows={20} cols={80} />}
-            {renderCopyCode(t("dialog.automation.curl"), getCurlCommands(filteredLog))}
+                    const log = RestSpinner.getLog();
+                    setLog(log);
+                    if (log.length > 0 && selectedTimestamp === "") {
+                        setSelectedTimestamp(log[0].timestamp);
+                    }
+                }}>{t("dialog.automation.stopRecording")}</Button>
+            </div>
+            {!isRecording && log.length > 0 &&
+                <div className="NuoColumn">
+                    <label>
+                        <input type="checkbox" checked={hideGetRequests} onChange={() => {
+                            setHideGetRequests(!hideGetRequests);
+                        }} />
+                        {t("dialog.automation.hideGetRequests")}
+                    </label>
+                    {filteredLog.length > 0 ?
+                        <div className="NuoRow">
+                            <select disabled={filteredLog.length === 0} size={20} value={selectedTimestamp} onChange={(event) => {
+                                setSelectedTimestamp(event.currentTarget.value);
+                            }}>
+                                {filteredLog.map(entry => (
+                                    <option key={entry.timestamp} value={entry.timestamp}>
+                                        {(new Date(entry.timestamp)).toLocaleTimeString() + " " + entry.method + " " + entry.url}
+                                    </option>
+                                ))}
+                            </select>
+                            {selectedLogEntry &&
+                                <textarea value={JSON.stringify(selectedLogEntry, null, 2)} readOnly={true} disabled={true} rows={20} cols={80} />}
+                        </div> : t("dialog.automation.noWriteRequests")}
+                </div>}
+
+            {filteredLog.length > 0 && renderCopyCode(t("dialog.automation.curl"), getCurlCommands(filteredLog))}
         </div >
     );
 
@@ -64,9 +91,22 @@ function Automation({ t }: AutomationProps) {
         ret.push("HOST=\"" + window.location.protocol + "//" + window.location.host + "\"");
         ret.push("");
         log.forEach(entry => {
-            let curl = "curl -X " + entry.method.toUpperCase() + " -H \"Authorization: Bearer $AUTH_TOKEN\" -H \"Content-Type: application/json\" \"$HOST" + entry.url + "\"";
-            if (entry.body) {
-                curl += " --data-binary '" + JSON.stringify(entry.body).replaceAll("'", "\\'") + "'";
+            let method = entry.method.toUpperCase();
+            let body: any = entry.body;
+            if (method === "PUT" && body && body["resourceVersion"] && convertUpdateToPatch) {
+                let patch: JsonType[] = [];
+                Object.keys(body).forEach(key => {
+                    if (key !== "resourceVersion") {
+                        patch.push({ op: "add", path: "/" + key, value: body[key] });
+                    }
+                })
+                body = patch;
+                method = "PATCH";
+            }
+            const contentType = method === "PATCH" ? "application/json-patch+json" : "application/json";
+            let curl = "curl -X " + method + " -H \"Authorization: Bearer $AUTH_TOKEN\" -H \"Content-Type: " + contentType + "\" \"$HOST" + entry.url + "\"";
+            if (body) {
+                curl += " --data-binary '" + JSON.stringify(body).replaceAll("'", "\\'") + "'";
             }
             ret.push(curl);
         })
@@ -89,6 +129,13 @@ function Automation({ t }: AutomationProps) {
                     })
                 }} />
             </Tooltip>
+            <label>
+                <input type="checkbox" checked={convertUpdateToPatch} onChange={() => {
+                    setConvertUpdateToPatch(!convertUpdateToPatch);
+                }} />
+                {t("dialog.automation.convertUpdatesToPatchRequests")}
+            </label>
+
             <textarea disabled={true} className="NuoDbConnectionInfoSample" value={lines.join("\n")}></textarea>
         </Accordion>
     }

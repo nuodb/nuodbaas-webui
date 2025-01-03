@@ -4,6 +4,11 @@
     margin-left: auto;
     margin-right: auto;
 }
+.NuoContainerLG {
+    max-width: 100%;
+    margin-left: 24px;
+    margin-right: 24px;
+}
 .NuoBanner {
     width: 100%;
     padding-left: 24px;
@@ -316,4 +321,11 @@ code {
     width: 25px;
     height: 25px;
     float: left;
+}
+
+.NuoButtons {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    margin: 5px 0;
 }

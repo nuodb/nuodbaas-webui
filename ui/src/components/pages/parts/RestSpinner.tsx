@@ -13,15 +13,15 @@ interface State {
     pendingRequests: number,
     errorMessage?: string | null,
     isRecording: boolean,
-    log: RestLogEntry[]
 }
+
+const AUTOMATION_LOG = "automationLog";
 
 export default class RestSpinner extends React.Component {
     state: State = {
         pendingRequests: 0,
         errorMessage: null,
         isRecording: false,
-        log: []
     }
 
     componentDidMount() {
@@ -71,25 +71,18 @@ export default class RestSpinner extends React.Component {
         if (instance === null || !instance.state.isRecording) {
             return;
         }
-        instance.setState((prevState: State) => {
-            let log = [...prevState.log];
-            log.push({ timestamp: new Date(), method, url, body, success });
-            return { log };
-        })
+        let automationLog = RestSpinner.getLog();
+        automationLog.push({ timestamp: new Date().toISOString(), method, url, body, success });
+        window.sessionStorage.setItem(AUTOMATION_LOG, JSON.stringify(automationLog));
     }
 
     static getLog(): RestLogEntry[] {
-        if (instance === null) {
-            return [];
-        }
-        return [...instance.state.log];
+        const strAutomationLog = window.sessionStorage.getItem(AUTOMATION_LOG);
+        return strAutomationLog ? JSON.parse(strAutomationLog) : [];
     }
 
     static clearLog() {
-        if (instance === null) {
-            return;
-        }
-        instance.setState({ log: [] });
+        window.sessionStorage.removeItem(AUTOMATION_LOG);
     }
 
     render(): ReactNode {
