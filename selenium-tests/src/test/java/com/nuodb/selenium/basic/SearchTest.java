@@ -46,49 +46,63 @@ public class SearchTest extends TestRoutines {
         replaceInputElementByName("search", name + "1");
         waitElement("searchButton").click();
         waitRestComplete();
-        nameCell = waitTableElements("list_resource__table", "name", null, "name");
-        assertEquals(10, nameCell.size());
+        retry(()-> {
+            var nc = waitTableElements("list_resource__table", "name", null, "name");
+            assertEquals(10, nc.size());
+        });
 
         // search users by label existence
         replaceInputElementByName("search", "label=label1");
         waitElement("searchButton").click();
         waitRestComplete();
-        nameCell = waitTableElements("list_resource__table", "name", null, "name");
-        assertEquals(20, nameCell.size());
+        retry(()-> {
+            var nc = waitTableElements("list_resource__table", "name", null, "name");
+            assertEquals(20, nc.size());
+        });
 
         // search users by label value
         replaceInputElementByName("search", "label=label2=" + name + "8");
         waitElement("searchButton").click();
         waitRestComplete();
-        nameCell = waitTableElements("list_resource__table", "name", null, "name");
-        assertEquals(9, nameCell.size());
+        retry(()->{
+            var nc = waitTableElements("list_resource__table", "name", null, "name");
+            assertEquals(9, nc.size());
+        });
 
         // search users by label value and name
         replaceInputElementByName("search", "label=label2=" + name + "8" + " name=" + name + "1");
         waitElement("searchButton").click();
         waitRestComplete();
-        nameCell = waitTableElements("list_resource__table", "name", null, "name");
-        assertEquals(1, nameCell.size());
+        retry(()-> {
+            var nc = waitTableElements("list_resource__table", "name", null, "name");
+            assertEquals(1, nc.size());
+        });
 
         // search users by partial name
         replaceInputElementByName("search", "name=" + name + "1");
         waitElement("searchButton").click();
         waitRestComplete();
-        nameCell = waitTableElements("list_resource__table", "name", null, "name");
-        assertEquals(10, nameCell.size());
+        retry(()->{
+            var nc = waitTableElements("list_resource__table", "name", null, "name");
+            assertEquals(10, nc.size());
+        });
 
         // search users by full name
         replaceInputElementByName("search", "name=" + name + "19");
         waitElement("searchButton").click();
         waitRestComplete();
-        nameCell = waitTableElements("list_resource__table", "name", null, "name");
-        assertEquals(1, nameCell.size());
+        retry(()->{
+            var nc = waitTableElements("list_resource__table", "name", null, "name");
+            assertEquals(1, nc.size());
+        });
 
         // search users by invalid name
         replaceInputElementByName("search", "name=" + name + "invalid");
         waitElement("searchButton").click();
         waitRestComplete();
-        nameCell = waitTableElements("list_resource__table", "name", null, "name");
-        assertEquals(0, nameCell.size());
+        retry(()->{
+            var nc = waitTableElements("list_resource__table", "name", null, "name");
+            assertEquals(0, nc.size());
+        });
     }
 }
