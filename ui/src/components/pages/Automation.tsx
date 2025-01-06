@@ -12,13 +12,12 @@ import Auth from "../../utils/auth";
 
 type AutomationProps = {
     isRecording: boolean,
-    setIsRecording: (isRecording: boolean) => void,
     t: any
 };
 
 let copiedTimeout: NodeJS.Timeout | undefined = undefined;
 
-function Automation({ isRecording, setIsRecording, t }: AutomationProps) {
+function Automation({ isRecording, t }: AutomationProps) {
     const [log, setLog] = useState<RestLogEntry[]>([]);
     const [selectedTimestamp, setSelectedTimestamp] = useState(""); //using the timestamp (millisecond granularity) as unique key
     const [hideGetRequests, setHideGetRequests] = useState(true);
@@ -45,10 +44,10 @@ function Automation({ isRecording, setIsRecording, t }: AutomationProps) {
             <div className="NuoButtons">
                 <Button disabled={isRecording} variant="contained" onClick={(event) => {
                     Rest.clearLog();
-                    setIsRecording(true);
+                    Rest.setIsRecording(true);
                 }}>{t("dialog.automation.startRecording")}</Button>
             <Button disabled={!isRecording} variant="contained" onClick={(event) => {
-                    setIsRecording(false);
+                    Rest.setIsRecording(false);
                     const log = Rest.getLog();
                     setLog(log);
                     if (log.length > 0 && selectedTimestamp === "") {

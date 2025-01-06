@@ -14,7 +14,8 @@ interface State {
     errorMessage?: string | null,
 }
 
-const AUTOMATION_LOG = "automationLog";
+const AUTOMATION_LOG = "nuodbaas-webui-recorded";
+export const NUODBAAS_WEBUI_ISRECORDING = "nuodbaas-webui-isRecording";
 
 export class Rest extends React.Component<{ isRecording: boolean, setIsRecording: (isRecording: boolean) => void }> {
     state: State = {
@@ -60,6 +61,12 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
             return;
         }
         instance.props.setIsRecording(isRecording);
+        if (isRecording) {
+            sessionStorage.setItem(NUODBAAS_WEBUI_ISRECORDING, "true");
+        }
+        else {
+            sessionStorage.removeItem(NUODBAAS_WEBUI_ISRECORDING);
+        }
     }
 
     static isRecording() {
@@ -86,7 +93,7 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
     }
 
     static getLog(): RestLogEntry[] {
-        const strAutomationLog = window.sessionStorage.getItem(AUTOMATION_LOG);
+        const strAutomationLog = sessionStorage.getItem(AUTOMATION_LOG);
         return strAutomationLog ? JSON.parse(strAutomationLog) : [];
     }
 

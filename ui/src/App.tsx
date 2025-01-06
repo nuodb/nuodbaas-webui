@@ -21,7 +21,7 @@ import Settings from './components/pages/Settings';
 import Automation from './components/pages/Automation';
 import Customizations from './utils/Customizations';
 import { PopupMenu } from './components/controls/Menu';
-import { Rest } from './components/pages/parts/Rest';
+import { NUODBAAS_WEBUI_ISRECORDING, Rest } from './components/pages/parts/Rest';
 
 /**
  * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
@@ -30,7 +30,7 @@ import { Rest } from './components/pages/parts/Rest';
 export default function App() {
   const [schema, setSchema] = useState();
   const [isLoggedIn, setIsLoggedIn] = useState(Auth.isLoggedIn());
-  const [isRecording, setIsRecording] = useState(false);
+  const [isRecording, setIsRecording] = useState(sessionStorage.getItem(NUODBAAS_WEBUI_ISRECORDING) === "true");
   return (
     <div className="App">
       <GlobalErrorBoundary>
@@ -54,7 +54,7 @@ export default function App() {
                   <Route path="/ui/resource/edit/*" element={<EditResource schema={schema} />} />
                   <Route path="/ui/resource/view/*" element={<ViewResource schema={schema} />} />
                   <Route path="/ui/settings" element={<Settings />} />
-                  <Route path="/ui/automation" element={<Automation isRecording={isRecording} setIsRecording={setIsRecording} />} />
+                  <Route path="/ui/automation" element={<Automation isRecording={isRecording} />} />
                   <Route path="/*" element={<NotFound />} />
                 </Routes></React.Fragment>
               :
