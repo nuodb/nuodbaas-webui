@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import FieldFactory from "../../fields/FieldFactory";
 import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultValue, submitForm } from "../../../utils/schema";
+import { RestSpinner } from "./Rest";
 import Button from "../../controls/Button";
 import Accordion from "../../controls/Accordion";
 import Auth from "../../../utils/auth";
@@ -293,6 +294,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
     }
 
     return <div className="NuoContainerSM">
+        <RestSpinner />
         <form>
             {!readonly && <h1>{data ? t("text.editEntryForPath", { path }) : t("text.createEntryForPath", { path })}</h1>}
             <div className="fields">

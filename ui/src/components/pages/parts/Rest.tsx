@@ -7,26 +7,28 @@ import axios from "axios";
 import Auth from "../../../utils/auth";
 import { JsonType, RestLogEntry, RestMethodType } from "../../../utils/types";
 
-let instance: RestSpinner | null = null;
+let instance: Rest | null = null;
 
 interface State {
     pendingRequests: number,
     errorMessage?: string | null,
-    isRecording: boolean,
 }
 
 const AUTOMATION_LOG = "automationLog";
 
-export default class RestSpinner extends React.Component {
+export class Rest extends React.Component<{ isRecording: boolean, setIsRecording: (isRecording: boolean) => void }> {
     state: State = {
         pendingRequests: 0,
         errorMessage: null,
-        isRecording: false,
     }
 
     componentDidMount() {
-        instance = this;
+        if (!instance) {
+            instance = this;
+        }
     }
+
+    lastTimestamp = new Date();
 
     static toastError(msg: string, error: string) {
         instance && instance.setState({ errorMessage: msg });
@@ -54,25 +56,32 @@ export default class RestSpinner extends React.Component {
     }
 
     static setIsRecording(isRecording: boolean) {
-        if (instance === null) {
+        if (!instance || !instance.props.setIsRecording) {
             return;
         }
-        instance.setState({ isRecording });
+        instance.props.setIsRecording(isRecording);
     }
 
     static isRecording() {
         if (instance === null) {
             return false;
         }
-        return instance.state.isRecording;
+        return instance.props.isRecording;
     }
 
     static log(method: RestMethodType, url: string, success: boolean, body?: JsonType) {
-        if (instance === null || !instance.state.isRecording) {
+        if (instance === null || !instance.props.isRecording) {
             return;
         }
-        let automationLog = RestSpinner.getLog();
-        automationLog.push({ timestamp: new Date().toISOString(), method, url, body, success });
+        let automationLog = Rest.getLog();
+        const now = new Date();
+        if (now <= instance.lastTimestamp) {
+            instance.lastTimestamp = new Date(instance.lastTimestamp.getTime() + 1)
+        }
+        else {
+            instance.lastTimestamp = now;
+        }
+        automationLog.push({ timestamp: instance.lastTimestamp.toISOString(), method, url, body, success });
         window.sessionStorage.setItem(AUTOMATION_LOG, JSON.stringify(automationLog));
     }
 
@@ -86,42 +95,29 @@ export default class RestSpinner extends React.Component {
     }
 
     render(): ReactNode {
-        return <React.Fragment>
-            <Snackbar
-                open={this.state.errorMessage !== null}
-                autoHideDuration={5000}
-                anchorOrigin={{ vertical: "top", horizontal: "center" }}
-                message={this.state.errorMessage}
-                onClose={() => this.setState({ errorMessage: null })}
-            />
-            {this.state.pendingRequests > 0 ?
-                <CircularProgress color="inherit" size="1em" />
-                :
-                <div data-testid="rest_spinner__complete">&nbsp;</div>
-            }
-        </React.Fragment>;
+        return null;
     }
 
     static async get(path: string) {
         return new Promise((resolve, reject) => {
-            RestSpinner.incrementPending();
+            Rest.incrementPending();
             const url = Auth.getNuodbCpRestUrl(path);
             axios.get(url, { headers: Auth.getHeaders() })
                 .then(response => {
-                    RestSpinner.log("get", url, true);
+                    Rest.log("get", url, true);
                     resolve(response.data);
                 }).catch(reason => {
-                    RestSpinner.log("get", url, false);
+                    Rest.log("get", url, false);
                     reject(reason);
                 }).finally(() => {
-                    RestSpinner.decrementPending();
+                    Rest.decrementPending();
                 })
         })
     }
 
     static async getStream(path: string, eventsAbortController: AbortController) {
         return new Promise((resolve, reject) => {
-            RestSpinner.incrementPending();
+            Rest.incrementPending();
             const url = Auth.getNuodbCpRestUrl(path);
             axios({
                 headers: { ...Auth.getHeaders(), 'Accept': 'text/event-stream' },
@@ -132,65 +128,84 @@ export default class RestSpinner extends React.Component {
                 signal: eventsAbortController.signal
             })
                 .then(async response => {
-                    RestSpinner.log("get", url, true);
+                    Rest.log("get", url, true);
                     resolve(response.data);
                 }).catch(reason => {
-                    RestSpinner.log("get", url, false);
+                    Rest.log("get", url, false);
                     reject(reason);
                 }).finally(() => {
-                    RestSpinner.decrementPending();
+                    Rest.decrementPending();
                 })
         })
     }
 
     static async put(path: string, data: JsonType) {
         return new Promise((resolve, reject) => {
-            RestSpinner.incrementPending();
+            Rest.incrementPending();
             const url = Auth.getNuodbCpRestUrl(path);
             axios.put(url, data, { headers: Auth.getHeaders() })
                 .then(response => {
-                    RestSpinner.log("put", url, true, data);
+                    Rest.log("put", url, true, data);
                     resolve(response.data);
                 }).catch(error => {
-                    RestSpinner.log("put", url, false, data);
+                    Rest.log("put", url, false, data);
                     return reject(error);
                 }).finally(() => {
-                    RestSpinner.decrementPending();
+                    Rest.decrementPending();
                 })
         });
     }
 
     static async delete(path: string) {
         return new Promise((resolve, reject) => {
-            RestSpinner.incrementPending();
+            Rest.incrementPending();
             const url = Auth.getNuodbCpRestUrl(path);
             axios.delete(url, { headers: Auth.getHeaders() })
                 .then(response => {
-                    RestSpinner.log("delete", url, true);
+                    Rest.log("delete", url, true);
                     resolve(response.data);
                 }).catch(reason => {
-                    RestSpinner.log("delete", url, false);
+                    Rest.log("delete", url, false);
                     reject(reason);
                 }).finally(() => {
-                    RestSpinner.decrementPending();
+                    Rest.decrementPending();
                 })
         });
     }
 
     static async patch(path: string, data: JsonType) {
         return new Promise((resolve, reject) => {
-            RestSpinner.incrementPending();
+            Rest.incrementPending();
             const url = Auth.getNuodbCpRestUrl(path);
             axios.patch(url, data, { headers: { ...Auth.getHeaders(), "Content-Type": "application/json-patch+json" } })
                 .then(response => {
-                    RestSpinner.log("patch", url, true, data);
+                    Rest.log("patch", url, true, data);
                     resolve(response.data);
                 }).catch(error => {
-                    RestSpinner.log("patch", url, false, data);
+                    Rest.log("patch", url, false, data);
                     reject(error);
                 }).finally(() => {
-                    RestSpinner.decrementPending();
+                    Rest.decrementPending();
                 })
         });
     }
+}
+
+export function RestSpinner() {
+    if (!instance) return null;
+
+    return <React.Fragment>
+        <Snackbar
+            open={instance.state.errorMessage !== null}
+            autoHideDuration={5000}
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            message={instance.state.errorMessage}
+            onClose={() => instance?.setState({ errorMessage: null })}
+        />
+        {instance.state.pendingRequests > 0 ?
+            <CircularProgress color="inherit" size="1em" />
+            :
+            <div data-testid="rest_spinner__complete">&nbsp;</div>
+        }
+    </React.Fragment>;
 }

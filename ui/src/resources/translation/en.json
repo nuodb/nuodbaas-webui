@@ -166,6 +166,7 @@
             "curl": "Export recording as CURL commands",
             "startRecording": "Start new recording",
             "stopRecording": "Stop recording",
+            "recordingInProgress": "Recordingn in progress...",
             "hideGetRequests": "Hide GET requests",
             "convertUpdatesToPatchRequests": "Convert updates to PATCH requests",
             "noWriteRequests": "No write requests recorded."

@@ -329,3 +329,7 @@ code {
     gap: 10px;
     margin: 5px 0;
 }
+.NuoRecordingBanner {
+    background-color: #f08080;
+    padding: 5px 24px;
+}

@@ -15,11 +15,19 @@ import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import { SchemaType } from "../../../utils/types";
 import Menu from "../../controls/Menu";
+import { Rest } from "./Rest";
+import Button from "../../controls/Button";
 
-function ResponsiveAppBar(resources: string[], t: any) {
+function ResponsiveAppBar(resources: string[], isRecording: boolean, t: any) {
   const navigate = useNavigate();
 
-  return (
+  return (<>
+    {isRecording && <div className="NuoRecordingBanner">{t("dialog.automation.recordingInProgress")}
+      <Button variant="text" onClick={() => {
+        Rest.setIsRecording(false);
+        navigate("/ui/automation");
+      }}>{t("dialog.automation.stopRecording")}</Button>
+    </div>}
     <AppBar data-testid={resources.length > 0 ? "banner-done" : ""}
       position="static">
       <Container maxWidth="xl">
@@ -137,16 +145,17 @@ function ResponsiveAppBar(resources: string[], t: any) {
           </Box>
         </Toolbar>
       </Container>
-    </AppBar>
+    </AppBar></>
   );
 }
 
 interface Props {
   schema: SchemaType,
+  isRecording: boolean,
   t: any
 }
 
-function Banner({ schema, t }: Props) {
+function Banner({ schema, isRecording, t }: Props) {
 
   if (!schema) {
     return null;
@@ -159,7 +168,7 @@ function Banner({ schema, t }: Props) {
     return path;
   });
 
-  return ResponsiveAppBar(resources, t);
+  return ResponsiveAppBar(resources, isRecording, t);
 }
 
 export default withTranslation()(Banner);

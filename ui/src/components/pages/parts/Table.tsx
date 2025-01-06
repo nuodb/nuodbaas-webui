@@ -5,7 +5,7 @@ import { withTranslation } from "react-i18next";
 import { TableBody, TableTh, TableCell, Table as TableCustom, TableHead, TableRow } from '../../controls/Table';
 import { getResourceByPath, getCreatePath, getChild, replaceVariables } from "../../../utils/schema";
 import FieldFactory from "../../fields/FieldFactory";
-import RestSpinner from "./RestSpinner";
+import { Rest } from "./Rest";
 import Dialog from "./Dialog";
 import { MenuItemProps, TempAny } from "../../../utils/types";
 import { CustomViewField, evaluate, getCustomizationsView } from '../../../utils/Customizations';
@@ -136,11 +136,11 @@ function Table(props: TempAny) {
         const createPathFirstPart = path?.replace(/^\//, "").split("/")[0];
         row = { ...row, resources_one: t("resource.label." + createPathFirstPart + "_one", createPathFirstPart) };
         if ("yes" === await Dialog.confirm(t("confirm.delete.resource.title", row), t("confirm.delete.resource.body", row), t)) {
-            RestSpinner.delete(path + "/" + row["$ref"])
+            Rest.delete(path + "/" + row["$ref"])
                 .then(() => {
                     window.location.reload();
                 }).catch((error) => {
-                    RestSpinner.toastError("Unable to delete " + path + "/" + row["$ref"], error);
+                    Rest.toastError("Unable to delete " + path + "/" + row["$ref"], error);
                 });
             window.location.reload();
         }
@@ -176,7 +176,7 @@ function Table(props: TempAny) {
                 }
                 catch (ex) {
                     const msg = "Error in checking visibility of button.";
-                    RestSpinner.toastError(msg, String(ex));
+                    Rest.toastError(msg, String(ex));
                     console.log(msg, ex, row);
                 }
 
@@ -194,9 +194,9 @@ function Table(props: TempAny) {
                                 }
                             }
                             if (menu.patch) {
-                                RestSpinner.patch(path + "/" + row["$ref"], menu.patch)
+                                Rest.patch(path + "/" + row["$ref"], menu.patch)
                                     .catch((error) => {
-                                        RestSpinner.toastError("Unable to update " + path + "/" + row["$ref"], error);
+                                        Rest.toastError("Unable to update " + path + "/" + row["$ref"], error);
                                     })
                             }
                             else if (menu.link) {
@@ -245,7 +245,7 @@ function Table(props: TempAny) {
             }
             catch (ex) {
                 const msg = "Error in custom value evaluation for field \"" + fieldName + "\"";
-                RestSpinner.toastError(msg, String(ex));
+                Rest.toastError(msg, String(ex));
                 console.log(msg, ex, row);
                 value = ""
             }

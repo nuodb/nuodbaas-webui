@@ -2,7 +2,7 @@
 
 import Button from "../controls/Button";
 import { withTranslation } from "react-i18next";
-import RestSpinner from "./parts/RestSpinner";
+import { Rest } from "./parts/Rest";
 import { useEffect, useState } from "react";
 import { JsonType, RestLogEntry } from "../../utils/types";
 import { Tooltip } from "@mui/material";
@@ -11,13 +11,14 @@ import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
 import Auth from "../../utils/auth";
 
 type AutomationProps = {
+    isRecording: boolean,
+    setIsRecording: (isRecording: boolean) => void,
     t: any
 };
 
 let copiedTimeout: NodeJS.Timeout | undefined = undefined;
 
-function Automation({ t }: AutomationProps) {
-    const [isRecording, setIsRecording] = useState(RestSpinner.isRecording());
+function Automation({ isRecording, setIsRecording, t }: AutomationProps) {
     const [log, setLog] = useState<RestLogEntry[]>([]);
     const [selectedTimestamp, setSelectedTimestamp] = useState(""); //using the timestamp (millisecond granularity) as unique key
     const [hideGetRequests, setHideGetRequests] = useState(true);
@@ -25,7 +26,7 @@ function Automation({ t }: AutomationProps) {
     const [copiedField, setCopiedField] = useState("");
 
     useEffect(() => {
-        const initialLog = RestSpinner.getLog();
+        const initialLog = Rest.getLog();
         setLog(initialLog);
         setSelectedTimestamp(initialLog.length > 0 ? initialLog[0].timestamp : "");
     }, []);
@@ -43,14 +44,12 @@ function Automation({ t }: AutomationProps) {
             <h1>{t("dialog.automation.title")}</h1>
             <div className="NuoButtons">
                 <Button disabled={isRecording} variant="contained" onClick={(event) => {
-                    RestSpinner.clearLog();
+                    Rest.clearLog();
                     setIsRecording(true);
-                    RestSpinner.setIsRecording(true);
                 }}>{t("dialog.automation.startRecording")}</Button>
             <Button disabled={!isRecording} variant="contained" onClick={(event) => {
-                setIsRecording(false);
-                RestSpinner.setIsRecording(false);
-                    const log = RestSpinner.getLog();
+                    setIsRecording(false);
+                    const log = Rest.getLog();
                     setLog(log);
                     if (log.length > 0 && selectedTimestamp === "") {
                         setSelectedTimestamp(log[0].timestamp);
@@ -81,7 +80,7 @@ function Automation({ t }: AutomationProps) {
                         </div> : t("dialog.automation.noWriteRequests")}
                 </div>}
 
-            {filteredLog.length > 0 && renderCopyCode(t("dialog.automation.curl"), getCurlCommands(filteredLog))}
+            {filteredLog.length > 0 && !isRecording && renderCopyCode(t("dialog.automation.curl"), getCurlCommands(filteredLog))}
         </div >
     );
 

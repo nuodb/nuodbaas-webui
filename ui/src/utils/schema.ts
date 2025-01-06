@@ -1,6 +1,6 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
-import RestSpinner from "../components/pages/parts/RestSpinner";
+import { Rest } from "../components/pages/parts/Rest";
 import Auth from "./auth"
 import { FieldValuesType, TempAny, SchemaType, FieldParametersType } from "./types";
 let schema : TempAny = null;
@@ -12,7 +12,7 @@ let schema : TempAny = null;
 export async function getSchema() {
     if(!schema) {
         try {
-            schema = await RestSpinner.get("openapi");
+            schema = await Rest.get("openapi");
             parseSchema(schema, schema, []);
             schema = schema["paths"];
         }
@@ -267,7 +267,7 @@ export function getResourceEvents(path: string, multiResolve: TempAny, multiReje
     //only one event stream is supported - close prior one if it exists.
     let eventsAbortController = new AbortController();
 
-    RestSpinner.getStream("events" + path, eventsAbortController)
+    Rest.getStream("events" + path, eventsAbortController)
       .then(async (response: TempAny) => {
         let event = null;
         let data = null;
@@ -374,12 +374,12 @@ export function getResourceEvents(path: string, multiResolve: TempAny, multiReje
       .catch((error) => {
         if(error.status === 404) {
             // fall back to non-streaming request
-            RestSpinner.get(path)
+            Rest.get(path)
                 .then(data => multiResolve(data))
                 .catch(reason => multiReject(reason));
         }
         else if(error.status) {
-            RestSpinner.toastError("Cannot retrieve resource for path " + path, error.status + " " + error.message);
+            Rest.toastError("Cannot retrieve resource for path " + path, error.status + " " + error.message);
         }
         else {
             //request was aborted. Ignore.
@@ -536,5 +536,5 @@ export async function submitForm(urlParameters: FieldParametersType, formParamet
 
     deleteEmptyFields(values);
 
-    return RestSpinner.put(path, values);
+    return Rest.put(path, values);
 }
