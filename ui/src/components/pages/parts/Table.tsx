@@ -142,7 +142,6 @@ function Table(props: TempAny) {
                 }).catch((error) => {
                     Rest.toastError("Unable to delete " + path + "/" + row["$ref"], error);
                 });
-            window.location.reload();
         }
     }
 

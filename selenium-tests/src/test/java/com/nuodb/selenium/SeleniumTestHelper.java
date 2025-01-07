@@ -312,4 +312,12 @@ public class SeleniumTestHelper {
         }
         throw new RuntimeException(exception);
     }
+
+    public void clearSessionStorage(String key) {
+        ((JavascriptExecutor)driver).executeScript("window.sessionStorage.removeItem(\"" + key + "\")");
+    }
+
+    public String getSessionStorage(String key) {
+        return (String) ((JavascriptExecutor)driver).executeScript("return window.sessionStorage.getItem(\"" + key + "\")");
+    }
 }

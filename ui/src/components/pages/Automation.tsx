@@ -42,11 +42,11 @@ function Automation({ isRecording, t }: AutomationProps) {
         <div className="NuoContainerLG">
             <h1>{t("dialog.automation.title")}</h1>
             <div className="NuoButtons">
-                <Button disabled={isRecording} variant="contained" onClick={(event) => {
+                <Button data-testid="btnStartRecording" disabled={isRecording} variant="contained" onClick={(event) => {
                     Rest.clearLog();
                     Rest.setIsRecording(true);
                 }}>{t("dialog.automation.startRecording")}</Button>
-            <Button disabled={!isRecording} variant="contained" onClick={(event) => {
+                <Button data-testid="btnStopRecording" disabled={!isRecording} variant="contained" onClick={(event) => {
                     Rest.setIsRecording(false);
                     const log = Rest.getLog();
                     setLog(log);

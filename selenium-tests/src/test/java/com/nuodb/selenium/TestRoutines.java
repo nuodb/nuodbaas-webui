@@ -138,6 +138,11 @@ public class TestRoutines extends SeleniumTestHelper {
         menuItems.get(0).click();
     }
 
+    public void clickUserMenu(String dataTestId) {
+        WebElement userMenu = waitElement("user-menu");
+        clickPopupMenu(userMenu, dataTestId);
+    }
+
     private void createResource(Resource resource, String name, String ...fieldValueList) {
         clickMenu(resource.name());
 

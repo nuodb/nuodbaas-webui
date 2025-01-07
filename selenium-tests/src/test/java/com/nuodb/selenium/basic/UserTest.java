@@ -3,7 +3,6 @@
 package com.nuodb.selenium.basic;
 
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.nuodb.selenium.Constants;

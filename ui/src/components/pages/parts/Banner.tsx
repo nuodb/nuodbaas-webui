@@ -23,7 +23,7 @@ function ResponsiveAppBar(resources: string[], isRecording: boolean, t: any) {
 
   return (<>
     {isRecording && <div className="NuoRecordingBanner">{t("dialog.automation.recordingInProgress")}
-      <Button variant="text" onClick={() => {
+      <Button data-testid="btnStopRecording" variant="text" onClick={() => {
         Rest.setIsRecording(false);
         navigate("/ui/automation");
       }}>{t("dialog.automation.stopRecording")}</Button>
@@ -108,13 +108,14 @@ function ResponsiveAppBar(resources: string[], isRecording: boolean, t: any) {
             />
           </Box>
 
-          <Box sx={{ flexGrow: 0 }}>
+          <Box data-testid="user-menu" sx={{ flexGrow: 0 }}>
             <Menu
               align="right"
               items={[
                 {
                   label: t("button.settings"),
                   id: "settings",
+                  "data-testid": "settings",
                   onClick: () => {
                     navigate("/ui/settings");
                   }
@@ -122,6 +123,7 @@ function ResponsiveAppBar(resources: string[], isRecording: boolean, t: any) {
                 {
                   label: t("button.automation"),
                   id: "automation",
+                  "data-testid": "automation",
                   onClick: () => {
                     navigate("/ui/automation");
                   }
@@ -129,6 +131,7 @@ function ResponsiveAppBar(resources: string[], isRecording: boolean, t: any) {
                 {
                   label: t("button.logout"),
                   id: "logout",
+                  "data-testid": "logout",
                   onClick: () => {
                     Auth.logout();
                     window.location.href = "/ui";
