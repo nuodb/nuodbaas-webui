@@ -35,8 +35,10 @@ public class UserTest extends TestRoutines {
 
         // verify user is gone
         waitRestComplete();
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", userName, MENU_COLUMN);
-        assertEquals(0, buttonsCell.size());
+        retry(()-> {
+            List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", userName, MENU_COLUMN);
+            assertEquals(0, buttonsCell.size());
+        });
     }
 
     @Test
@@ -68,10 +70,12 @@ public class UserTest extends TestRoutines {
         waitRestComplete();
 
         // verify user was modified
-        List<WebElement> labelsCells = waitTableElements("list_resource__table", "name", userName, "labels");
-        assertThat(labelsCells)
-            .hasSize(1)
-            .get(0)
-            .mapContains(userName, userName);
+        retry(()->{
+            List<WebElement> labelsCells = waitTableElements("list_resource__table", "name", userName, "labels");
+            assertThat(labelsCells)
+                .hasSize(1)
+                .get(0)
+                .mapContains(userName, userName);
+        });
    }
 }

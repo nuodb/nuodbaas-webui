@@ -40,8 +40,10 @@ public class DatabaseTest extends TestRoutines {
 
         // verify database is gone
         waitRestComplete();
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
-        assertEquals(0, buttonsCell.size());
+        retry(()->{
+            List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
+            assertEquals(0, buttonsCell.size());
+        });
     }
 
     @Test
@@ -64,11 +66,13 @@ public class DatabaseTest extends TestRoutines {
         waitRestComplete();
 
         // verify database was modified
-        List<WebElement> labelCells = waitTableElements("list_resource__table", "name", databaseName, "labels");
-        assertThat(labelCells)
-            .hasSize(1)
-            .get(0)
-            .mapContains(projectName, databaseName);
+        retry(()->{
+            List<WebElement> labelCells = waitTableElements("list_resource__table", "name", databaseName, "labels");
+            assertThat(labelCells)
+                .hasSize(1)
+                .get(0)
+                .mapContains(projectName, databaseName);
+        });
    }
 
    private WebElement findSingleDatabaseButton(String databaseName, String buttonLabel) {

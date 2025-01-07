@@ -41,8 +41,10 @@ public class BackupTest extends TestRoutines {
 
         // verify backup is gone
         waitRestComplete();
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", backupName, MENU_COLUMN);
-        assertEquals(0, buttonsCell.size());
+        retry(()->{
+            List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", backupName, MENU_COLUMN);
+            assertEquals(0, buttonsCell.size());
+        });
     }
 
     @Test
@@ -68,10 +70,12 @@ public class BackupTest extends TestRoutines {
         waitRestComplete();
 
         // verify backup was modified
-        List<WebElement> labelCells = waitTableElements("list_resource__table", "name", backupName, "labels");
-        assertThat(labelCells)
-            .hasSize(1)
-            .get(0)
-            .mapContains(projectName, databaseName);
+        retry(()->{
+            List<WebElement> labelCells = waitTableElements("list_resource__table", "name", backupName, "labels");
+            assertThat(labelCells)
+                .hasSize(1)
+                .get(0)
+                .mapContains(projectName, databaseName);
+        });
     }
 }

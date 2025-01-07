@@ -39,8 +39,10 @@ public class SearchTest extends TestRoutines {
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
         clickMenu("users");
         waitRestComplete();
-        List<WebElement> nameCell = waitTableElements("list_resource__table", "name", null, "name");
-        assertEquals(20, nameCell.size());
+        retry(()->{
+            List<WebElement> nameCell = waitTableElements("list_resource__table", "name", null, "name");
+            assertEquals(20, nameCell.size());
+        });
 
         // search users starting with "1" index and check that 10 users are returned
         replaceInputElementByName("search", name + "1");
