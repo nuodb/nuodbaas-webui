@@ -18,8 +18,10 @@ import Dialog from "./components/pages/parts/Dialog";
 import GlobalErrorBoundary from "./components/GlobalErrorBoundary";
 import Auth from "./utils/auth";
 import Settings from './components/pages/Settings';
+import Automation from './components/pages/Automation';
 import Customizations from './utils/Customizations';
 import { PopupMenu } from './components/controls/Menu';
+import { NUODBAAS_WEBUI_ISRECORDING, Rest } from './components/pages/parts/Rest';
 
 /**
  * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
@@ -28,6 +30,7 @@ import { PopupMenu } from './components/controls/Menu';
 export default function App() {
   const [schema, setSchema] = useState();
   const [isLoggedIn, setIsLoggedIn] = useState(Auth.isLoggedIn());
+  const [isRecording, setIsRecording] = useState(sessionStorage.getItem(NUODBAAS_WEBUI_ISRECORDING) === "true");
   return (
     <div className="App">
       <GlobalErrorBoundary>
@@ -35,12 +38,13 @@ export default function App() {
           <CssBaseline />
           <PopupMenu />
           <Dialog />
+          <Rest isRecording={isRecording} setIsRecording={setIsRecording} />
           <BrowserRouter>
             {isLoggedIn
               ?
               <React.Fragment>
                 <Schema setSchema={setSchema} />
-                {schema && <Banner schema={schema} />}
+                {schema && <Banner schema={schema} isRecording={isRecording} />}
                 <Routes>
                   <Route path="/" element={<Navigate to="/ui" />} />
                   <Route path="/ui" element={<Home schema={schema} />} />
@@ -50,6 +54,7 @@ export default function App() {
                   <Route path="/ui/resource/edit/*" element={<EditResource schema={schema} />} />
                   <Route path="/ui/resource/view/*" element={<ViewResource schema={schema} />} />
                   <Route path="/ui/settings" element={<Settings />} />
+                  <Route path="/ui/automation" element={<Automation isRecording={isRecording} />} />
                   <Route path="/*" element={<NotFound />} />
                 </Routes></React.Fragment>
               :

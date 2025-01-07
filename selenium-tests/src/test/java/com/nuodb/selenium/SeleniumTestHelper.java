@@ -288,4 +288,36 @@ public class SeleniumTestHelper {
             Thread.currentThread().interrupt();
         }
     }
+
+    public void retry(Runnable r) {
+        retry(10, 100, r);
+    }
+
+    public void retry(int count, long delayMS, Runnable r) {
+        Throwable exception = null;
+        for(int i=count; i>=0; i--) {
+            try {
+                r.run();
+                return;
+            }
+            catch(Throwable e) {
+                exception = e;
+            }
+            try {
+                Thread.sleep(delayMS);
+            }
+            catch(InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        throw new RuntimeException(exception);
+    }
+
+    public void clearSessionStorage(String key) {
+        ((JavascriptExecutor)driver).executeScript("window.sessionStorage.removeItem(\"" + key + "\")");
+    }
+
+    public String getSessionStorage(String key) {
+        return (String) ((JavascriptExecutor)driver).executeScript("return window.sessionStorage.getItem(\"" + key + "\")");
+    }
 }

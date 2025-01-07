@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import FieldFactory from "../../fields/FieldFactory";
 import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultValue, submitForm } from "../../../utils/schema";
-import RestSpinner from "./RestSpinner";
+import { RestSpinner } from "./Rest";
 import Button from "../../controls/Button";
 import Accordion from "../../controls/Accordion";
 import Auth from "../../../utils/auth";

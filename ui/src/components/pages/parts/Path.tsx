@@ -10,7 +10,7 @@ import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography';
 import TextField from "../../controls/TextField"
 import { styled } from '@mui/material';
-import RestSpinner from './RestSpinner';
+import { RestSpinner } from './Rest';
 import { getFilterField, getSchemaPath } from "../../../utils/schema";
 import { TempAny } from "../../../utils/types"
 

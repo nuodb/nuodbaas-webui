@@ -19,6 +19,7 @@
         "show.databases": "Show Databases",
         "show.backups": "Show Backups",
         "settings": "Settings",
+        "automation": "Automation",
         "logout": "Logout",
         "add": "Add",
         "copy": "Copy",
@@ -159,6 +160,16 @@
                 "jdbc": "Java (JDBC)",
                 "cpp": "C++"
             }
+        },
+        "automation": {
+            "title": "Automation",
+            "curl": "Export recording as CURL commands",
+            "startRecording": "Start new recording",
+            "stopRecording": "Stop recording",
+            "recordingInProgress": "Recording in progress...",
+            "hideGetRequests": "Hide GET requests",
+            "convertUpdatesToPatchRequests": "Convert updates to PATCH requests",
+            "noWriteRequests": "No write requests recorded."
         }
     },
     "text": {

@@ -35,8 +35,10 @@ public class ProjectTest extends TestRoutines {
 
         // verify project is gone
         waitRestComplete();
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", projectName, MENU_COLUMN);
-        assertEquals(0, buttonsCell.size());
+        retry(()->{
+            List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", projectName, MENU_COLUMN);
+            assertEquals(0, buttonsCell.size());
+        });
 
     }
 
@@ -61,11 +63,13 @@ public class ProjectTest extends TestRoutines {
         waitRestComplete();
 
         // verify project was modified
-        List<WebElement> tierCells = waitTableElements("list_resource__table", "name", projectName, "tier");
-        assertThat(tierCells)
-            .hasSize(1)
-            .get(0)
-            .hasValue("n0.small");
+        retry(()->{
+            List<WebElement> tierCells = waitTableElements("list_resource__table", "name", projectName, "tier");
+            assertThat(tierCells)
+                .hasSize(1)
+                .get(0)
+                .hasValue("n0.small");
+        });
 
         List<WebElement> maintenanceCells = waitTableElements("list_resource__table", "name", projectName, "maintenance");
             assertThat(maintenanceCells)

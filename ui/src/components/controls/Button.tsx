@@ -7,6 +7,7 @@ import { Button as MuiButton } from '@mui/material'
 export type ButtonProps = {
     "data-testid"?: string,
     type?: "button" | "reset" | "submit",
+    disabled?: boolean,
     variant?: "contained" | "outlined" | "text",
     style?: React.CSSProperties,
     children: ReactNode,
@@ -15,7 +16,7 @@ export type ButtonProps = {
 }
 export default function Button(props: ButtonProps): JSX.Element {
     if (isMaterial()) {
-        return <MuiButton variant={props.variant} {...props}>{props.children}</MuiButton>
+        return <MuiButton disabled={props.disabled} variant={props.variant} {...props}>{props.children}</MuiButton>
     }
     else {
         return <button {...props}>{props.children}</button>

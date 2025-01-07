@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Table from "./parts/Table";
 import { getResourceEvents, getCreatePath, getResourceByPath, getFilterField } from "../../utils/schema";
-import RestSpinner from "./parts/RestSpinner";
+import { Rest } from "./parts/Rest";
 import Button from "../controls/Button";
 import Path, { parseSearch } from './parts/Path'
 import Auth from "../../utils/auth"
@@ -52,7 +52,7 @@ function ListResource({ schema, t }: SchemaType) {
 
         let resourcesByPath_ = getResourceByPath(schema, path);
         if ("get" in resourcesByPath_) {
-            RestSpinner.get(path + "?listAccessible=true" + labelFilter).then((data: TempAny) => {
+            Rest.get(path + "?listAccessible=true" + labelFilter).then((data: TempAny) => {
                 let start = 0;
                 let end = data.items.length;
                 while (data.items.length > start && !lastPartLower(data.items[start]).startsWith(name)) {
@@ -76,7 +76,7 @@ function ListResource({ schema, t }: SchemaType) {
                     })
                 );
             }).catch((reason) => {
-                RestSpinner.toastError("Unable to get resource in " + path, reason);
+                Rest.toastError("Unable to get resource in " + path, reason);
             });
         }
         setCreatePath(getCreatePath(schema, path));
