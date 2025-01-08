@@ -12,6 +12,11 @@ import { SchemaType, TempAny } from "../../utils/types";
 import Pagination from "../controls/Pagination";
 import { withTranslation } from "react-i18next";
 
+type ItemsAndPathProps = {
+    items: [] | null,
+    path: string,
+}
+
 /**
  * handles all the /resource/list/* requests to list a resource
  */
@@ -20,7 +25,7 @@ function ListResource({ schema, t }: SchemaType) {
     const path = "/" + useParams()["*"];
     const pageSize = 20;
 
-    const [itemsAndPath, setItemsAndPath] = useState({ items: [], path });
+    const [itemsAndPath, setItemsAndPath] = useState<ItemsAndPathProps>({ items: null, path });
     const [page, setPage] = useState(1);
     const [allItems, setAllItems] = useState([]);
     const [createPath, setCreatePath] = useState<string | null>(null);
@@ -121,21 +126,26 @@ function ListResource({ schema, t }: SchemaType) {
 
     const createPathFirstPart = createPath?.replace(/^\//, "").split("/")[0];
     const createLabel = t('button.create.resource', { resource: t("resource.label." + createPathFirstPart + "_one", createPathFirstPart) });
-    const dataNotDeleted = itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true);
-    return (
-        <React.Fragment>
-            <Path schema={schema} path={path} filterValues={getFilterValues()} search={search} setSearch={setSearch} setPage={setPage} />
-            {createPath && <Button data-testid="list_resource__create_button" variant="outlined" onClick={handleCreate}>{createLabel}</Button>}
-            {renderPaging()}
-            <Table
-                data-testid="list_resource__table"
-                schema={schema}
-                data={dataNotDeleted}
-                path={itemsAndPath.path}
-            />
-            {renderPaging()}
-        </React.Fragment>
-    );
+    if (itemsAndPath.items) {
+        const dataNotDeleted = itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true);
+        return (
+            <React.Fragment>
+                <Path schema={schema} path={path} filterValues={getFilterValues()} search={search} setSearch={setSearch} setPage={setPage} />
+                {createPath && <Button data-testid="list_resource__create_button" variant="outlined" onClick={handleCreate}>{createLabel}</Button>}
+                {renderPaging()}
+                <Table
+                    data-testid="list_resource__table"
+                    schema={schema}
+                    data={dataNotDeleted}
+                    path={itemsAndPath.path}
+                />
+                {renderPaging()}
+            </React.Fragment>
+        );
+    }
+    else {
+        return null;
+    }
 }
 
 export default withTranslation()(ListResource);
