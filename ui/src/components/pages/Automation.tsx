@@ -86,7 +86,15 @@ function Automation({ isRecording, t }: AutomationProps) {
     function getCurlCommands(log: RestLogEntry[]): string[] {
         let ret: string[] = [];
         ret.push("AUTH_TOKEN=\"" + (token || "") + "\"");
-        ret.push("HOST=\"" + window.location.protocol + "//" + window.location.host + "\"");
+        let pathPrefix = Auth.getNuodbCpRestUrl("");
+        while (pathPrefix.startsWith("/")) {
+            pathPrefix = pathPrefix.substring(1);
+        }
+        while (pathPrefix.endsWith("/")) {
+            pathPrefix = pathPrefix.substring(0, pathPrefix.length - 1);
+        }
+        const baseUrl = window.location.protocol + "//" + window.location.host + "/" + pathPrefix;
+        ret.push("BASE_URL=\"" + baseUrl + "\"");
         ret.push("");
         log.forEach(entry => {
             let method = entry.method.toUpperCase();
@@ -102,7 +110,14 @@ function Automation({ isRecording, t }: AutomationProps) {
                 method = "PATCH";
             }
             const contentType = method === "PATCH" ? "application/json-patch+json" : "application/json";
-            let curl = "curl -X " + method + " -H \"Authorization: Bearer $AUTH_TOKEN\" -H \"Content-Type: " + contentType + "\" \"$HOST" + entry.url + "\"";
+            let url = entry.url;
+            if (url.startsWith(baseUrl + "/")) {
+                url = url.substring(baseUrl.length);
+            }
+            else if (url.startsWith("/" + pathPrefix + "/")) {
+                url = url.substring(pathPrefix.length + 1);
+            }
+            let curl = "curl -X " + method + " -H \"Authorization: Bearer $AUTH_TOKEN\" -H \"Content-Type: " + contentType + "\" \"$BASE_URL" + url + "\"";
             if (body) {
                 curl += " --data-binary '" + JSON.stringify(body).replaceAll("'", "\\'") + "'";
             }

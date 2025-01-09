@@ -38,7 +38,7 @@
         "stop.database.title": "Stop Database",
         "stop.database.body": "Do you want to stop Database {{organization}}/{{project}}/{{name}}?",
         "delete.resource.title": "Deleting {{resources_one}} {{name}}",
-        "delete.resource.body": "Do you really want to delete {{resources_one}} {{name}}?"
+        "delete.resource.body": "Please confirm deletion of {{resources_one}} {{name}}?"
     },
     "resource": {
         "label": {
@@ -81,6 +81,11 @@
             "maintenance.expiresIn": "Expires in",
             "properties.propagatePolicyLabels": "Propagate policy labels",
             "properties.propagateDatabaseLabels": "Propagate database labels",
+            "properties.archiveDiskSize": "Archive disk size",
+            "properties.journalDiskSize": "Journal disk size",
+            "properties.tierParameters": "Tier parameters",
+            "properties.inheritTierParameters": "Inherit tier parameters",
+            "properties.productVersion": "Product Version",
             "retention": "Retention",
             "retention.hourly": "Hourly",
             "retention.daily": "Daily",

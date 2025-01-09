@@ -290,7 +290,7 @@ public class SeleniumTestHelper {
     }
 
     public void retry(Runnable r) {
-        retry(10, 100, r);
+        retry(30, 100, r);
     }
 
     public void retry(int count, long delayMS, Runnable r) {

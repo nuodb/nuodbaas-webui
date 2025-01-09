@@ -45,6 +45,18 @@ services:
       timeout: 30s
       retries: 3
       start_period: 60s
+  nuodb-cp-operator:
+    image: "ghcr.io/nuodb/nuodb-cp-images:2.7.0"
+    command:
+      - "controller"
+      - "--feature-gates"
+      - "EmbeddedDatabaseBackupPlugin=false"
+    networks:
+      - kwok-kwok
+    volumes:
+      - ./files/kubeconfig:/home/nuodb/.kube/config
+    environment:
+      ENABLE_WEBHOOKS: "false"
   nginx:
     image: "nginx"
     ports:

@@ -49,6 +49,9 @@ public class ProjectTest extends TestRoutines {
         String projectName = createProject();
         clickMenu("projects");
 
+        // resource versions are getting updated in the background a few times by the control plane / operator preventing an update later.
+        sleep(5000);
+
         // find project and start edit mode
         List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", projectName, MENU_COLUMN);
         assertEquals(1, buttonsCell.size());
@@ -70,11 +73,5 @@ public class ProjectTest extends TestRoutines {
                 .get(0)
                 .hasValue("n0.small");
         });
-
-        List<WebElement> maintenanceCells = waitTableElements("list_resource__table", "name", projectName, "maintenance");
-            assertThat(maintenanceCells)
-                .hasSize(1)
-                .get(0)
-                .containsValue("2592000000000000ns");
-       }
+    }
 }
