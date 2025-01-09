@@ -81,7 +81,7 @@ setup-integration-tests: build-image install-crds ## setup containers before run
 		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_BASE%%%#$(NUODB_CP_BASE)#g" > docker/development/default.conf; \
 	fi
 	@docker compose -f selenium-tests/compose.yaml up --wait
-	@kubectl apply -f docker/development/samples.yaml
+	@kubectl apply -f docker/development/samples.yaml --context kwok-kwok -n default
 	@docker exec selenium-tests-nuodb-cp-1 bash -c "curl \
 		http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true \
 		--data-binary \

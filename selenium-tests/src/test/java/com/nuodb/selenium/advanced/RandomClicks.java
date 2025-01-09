@@ -1,10 +1,6 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 package com.nuodb.selenium.advanced;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 import com.nuodb.selenium.Constants;
