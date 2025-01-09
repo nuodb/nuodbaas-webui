@@ -138,11 +138,11 @@ function Table(props: TempAny) {
         const createPathFirstPart = deletePath?.replace(/^\//, "").split("/")[0];
         row = { ...row, resources_one: t("resource.label." + createPathFirstPart + "_one", createPathFirstPart) };
         if ("yes" === await Dialog.confirm(t("confirm.delete.resource.title", row), t("confirm.delete.resource.body", row), t)) {
-            Rest.delete(deletePath + "/" + row["$ref"])
+            Rest.delete(deletePath)
                 .then(() => {
                     window.location.reload();
                 }).catch((error) => {
-                    Rest.toastError("Unable to delete " + deletePath + "/" + row["$ref"], error);
+                    Rest.toastError("Unable to delete " + deletePath, error);
                 });
         }
     }
