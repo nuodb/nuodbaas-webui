@@ -3,7 +3,7 @@
 import { useNavigate } from 'react-router-dom';
 import { withTranslation } from "react-i18next";
 import { TableBody, TableTh, TableCell, Table as TableCustom, TableHead, TableRow } from '../../controls/Table';
-import { getResourceByPath, getCreatePath, getChild, replaceVariables } from "../../../utils/schema";
+import { getResourceByPath, getCreatePath, getChild, replaceVariables, getSchemaPath } from "../../../utils/schema";
 import FieldFactory from "../../fields/FieldFactory";
 import { Rest } from "./Rest";
 import Dialog from "./Dialog";
@@ -40,6 +40,8 @@ function Table(props: TempAny) {
     const { schema, data, path, t } = props;
     const [columns, setColumns] = useState<MenuItemProps[]>([]);
     let navigate = useNavigate();
+    let lastSchemaPathElement = "/" + getSchemaPath(schema, path);
+    lastSchemaPathElement = lastSchemaPathElement.substring(lastSchemaPathElement.lastIndexOf("/") + 1);
 
     /**
      * Find all fields to be shown in the table
@@ -132,36 +134,45 @@ function Table(props: TempAny) {
         }
     }
 
-    async function handleDelete(row: TempAny) {
-        const createPathFirstPart = path?.replace(/^\//, "").split("/")[0];
+    async function handleDelete(row: TempAny, deletePath: string) {
+        const createPathFirstPart = deletePath?.replace(/^\//, "").split("/")[0];
         row = { ...row, resources_one: t("resource.label." + createPathFirstPart + "_one", createPathFirstPart) };
         if ("yes" === await Dialog.confirm(t("confirm.delete.resource.title", row), t("confirm.delete.resource.body", row), t)) {
-            Rest.delete(path + "/" + row["$ref"])
+            Rest.delete(deletePath + "/" + row["$ref"])
                 .then(() => {
                     window.location.reload();
                 }).catch((error) => {
-                    Rest.toastError("Unable to delete " + path + "/" + row["$ref"], error);
+                    Rest.toastError("Unable to delete " + deletePath + "/" + row["$ref"], error);
                 });
         }
     }
 
     function renderMenuCell(row: any) {
-        const buttons: MenuItemProps[] = [
-            {
+        let editDeletePath: string;
+        if (lastSchemaPathElement.startsWith("{")) {
+            editDeletePath = path + "/" + row["$ref"];
+        }
+        else {
+            // special case for /backuppolicies/{organization}/{name}/databases (or similar) where the last element specifies a resource type
+            editDeletePath = "/" + lastSchemaPathElement + "/" + row["$ref"];
+        }
+        const resource = getResourceByPath(schema, editDeletePath)
+        const buttons: MenuItemProps[] = [];
+        if (resource && ("put" in resource)) {
+            buttons.push({
                 "data-testid": "edit_button",
                 id: "edit",
                 label: t("button.edit"),
                 onClick: () => {
-                    navigate("/ui/resource/edit" + path + "/" + row["$ref"])
+                    navigate("/ui/resource/edit" + editDeletePath);
                 }
-            }
-        ];
-        const resource = getResourceByPath(schema, path + "/" + row["$ref"])
+            });
+        }
         if (resource && ("delete" in resource)) {
             buttons.push({
                 "data-testid": "delete_button",
                 id: "delete",
-                onClick: () => handleDelete(row),
+                onClick: () => handleDelete(row, editDeletePath),
                 label: t("button.delete")
             });
         }

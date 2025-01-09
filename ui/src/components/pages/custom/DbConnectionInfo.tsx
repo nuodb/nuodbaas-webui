@@ -208,7 +208,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
     return <div className="NuoDbConnectionInfo">
         {renderCopyField(t("dialog.dbConnectionInfo.label.database"), dbName)}
         {renderCopyField(t("dialog.dbConnectionInfo.label.sqlEndpoint"), sqlEndpoint)}
-        {renderCopyField(t("dialog.dbConnectionInfo.label.certificate"), caPem + "a\nb\nc\nd\ne\nf\ng\nh\ni\n")}
+        {renderCopyField(t("dialog.dbConnectionInfo.label.certificate"), caPem)}
         <Accordion summary={t("dialog.dbConnectionInfo.label.codeSamples")} defaultExpanded={false}>
             <div>{processMarkdownLinks(t("dialog.dbConnectionInfo.label.description"))}</div>
             {renderCopyCode(t("dialog.dbConnectionInfo.label.nuosql"), nuosql)}

@@ -9,3 +9,4 @@ selenium-tests/target
 .project
 .classpath
 build
+docker/development/default.conf

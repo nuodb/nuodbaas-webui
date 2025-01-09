@@ -7,10 +7,12 @@ export PATH := $(BIN_DIR):$(PATH)
 OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ARCH := $(shell uname -m | sed "s/x86_64/amd64/g")
 
+KWOKCTL_VERSION ?= 0.5.1
 KUBECTL_VERSION ?= 1.28.3
 HELM_VERSION ?= 3.16.2
 NUODB_CP_VERSION ?= 2.7.0
 
+KWOKCTL := bin/kwokctl
 KUBECTL := bin/kubectl
 HELM := bin/helm
 
@@ -64,15 +66,22 @@ deploy-image-ecr: build-image ## deploy Docker image to AWS
 	fi
 
 .PHONY: install-crds
-install-crds: $(KUBECTL) $(HELM)
+install-crds: $(KWOKCTL) $(KUBECTL) $(HELM)
+	@$(KWOKCTL) create cluster --wait 120s
+	@$(KWOKCTL) get kubeconfig | sed "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kwok-kwok-kube-apiserver:6443/g" > selenium-tests/files/kubeconfig
+	@$(KUBECTL) apply -f selenium-tests/files/nuodb-cp-runtime-config.yaml --context kwok-kwok -n default
 	@$(HELM) install -n default nuodb-cp-crd nuodb-cp-crd --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION)
-	@$(HELM) install -n default nuodb-cp-operator nuodb-cp-operator --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION)
-	@$(HELM) install -n default nuodb-cp-rest nuodb-cp-rest --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION)
 	@rm -rf nuodb-cp-crd
 
 .PHONY: setup-integration-tests
 setup-integration-tests: build-image install-crds ## setup containers before running integration tests
+	@if [ "$(NUODB_CP_BASE)" = "" ] ; then \
+		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_BASE%%%#http://localhost:8081#g" > docker/development/default.conf; \
+	else \
+		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_BASE%%%#$(NUODB_CP_BASE)#g" > docker/development/default.conf; \
+	fi
 	@docker compose -f selenium-tests/compose.yaml up --wait
+	@kubectl apply -f docker/development/samples.yaml
 	@docker exec selenium-tests-nuodb-cp-1 bash -c "curl \
 		http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true \
 		--data-binary \
@@ -80,8 +89,9 @@ setup-integration-tests: build-image install-crds ## setup containers before run
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
 
 .PHONY: teardown-integration-tests
-teardown-integration-tests: ## clean up containers used by integration tests
+teardown-integration-tests: $(KWOKCTL) ## clean up containers used by integration tests
 	@docker compose -f selenium-tests/compose.yaml down 2> /dev/null
+	@$(KWOKCTL) delete cluster 2> /dev/null || true
 
 .PHONY: run-integration-tests-only
 run-integration-tests-only: ## integration tests without setup/teardown
@@ -104,6 +114,11 @@ stop-dev: teardown-integration-tests ## stop development environment processes (
 	if [ "$$PID" != "" ] ; then kill -9 $$PID; fi
 	@PID=$(shell docker ps -aq --filter "name=nuodb-webui-dev"); \
 	if [ "$$PID" != "" ] ; then docker stop $$PID; fi
+
+$(KWOKCTL): $(KUBECTL)
+	mkdir -p bin
+	curl -L -s https://github.com/kubernetes-sigs/kwok/releases/download/v$(KWOKCTL_VERSION)/kwokctl-$(OS)-$(ARCH) -o $(KWOKCTL)
+	chmod +x $(KWOKCTL)
 
 $(KUBECTL):
 	mkdir -p bin
