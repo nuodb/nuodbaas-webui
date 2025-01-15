@@ -75,10 +75,10 @@ install-crds: $(KWOKCTL) $(KUBECTL) $(HELM)
 
 .PHONY: setup-integration-tests
 setup-integration-tests: build-image install-crds ## setup containers before running integration tests
-	@if [ "$(NUODB_CP_BASE)" = "" ] ; then \
-		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_BASE%%%#http://localhost:8081#g" > docker/development/default.conf; \
+	@if [ "$(NUODB_CP_URL_BASE)" = "" ] ; then \
+		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_URL_BASE%%%#http://localhost:8081#g" > docker/development/default.conf; \
 	else \
-		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_BASE%%%#$(NUODB_CP_BASE)#g" > docker/development/default.conf; \
+		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_URL_BASE%%%#$(NUODB_CP_URL_BASE)#g" > docker/development/default.conf; \
 	fi
 	@docker compose -f selenium-tests/compose.yaml up --wait
 	@kubectl apply -f docker/development/samples.yaml --context kwok-kwok -n default

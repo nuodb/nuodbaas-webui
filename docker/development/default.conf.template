@@ -10,11 +10,11 @@ server {
   }
 
   location /nuodb-cp/ {
-    proxy_pass %%%NUODB_CP_BASE%%%/;
+    proxy_pass %%%NUODB_CP_URL_BASE%%%/;
   }
 
   location /nuodb-cp/events {
-    proxy_pass %%%NUODB_CP_BASE%%%/events;
+    proxy_pass %%%NUODB_CP_URL_BASE%%%/events;
     proxy_buffering off;
   }
 
