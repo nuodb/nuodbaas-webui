@@ -5,6 +5,7 @@ import { TempAny } from '../../../utils/types'
 import Accordion from '../../controls/Accordion'
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
 import Tooltip from '@mui/material/Tooltip';
+import Textarea from '../../controls/Textarea';
 
 type DbConnectionInfoProps = {
     data: TempAny
@@ -154,7 +155,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
                 }} />
             </Tooltip>
             {value.includes("\n") ?
-                <textarea name={fieldname} disabled={true} value={value}></textarea>
+                <Textarea name={fieldname} disabled={true} value={value}></Textarea>
                 :
                 <input name={fieldname} disabled={true} value={value} />
             }

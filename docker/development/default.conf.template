@@ -10,11 +10,11 @@ server {
   }
 
   location /nuodb-cp/ {
-    proxy_pass http://localhost:8081/;
+    proxy_pass %%%NUODB_CP_URL_BASE%%%/;
   }
 
   location /nuodb-cp/events {
-    proxy_pass http://localhost:8081/events;
+    proxy_pass %%%NUODB_CP_URL_BASE%%%/events;
     proxy_buffering off;
   }
 

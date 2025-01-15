@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 import { getValue } from "./utils";
-import { FieldValuesType, FieldParameterType } from "../../utils/types";
+import { FieldValuesType, FieldParameterType, TempAny } from "../../utils/types";
 
 export interface FieldPropsDisplay {
     /** contains resource path */
@@ -120,24 +120,38 @@ export default function FieldBase(props: FieldProps): FieldBaseType {
         throw new Error("show() must be implemented");
     };
 
+    function getRecursiveValue(value: TempAny) {
+        if (value === undefined || value === null) {
+            return "";
+        }
+        if (typeof value === "object") {
+            if (Array.isArray(value)) {
+                return <>{value.map(v => <div>{getRecursiveValue(v)}</div>)}</>;
+            }
+            else {
+                return <dl className="map">{Object.keys(value).map(key => {
+                    return <div key={key}><dt>{String(key)}</dt><dd>{getRecursiveValue(value[key])}</dd></div>;
+                })}</dl>
+            }
+        }
+
+        let strValue = String(value);
+        if (strValue.indexOf("\n") !== -1) {
+            strValue = strValue.substring(0, strValue.indexOf("\n")) + "...";
+        }
+        if (strValue.length > 80) {
+            strValue = strValue.substring(0, 80) + "...";
+        }
+        return strValue;
+    }
+
     /**
      * shows display value of the field (read only)
      * @returns display value
      */
     function getDisplayValue(): ReactNode {
         const { prefix, values } = props;
-        let value = getValue(values, prefix);
-        if (value === undefined || value === null) {
-            return "";
-        }
-        value = String(value);
-        if (value.indexOf("\n") !== -1) {
-            value = value.substring(0, value.indexOf("\n")) + "...";
-        }
-        if (value.length > 80) {
-            value = value.substring(0, 80) + "...";
-        }
-        return String(value);
+        return getRecursiveValue(getValue(values, prefix));
     }
 
     return { props, validate, show, getDisplayValue }

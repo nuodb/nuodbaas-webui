@@ -27,7 +27,7 @@ export default function FieldSelect(props: FieldProps): FieldBaseType {
     function getDisplayValue(): ReactNode {
         const { prefix, values, t } = props;
         const value = getValue(values, prefix);
-        return t("field.enum." + prefix + "." + value, prefix + "." + value);
+        return t("field.enum." + prefix + "." + value, value);
     }
 
     return { ...FieldBase(props), show, getDisplayValue };
