@@ -80,7 +80,7 @@ setup-integration-tests: build-image install-crds ## setup containers before run
 	else \
 		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_URL_BASE%%%#$(NUODB_CP_URL_BASE)#g" > docker/development/default.conf; \
 	fi
-	@docker compose -f selenium-tests/compose.yaml up --wait
+	@NUODB_CP_VERSION=$(NUODB_CP_VERSION) docker compose -f selenium-tests/compose.yaml up --wait
 	@kubectl apply -f docker/development/samples.yaml --context kwok-kwok -n default
 	@docker exec selenium-tests-nuodb-cp-1 bash -c "curl \
 		http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true \
@@ -90,7 +90,7 @@ setup-integration-tests: build-image install-crds ## setup containers before run
 
 .PHONY: teardown-integration-tests
 teardown-integration-tests: $(KWOKCTL) ## clean up containers used by integration tests
-	@docker compose -f selenium-tests/compose.yaml down 2> /dev/null
+	@NUODB_CP_VERSION=$(NUODB_CP_VERSION) docker compose -f selenium-tests/compose.yaml down 2> /dev/null
 	@$(KWOKCTL) delete cluster 2> /dev/null || true
 
 .PHONY: run-integration-tests-only

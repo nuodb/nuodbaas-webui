@@ -30,7 +30,7 @@ services:
       retries: 3
       start_period: 60s
   nuodb-cp:
-    image: "ghcr.io/nuodb/nuodb-cp-images:2.7.0"
+    image: "ghcr.io/nuodb/nuodb-cp-images:${NUODB_CP_VERSION}"
     ports:
       - "8081:8080"
     command:
@@ -46,7 +46,7 @@ services:
       retries: 3
       start_period: 60s
   nuodb-cp-operator:
-    image: "ghcr.io/nuodb/nuodb-cp-images:2.7.0"
+    image: "ghcr.io/nuodb/nuodb-cp-images:${NUODB_CP_VERSION}"
     command:
       - "controller"
       - "--feature-gates"
