@@ -14,7 +14,7 @@ export default function FieldSelect(props: FieldProps): FieldBaseType {
         const { prefix, label, values, parameter, required, setValues, autoFocus, readonly, t } = props;
         let value = getValue(values, prefix);
 
-        return <Select id={prefix} key={prefix} label={label} value={value} autoFocus={autoFocus} required={required} onChange={(e: any) => {
+        return <Select id={prefix} key={prefix} label={label} description={parameter.description} value={value} autoFocus={autoFocus} required={required} onChange={(e: any) => {
             let v = { ...values };
             setValue(v, prefix, e.target.value);
             setValues(v);

@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableRow } from "../controls/Ta
 import FieldBase, { FieldBaseType, FieldProps } from './FieldBase'
 import FieldFactory from "./FieldFactory"
 import FieldMessage from "./FieldMessage";
+import InfoPopup from "../controls/InfoPopup";
 
 export default function FieldArray(props: FieldProps): FieldBaseType {
     /**
@@ -61,7 +62,10 @@ export default function FieldArray(props: FieldProps): FieldBaseType {
         return <Table key={prefix}>
             <TableHead>
                 <TableRow>
-                    <TableCell>{t("field.label." + prefix, prefix)}</TableCell>
+                    <TableCell className="NuoArrayLabel">
+                        {t("field.label." + prefix, prefix)}
+                        <InfoPopup description={parameter.description} />
+                    </TableCell>
                 </TableRow>
             </TableHead>
             <TableBody>
