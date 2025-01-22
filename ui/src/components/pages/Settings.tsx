@@ -7,12 +7,11 @@ import axios from "axios";
 import FieldSelect from "../fields/FieldSelect";
 import Button from "../controls/Button";
 import { withTranslation } from "react-i18next";
+import { PageProps } from "../../utils/types";
+import PageLayout from "./parts/PageLayout";
 
-type SettingsProps = {
-    t: any
-};
-
-function Settings({ t }: SettingsProps) {
+function Settings(props: PageProps) {
+    const { t } = props;
     const navigate = useNavigate();
     let [settings, setSettings] = useState("");
     let [advanced, setAdvanced] = useState(false);
@@ -75,7 +74,7 @@ function Settings({ t }: SettingsProps) {
         </div>
     }
 
-    return (
+    return (<PageLayout {...props}>
         <div className="NuoContainerSM">
             <h1>Settings</h1>
             {advanced ? renderAdvanced() : renderBasic()}
@@ -103,7 +102,7 @@ function Settings({ t }: SettingsProps) {
                     setAdvanced(true);
                 }}>Advanced</Button>
             }
-        </div >
+        </div ></PageLayout>
     );
 }
 

@@ -7,7 +7,7 @@ import { getResourceByPath, getCreatePath, getChild, replaceVariables, getSchema
 import FieldFactory from "../../fields/FieldFactory";
 import { Rest } from "./Rest";
 import Dialog from "./Dialog";
-import { MenuItemProps, TempAny } from "../../../utils/types";
+import { MenuItemProps, PageProps, TempAny } from "../../../utils/types";
 import { CustomViewField, evaluate, getCustomizationsView } from '../../../utils/Customizations';
 import Menu from '../../controls/Menu';
 import TableSettingsColumns from './TableSettingsColumns';
@@ -31,13 +31,19 @@ function getFlattenedKeys(obj: TempAny, prefix?: string): string[] {
     return ret;
 }
 
+interface TableProps extends PageProps {
+    ["data-testid"]: string;
+    data: TempAny;
+    path: string;
+}
+
 /**
  * shows a table with all the "data". Columns are determined by the schema definition for the "path"
  * @param {*} param0
  * @returns
  */
-function Table(props: TempAny) {
-    const { schema, data, path, t } = props;
+function Table(props: TableProps) {
+    const { schema, data, path, org, t } = props;
     const [columns, setColumns] = useState<MenuItemProps[]>([]);
     let navigate = useNavigate();
     let lastSchemaPathElement = "/" + getSchemaPath(schema, path);
@@ -271,12 +277,16 @@ function Table(props: TempAny) {
             });
         }
 
-        return <TableCell key={fieldName}>{value}</TableCell>;
+        return <TableCell key={fieldName}>
+            {fieldName === "name" ? <button onClick={() => {
+                navigate("/ui/resource/view" + path + "/" + row["$ref"]);
+            }}>{value}</button> : value}
+        </TableCell>;
 
     }
 
     const tableLabels = getTableLabels();
-    const visibleColumns = columns.filter(col => col.selected);
+    const visibleColumns = columns.filter(col => col.selected && (col.id !== "organization" || org === ""));
     return (
         <TableCustom data-testid={props["data-testid"]}>
             <TableHead>

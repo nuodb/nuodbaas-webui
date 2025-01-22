@@ -10,13 +10,11 @@
     margin-right: 24px;
 }
 .NuoBanner {
+    display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 25px;
     width: 100%;
-    padding-left: 24px;
-    padding-right: 24px;
-    background-color: rgb(25, 118, 210);
-    box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px;
-    color: white;
-    position: static;
 }
 
 .NuoBannerItems {
@@ -157,6 +155,12 @@
     text-align: left;
 }
 
+.NuoTableTd>button {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    text-decoration: underline;
+}
 .NuoTableTh {
     line-height: 1.5rem;
     font-weight: 500;
@@ -332,4 +336,85 @@ code {
 .NuoRecordingBanner {
     background-color: #e0e033;
     padding: 5px 24px;
+}
+.MockHome {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+}
+
+.NuoLeftMenu {
+    width: 200px;
+    padding: 10px;
+    transition: width 0.2s, padding 0.2s, opacity 0.2s;
+}
+
+.NuoLogo {
+    width: 60px;
+    position: relative;
+}
+
+.NuoLeftMenuSelected {
+    background-color: #4f8dbf;
+    color: white;
+}
+
+.NuoLeftMenu>details {
+    text-wrap: nowrap;
+}
+
+.NuoLeftMenu>details>ol {
+    margin: 0 0 10px 0;
+}
+
+.NuoLeftMenu>details>ol>li {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    list-style-type: none;
+    border-radius: 5px;
+    height: 40px;
+    padding: 0 10px;
+    cursor: default;
+    text-wrap: nowrap;
+    overflow: hidden;
+}
+
+.NuoLeftMenu>details>summary {
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.NuoPageLayout {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+
+.NuoPageLayoutMenuSeparator {
+    width: 20px;
+    border-left: 1px solid;
+    border-color: rgba(240, 240, 240, 1);
+    margin: 0 0 0 10px;
+    padding: 0 10px 0 0;
+
+}
+
+.NuoPageLayoutMenuSeparator>button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    border: 1px solid;
+    border-radius: 50%;
+    padding: 0;
+    margin: 0;
+    left: -10px;
+    top: 10px;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    color: rgba(200, 200, 200, 1);
+
 }

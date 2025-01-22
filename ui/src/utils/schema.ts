@@ -115,6 +115,17 @@ export function getSchemaPath(schema: SchemaType, path:string) : string|null {
     return ret.length === 1 ? ret[0] : null;
 }
 
+export function getOrgFromPath(schema: SchemaType, path: string) {
+    let pathParts = path.split("/");
+    const schemaParts = getSchemaPath(schema, path)?.split("/") || [];
+    for(let i=0; i<pathParts.length && i<schemaParts.length; i++) {
+        if(schemaParts[i] === "{organization}") {
+            return pathParts[i];
+        }
+    }
+    return "";
+}
+
 /**
  * given a search string, replaces all placeholders "{variable}" with the value of the variable
  * @param {*} search

@@ -66,3 +66,12 @@ export type RestLogEntry = {
     success: boolean
     body?: JsonType,
 }
+
+export interface PageProps {
+    schema: SchemaType,
+    isRecording: boolean,
+    org: string,
+    setOrg: (org: string) => void;
+    orgs: string[];
+    t: any
+};

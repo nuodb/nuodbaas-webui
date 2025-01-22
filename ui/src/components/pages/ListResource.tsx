@@ -1,14 +1,15 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Table from "./parts/Table";
 import { getResourceEvents, getCreatePath, getResourceByPath, getFilterField } from "../../utils/schema";
 import { Rest } from "./parts/Rest";
 import Button from "../controls/Button";
 import Path, { parseSearch } from './parts/Path'
+import PageLayout from './parts/PageLayout'
 import Auth from "../../utils/auth"
-import { SchemaType, TempAny } from "../../utils/types";
+import { PageProps, TempAny } from "../../utils/types";
 import Pagination from "../controls/Pagination";
 import { withTranslation } from "react-i18next";
 
@@ -20,7 +21,8 @@ type ItemsAndPathProps = {
 /**
  * handles all the /resource/list/* requests to list a resource
  */
-function ListResource({ schema, t }: SchemaType) {
+function ListResource(props: PageProps) {
+    const { schema, t } = props;
     const navigate = useNavigate();
     const path = "/" + useParams()["*"];
     const pageSize = 20;
@@ -129,18 +131,18 @@ function ListResource({ schema, t }: SchemaType) {
     if (itemsAndPath.items) {
         const dataNotDeleted = itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true);
         return (
-            <React.Fragment>
+            <PageLayout {...props} >
                 <Path schema={schema} path={path} filterValues={getFilterValues()} search={search} setSearch={setSearch} setPage={setPage} />
                 {createPath && <Button data-testid="list_resource__create_button" variant="outlined" onClick={handleCreate}>{createLabel}</Button>}
                 {renderPaging()}
                 <Table
                     data-testid="list_resource__table"
-                    schema={schema}
+                    {...props}
                     data={dataNotDeleted}
                     path={itemsAndPath.path}
                 />
                 {renderPaging()}
-            </React.Fragment>
+            </PageLayout>
         );
     }
     else {

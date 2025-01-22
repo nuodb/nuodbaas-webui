@@ -46,7 +46,7 @@ export function parseSearch(search: string) {
     return ret;
 }
 
-function Path({ schema, path, filterValues, search, setSearch, setPage, t }: TempAny) {
+function Path({ schema, path, filterValues, search, setSearch, setPage, org, t }: TempAny) {
     const [searchField, setSearchField] = useState(search);
     const [error, setError] = useState(undefined);
 
@@ -73,10 +73,14 @@ function Path({ schema, path, filterValues, search, setSearch, setPage, t }: Tem
             return null;
         }
 
-        return <Select id={filterField} label={t("field.label." + filterField, filterField)} value={"__all__"} onChange={({ target }) => {
+        if (filterField === "organization") {
+            return null;
+        }
+
+        return <Select id={filterField} label={t("field.label." + filterField, filterField)} value={""} onChange={({ target }) => {
                 navigate("/ui/resource/list" + path + "/" + target.value);
             }}>
-            <SelectOption value="__all__">{t("control.select.item.all")}</SelectOption>
+            <SelectOption value="">{t("control.select.item.all")}</SelectOption>
             {filterValues && filterValues.map((fv: string) => <SelectOption key={fv} value={fv}>{fv}</SelectOption>)}
         </Select>;
     }
@@ -96,7 +100,15 @@ function Path({ schema, path, filterValues, search, setSearch, setPage, t }: Tem
     let filterField = getFilterField(schema, path);
 
     let pathParts = (path.startsWith("/") ? path.substring(1) : path).split("/");
-    const schemaPath = getSchemaPath(schema, path);
+    const schemaPath = getSchemaPath(schema, path) || "";
+    let schemaPathParts = (schemaPath?.startsWith("/") ? schemaPath.substring(1) : schemaPath)?.split("/");
+    for (let i = 0; i < schemaPathParts.length; i++) {
+        if (schemaPathParts[i] === "{organization}" && org !== "") {
+            schemaPathParts.splice(i, 1);
+            pathParts.splice(i, 1);
+            break;
+        }
+    }
     return <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
         <StyledBreadcrumbs data-testid="path_component" separator=">" aria-label="resources" style={{ fontSize: "2em", padding: "20px", display: "flex", flexWrap: "nowrap" }}>
             {pathParts && pathParts.map((p: string, index: number) => {

@@ -1,19 +1,23 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
-import React from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Button from "../controls/Button";
+import PageLayout from "./parts/PageLayout";
+import { PageProps } from "../../utils/types";
+import { withTranslation } from "react-i18next";
 
-export default function ErrorPage() {
+function ErrorPage(props: PageProps) {
     const navigate = useNavigate();
     let [searchParams] = useSearchParams();
     return (
-        <React.Fragment>
+        <PageLayout {...props}>
             <h1>Error occurred</h1>
             <div>{searchParams.get("msg") || "Unknown Error occurred"}</div>
             <Button onClick={() => {
                 navigate("/ui");
             }}>Dismiss</Button>
-        </React.Fragment>
+        </PageLayout>
     );
 }
+
+export default withTranslation()(ErrorPage)

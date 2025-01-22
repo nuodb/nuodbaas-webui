@@ -4,20 +4,17 @@ import Button from "../controls/Button";
 import { withTranslation } from "react-i18next";
 import { Rest } from "./parts/Rest";
 import { useEffect, useState } from "react";
-import { JsonType, RestLogEntry } from "../../utils/types";
+import { JsonType, PageProps, RestLogEntry } from "../../utils/types";
 import { Tooltip } from "@mui/material";
 import Accordion from "../controls/Accordion";
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
 import Auth from "../../utils/auth";
-
-type AutomationProps = {
-    isRecording: boolean,
-    t: any
-};
+import PageLayout from "./parts/PageLayout";
 
 let copiedTimeout: NodeJS.Timeout | undefined = undefined;
 
-function Automation({ isRecording, t }: AutomationProps) {
+function Automation(props: PageProps) {
+    const { isRecording, t } = props;
     const [log, setLog] = useState<RestLogEntry[]>([]);
     const [selectedTimestamp, setSelectedTimestamp] = useState(""); //using the timestamp (millisecond granularity) as unique key
     const [hideGetRequests, setHideGetRequests] = useState(true);
@@ -38,7 +35,7 @@ function Automation({ isRecording, t }: AutomationProps) {
         selectedLogEntry = filteredLog[0];
     }
 
-    return (
+    return (<PageLayout {...props}>
         <div className="NuoContainerLG">
             <h1>{t("dialog.automation.title")}</h1>
             <div className="NuoButtons">
@@ -80,7 +77,7 @@ function Automation({ isRecording, t }: AutomationProps) {
                 </div>}
 
             {filteredLog.length > 0 && !isRecording && renderCopyCode(t("dialog.automation.curl"), getCurlCommands(filteredLog))}
-        </div >
+        </div ></PageLayout>
     );
 
     function getCurlCommands(log: RestLogEntry[]): string[] {

@@ -42,16 +42,16 @@
     },
     "resource": {
         "label": {
-            "backuppolicies": "backup policies",
-            "backuppolicies_one": "backup policy",
-            "backups": "backups",
-            "backups_one": "backup",
-            "databases": "databases",
-            "databases_one": "database",
-            "projects": "projects",
-            "projects_one": "project",
-            "users": "users",
-            "users_one": "user"
+            "backuppolicies": "Backup policies",
+            "backuppolicies_one": "Backup policy",
+            "backups": "Backups",
+            "backups_one": "Backup",
+            "databases": "Databases",
+            "databases_one": "Database",
+            "projects": "Projects",
+            "projects_one": "Project",
+            "users": "Users",
+            "users_one": "User"
         }
     },
     "field": {
@@ -142,7 +142,8 @@
             "hint.new.value": "new value"
         },
         "select": {
-            "selectItem": "--- Select Item ---"
+            "selectItem": "--- Select Item ---",
+            "allOrgs": "All Organizations"
         }
     },
     "form": {
