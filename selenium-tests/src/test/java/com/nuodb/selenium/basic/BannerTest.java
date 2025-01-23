@@ -16,7 +16,7 @@ public class BannerTest extends TestRoutines {
     public static final List<String> expectedMenuItems = ImmutableList.of("backuppolicies", "backups", "databases", "projects", "users");
 
     @Test
-    public void testHorizontalBanner() throws MalformedURLException {
+    public void testMenuBanner() throws MalformedURLException {
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
 
         // make sure all menu items are present
@@ -25,15 +25,4 @@ public class BannerTest extends TestRoutines {
         }
     }
 
-    @Test
-    public void testMenuBanner() throws MalformedURLException {
-        setWindowSize(500, 800);
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
-        click("menu-appbar");
-
-        // make sure all menu items are present
-        for(String menuItem : expectedMenuItems) {
-            waitElement("menu-label-" + menuItem);
-        }
-    }
 }

@@ -1,4 +1,17 @@
 /* (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved. */
+html,
+body,
+#root,
+.App,
+.NuoPageLayout {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
+html {
+    min-height: 100vh;
+}
 .NuoContainerSM {
     max-width: 600px;
     margin-left: auto;
@@ -13,7 +26,7 @@
     display: flex;
         flex-direction: row;
         justify-content: space-between;
-        padding: 25px;
+        padding: 23px 25px 23px 27px;
     width: 100%;
 }
 
@@ -344,48 +357,60 @@ code {
     width: 100%;
 }
 
+.NuoLogo {
+    width: 62px;
+    position: relative;
+}
 .NuoLeftMenu {
     width: 200px;
     padding: 10px;
     transition: width 0.2s, padding 0.2s, opacity 0.2s;
 }
-
-.NuoLogo {
-    width: 60px;
-    position: relative;
-}
-
-.NuoLeftMenuSelected {
-    background-color: #4f8dbf;
-    color: white;
-}
-
 .NuoLeftMenu>details {
     text-wrap: nowrap;
 }
 
 .NuoLeftMenu>details>ol {
     margin: 0 0 10px 0;
+    padding: 0;
 }
 
-.NuoLeftMenu>details>ol>li {
+.NuoLeftMenuItem {
     display: flex;
     justify-content: left;
     align-items: center;
     list-style-type: none;
     border-radius: 5px;
     height: 40px;
-    padding: 0 10px;
+    padding: 0;
     cursor: default;
     text-wrap: nowrap;
     overflow: hidden;
 }
 
+.NuoLeftMenuItem>svg {
+    margin: 5px;
+    color: #cdd1d6;
+}
+
+.NuoLeftMenuItem {
+    text-align: left;
+    color: #7a8088;
+}
 .NuoLeftMenu>details>summary {
     text-transform: uppercase;
     font-weight: bold;
 }
 
+.NuoLeftMenuItemSelected,
+.NuoLeftMenuItemSelected>svg {
+    background-color: #4f8dbf;
+    color: white;
+}
+
+.NuoLeftMenuItemSelected>svg {
+    color: #cdd1d6
+}
 .NuoPageLayout {
     display: flex;
     flex-direction: column;
@@ -417,4 +442,21 @@ code {
     background-color: white;
     color: rgba(200, 200, 200, 1);
 
+}
+.NuoOrgSelector {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.NuoOrgSelector>svg {
+    margin: 5px;
+    color: #cdd1d6
+}
+
+.NuoOrgSelector>select {
+    display: flex;
+    flex: 1 1 auto;
+    border: 0;
+    color: #7a8088;
 }

@@ -37,6 +37,17 @@ export default function App() {
   const pageProps = { schema, isRecording, org, setOrg, orgs };
 
   useEffect(() => {
+    let org = "";
+    let path = window.location.pathname;
+    if (path.startsWith("/ui/resource/")) {
+      path = path.substring("/ui/resource/".length);
+      const posSlash = path.indexOf("/");
+      if (posSlash !== -1) {
+        org = getOrgFromPath(schema, path.substring(posSlash));
+      }
+    }
+    setOrg(org);
+
     Rest.get("/users").then((data: any) => {
       if (data.items) {
         let orgs: string[] = [];
@@ -49,23 +60,10 @@ export default function App() {
         setOrgs(orgs);
       }
     })
-  }, []);
-
-  useEffect(() => {
-    let path = window.location.pathname;
-    if (path.startsWith("/ui/resource/")) {
-      path = path.substring("/ui/resource/".length);
-      const posSlash = path.indexOf("/");
-      if (posSlash !== -1) {
-        setOrg(getOrgFromPath(schema, path.substring(posSlash)));
-        return;
-      }
-    }
-    setOrg("");
   }, [schema]);
 
   return (
-    <div className="App">
+    <div className="App" data-testid={orgs.length > 0 ? "banner-done" : ""}>
       <GlobalErrorBoundary>
         <Customizations>
           <CssBaseline />
