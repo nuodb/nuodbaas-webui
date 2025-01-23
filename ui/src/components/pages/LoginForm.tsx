@@ -6,16 +6,19 @@ import Auth from "../../utils/auth";
 import Button from '../controls/Button';
 import TextField from '../controls/TextField';
 import BuildNumber from "./parts/BuildNumber"
+import { withTranslation } from 'react-i18next';
+import { TempAny } from '../../utils/types';
 
 interface Props {
-    setIsLoggedIn: (isLoggedIn: boolean) => void
+    setIsLoggedIn: (isLoggedIn: boolean) => void,
+    t: TempAny
 }
 
 /**
  * Provides Login form storing credentials (currently username/password) in "credentials" local storage
  * @returns
  */
-export default function LoginForm({ setIsLoggedIn }: Props) {
+function LoginForm({ setIsLoggedIn, t }: Props) {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
 
@@ -38,8 +41,8 @@ export default function LoginForm({ setIsLoggedIn }: Props) {
 
     return (
         <React.Fragment>
-            <div className="NuoContainerSM">
-                <h3>NuoDB Login</h3>
+            <div className="NuoLoginForm">
+                <img src="/ui/images/nuodb.png" alt="" />
                 <form>
                     <div className="fields">
                         <TextField required data-testid="organization" id="organization" label="Organization" value={organization} onChange={(event) => setOrganization(event.target.value)} />
@@ -54,3 +57,5 @@ export default function LoginForm({ setIsLoggedIn }: Props) {
         </React.Fragment>
     );
 }
+
+export default withTranslation()(LoginForm);

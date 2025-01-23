@@ -48,19 +48,21 @@ export default function App() {
     }
     setOrg(org);
 
-    Rest.get("/users").then((data: any) => {
-      if (data.items) {
-        let orgs: string[] = [];
-        data.items.forEach((item: string) => {
-          let org = item.split("/")[0];
-          if (!orgs.includes(org)) {
-            orgs.push(org);
-          }
-        });
-        setOrgs(orgs);
-      }
-    })
-  }, [schema]);
+    if (isLoggedIn) {
+      Rest.get("/users").then((data: any) => {
+        if (data.items) {
+          let orgs: string[] = [];
+          data.items.forEach((item: string) => {
+            let org = item.split("/")[0];
+            if (!orgs.includes(org)) {
+              orgs.push(org);
+            }
+          });
+          setOrgs(orgs);
+        }
+      })
+    }
+  }, [schema, isLoggedIn]);
 
   return (
     <div className="App" data-testid={orgs.length > 0 ? "banner-done" : ""}>

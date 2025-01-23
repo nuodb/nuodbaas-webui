@@ -147,6 +147,7 @@ export default function LeftMenu(props: LeftMenuProps) {
     }
     return <div className="NuoLeftMenu" style={style}>
         <Organization {...props} />
+        <div className="NuoOrgSeparator"></div>
         <Menu data={data} org={org} />
     </div>;
 }
