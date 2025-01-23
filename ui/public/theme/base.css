@@ -350,12 +350,6 @@ code {
     background-color: #e0e033;
     padding: 5px 24px;
 }
-.MockHome {
-    display: flex;
-    flex-direction: row;
-    height: 100%;
-    width: 100%;
-}
 
 .NuoLogo {
     width: 62px;
@@ -459,4 +453,59 @@ code {
     flex: 1 1 auto;
     border: 0;
     color: #7a8088;
+}
+
+.NuoFormHeader {
+    margin-block-start: 0.67em;
+    margin-block-end: 2em;
+    margin-inline-start: 0;
+    margin-inline-end: 0;
+}
+
+.NuoFormHeader>h1 {
+    display: flex;
+    margin-block-start: 0;
+    margin-block-end: 0;
+    font-size: 2em;
+    font-weight: bold;
+    unicode-bidi: isolate;
+}
+
+.NuoFormHeader>label {
+    margin-block-end: 0.67em;
+}
+
+.NuoInfoPopup {
+    display: flex;
+    cursor: default;
+    flex-direction: row;
+    align-items: top;
+    justify-content: right;
+}
+
+.NuoInfoPopup>label {
+    display: none;
+}
+
+.NuoInfoPopup>svg {
+    opacity: 0.5;
+}
+
+.NuoInfoPopup:hover>label {
+    display: flex;
+    text-wrap: wrap;
+    max-width: 500px;
+    background-color: white;
+    box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+    position: absolute;
+    margin-top: 30px;
+    margin-left: -1000px;
+    padding: 5px;
+    z-index: 1001;
+}
+
+.NuoArrayLabel {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }

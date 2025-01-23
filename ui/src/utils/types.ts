@@ -23,6 +23,7 @@ export type FieldParameterType = {
     properties?: FieldParametersType,
     additionalProperties?: FieldParameterType
     enum?: string[],
+    description?: string,
     schema?: {
         default: boolean|string,
         type: string

@@ -1,8 +1,9 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
 import React from 'react';
 import { isMaterial } from '../../utils/Customizations';
-import { IconButton, InputAdornment, TextField as MuiTextField } from '@mui/material'
+import { IconButton, InputAdornment, TextField as MuiTextField } from '@mui/material';
+import InfoPopup from './InfoPopup';
 
 export type TextFieldProps = {
     "data-testid"?: string,
@@ -10,6 +11,7 @@ export type TextFieldProps = {
     required?: boolean,
     id: string,
     label: string,
+    description?: string,
     type?: "password" | "datetime-local" | "text",
     value?: string,
     defaultValue?: string,
@@ -31,18 +33,20 @@ export default function TextField(props: TextFieldProps): JSX.Element {
             fullWidth={true}
             {...fieldProps}
             name={props.id}
+            aria-details={props.description}
             error={!!props.error}
             helperText={props.error}
-            slotProps={(props.icon && {
+            slotProps={((props.icon || fieldProps.description) && {
                 input: {
                     endAdornment:
                         <InputAdornment position="end">
-                            <IconButton
+                            {props.icon && <IconButton
                                 aria-label=""
                                 onClick={props.iconOnClick}
                             >
                                 {props.icon}
-                            </IconButton>
+                            </IconButton>}
+                            {props.description && <InfoPopup description={props.description} />}
                         </InputAdornment>
                 }
             }) || undefined
@@ -51,13 +55,14 @@ export default function TextField(props: TextFieldProps): JSX.Element {
     }
     else {
         return <div>
-            <div className="NuoFieldBase NuoFieldString" key={props.id}>
+            <div className="NuoFieldBase NuoFieldString" key={props.id} aria-details={props.description}>
                 <label>{props.label}</label>
                 <input name={props.id} {...fieldProps} />
-                <button onClick={(event) => {
+                {props.iconOnClick && <button onClick={(event) => {
                     event.preventDefault();
                     props.iconOnClick && props.iconOnClick(event);
-                }}>{props.icon}</button>
+                }}>{props.icon}</button>}
+                {props.description && <InfoPopup description={props.description} />}
             </div>
             {props.error !== "" && <div className="NuoFieldError">{props.error}</div>}
         </div>
