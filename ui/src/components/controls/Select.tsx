@@ -2,12 +2,14 @@
 
 import { ReactNode } from 'react';
 import { isMaterial } from '../../utils/Customizations';
-import { FormControl, InputLabel, MenuItem, Select as MuiSelect } from '@mui/material'
+import { FormControl, InputAdornment, InputLabel, MenuItem, Select as MuiSelect } from '@mui/material'
+import InfoPopup from './InfoPopup';
 
 export type SelectProps = {
     "data-testid"?: string,
     id: string,
     label?: string,
+    description?: string,
     value: string,
     children: ReactNode,
     required?: boolean,
@@ -23,11 +25,22 @@ export type SelectOptionProps = {
 }
 
 export default function Select(props: SelectProps): JSX.Element {
-    const { id, label, required, children } = props;
+    const { id, label, description, required, children } = props;
     if (isMaterial()) {
         return <FormControl key={id} fullWidth>
             <InputLabel id={"label_" + id}>{label}</InputLabel>
-            <MuiSelect labelId={"label_" + id} name={id} label={label} {...props} value={props.value || ""}>
+            <MuiSelect labelId={"label_" + id} name={id} label={label} {...props} value={props.value || ""}
+                endAdornment={(description) &&
+                    <InputAdornment position="end">
+                        {description && <InfoPopup description={description} />}
+                    </InputAdornment>
+                }
+                sx={{
+                    "& .MuiSelect-icon": {
+                        right: description ? "40px !important;" : "0"
+                    },
+                }}
+            >
                 {children}
             </MuiSelect>
             {required && <span>Required</span>}
@@ -40,6 +53,7 @@ export default function Select(props: SelectProps): JSX.Element {
                 {children}
             </select>
             {required && <span>Required</span>}
+            {description && <InfoPopup description={description} />}
         </div>;
     }
 }

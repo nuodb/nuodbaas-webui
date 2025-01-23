@@ -3,6 +3,8 @@
 }
 .NuoFieldString,
 .NuoFieldSelect {
+    display: flex;
+        flex-direction: row;
     position: relative;
     border: 1px solid;
     margin: 5px;

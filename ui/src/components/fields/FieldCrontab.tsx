@@ -13,7 +13,7 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
      * show Field of type Boolean using the values and schema definition
      */
     function show(): ReactNode {
-        const { prefix, label, values, setValues, errors, autoFocus, readonly, required, t } = props;
+        const { prefix, label, parameter, values, setValues, errors, autoFocus, readonly, required, t } = props;
         let error = (errors && (prefix in errors) && errors[prefix]) || "";
         let value = getValue(values, prefix) || "";
         const parts = value.split(" ");
@@ -40,7 +40,7 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
 
         return <div key={prefix} className={(isOther && "NuoFieldCrontab") || ""}>
             <label id={"label_" + prefix}>{isOther && label}</label>
-            <Select id={prefix} key={prefix} label={(!isOther && label) || ""} value={frequency} required={required} autoFocus={autoFocus} onChange={(e: any) => {
+            <Select id={prefix} key={prefix} label={(!isOther && label) || ""} description={parameter.description} value={frequency} required={required} autoFocus={autoFocus} onChange={(e: any) => {
                 let v = { ...values };
                 if (e.target.value === "other") {
                     setValue(v, prefix, "* * * * *");
@@ -81,7 +81,7 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
     function getDisplayValue(): ReactNode {
         const { prefix, values, t } = props;
         const value = getValue(values, prefix);
-        return t("field.enum." + prefix + "." + value, prefix + "." + value);
+        return t("field.enum." + prefix + "." + value, value);
     }
 
     /** validate field and set error state

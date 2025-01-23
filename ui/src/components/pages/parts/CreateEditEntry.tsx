@@ -14,12 +14,17 @@ import { FieldValuesType, FieldParameterType, TempAny, StringMapType, FieldParam
 import { getCustomizations } from "../../../utils/Customizations";
 import { withTranslation } from "react-i18next";
 
+type PutResourceType = {
+    summary?: string;
+}
+
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
  */
 function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
     const navigate = useNavigate();
 
+    const [putResource, setPutResource] = useState<PutResourceType>({});
     const [formParameters, setFormParameters] = useState<FieldParametersType>({});
     const [sectionFormParameters, setSectionFormParameters] = useState([]);
     const [urlParameters, setUrlParameters] = useState<FieldParametersType>({});
@@ -236,6 +241,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
         setValues(v);
         setFocus(v, formParams);
         setFormParameters(formParams);
+        setPutResource(putResource);
         setSectionFormParameters(sectionFormParams);
     }, [schema, path, data, t]);
 
@@ -296,7 +302,10 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
     return <div className="NuoContainerSM">
         <RestSpinner />
         <form>
+            <div className="NuoFormHeader">
             {!readonly && <h1>{data ? t("text.editEntryForPath", { path }) : t("text.createEntryForPath", { path })}</h1>}
+                <label>{putResource.summary}</label>
+            </div>
             <div className="fields">
                 {urlParameters && Object.keys(urlParameters)
                     .filter(key => urlParameters[key].in === "query")

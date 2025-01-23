@@ -7,6 +7,7 @@ import FieldBase, { FieldBaseType, FieldProps } from "./FieldBase"
 import { TempAny } from "../../utils/types";
 import { ReactNode } from "react";
 import { Table, TableBody, TableCell, TableHead, TableRow } from "../controls/Table";
+import InfoPopup from "../controls/InfoPopup";
 
 export default function FieldMap(props: FieldProps): FieldBaseType {
 
@@ -53,7 +54,7 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
      * @returns
      */
     function show(): ReactNode {
-        const { prefix, values, errors, setValues, readonly, t } = props;
+        const { prefix, values, errors, setValues, readonly, parameter, t } = props;
 
         let valueKeys = Object.keys(getValue(values, prefix) || {});
         let rows = [];
@@ -142,9 +143,9 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
             <Table key={prefix}>
                 <TableHead>
                     <TableRow>
-                        <TableCell>{t("field.map.header.label.key")}</TableCell>
-                        <TableCell>{t("field.map.header.label.value")}</TableCell>
-                        <TableCell></TableCell>
+                        <TableCell>{t("field.label." + prefix, prefix)} {t("field.map.header.label.key")}</TableCell>
+                        <TableCell>{t("field.label." + prefix, prefix)} {t("field.map.header.label.value")}</TableCell>
+                        <TableCell className="NuoTableMenuCell"><InfoPopup description={parameter.description} /></TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>

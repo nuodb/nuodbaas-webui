@@ -172,7 +172,7 @@ export default function FieldDateTime(props: FieldProps): FieldBaseType {
      * @returns
      */
     function show(): ReactNode {
-        const { prefix, label, values, errors, required, setValues, autoFocus, updateErrors, readonly, t } = props;
+        const { prefix, label, values, errors, required, setValues, autoFocus, updateErrors, readonly, parameter, t } = props;
         let value = getValue(values, prefix);
         let editValue = getValue(values, "_" + prefix);
         if (editValue === null) {
@@ -184,6 +184,7 @@ export default function FieldDateTime(props: FieldProps): FieldBaseType {
             required={required}
             id={prefix}
             label={label}
+            description={parameter.description}
             value={editValue}
             autoFocus={autoFocus}
             error={error}

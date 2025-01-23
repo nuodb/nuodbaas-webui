@@ -12,10 +12,10 @@ export default function FieldPassword(props: FieldProps): FieldBaseType {
      * @returns
      */
     function show(): ReactNode {
-        let { prefix, label, values, errors, required, setValues, autoFocus, readonly } = props;
+        let { prefix, label, values, errors, required, setValues, autoFocus, readonly, parameter } = props;
         let value = String(getValue(values, prefix) || "");
         let error = (errors && (prefix in errors) && errors[prefix]) || "";
-        return <TextField key={prefix} type="password" required={required} id={prefix} label={label} value={value} autoFocus={autoFocus} onChange={({ currentTarget: input }) => {
+        return <TextField key={prefix} type="password" required={required} id={prefix} label={label} description={parameter.description} value={value} autoFocus={autoFocus} onChange={({ currentTarget: input }) => {
             let v = { ...values };
             setValue(v, prefix, input.value);
             setValues(v);
