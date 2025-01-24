@@ -131,7 +131,7 @@ function ListResource({ schema, t }: SchemaType) {
         return (
             <React.Fragment>
                 <Path schema={schema} path={path} filterValues={getFilterValues()} search={search} setSearch={setSearch} setPage={setPage} />
-                {createPath && <Button data-testid="list_resource__create_button" variant="outlined" onClick={handleCreate}>{createLabel}</Button>}
+                {createPath && <Button data-testid={"list_resource__create_button_" + createPathFirstPart} variant="outlined" onClick={handleCreate}>{createLabel}</Button>}
                 {renderPaging()}
                 <Table
                     data-testid="list_resource__table"

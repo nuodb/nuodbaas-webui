@@ -50,23 +50,21 @@ public class ProjectTest extends TestRoutines {
         clickMenu("projects");
 
         // resource versions are getting updated in the background a few times by the control plane / operator preventing an update later.
-        sleep(5000);
+        retry(10, 1000, ()->{
+            // find project and start edit mode
+            List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", projectName, MENU_COLUMN);
+            assertEquals(1, buttonsCell.size());
+            clickPopupMenu(buttonsCell.get(0), "edit_button");
 
-        // find project and start edit mode
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", projectName, MENU_COLUMN);
-        assertEquals(1, buttonsCell.size());
-        clickPopupMenu(buttonsCell.get(0), "edit_button");
+            // edit project and save
+            replaceInputElementByName("tier", "n0.small");
+            waitElement("section-title-advanced").click();
+            waitElement("section-maintenance").click();
+            replaceInputElementByName("maintenance.expiresIn", "30d");
+            waitElement("create_resource__create_button").click();
+            waitRestComplete();
 
-        // edit project and save
-        replaceInputElementByName("tier", "n0.small");
-        waitElement("section-title-advanced").click();
-        waitElement("section-maintenance").click();
-        replaceInputElementByName("maintenance.expiresIn", "30d");
-        waitElement("create_resource__create_button").click();
-        waitRestComplete();
-
-        // verify project was modified
-        retry(()->{
+            // verify project was modified
             List<WebElement> tierCells = waitTableElements("list_resource__table", "name", projectName, "tier");
             assertThat(tierCells)
                 .hasSize(1)
