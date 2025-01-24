@@ -1,3 +1,5 @@
+// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { PageProps } from "../../../utils/types";

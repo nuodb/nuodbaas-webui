@@ -1,4 +1,5 @@
 #!/bin/bash
+# (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 REPOSITORY="nuodbaas-webui"
 DOCKER_REGISTRY="ghcr.io/nuodb/${REPOSITORY}"
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"

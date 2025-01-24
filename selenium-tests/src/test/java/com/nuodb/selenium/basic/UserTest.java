@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 package com.nuodb.selenium.basic;
 
@@ -49,9 +49,11 @@ public class UserTest extends TestRoutines {
         clickMenu("users");
 
         // find user and start edit mode
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", userName, MENU_COLUMN);
-        assertEquals(1, buttonsCell.size());
-        clickPopupMenu(buttonsCell.get(0), "edit_button");
+        retryStale(()->{
+            List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", userName, MENU_COLUMN);
+            assertEquals(1, buttonsCell.size());
+            clickPopupMenu(buttonsCell.get(0), "edit_button");
+        });
 
         // edit user and save
         waitElement("section-title-labels").click();

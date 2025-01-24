@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { useState } from 'react';
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -42,7 +42,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     return (
         <React.Fragment>
             <div className="NuoLoginForm">
-                <img src="/ui/images/nuodb.png" alt="" />
+                <img alt="" />
                 <form>
                     <div className="fields">
                         <TextField required data-testid="organization" id="organization" label="Organization" value={organization} onChange={(event) => setOrganization(event.target.value)} />

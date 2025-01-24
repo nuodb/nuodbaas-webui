@@ -1,4 +1,4 @@
-/* (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved. */
+/* (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved. */
 html,
 body,
 #root,
@@ -32,6 +32,7 @@ html {
 }
 
 .NuoLoginForm>img {
+    content: url("/ui/images/nuodb.png");
     width: 300px;
     height: 100%;
     padding: 30px;

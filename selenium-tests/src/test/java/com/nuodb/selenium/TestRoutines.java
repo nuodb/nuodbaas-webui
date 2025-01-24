@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 package com.nuodb.selenium;
 
@@ -160,12 +160,14 @@ public class TestRoutines extends SeleniumTestHelper {
     }
 
     public void deleteResource(Resource resource, String name) {
-        clickMenu(resource.name());
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", name, MENU_COLUMN);
-        assertEquals(1, buttonsCell.size());
-        clickPopupMenu(buttonsCell.get(0), "delete_button");
-        waitElement("dialog_button_yes").click();
-        createdResources.get(resource).remove(name);
+        retryStale(()->{
+            clickMenu(resource.name());
+            List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", name, MENU_COLUMN);
+            assertEquals(1, buttonsCell.size());
+            clickPopupMenu(buttonsCell.get(0), "delete_button");
+            waitElement("dialog_button_yes").click();
+            createdResources.get(resource).remove(name);
+        });
     }
 
     /**

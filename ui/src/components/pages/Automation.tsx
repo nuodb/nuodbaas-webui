@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
 import Button from "../controls/Button";
 import { withTranslation } from "react-i18next";

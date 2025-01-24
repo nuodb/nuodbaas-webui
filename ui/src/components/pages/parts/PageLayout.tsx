@@ -1,3 +1,5 @@
+// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+
 import React, { useState } from 'react';
 import LeftMenu from './LeftMenu';
 import Banner from './Banner';
