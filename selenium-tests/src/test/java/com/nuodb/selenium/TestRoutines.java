@@ -146,7 +146,7 @@ public class TestRoutines extends SeleniumTestHelper {
     private void createResource(Resource resource, String name, String ...fieldValueList) {
         clickMenu(resource.name());
 
-        WebElement createButton = waitElement("list_resource__create_button");
+        WebElement createButton = waitElement("list_resource__create_button_" + resource);
         createButton.click();
         for (int i=0; i<fieldValueList.length; i += 2) {
             WebElement element = waitInputElementByName(fieldValueList[i]);
