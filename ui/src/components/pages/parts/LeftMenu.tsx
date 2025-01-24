@@ -80,10 +80,17 @@ function Menu(props: MenuProps) {
                 if (path === pathname || path + "/" === pathname || (pathname + "/").startsWith(path + "/")) {
                     className += " NuoLeftMenuItemSelected";
                 }
-                return <li data-testid={"menu-button-" + childKey} key={childKey}
+                return <li data-testid={"menu-button-" + childKey}
+                    key={childKey}
                     className={className}
+                    tabIndex={0}
                     onClick={() => {
                         navigate(path);
+                    }}
+                    onKeyDown={(event) => {
+                        if (event.key === "Enter") {
+                            navigate(path);
+                        }
                     }}
                 >{icon}<label>{data[key].children[childKey].label}</label></li>;
             }

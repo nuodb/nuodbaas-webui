@@ -106,16 +106,13 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
             })
 
             //find first required empty field (or a field with an error)
-            console.log("F0", fieldName, formParameters, urlParameters, params);
             Object.keys(params).forEach(key => {
-                console.log("F", fieldName, key, values, params[key].required);
                 if (fieldName === null && params[key].required) {
                     if (!(key in values) || values[key] === "") {
                         fieldName = key;
                     }
                 }
             })
-            console.log("F2", fieldName);
             setFocusField(fieldName);
         }
 

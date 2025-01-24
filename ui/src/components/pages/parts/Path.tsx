@@ -102,16 +102,12 @@ function Path({ schema, path, filterValues, search, setSearch, setPage, org, t }
     let pathParts = (path.startsWith("/") ? path.substring(1) : path).split("/");
     const schemaPath = getSchemaPath(schema, path) || "";
     let schemaPathParts = (schemaPath?.startsWith("/") ? schemaPath.substring(1) : schemaPath)?.split("/");
-    for (let i = 0; i < schemaPathParts.length; i++) {
-        if (schemaPathParts[i] === "{organization}" && org !== "") {
-            schemaPathParts.splice(i, 1);
-            pathParts.splice(i, 1);
-            break;
-        }
-    }
     return <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
         <StyledBreadcrumbs data-testid="path_component" separator=">" aria-label="resources" style={{ fontSize: "2em", padding: "20px", display: "flex", flexWrap: "nowrap" }}>
             {pathParts && pathParts.map((p: string, index: number) => {
+                if (schemaPathParts[index] === "{organization}" && org !== "") {
+                    return null;
+                }
                 if (index === 0) {
                     p = t("resource.label." + p, p);
                 }

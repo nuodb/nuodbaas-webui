@@ -149,7 +149,10 @@ public class TestRoutines extends SeleniumTestHelper {
         WebElement createButton = waitElement("list_resource__create_button");
         createButton.click();
         for (int i=0; i<fieldValueList.length; i += 2) {
-            waitInputElementByName(fieldValueList[i]).sendKeys(fieldValueList[i+1]);
+            WebElement element = waitInputElementByName(fieldValueList[i]);
+            if(!element.getAttribute("value").equals(fieldValueList[i+1])) {
+                element.sendKeys(fieldValueList[i+1]);
+            }
         }
         waitElement("create_resource__create_button").click();
         createdResources.computeIfAbsent(resource, n -> new HashSet<String>()).add(name);

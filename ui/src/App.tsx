@@ -37,31 +37,39 @@ export default function App() {
   const pageProps = { schema, isRecording, org, setOrg, orgs };
 
   useEffect(() => {
-    let org = "";
-    let path = window.location.pathname;
-    if (path.startsWith("/ui/resource/")) {
-      path = path.substring("/ui/resource/".length);
-      const posSlash = path.indexOf("/");
-      if (posSlash !== -1) {
-        org = getOrgFromPath(schema, path.substring(posSlash));
-      }
+    if (!isLoggedIn) {
+      return;
     }
-    setOrg(org);
 
-    if (isLoggedIn) {
-      Rest.get("/users").then((data: any) => {
-        if (data.items) {
-          let orgs: string[] = [];
-          data.items.forEach((item: string) => {
-            let org = item.split("/")[0];
-            if (!orgs.includes(org)) {
-              orgs.push(org);
-            }
-          });
-          setOrgs(orgs);
+    // get orgs by scanning all accessible users
+    Rest.get("/users").then((data: any) => {
+      if (data.items) {
+        let orgs: string[] = [];
+        data.items.forEach((item: string) => {
+          let org = item.split("/")[0];
+          if (!orgs.includes(org)) {
+            orgs.push(org);
+          }
+        });
+        setOrgs(orgs);
+        if (orgs.length === 1) {
+          setOrg(orgs[0]);
         }
-      })
-    }
+        else {
+          // get selected org from URL path
+          let org = "";
+          let path = window.location.pathname;
+          if (path.startsWith("/ui/resource/")) {
+            path = path.substring("/ui/resource/".length);
+            const posSlash = path.indexOf("/");
+            if (posSlash !== -1) {
+              org = getOrgFromPath(schema, path.substring(posSlash));
+            }
+          }
+          setOrg(org);
+        }
+      }
+    })
   }, [schema, isLoggedIn]);
 
   return (
