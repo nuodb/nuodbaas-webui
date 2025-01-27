@@ -231,7 +231,10 @@ public class SeleniumTestHelper {
         sendKeys("username", username);
         sendKeys("password", password);
         click("login_button");
-        assertEquals("Home", waitText("path_component"));
+        retryStale(()->{
+            String text = waitText("path_component");
+            assertEquals("Home", text);
+        });
         waitElement("banner-done");
     }
 
