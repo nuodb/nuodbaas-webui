@@ -132,7 +132,7 @@ function ListResource(props: PageProps) {
         const dataNotDeleted = itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true);
         return (
             <PageLayout {...props} >
-                <Path schema={schema} path={path} filterValues={getFilterValues()} search={search} setSearch={setSearch} setPage={setPage} />
+                <Path {...props} path={path} filterValues={getFilterValues()} search={search} setSearch={setSearch} setPage={setPage} />
                 {createPath && <Button data-testid={"list_resource__create_button_" + createPathFirstPart} variant="outlined" onClick={handleCreate}>{createLabel}</Button>}
                 {renderPaging()}
                 <Table

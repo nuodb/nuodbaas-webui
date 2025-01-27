@@ -46,7 +46,8 @@ function Table(props: TableProps) {
     const { schema, data, path, org, t } = props;
     const [columns, setColumns] = useState<MenuItemProps[]>([]);
     let navigate = useNavigate();
-    let lastSchemaPathElement = "/" + getSchemaPath(schema, path);
+    const schemaPath = getSchemaPath(schema, path);
+    let lastSchemaPathElement = "/" + schemaPath;
     lastSchemaPathElement = lastSchemaPathElement.substring(lastSchemaPathElement.lastIndexOf("/") + 1);
 
     /**
@@ -286,7 +287,7 @@ function Table(props: TableProps) {
     }
 
     const tableLabels = getTableLabels();
-    const visibleColumns = columns.filter(col => col.selected && (col.id !== "organization" || org === ""));
+    const visibleColumns = columns.filter(col => col.selected && !schemaPath?.includes("{" + col.id + "}"));
     return (
         <TableCustom data-testid={props["data-testid"]}>
             <TableHead>

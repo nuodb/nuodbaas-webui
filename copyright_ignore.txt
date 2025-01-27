@@ -9,6 +9,4 @@
 \./ui/public/logo512.png$
 \./ui/public/logo192.png$
 \./ui/public/images/
-\./bin/kubectl
-\./bin/kwokctl
-\./bin/helm
+\./bin/

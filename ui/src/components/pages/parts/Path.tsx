@@ -73,10 +73,6 @@ function Path({ schema, path, filterValues, search, setSearch, setPage, org, t }
             return null;
         }
 
-        if (filterField === "organization") {
-            return null;
-        }
-
         return <Select id={filterField} label={t("field.label." + filterField, filterField)} value={""} onChange={({ target }) => {
                 navigate("/ui/resource/list" + path + "/" + target.value);
             }}>
@@ -101,17 +97,13 @@ function Path({ schema, path, filterValues, search, setSearch, setPage, org, t }
 
     let pathParts = (path.startsWith("/") ? path.substring(1) : path).split("/");
     const schemaPath = getSchemaPath(schema, path) || "";
-    let schemaPathParts = (schemaPath?.startsWith("/") ? schemaPath.substring(1) : schemaPath)?.split("/");
     return <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
         <StyledBreadcrumbs data-testid="path_component" separator=">" aria-label="resources" style={{ fontSize: "2em", padding: "20px", display: "flex", flexWrap: "nowrap" }}>
             {pathParts && pathParts.map((p: string, index: number) => {
-                if (schemaPathParts[index] === "{organization}" && org !== "") {
-                    return null;
-                }
                 if (index === 0) {
                     p = t("resource.label." + p, p);
                 }
-                if (index === pathParts.length - 1) {
+                if (index === pathParts.length - 1 || (org !== "" && index === 0)) {
                     return <Typography key={index} color="text.primary" style={{ fontSize: "1em" }}>{p}</Typography>
                 }
                 else if (index === pathParts.length - 2 && schemaPath != null && !schemaPath.endsWith("}")) {
