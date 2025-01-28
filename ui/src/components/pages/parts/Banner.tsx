@@ -41,7 +41,6 @@ function Banner(props: Props) {
   return <div className="NuoColumn">
     <Recording {...props} />
     <div className="NuoBanner">
-      <img className="NuoLogo" src="/ui/images/nuodb.png" alt="" />
       <Menu data-testid="user-menu"
         align="right"
         items={[

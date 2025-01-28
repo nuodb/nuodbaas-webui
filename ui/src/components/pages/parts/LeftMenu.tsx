@@ -155,6 +155,8 @@ export default function LeftMenu(props: LeftMenuProps) {
         }
     }
     return <div className="NuoLeftMenu" style={style}>
+        <img className="NuoLogo" src="/ui/images/nuodb.png" alt="" />
+        <div className="NuoOrgSeparator"></div>
         <Organization {...props} />
         <div className="NuoOrgSeparator"></div>
         <Menu data={data} org={org} />
