@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { ReactNode } from "react"
 import CircularProgress from '@mui/material/CircularProgress';

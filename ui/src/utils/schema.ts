@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import { Rest } from "../components/pages/parts/Rest";
 import Auth from "./auth"
@@ -113,6 +113,17 @@ export function getSchemaPath(schema: SchemaType, path:string) : string|null {
     }
     const ret = Object.keys(schema).filter(sPath => matchesPath(path, sPath));
     return ret.length === 1 ? ret[0] : null;
+}
+
+export function getOrgFromPath(schema: SchemaType, path: string) {
+    let pathParts = path.split("/");
+    const schemaParts = getSchemaPath(schema, path)?.split("/") || [];
+    for(let i=0; i<pathParts.length && i<schemaParts.length; i++) {
+        if(schemaParts[i] === "{organization}") {
+            return pathParts[i];
+        }
+    }
+    return "";
 }
 
 /**

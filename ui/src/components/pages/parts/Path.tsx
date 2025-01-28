@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { useState } from "react"
 import { withTranslation } from "react-i18next";
@@ -46,7 +46,7 @@ export function parseSearch(search: string) {
     return ret;
 }
 
-function Path({ schema, path, filterValues, search, setSearch, setPage, t }: TempAny) {
+function Path({ schema, path, filterValues, search, setSearch, setPage, org, t }: TempAny) {
     const [searchField, setSearchField] = useState(search);
     const [error, setError] = useState(undefined);
 
@@ -73,10 +73,10 @@ function Path({ schema, path, filterValues, search, setSearch, setPage, t }: Tem
             return null;
         }
 
-        return <Select id={filterField} label={t("field.label." + filterField, filterField)} value={"__all__"} onChange={({ target }) => {
+        return <Select id={filterField} label={t("field.label." + filterField, filterField)} value={""} onChange={({ target }) => {
                 navigate("/ui/resource/list" + path + "/" + target.value);
             }}>
-            <SelectOption value="__all__">{t("control.select.item.all")}</SelectOption>
+            <SelectOption value="">{t("control.select.item.all")}</SelectOption>
             {filterValues && filterValues.map((fv: string) => <SelectOption key={fv} value={fv}>{fv}</SelectOption>)}
         </Select>;
     }
@@ -96,14 +96,14 @@ function Path({ schema, path, filterValues, search, setSearch, setPage, t }: Tem
     let filterField = getFilterField(schema, path);
 
     let pathParts = (path.startsWith("/") ? path.substring(1) : path).split("/");
-    const schemaPath = getSchemaPath(schema, path);
+    const schemaPath = getSchemaPath(schema, path) || "";
     return <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
         <StyledBreadcrumbs data-testid="path_component" separator=">" aria-label="resources" style={{ fontSize: "2em", padding: "20px", display: "flex", flexWrap: "nowrap" }}>
             {pathParts && pathParts.map((p: string, index: number) => {
                 if (index === 0) {
                     p = t("resource.label." + p, p);
                 }
-                if (index === pathParts.length - 1) {
+                if (index === pathParts.length - 1 || (org !== "" && index === 0)) {
                     return <Typography key={index} color="text.primary" style={{ fontSize: "1em" }}>{p}</Typography>
                 }
                 else if (index === pathParts.length - 2 && schemaPath != null && !schemaPath.endsWith("}")) {

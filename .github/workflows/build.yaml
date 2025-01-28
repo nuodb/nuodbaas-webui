@@ -1,3 +1,4 @@
+# (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 name: Build
 on:
   push:
@@ -27,6 +28,9 @@ jobs:
       - name: Run Integration Tests
         run: |
           make run-integration-tests-only
+      - name: validate copyrights
+        run: |
+          make copyright
       - name: Teardown Integration Test Environment
         if: '!cancelled()'
         run: |

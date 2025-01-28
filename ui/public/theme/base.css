@@ -1,4 +1,17 @@
-/* (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved. */
+/* (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved. */
+html,
+body,
+#root,
+.App,
+.NuoPageLayout {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
+html {
+    min-height: 100vh;
+}
 .NuoContainerSM {
     max-width: 600px;
     margin-left: auto;
@@ -9,14 +22,29 @@
     margin-left: 24px;
     margin-right: 24px;
 }
+.NuoLoginForm {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.NuoLoginForm>img {
+    content: url("/ui/images/nuodb.png");
+    width: 300px;
+    height: 100%;
+    padding: 30px;
+    margin-left: auto;
+    margin-right: auto;
+}
 .NuoBanner {
+    display: flex;
+        flex-direction: row;
+        justify-content: right;
+        padding: 23px 25px 23px 27px;
     width: 100%;
-    padding-left: 24px;
-    padding-right: 24px;
-    background-color: rgb(25, 118, 210);
-    box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px;
-    color: white;
-    position: static;
 }
 
 .NuoBannerItems {
@@ -157,6 +185,12 @@
     text-align: left;
 }
 
+.NuoTableTd>button {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    text-decoration: underline;
+}
 .NuoTableTh {
     line-height: 1.5rem;
     font-weight: 500;
@@ -332,6 +366,126 @@ code {
 .NuoRecordingBanner {
     background-color: #e0e033;
     padding: 5px 24px;
+}
+
+.NuoLogo {
+    width: 62px;
+    position: relative;
+    margin: 5px;
+}
+.NuoLeftMenu {
+    width: 200px;
+    padding: 15px;
+    transition: width 0.2s, padding 0.2s, opacity 0.2s;
+}
+.NuoLeftMenu>details {
+    text-wrap: nowrap;
+}
+.NuoLeftMenu>details>summary {
+    text-transform: uppercase;
+        font-weight: bold;
+        font-size: 0.8em;
+    color: #888888;
+    margin: 10px 0 0 0;
+}
+
+.NuoLeftMenu>details>ol {
+    margin: 0 0 10px 0;
+    padding: 0;
+}
+
+.NuoLeftMenuItem {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    list-style-type: none;
+    border-radius: 5px;
+    height: 40px;
+    padding: 0;
+    cursor: default;
+    text-wrap: nowrap;
+    overflow: hidden;
+    font-size: 0.9em;
+}
+
+.NuoLeftMenuItem>svg {
+    margin: 5px;
+    color: #cdd1d6;
+}
+
+.NuoLeftMenuItem {
+    text-align: left;
+    color: #7a8088;
+}
+
+.NuoLeftMenuItemSelected,
+.NuoLeftMenuItemSelected>svg {
+    background-color: #4f8dbf;
+    color: white;
+}
+
+.NuoPageLayout {
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+}
+
+.NuoPageLayoutMenuSeparator {
+    width: 20px;
+    border-left: 1px solid;
+    border-color: rgba(240, 240, 240, 1);
+    margin: 0 0 0 10px;
+    padding: 0 10px 0 0;
+
+}
+
+.NuoPageLayoutMenuSeparator>button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    border: 1px solid;
+    border-radius: 50%;
+    padding: 0;
+    margin: 0;
+    left: -10px;
+    top: 25px;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    color: rgba(200, 200, 200, 1);
+
+}
+.NuoOrgSelector {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.NuoOrgSelector>svg {
+    margin: 5px 0;
+        color: #cdd1d6;
+        border: 1px solid;
+        border-radius: 50%;
+        padding: 3px;
+        width: 30px;
+        height: 30px;
+}
+
+.NuoOrgSelector>select {
+    display: flex;
+    flex: 1 1 auto;
+    border: 0;
+    color: #7a8088;
+    font-size: 1em;
+        font-weight: bold;
+}
+
+.NuoOrgSeparator {
+    height: 1px;
+    border-bottom: 1px solid;
+    border-color: rgba(240, 240, 240, 1);
+    margin: 0 -25px 0 -15px;
 }
 .NuoFormHeader {
     margin-block-start: 0.67em;

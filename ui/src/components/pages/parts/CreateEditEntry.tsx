@@ -1,9 +1,9 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import FieldFactory from "../../fields/FieldFactory";
-import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultValue, submitForm } from "../../../utils/schema";
+import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultValue, submitForm, getSchemaPath } from "../../../utils/schema";
 import { RestSpinner } from "./Rest";
 import Button from "../../controls/Button";
 import Accordion from "../../controls/Accordion";
@@ -21,7 +21,7 @@ type PutResourceType = {
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
  */
-function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
+function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
     const navigate = useNavigate();
 
     const [putResource, setPutResource] = useState<PutResourceType>({});
@@ -98,7 +98,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
             Object.keys(params).forEach(key => {
                 let parameter = params[key];
                 if (parameter && fieldName === null && key in values) {
-                    if (FieldFactory.validateProps({ path, prefix: key, label: t("field.label." + key, key), parameter, values, updateErrors, setValues, t })) {
+                    if (!FieldFactory.validateProps({ path, prefix: key, label: t("field.label." + key, key), parameter, values, updateErrors, setValues, t })) {
                         fieldName = key;
                     }
                 }
@@ -113,7 +113,6 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
                     }
                 }
             })
-
             setFocusField(fieldName);
         }
 
@@ -274,6 +273,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
             const formParameter = { ...section.params[key] };
             const ro = readonly
                 || (data && (key in urlParameters || key === "name" || formParameter["x-immutable"] === true))
+                || (key === "organization" && getSchemaPath(schema, path)?.includes("{organization}"));
             return (FieldFactory.create({
                 path,
                 prefix: key,

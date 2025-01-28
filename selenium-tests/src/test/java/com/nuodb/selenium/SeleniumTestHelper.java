@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 package com.nuodb.selenium;
 
@@ -25,6 +25,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -230,7 +231,10 @@ public class SeleniumTestHelper {
         sendKeys("username", username);
         sendKeys("password", password);
         click("login_button");
-        assertEquals("Home", waitText("path_component"));
+        retryStale(()->{
+            String text = waitText("path_component");
+            assertEquals("Home", text);
+        });
         waitElement("banner-done");
     }
 
@@ -301,6 +305,30 @@ public class SeleniumTestHelper {
                 return;
             }
             catch(Throwable e) {
+                exception = e;
+            }
+            try {
+                Thread.sleep(delayMS);
+            }
+            catch(InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+        throw new RuntimeException(exception);
+    }
+
+    public void retryStale(Runnable r) {
+        retryStale(30, 100, r);
+    }
+
+    public void retryStale(int count, long delayMS, Runnable r) {
+        StaleElementReferenceException exception = null;
+        for(int i=count; i>=0; i--) {
+            try {
+                r.run();
+                return;
+            }
+            catch(StaleElementReferenceException e) {
                 exception = e;
             }
             try {

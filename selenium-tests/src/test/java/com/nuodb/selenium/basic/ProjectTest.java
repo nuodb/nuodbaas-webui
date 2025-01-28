@@ -1,9 +1,8 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 package com.nuodb.selenium.basic;
 
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.nuodb.selenium.Constants;
@@ -47,10 +46,10 @@ public class ProjectTest extends TestRoutines {
         // Setup and list projects
         login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
         String projectName = createProject();
-        clickMenu("projects");
 
         // resource versions are getting updated in the background a few times by the control plane / operator preventing an update later.
         retry(10, 1000, ()->{
+            clickMenu("projects");
             // find project and start edit mode
             List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", projectName, MENU_COLUMN);
             assertEquals(1, buttonsCell.size());

@@ -1,14 +1,14 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import Path from "./parts/Path";
-import { SchemaType } from "../../utils/types";
+import { PageProps } from "../../utils/types";
+import PageLayout from "./parts/PageLayout";
+import { withTranslation } from "react-i18next";
 
-interface Props {
-    schema: SchemaType
+function Home(props: PageProps) {
+    return <PageLayout {...props}>
+        <Path schema={props.schema} path="Home" filterValues={[]} />
+    </PageLayout>;
 }
 
-export default function Home({ schema }: Props) {
-    return (
-        <Path schema={schema} path="Home" filterValues={[]} />
-    );
-}
+export default withTranslation()(Home);

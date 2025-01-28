@@ -1,4 +1,4 @@
-# (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+# (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 PROJECT_DIR := $(shell pwd)
 BIN_DIR ?= $(PROJECT_DIR)/bin
@@ -41,11 +41,15 @@ help: ## Display this help.
 ##@ Production Builds
 
 .PHONY: all
-all: run-integration-tests deploy-image-ecr ## build, test + deploy everything
+all: run-integration-tests deploy-image-ecr copyright ## build, test + deploy everything
 
 .PHONY: build-image
 build-image:  ## build UI and create Docker image
 	@docker build -t "${IMG_REPO}:latest" --build-arg "REACT_APP_GIT_SHA=${SHA}" -f docker/production/Dockerfile .
+
+.PHONY: copyright
+copyright: ### check copyrights
+	./copyright.sh
 
 .PHONY: deploy-image-ecr
 deploy-image-ecr: build-image ## deploy Docker image to AWS

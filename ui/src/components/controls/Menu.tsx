@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import { Component, useEffect } from 'react';
 import Button from './Button';
@@ -9,6 +9,7 @@ import { MenuItemProps, MenuProps } from '../../utils/types';
 
 export default function Menu(props: MenuProps): JSX.Element {
     const { popupId, items, className } = props;
+    const dataTestid = props["data-testid"];
 
     useEffect(() => {
         PopupMenu.updateMenu(props)
@@ -30,13 +31,13 @@ export default function Menu(props: MenuProps): JSX.Element {
     }
 
     if (children) {
-        return <>
+        return <div data-testid={dataTestid}>
             <div data-testid="menu-toggle" onClick={(event) => {
                 PopupMenu.showMenu(props, event.currentTarget)
             }}>
                 <>{children}</>
             </div>
-        </>;
+        </div>;
     }
     else {
         return <div className={className}>{listMenu(items)}</div>;

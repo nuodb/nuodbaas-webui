@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -6,15 +6,15 @@ import CreateEditEntry from "./parts/CreateEditEntry";
 import { getResourceByPath } from "../../utils/schema";
 import { Rest } from "./parts/Rest";
 import Auth from "../../utils/auth";
-import { SchemaType, TempAny } from "../../utils/types";
+import { PageProps, TempAny } from "../../utils/types";
+import PageLayout from "./parts/PageLayout";
+import { withTranslation } from "react-i18next";
 
-interface Props {
-    schema: SchemaType
-}
 /**
  * handles all the /resource/edit/* requests to edit a resource
  */
-export default function EditResource({ schema }: Props) {
+function EditResource(props: PageProps) {
+    const { schema } = props;
     const path = "/" + useParams()["*"];
     const [data, setData] = useState({});
 
@@ -38,8 +38,10 @@ export default function EditResource({ schema }: Props) {
     }
 
     return (
-        <React.Fragment>
+        <PageLayout {...props}>
             <CreateEditEntry schema={schema} path={path} data={data} />
-        </React.Fragment>
+        </PageLayout >
     );
 }
+
+export default withTranslation()(EditResource);

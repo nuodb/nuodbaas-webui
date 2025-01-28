@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 package com.nuodb.selenium;
 
@@ -129,7 +129,7 @@ public class TestRoutines extends SeleniumTestHelper {
     }
 
     public void clickPopupMenu(WebElement element, String dataTestId) {
-        List<WebElement> menuToggles = element.findElements(By.xpath("div[@data-testid='menu-toggle']"));
+        List<WebElement> menuToggles = element.findElements(By.xpath(".//div[@data-testid='menu-toggle']"));
         assertEquals(1, menuToggles.size());
         menuToggles.get(0).click();
         WebElement menuPopup = getElement("menu-popup");
@@ -149,7 +149,10 @@ public class TestRoutines extends SeleniumTestHelper {
         WebElement createButton = waitElement("list_resource__create_button_" + resource);
         createButton.click();
         for (int i=0; i<fieldValueList.length; i += 2) {
-            waitInputElementByName(fieldValueList[i]).sendKeys(fieldValueList[i+1]);
+            WebElement element = waitInputElementByName(fieldValueList[i]);
+            if(!element.getAttribute("value").equals(fieldValueList[i+1])) {
+                element.sendKeys(fieldValueList[i+1]);
+            }
         }
         waitElement("create_resource__create_button").click();
         createdResources.computeIfAbsent(resource, n -> new HashSet<String>()).add(name);
@@ -157,12 +160,14 @@ public class TestRoutines extends SeleniumTestHelper {
     }
 
     public void deleteResource(Resource resource, String name) {
-        clickMenu(resource.name());
-        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", name, MENU_COLUMN);
-        assertEquals(1, buttonsCell.size());
-        clickPopupMenu(buttonsCell.get(0), "delete_button");
-        waitElement("dialog_button_yes").click();
-        createdResources.get(resource).remove(name);
+        retryStale(()->{
+            clickMenu(resource.name());
+            List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", name, MENU_COLUMN);
+            assertEquals(1, buttonsCell.size());
+            clickPopupMenu(buttonsCell.get(0), "delete_button");
+            waitElement("dialog_button_yes").click();
+            createdResources.get(resource).remove(name);
+        });
     }
 
     /**

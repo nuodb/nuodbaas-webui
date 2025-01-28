@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import { ReactNode } from "react";
 
@@ -67,3 +67,12 @@ export type RestLogEntry = {
     success: boolean
     body?: JsonType,
 }
+
+export interface PageProps {
+    schema: SchemaType,
+    isRecording: boolean,
+    org: string,
+    setOrg: (org: string) => void;
+    orgs: string[];
+    t: any
+};

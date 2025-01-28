@@ -1,3 +1,4 @@
+# (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 apiVersion: cp.nuodb.com/v1beta1
 kind: HelmFeature
 metadata:
