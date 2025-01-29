@@ -11,27 +11,48 @@ import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import StorageIcon from '@mui/icons-material/Storage';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import Menu from "../../controls/Menu";
 
-function Organization({ schema, org, orgs, setOrg, t }: PageProps) {
+interface OrganizationProps extends PageProps {
+    onSelection?: () => void;
+}
+
+
+function Organization({ schema, org, orgs, setOrg, onSelection, t }: OrganizationProps) {
     const navigate = useNavigate();
     let path = "/" + useParams()["*"];
-    return <div className="NuoOrgSelector">
-        <CorporateFareIcon />
-        <select id={"organization"} value={org} onChange={(e: any) => {
-            setOrg(e.target.value);
-            const schemaPath = getSchemaPath(schema, path + "/") || "";
-            const posOrganization = schemaPath.indexOf("/{organization}");
-            if (posOrganization !== -1) {
-                path = schemaPath.substring(0, posOrganization);
-                if (e.target.value !== "") {
-                    path += "/" + e.target.value;
-                }
-                navigate("/ui/resource/list" + path);
+
+    function selectOrg(newOrg: string) {
+        onSelection && onSelection();
+        setOrg(newOrg);
+        const schemaPath = getSchemaPath(schema, path + "/") || "";
+        const posOrganization = schemaPath.indexOf("/{organization}");
+        if (posOrganization !== -1) {
+            path = schemaPath.substring(0, posOrganization);
+            if (newOrg !== "") {
+                path += "/" + newOrg;
             }
-        }}>
-            <option value="">{t("field.select.allOrgs")}</option>
-            {orgs.map(o => <option key={o} value={o}>{o}</option>)}
-        </select>
+            navigate("/ui/resource/list" + path);
+        }
+    }
+    const orgMenuItems = [{
+        id: "",
+        label: t("field.select.allOrgs"),
+        onClick: () => {
+            selectOrg("");
+        }
+    }
+        , ...orgs.map(o => {
+            return {
+                id: o,
+                label: o,
+                onClick: () => {
+                    selectOrg(o);
+                }
+            }
+        })];
+    return <div className="NuoOrgSelector">
+        <Menu popupId="orgs_menu" items={orgMenuItems} align="left"><CorporateFareIcon />{org === "" ? t("field.select.allOrgs") : org}</Menu>
     </div>;
 }
 
@@ -48,10 +69,11 @@ type MenuProps = {
         }
     };
     org: string;
+    onSelection?: () => void;
 };
 
-function Menu(props: MenuProps) {
-    const { data, org } = props;
+function TOC(props: MenuProps) {
+    const { data, org, onSelection } = props;
     const navigate = useNavigate();
 
     const icons: { [key: string]: React.ReactNode } = {
@@ -63,8 +85,8 @@ function Menu(props: MenuProps) {
         "users": <GroupIcon />,
     }
 
-    return <>{Object.keys(data).map(key => <details key={key} open={true}>
-        <summary>{data[key].label}</summary>
+    return <>{Object.keys(data).map(key => <div className="details" key={key}>
+        <div className="summary">{data[key].label}</div>
         <ol>
             {Object.keys(data[key].children).map(childKey => {
                 let icon: React.ReactNode = icons[childKey];
@@ -87,6 +109,7 @@ function Menu(props: MenuProps) {
                     className={className}
                     tabIndex={0}
                     onClick={() => {
+                        onSelection && onSelection();
                         navigate(path);
                     }}
                     onKeyDown={(event) => {
@@ -98,15 +121,16 @@ function Menu(props: MenuProps) {
             }
             )}
         </ol>
-    </details>)}</>;
+    </div>)}</>;
 }
 
 interface LeftMenuProps extends PageProps {
-    style?: React.CSSProperties;
+    className: string;
+    onSelection?: () => void;
 }
 
 export default function LeftMenu(props: LeftMenuProps) {
-    const { schema, style, org, t } = props;
+    const { schema, className, org, t } = props;
 
     if (!schema) {
         return null;
@@ -154,11 +178,11 @@ export default function LeftMenu(props: LeftMenuProps) {
             children
         }
     }
-    return <div className="NuoLeftMenu" style={style}>
-        <img className="NuoLogo" src="/ui/images/nuodb.png" alt="" />
+    return <div className={className}>
+        <img className="NuoForDesktop" />
         <div className="NuoOrgSeparator"></div>
         <Organization {...props} />
         <div className="NuoOrgSeparator"></div>
-        <Menu data={data} org={org} />
+        <TOC {...props} data={data} />
     </div>;
 }

@@ -133,7 +133,7 @@ function ListResource(props: PageProps) {
         return (
             <PageLayout {...props} >
                 <Path {...props} path={path} filterValues={getFilterValues()} search={search} setSearch={setSearch} setPage={setPage} />
-                {createPath && <Button data-testid={"list_resource__create_button_" + createPathFirstPart} variant="outlined" onClick={handleCreate}>{createLabel}</Button>}
+                {createPath && <div className="Nuo-p20"><Button data-testid={"list_resource__create_button_" + createPathFirstPart} variant="outlined" onClick={handleCreate}>{createLabel}</Button></div>}
                 {renderPaging()}
                 <Table
                     data-testid="list_resource__table"

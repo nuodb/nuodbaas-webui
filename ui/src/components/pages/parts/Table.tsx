@@ -43,7 +43,7 @@ interface TableProps extends PageProps {
  * @returns
  */
 function Table(props: TableProps) {
-    const { schema, data, path, org, t } = props;
+    const { schema, data, path, t } = props;
     const [columns, setColumns] = useState<MenuItemProps[]>([]);
     let navigate = useNavigate();
     const schemaPath = getSchemaPath(schema, path);
