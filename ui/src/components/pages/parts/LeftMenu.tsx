@@ -11,7 +11,7 @@ import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import StorageIcon from '@mui/icons-material/Storage';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import BarChartIcon from '@mui/icons-material/BarChart';
-import Menu from "../../controls/Menu";
+import ComboBox from "../../controls/ComboBox";
 
 interface OrganizationProps extends PageProps {
     onSelection?: () => void;
@@ -51,9 +51,9 @@ function Organization({ schema, org, orgs, setOrg, onSelection, t }: Organizatio
                 }
             }
         })];
-    return <div className="NuoOrgSelector">
-        <Menu popupId="orgs_menu" items={orgMenuItems} align="left"><CorporateFareIcon />{org === "" ? t("field.select.allOrgs") : org}</Menu>
-    </div>;
+    return <ComboBox className="NuoOrgSelector" items={orgMenuItems} selected={org}>
+        <CorporateFareIcon />{org === "" ? t("field.select.allOrgs") : org}
+    </ComboBox>;
 }
 
 type MenuProps = {
@@ -130,7 +130,7 @@ interface LeftMenuProps extends PageProps {
 }
 
 export default function LeftMenu(props: LeftMenuProps) {
-    const { schema, className, org, t } = props;
+    const { schema, className, t } = props;
 
     if (!schema) {
         return null;
@@ -179,10 +179,8 @@ export default function LeftMenu(props: LeftMenuProps) {
         }
     }
     return <div className={className}>
-        <img className="NuoForDesktop" />
-        <div className="NuoOrgSeparator"></div>
+        <img className="NuoForDesktop" alt="" />
         <Organization {...props} />
-        <div className="NuoOrgSeparator"></div>
         <TOC {...props} data={data} />
     </div>;
 }

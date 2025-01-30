@@ -128,10 +128,8 @@ public class TestRoutines extends SeleniumTestHelper {
         waitElement("rest_spinner__complete");
     }
 
-    public void clickPopupMenu(WebElement element, String dataTestId) {
-        List<WebElement> menuToggles = element.findElements(By.xpath(".//div[@data-testid='menu-toggle']"));
-        assertEquals(1, menuToggles.size());
-        menuToggles.get(0).click();
+    public void clickPopupMenu(WebElement menuToggle, String dataTestId) {
+        menuToggle.click();
         WebElement menuPopup = getElement("menu-popup");
         List<WebElement> menuItems = menuPopup.findElements(By.xpath(".//div[@data-testid='" + dataTestId + "']"));
         assertEquals(1, menuItems.size());

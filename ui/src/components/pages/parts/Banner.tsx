@@ -35,7 +35,7 @@ function Recording({ isRecording, t }: Props) {
 }
 
 function Banner(props: Props) {
-  const [mobileMenu, setMobileMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const { schema, t } = props;
   const navigate = useNavigate();
   if (!schema) {
@@ -47,7 +47,7 @@ function Banner(props: Props) {
     <div className="NuoBanner">
       <div className="NuoMenuIcon NuoForMobile">
         <MenuIcon onClick={() => {
-          setMobileMenu(!mobileMenu);
+          setShowMobileMenu(!showMobileMenu);
         }} />
       </div>
       <div className="NuoForDesktop">
@@ -88,8 +88,8 @@ function Banner(props: Props) {
           </IconButton>
         </Tooltip>
       </Menu></div>
-    {mobileMenu && <LeftMenu className="NuoLeftMenu NuoWidth100" {...props} onSelection={() => {
-      setMobileMenu(false);
+    {showMobileMenu && <LeftMenu className="NuoLeftMenu NuoWidth100" {...props} onSelection={() => {
+      setShowMobileMenu(false);
     }} />}
   </div>;
 }

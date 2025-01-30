@@ -27,7 +27,7 @@ export default function PageLayout(props: PageLayoutProps) {
                 </button>
             </div>
         </div>
-        <div className="NuoColumn">
+        <div className="NuoColumn NuoContainerLG">
             <div>{schema && <Banner {...props} isRecording={isRecording} />}</div>
             <div>{children}</div>
         </div>

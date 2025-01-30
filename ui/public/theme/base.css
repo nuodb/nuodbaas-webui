@@ -97,6 +97,13 @@ html {
     background-color: lightgray;
 }
 
+.NuoMenuSelected {
+    background-color: rgba(25, 118, 210, 0.08);
+}
+
+.NuoMenuSelected:hover {
+    background-color: rgba(110, 110, 110, 0.2);
+}
 .NuoAlignRight {
     left: auto;
     right: 0;
@@ -548,13 +555,17 @@ code {
 }
 .NuoOrgSelector {
     display: flex;
+    color: #cdd1d6;
     flex-direction: row;
     align-items: center;
     padding: 0 15px;
+    border: 1px solid rgba(240, 240, 240, 1);
+        cursor: default;
+        overflow: hidden;
 }
 
-.NuoOrgSelector *>svg {
-    margin: 5px 0;
+.NuoOrgSelector>svg {
+    margin: 5px 5px 5px 0;
         color: #cdd1d6;
         border: 1px solid;
         border-radius: 50%;
@@ -563,9 +574,10 @@ code {
         height: 30px;
 }
 
-.NuoLeftMenuCollapsed>.NuoOrgSelector {
-    padding: 0;
-    justify-content: center;
+.NuoLeftMenuCollapsed>.NuoOrgSelector,
+.NuoLeftMenuCollapsed *>.NuoOrgSelector {
+    padding: 0 5px;
+    justify-content: left;
 }
 
 .NuoLeftMenu>.NuoOrgSelector>select,
@@ -583,11 +595,6 @@ code {
 
 .NuoLeftMenuCollapsed>.NuoOrgSelector>select {
     display: none;
-}
-.NuoOrgSeparator {
-    height: 1px;
-    border-bottom: 1px solid;
-    border-color: rgba(240, 240, 240, 1);
 }
 .NuoFormHeader {
     margin-block-start: 0.67em;

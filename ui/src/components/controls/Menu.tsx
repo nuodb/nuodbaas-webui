@@ -31,12 +31,10 @@ export default function Menu(props: MenuProps): JSX.Element {
     }
 
     if (children) {
-        return <div data-testid={dataTestid}>
-            <div data-testid="menu-toggle" onClick={(event) => {
+        return <div data-testid={dataTestid} onClick={(event) => {
                 PopupMenu.showMenu(props, event.currentTarget)
             }}>
-                <>{children}</>
-            </div>
+            <>{children}</>
         </div>;
     }
     else {
@@ -58,6 +56,7 @@ export class PopupMenu extends Component<{}, PopupState> {
         popupId: "",
         items: [],
         setItems: undefined,
+        selected: undefined,
         anchor: null,
         align: "right" as AlignType,
         draggable: false,
@@ -142,6 +141,7 @@ export class PopupMenu extends Component<{}, PopupState> {
             draggable: undefined,
             children: undefined,
             setItems: undefined,
+            selected: undefined,
             className: undefined,
             ...menu,
             anchor
@@ -187,7 +187,7 @@ export class PopupMenu extends Component<{}, PopupState> {
                         onDragOver={this.dndOver}
                         onDragStart={this.dndStart}
                         key={item.id}
-                        className="NuoMenuPopupItem"
+                        className={"NuoMenuPopupItem" + (item.id === this.state.selected ? " NuoMenuSelected" : "")}
                         onClick={(e) => {
                             e.stopPropagation();
                             if (item.onClick) {

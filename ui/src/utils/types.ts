@@ -56,6 +56,7 @@ export type MenuProps = {
     children?: ReactNode,
     items: MenuItemProps[],
     setItems?: (items: MenuItemProps[]) => void,
+    selected?: string,
     className?: string
 };
 
