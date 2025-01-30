@@ -158,7 +158,7 @@ public class TestRoutines extends SeleniumTestHelper {
     }
 
     public void deleteResource(Resource resource, String name) {
-        retryStale(()->{
+        retry(()->{
             clickMenu(resource.name());
             List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", name, MENU_COLUMN);
             assertEquals(1, buttonsCell.size());
