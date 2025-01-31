@@ -17,10 +17,20 @@ html {
     margin-left: auto;
     margin-right: auto;
 }
-.NuoContainerLG {
-    max-width: 100%;
-    margin-left: 24px;
-    margin-right: 24px;
+@media (max-width: 600px) {
+    .NuoContainerLG {
+        max-width: 100%;
+        margin-left: 15px;
+        margin-right: 15px;
+    }
+}
+
+@media (min-width: 601px) {
+    .NuoContainerLG {
+            max-width: 100%;
+            margin-left: 24px;
+            margin-right: 24px;
+        }
 }
 .NuoLoginForm {
     display: flex;
@@ -43,8 +53,18 @@ html {
     display: flex;
         flex-direction: row;
         justify-content: space-between;
-        padding: 23px 25px 23px 27px;
     width: 100%;
+}
+@media (max-width: 600px) {
+    .NuoBanner {
+        padding: 15px 0;
+    }
+}
+
+@media (min-width: 601px) {
+    .NuoBanner {
+        padding: 23px 0;
+    }
 }
 
 .NuoBannerItems {
@@ -406,11 +426,11 @@ code {
 
 .NuoLeftMenu,
 .NuoLeftMenuCollapsed {
-    transition: width 2s, padding 2s, opacity 2s;
+    transition: width 0.2s, padding 0.2s, opacity 0.2s;
 }
 
 .summary {
-    transition: padding 2s;
+    transition: padding 0.2s;
 }
 
 @media (max-width: 600px) {
@@ -426,12 +446,21 @@ code {
 }
 .NuoLeftMenu {
     width: 200px;
-}
-.NuoLeftMenuCollapsed {
-    opacity: 1;
-    width: 39px;
+    background-color: white;
 }
 
+.NuoLeftMenuCollapsed {
+    opacity: 1;
+    width: 45px;
+}
+
+.NuoLeftMenuPopup {
+    position: absolute;
+    z-index: 1001;
+    top: 70px;
+    padding: 5px;
+    box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
 .NuoLeftMenu>.details,
 .NuoLeftMenuCollapsed>.details {
     text-wrap: nowrap;
@@ -448,6 +477,7 @@ code {
 
     .NuoLeftMenuCollapsed>.details>.summary {
         overflow: hidden;
+        text-overflow: ellipsis;
         padding: 0 0 0 5px;
     }
 
@@ -490,30 +520,48 @@ code {
     color: #cdd1d6;
 }
 
+.NuoLeftMenuCollapsed *>.NuoLeftMenuItem>label {
+    display: none;
+}
+
+.NuoLeftMenuCollapsed *>.NuoLeftMenuItem:hover>label {
+    display: flex;
+}
 .NuoLeftMenuItem:hover>label,
 .NuoLeftMenuItemSelected:hover>label {
     display: flex;
     text-wrap: wrap;
     max-width: 500px;
     position: absolute;
-    margin: 5px 0px 5px 29px;
+    margin: 5px 0px 5px 35px;
     z-index: 1001;
 }
 
-.NuoLeftMenuItem:hover>label {
-    padding: 5px;
+.NuoLeftMenuCollapsed *>.NuoLeftMenuItem:hover>label {
+    padding: 8px 5px;
+    border-right: 1px solid;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    border-radius: 0 5px 5px 0;
     background-color: white;
 }
 
-.NuoLeftMenuItemSelected:hover>label {
+.NuoLeftMenuCollapsed *>.NuoLeftMenuItem:hover {
+    border-left: 1px solid;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    padding: 5px;
+}
+
+.NuoLeftMenuCollapsed *>.NuoLeftMenuItemSelected:hover>label {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     background-color: #4f8dbf;
     height: 30px;
-    border-radius: 5px;
-    padding: 20px 5px;
+    border-radius: 0 5px 5px 0;
+        padding: 19px 5px;
 }
 
 .NuoLeftMenuItemSelected,
@@ -558,14 +606,22 @@ code {
     color: #cdd1d6;
     flex-direction: row;
     align-items: center;
-    padding: 0 15px;
+    justify-content: space-between;
+        padding: 0 0 0 15px;
     border: 1px solid rgba(240, 240, 240, 1);
         cursor: default;
         overflow: hidden;
 }
 
-.NuoOrgSelector>svg {
-    margin: 5px 5px 5px 0;
+.NuoOrgSelector>div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-wrap: nowrap;
+}
+
+.NuoOrgSelector>div>svg {
+    margin: 5px 10px 5px 0px;
         color: #cdd1d6;
         border: 1px solid;
         border-radius: 50%;
@@ -580,22 +636,6 @@ code {
     justify-content: left;
 }
 
-.NuoLeftMenu>.NuoOrgSelector>select,
-.NuoLeftMenuCollapsed>.NuoOrgSelector>select {
-    flex: 1 1 auto;
-    border: 0;
-    color: #7a8088;
-    font-size: 1em;
-        font-weight: bold;
-}
-
-.NuoLeftMenu>.NuoOrgSelector>select {
-    display: flex;
-}
-
-.NuoLeftMenuCollapsed>.NuoOrgSelector>select {
-    display: none;
-}
 .NuoFormHeader {
     margin-block-start: 0.67em;
     margin-block-end: 2em;
@@ -650,9 +690,6 @@ code {
     flex-direction: row;
     justify-content: space-between;
 }
-.NuoWidth100 {
-    width: 100%;
-}
 
 .NuoMenuIcon {
     border: 1px solid lightgray;
@@ -663,7 +700,7 @@ code {
     width: 24px;
     height: 24px;
     padding: 15px;
-    margin: 5px;
+    margin: auto 5px;
 }
 
 .NuoMenuIcon:hover {

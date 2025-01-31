@@ -52,7 +52,7 @@ function Organization({ schema, org, orgs, setOrg, onSelection, t }: Organizatio
             }
         })];
     return <ComboBox className="NuoOrgSelector" items={orgMenuItems} selected={org}>
-        <CorporateFareIcon />{org === "" ? t("field.select.allOrgs") : org}
+        <CorporateFareIcon /><label>{org === "" ? t("field.select.allOrgs") : org}</label>
     </ComboBox>;
 }
 

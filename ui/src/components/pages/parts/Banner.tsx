@@ -88,9 +88,21 @@ function Banner(props: Props) {
           </IconButton>
         </Tooltip>
       </Menu></div>
-    {showMobileMenu && <LeftMenu className="NuoLeftMenu NuoWidth100" {...props} onSelection={() => {
+    {showMobileMenu && <div
+      style={{
+        position: "fixed",
+        right: 0,
+        left: 0,
+        top: 0,
+        bottom: 0,
+        backgroundColor: "transparent",
+        zIndex: 101
+      }}
+      className="NuoMenuToggle"
+      onClick={() => { setShowMobileMenu(false) }}>
+      <LeftMenu className="NuoLeftMenu NuoLeftMenuPopup NuoForMobile" {...props} onSelection={() => {
       setShowMobileMenu(false);
-    }} />}
+      }} /></div>}
   </div>;
 }
 
