@@ -7,12 +7,15 @@ import { withTranslation } from "react-i18next";
 import IconButton from '@mui/material/IconButton';
 import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
-import { SchemaType } from "../../../utils/types";
+import { PageProps, SchemaType } from "../../../utils/types";
 import Menu from "../../controls/Menu";
 import { Rest } from "./Rest";
 import Button from "../../controls/Button";
+import MenuIcon from '@mui/icons-material/Menu';
+import { useState } from "react";
+import LeftMenu from "./LeftMenu";
 
-interface Props {
+interface Props extends PageProps {
   schema: SchemaType,
   isRecording: boolean,
   t: any
@@ -32,6 +35,7 @@ function Recording({ isRecording, t }: Props) {
 }
 
 function Banner(props: Props) {
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const { schema, t } = props;
   const navigate = useNavigate();
   if (!schema) {
@@ -41,6 +45,13 @@ function Banner(props: Props) {
   return <div className="NuoColumn">
     <Recording {...props} />
     <div className="NuoBanner">
+      <div className="NuoMenuIcon NuoForMobile">
+        <MenuIcon onClick={() => {
+          setShowMobileMenu(!showMobileMenu);
+        }} />
+      </div>
+      <div className="NuoForDesktop">
+      </div>
       <Menu data-testid="user-menu"
         align="right"
         items={[
@@ -76,7 +87,23 @@ function Banner(props: Props) {
             <Avatar>{Auth.getAvatarText()}</Avatar>
           </IconButton>
         </Tooltip>
-      </Menu></div></div>;
+      </Menu></div>
+    {showMobileMenu && <div
+      style={{
+        position: "fixed",
+        right: 0,
+        left: 0,
+        top: 0,
+        bottom: 0,
+        backgroundColor: "transparent",
+        zIndex: 101
+      }}
+      className="NuoMenuToggle"
+      onClick={() => { setShowMobileMenu(false) }}>
+      <LeftMenu className="NuoLeftMenu NuoLeftMenuPopup NuoForMobile" {...props} onSelection={() => {
+      setShowMobileMenu(false);
+      }} /></div>}
+  </div>;
 }
 
 export default withTranslation()(Banner);

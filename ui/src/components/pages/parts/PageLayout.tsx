@@ -12,20 +12,23 @@ interface PageLayoutProps extends PageProps {
 }
 
 export default function PageLayout(props: PageLayoutProps) {
+    const HIDE_TOC = "nuodbaas-webui-hideTOC";
     const { schema, children, isRecording } = props;
-    const [showMenu, setShowMenu] = useState(true);
-    const style = showMenu ? {} : { opacity: 0, left: -200, width: 0, padding: 0 };
+    const [showMenu, setShowMenu] = useState(localStorage.getItem(HIDE_TOC) !== "true");
     return <div className="NuoPageLayout">
-        {<LeftMenu style={style} {...props} />}
-        <div className="NuoPageLayoutMenuSeparator">
-            <button onClick={() => {
-                setShowMenu(!showMenu);
-            }}>
-                {showMenu ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-            </button>
+        <div className="NuoRowFixed NuoForDesktop">
+            {<LeftMenu className={showMenu ? "NuoLeftMenu" : "NuoLeftMenuCollapsed"} {...props} />}
+            <div className="NuoPageLayoutMenuSeparator">
+                <button onClick={() => {
+                    localStorage.setItem(HIDE_TOC, String(showMenu));
+                    setShowMenu(!showMenu);
+                }}>
+                    {showMenu ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+                </button>
+            </div>
         </div>
-        <div className="NuoColumn">
-            <div>{schema && <Banner schema={schema} isRecording={isRecording} />}</div>
+        <div className="NuoColumn NuoContainerLG">
+            <div>{schema && <Banner {...props} isRecording={isRecording} />}</div>
             <div>{children}</div>
         </div>
     </div>
