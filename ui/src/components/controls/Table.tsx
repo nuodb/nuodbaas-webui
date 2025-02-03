@@ -14,7 +14,7 @@ type ChildProps = {
 }
 
 export function Table(props: TableProps): JSX.Element {
-    return <div className="NuoTableContainer"><table data-testid={props["data-testid"]} className="NuoTableTable">{props.children}</table></div>
+    return <table data-testid={props["data-testid"]} className="NuoTableTable">{props.children}</table>
 }
 
 export function TableHead(props: ChildProps): JSX.Element {

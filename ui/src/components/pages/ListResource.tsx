@@ -6,12 +6,13 @@ import Table from "./parts/Table";
 import { getResourceEvents, getCreatePath, getResourceByPath, getFilterField } from "../../utils/schema";
 import { Rest } from "./parts/Rest";
 import Button from "../controls/Button";
-import Path, { parseSearch } from './parts/Path'
+import Path from './parts/Path'
 import PageLayout from './parts/PageLayout'
 import Auth from "../../utils/auth"
 import { PageProps, TempAny } from "../../utils/types";
 import Pagination from "../controls/Pagination";
 import { withTranslation } from "react-i18next";
+import Search, { parseSearch } from "./parts/Search";
 
 type ItemsAndPathProps = {
     items: [] | null,
@@ -134,7 +135,13 @@ function ListResource(props: PageProps) {
             <PageLayout {...props} >
                 <Path {...props} path={path} filterValues={getFilterValues()} search={search} setSearch={setSearch} setPage={setPage} />
                 {createPath && <Button data-testid={"list_resource__create_button_" + createPathFirstPart} variant="outlined" onClick={handleCreate}>{createLabel}</Button>}
-                {renderPaging()}
+                <div className="NuoTableContainer">
+                    <div className="NuoTableOptions">
+                        <Search search={search} setSearch={(search: string) => {
+                            setPage(1);
+                            setSearch(search);
+                        }} />
+                    </div>
                 <Table
                     data-testid="list_resource__table"
                     {...props}
@@ -142,6 +149,7 @@ function ListResource(props: PageProps) {
                     path={itemsAndPath.path}
                 />
                 {renderPaging()}
+                </div>
             </PageLayout>
         );
     }

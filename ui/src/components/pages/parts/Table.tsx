@@ -43,8 +43,9 @@ interface TableProps extends PageProps {
  * @returns
  */
 function Table(props: TableProps) {
-    const { schema, data, path, org, t } = props;
+    const { schema, data, path, t } = props;
     const [columns, setColumns] = useState<MenuItemProps[]>([]);
+    const [selected, setSelected] = useState<boolean[]>([]);
     let navigate = useNavigate();
     const schemaPath = getSchemaPath(schema, path);
     let lastSchemaPathElement = "/" + schemaPath;
@@ -95,6 +96,7 @@ function Table(props: TableProps) {
         })
 
         setColumns(cols);
+        setSelected(data.map(() => false));
     }, [data, path, schema, t]);
 
     type TableLabelsType = {
@@ -286,12 +288,37 @@ function Table(props: TableProps) {
 
     }
 
+    function moveNameColumnToFront(columns: MenuItemProps[]) {
+        const nameColumns = columns.filter(col => col.id === "name");
+        if (nameColumns.length > 0) {
+            return [nameColumns[0], ...columns.filter(col => col.id !== "name")];
+        }
+        else {
+            return columns;
+        }
+    }
+
     const tableLabels = getTableLabels();
-    const visibleColumns = columns.filter(col => col.selected && !schemaPath?.includes("{" + col.id + "}"));
+    let visibleColumns = moveNameColumnToFront(columns.filter(col => col.selected && !schemaPath?.includes("{" + col.id + "}")));
     return (
         <TableCustom data-testid={props["data-testid"]}>
             <TableHead>
                 <TableRow>
+                    <TableTh key="__all_selected__">
+                        <input
+                            type="checkbox"
+                            checked={selected.length === selected.filter(s => s === true).length}
+                            onChange={(event) => {
+                                let allSelected = selected.length === selected.filter(s => s === true).length;
+                                if (allSelected) {
+                                    setSelected(selected.map(s => false));
+                                }
+                                else {
+                                    setSelected(selected.map(s => true));
+                                }
+                            }}
+                        />
+                    </TableTh>
                     {visibleColumns.map((column, index) => <TableTh key={column.id} data-testid={column.id}>
                         {tableLabels[column.id]}
                     </TableTh>)}
@@ -303,6 +330,11 @@ function Table(props: TableProps) {
             <TableBody>
                 {data.map((row: TempAny, index: number) => (
                     <TableRow key={row["$ref"] || index}>
+                        <TableCell key="__selected__"><input type="checkbox" checked={selected[index]} onChange={(event) => {
+                            let tmpSelected = [...selected];
+                            tmpSelected[index] = !tmpSelected[index];
+                            setSelected(tmpSelected);
+                        }} /></TableCell>
                         {visibleColumns.map(column => renderDataCell(column.id, row))}
                         {renderMenuCell(row)}
                     </TableRow>
