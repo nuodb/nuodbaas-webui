@@ -303,9 +303,9 @@ function Table(props: TableProps) {
     return (
         <TableCustom data-testid={props["data-testid"]}>
             <TableHead>
-                <TableRow>
+                {data.length > 0 && <TableRow>
                     <TableTh key="__all_selected__">
-                        <input
+                        {data.length > 0 && <input
                             type="checkbox"
                             checked={selected.length === selected.filter(s => s === true).length}
                             onChange={(event) => {
@@ -317,15 +317,15 @@ function Table(props: TableProps) {
                                     setSelected(selected.map(s => true));
                                 }
                             }}
-                        />
+                        />}
                     </TableTh>
                     {visibleColumns.map((column, index) => <TableTh key={column.id} data-testid={column.id}>
-                        {tableLabels[column.id]}
+                        {data.length > 0 && tableLabels[column.id]}
                     </TableTh>)}
                     <TableTh key="$ref" data-testid="$ref" className="NuoTableMenuCell">
                         {data.length > 0 && <TableSettingsColumns data={data} path={path} columns={columns} setColumns={setColumns} />}
                     </TableTh>
-                </TableRow>
+                </TableRow>}
             </TableHead>
             <TableBody>
                 {data.map((row: TempAny, index: number) => (

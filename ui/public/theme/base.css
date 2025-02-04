@@ -17,10 +17,33 @@ html {
     margin-left: auto;
     margin-right: auto;
 }
-.NuoContainerLG {
-    max-width: 100%;
-    margin-left: 24px;
-    margin-right: 24px;
+@media (max-width: 600px) {
+    .NuoContainerLG {
+        max-width: 100%;
+        margin-left: 15px;
+        margin-right: 15px;
+    }
+}
+
+.NuoListResourceHeader>h3 {
+    padding: 0 20px;
+    font-size: 1.5em;
+    margin: 0;
+}
+
+.NuoListResourceHeader>div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-right: 15px;
+}
+@media (min-width: 601px) {
+    .NuoContainerLG {
+            max-width: 100%;
+            margin-left: 24px;
+            margin-right: 24px;
+        }
 }
 .NuoLoginForm {
     display: flex;
@@ -42,9 +65,19 @@ html {
 .NuoBanner {
     display: flex;
         flex-direction: row;
-        justify-content: right;
-        padding: 23px 25px 23px 27px;
+        justify-content: space-between;
     width: 100%;
+}
+@media (max-width: 600px) {
+    .NuoBanner {
+        padding: 15px 0;
+    }
+}
+
+@media (min-width: 601px) {
+    .NuoBanner {
+        padding: 15px 0;
+    }
 }
 
 .NuoBannerItems {
@@ -97,6 +130,13 @@ html {
     background-color: lightgray;
 }
 
+.NuoMenuSelected {
+    background-color: rgba(25, 118, 210, 0.08);
+}
+
+.NuoMenuSelected:hover {
+    background-color: rgba(110, 110, 110, 0.2);
+}
 .NuoAlignRight {
     left: auto;
     right: 0;
@@ -111,6 +151,8 @@ html {
     padding: 25px;
 }
 .NuoTableContainer {
+    display: flex;
+        flex-direction: column;
     box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
     background-color: #fff;
     color: rgba(0, 0, 0, 0.87);
@@ -162,6 +204,17 @@ html {
     flex-direction: column;
     flex: 1 1 auto;
 }
+.NuoRowFixed {
+    display: flex;
+    flex-direction: row;
+    flex: 0 0 auto;
+}
+
+.NuoColumnFixed {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+}
 .NuoTableSettingsItem>label {
     display: flex;
     flex: 1 1 auto;
@@ -191,8 +244,15 @@ html {
 .NuoTableTd>button {
     border: none;
     background-color: transparent;
+    color: black;
     cursor: pointer;
     text-decoration: underline;
+    padding: 0;
+    }
+    
+    .NuoTableTd>button:hover {
+        background-color: transparent;
+        box-shadow: none;
 }
 .NuoTableTh {
     line-height: 1.5rem;
@@ -369,28 +429,96 @@ code {
     padding: 5px 24px;
 }
 
-.NuoLogo {
-    width: 62px;
+.NuoLeftMenu>img,
+.NuoLeftMenuCollapsed>img {
     position: relative;
     margin: 5px;
 }
-.NuoLeftMenu {
-    width: 200px;
-    padding: 15px;
+.NuoLeftMenu>img {
+    content: url("/ui/images/nuodb.png");
+    width: 62px;
+    margin: 15px;
+}
+
+.NuoLeftMenuCollapsed>img {
+    content: url("/ui/images/nuodb-bird-only.png");
+    width: 24px;
+    height: 38px;
+    object-fit: contain;
+}
+
+.NuoLeftMenu,
+.NuoLeftMenuCollapsed {
     transition: width 0.2s, padding 0.2s, opacity 0.2s;
 }
-.NuoLeftMenu>details {
+
+.summary {
+    transition: padding 0.2s;
+}
+
+@media (max-width: 600px) {
+    .NuoForDesktop {
+        display: none !important;
+    }
+}
+
+@media (min-width: 601px) {
+    .NuoForMobile {
+        display: none !important;
+    }
+}
+.NuoLeftMenu {
+    width: 200px;
+    background-color: white;
+}
+
+.NuoLeftMenuCollapsed {
+    opacity: 1;
+    width: 45px;
+}
+
+.NuoLeftMenuPopup {
+    position: absolute;
+    z-index: 1001;
+    top: 70px;
+    padding: 5px;
+    box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+.NuoLeftMenu>.details,
+.NuoLeftMenuCollapsed>.details {
     text-wrap: nowrap;
 }
-.NuoLeftMenu>details>summary {
+.NuoLeftMenu>.details>.summary,
+.NuoLeftMenuCollapsed>.details>.summary {
     text-transform: uppercase;
         font-weight: bold;
         font-size: 0.8em;
     color: #888888;
     margin: 10px 0 0 0;
+    padding: 0 15px;
+    cursor: default;
+    }
+
+    .NuoLeftMenuCollapsed>.details>.summary {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 0 0 0 5px;
+    }
+
+    .NuoLeftMenuCollapsed>.details>.summary:hover {
+        overflow: visible;
+        background-color: white;
+        width: fit-content;
+        position: relative;
+        z-index: 1001;
+    }
+
+    .NuoLeftMenuCollapsed>.details>ol>li {
+        padding: 0 5px;
 }
 
-.NuoLeftMenu>details>ol {
+.NuoLeftMenu>.details>ol,
+.NuoLeftMenuCollapsed>.details>ol {
     margin: 0 0 10px 0;
     padding: 0;
 }
@@ -402,11 +530,13 @@ code {
     list-style-type: none;
     border-radius: 5px;
     height: 40px;
-    padding: 0;
+    padding: 0 15px;
     cursor: default;
     text-wrap: nowrap;
     overflow: hidden;
     font-size: 0.9em;
+    text-align: left;
+        color: #7a8088;
 }
 
 .NuoLeftMenuItem>svg {
@@ -414,9 +544,52 @@ code {
     color: #cdd1d6;
 }
 
-.NuoLeftMenuItem {
-    text-align: left;
-    color: #7a8088;
+.NuoLeftMenuCollapsed *>.NuoLeftMenuItem>label {
+    display: none;
+}
+
+.NuoLeftMenuCollapsed *>.NuoLeftMenuItem:hover>label {
+    display: flex;
+}
+.NuoLeftMenuItem:hover>label,
+.NuoLeftMenuItemSelected:hover>label {
+    display: flex;
+    text-wrap: wrap;
+    max-width: 500px;
+    position: absolute;
+    margin: 5px 0px 5px 35px;
+    z-index: 1001;
+}
+
+.NuoLeftMenuCollapsed *>.NuoLeftMenuItem:hover>label {
+    padding-top: 8px;
+        padding-right: 5px;
+        padding-bottom: 8px;
+        padding-left: 5px;
+        height: 40px;
+    border-right: 1px solid;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    border-radius: 0 5px 5px 0;
+    background-color: white;
+}
+
+.NuoLeftMenuCollapsed *>.NuoLeftMenuItem:hover {
+    border-left: 1px solid;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    padding: 5px;
+}
+
+.NuoLeftMenuCollapsed *>.NuoLeftMenuItemSelected:hover>label {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #4f8dbf;
+    height: 30px;
+    border-radius: 0 5px 5px 0;
+        padding: 19px 5px;
 }
 
 .NuoLeftMenuItemSelected,
@@ -432,12 +605,11 @@ code {
 }
 
 .NuoPageLayoutMenuSeparator {
-    width: 20px;
+    width: 1px;
     border-left: 1px solid;
     border-color: rgba(240, 240, 240, 1);
-    margin: 0 0 0 10px;
-    padding: 0 10px 0 0;
-
+    margin: 0;
+        padding: 0;
 }
 
 .NuoPageLayoutMenuSeparator>button {
@@ -459,12 +631,25 @@ code {
 }
 .NuoOrgSelector {
     display: flex;
+    color: #cdd1d6;
     flex-direction: row;
     align-items: center;
+    justify-content: space-between;
+        padding: 0 0 0 15px;
+    border: 1px solid rgba(240, 240, 240, 1);
+        cursor: default;
+        overflow: hidden;
 }
 
-.NuoOrgSelector>svg {
-    margin: 5px 0;
+.NuoOrgSelector>div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-wrap: nowrap;
+}
+
+.NuoOrgSelector>div>svg {
+    margin: 5px 10px 5px 0px;
         color: #cdd1d6;
         border: 1px solid;
         border-radius: 50%;
@@ -473,21 +658,12 @@ code {
         height: 30px;
 }
 
-.NuoOrgSelector>select {
-    display: flex;
-    flex: 1 1 auto;
-    border: 0;
-    color: #7a8088;
-    font-size: 1em;
-        font-weight: bold;
+.NuoLeftMenuCollapsed>.NuoOrgSelector,
+.NuoLeftMenuCollapsed *>.NuoOrgSelector {
+    padding: 0 5px;
+    justify-content: left;
 }
 
-.NuoOrgSeparator {
-    height: 1px;
-    border-bottom: 1px solid;
-    border-color: rgba(240, 240, 240, 1);
-    margin: 0 -25px 0 -15px;
-}
 .NuoFormHeader {
     margin-block-start: 0.67em;
     margin-block-end: 2em;
@@ -555,5 +731,47 @@ code {
 }
 
 .NuoTableOptions {
+    display: flex;
+        flex-direction: row;
+        flex: 1 1 auto;
     padding: 15px;
+    align-items: center;
+    }
+
+.NuoMenuIcon {
+    border: 1px solid lightgray;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    padding: 15px;
+    margin: auto 5px;
+}
+
+.NuoMenuIcon:hover {
+    background-color: lightgray;
+    cursor: pointer;
+}
+button {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    background-color: #4f8dbf;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.9em;
+    padding: 7px 10px;
+    cursor: default;
+    text-wrap: nowrap;
+    text-align: left;
+}
+
+button:hover,
+button:focus {
+    background-color: #4377a2;
+    box-shadow: 2px 2px 5px -3px rgba(0, 0, 0, 0.2), 4px 4px 10px 1px rgba(0, 0, 0, 0.14), 1px 1px 14px 2px rgba(0, 0, 0, 0.12);
 }

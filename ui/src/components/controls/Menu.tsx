@@ -8,7 +8,7 @@ import DragHandleIcon from '@mui/icons-material/DragHandle';
 import { MenuItemProps, MenuProps } from '../../utils/types';
 
 export default function Menu(props: MenuProps): JSX.Element {
-    const { popupId, items, className } = props;
+    const { popupId, items, className, disabled } = props;
     const dataTestid = props["data-testid"];
 
     useEffect(() => {
@@ -31,12 +31,12 @@ export default function Menu(props: MenuProps): JSX.Element {
     }
 
     if (children) {
-        return <div data-testid={dataTestid}>
-            <div data-testid="menu-toggle" onClick={(event) => {
+        return <div data-testid={dataTestid} style={{ opacity: disabled ? 0.5 : 1 }} onClick={(event) => {
+            if (!disabled) {
                 PopupMenu.showMenu(props, event.currentTarget)
+            }
             }}>
-                <>{children}</>
-            </div>
+            <>{children}</>
         </div>;
     }
     else {
@@ -58,6 +58,7 @@ export class PopupMenu extends Component<{}, PopupState> {
         popupId: "",
         items: [],
         setItems: undefined,
+        selected: undefined,
         anchor: null,
         align: "right" as AlignType,
         draggable: false,
@@ -142,6 +143,7 @@ export class PopupMenu extends Component<{}, PopupState> {
             draggable: undefined,
             children: undefined,
             setItems: undefined,
+            selected: undefined,
             className: undefined,
             ...menu,
             anchor
@@ -187,7 +189,7 @@ export class PopupMenu extends Component<{}, PopupState> {
                         onDragOver={this.dndOver}
                         onDragStart={this.dndStart}
                         key={item.id}
-                        className="NuoMenuPopupItem"
+                        className={"NuoMenuPopupItem" + (item.id === this.state.selected ? " NuoMenuSelected" : "")}
                         onClick={(e) => {
                             e.stopPropagation();
                             if (item.onClick) {

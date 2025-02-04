@@ -2,10 +2,9 @@
     "copyright": "(C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.",
     "button": {
         "create": "Create",
-        "create.resource": "Create {{resource}}",
+        "create.resource": "New {{resource}}",
         "delete": "Delete",
         "edit": "Edit",
-        "search": "Search",
         "save": "Save",
         "yes": "Yes",
         "no": "No",
@@ -144,6 +143,11 @@
         "select": {
             "selectItem": "--- Select Item ---",
             "allOrgs": "All Organizations"
+        }
+    },
+    "list": {
+        "label": {
+            "management": "Management"
         }
     },
     "form": {

@@ -2,7 +2,6 @@
 
 import React, { useState } from "react"
 import { withTranslation } from "react-i18next";
-import Button from "../../controls/Button"
 import TextField from "../../controls/TextField"
 import { TempAny } from "../../../utils/types"
 
@@ -59,28 +58,23 @@ function Search({ search, setSearch, t }: SearchProps) {
         }
     }
 
-    return <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-        {<React.Fragment>
-            <TextField
-                required={false}
-                data-testid="searchField"
-                id="search"
-                label={"search, i.e. \"somename\" or \"label=key=value,!otherkey name=abc\""}
-                value={searchField}
-                onChange={({ currentTarget: input }) => {
-                    setSearchField(input.value);
-                }}
-                onKeyDown={(event) => {
-                    if (event.keyCode === 13) {
-                        handleSearch();
-                    }
-                }}
-                error={error}
-            />
-            <Button data-testid="searchButton" onClick={handleSearch}
-            >{t("button.search")}</Button>
-        </React.Fragment>
-        }
+    return <div style={{ display: "flex", flexDirection: "row", flex: "1 1 auto", alignItems: "center", justifyContent: "center" }}>
+        <TextField
+            required={false}
+            data-testid="searchField"
+            id="search"
+            label={"search, i.e. \"somename\" or \"label=key=value,!otherkey name=abc\""}
+            value={searchField}
+            onChange={({ currentTarget: input }) => {
+                setSearchField(input.value);
+            }}
+            onKeyDown={(event) => {
+                if (event.keyCode === 13) {
+                    handleSearch();
+                }
+            }}
+            error={error}
+        />
     </div>;
 }
 

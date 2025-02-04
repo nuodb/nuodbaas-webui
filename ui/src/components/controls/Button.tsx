@@ -15,7 +15,7 @@ export type ButtonProps = {
     onClick: (event: React.MouseEvent<HTMLButtonElement | MouseEvent>) => void
 }
 export default function Button(props: ButtonProps): JSX.Element {
-    if (isMaterial()) {
+    if (false && isMaterial()) {
         return <MuiButton disabled={props.disabled} variant={props.variant} {...props}>{props.children}</MuiButton>
     }
     else {

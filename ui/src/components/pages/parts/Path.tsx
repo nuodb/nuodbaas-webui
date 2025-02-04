@@ -48,7 +48,8 @@ function Path({ schema, path, filterValues, org, t }: TempAny) {
     let pathParts = (path.startsWith("/") ? path.substring(1) : path).split("/");
     const schemaPath = getSchemaPath(schema, path) || "";
     return <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-        <StyledBreadcrumbs data-testid="path_component" separator=">" aria-label="resources" style={{ fontSize: "2em", padding: "20px", display: "flex", flexWrap: "nowrap" }}>
+        <StyledBreadcrumbs data-testid="path_component" separator=">" aria-label="resources" style={{ color: "#b5b9bc", fontSize: "1em", padding: "0 20px", display: "flex", flexWrap: "nowrap" }}>
+            <Typography key="management" color="text.primary" style={{ fontSize: "1em" }}>{t("list.label.management")}</Typography>
             {pathParts && pathParts.map((p: string, index: number) => {
                 if (index === 0) {
                     p = t("resource.label." + p, p);
