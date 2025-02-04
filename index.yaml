@@ -3,7 +3,7 @@ entries:
   nuodbaas-webui:
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-02-03T18:43:22.192598909Z"
+    created: "2025-02-04T13:20:56.50632118Z"
     description: NuoDBaaS WebUI populated by the OpenAPI spec
     digest: 36f1e195a9c98e84b76614b1b15a8d593c06bc6dc6211f92c758a066edc0db8e
     name: nuodbaas-webui
@@ -12,20 +12,20 @@ entries:
     version: 1.0.0-latest
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-02-03T18:43:22.191664895Z"
+    created: "2025-02-04T13:20:56.506705714Z"
+    description: NuoDBaaS WebUI populated by the OpenAPI spec
+    digest: 36f1e195a9c98e84b76614b1b15a8d593c06bc6dc6211f92c758a066edc0db8e
+    name: nuodbaas-webui
+    urls:
+    - nuodbaas-webui-1.0.0.tgz
+    version: 1.0.0-latest
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2025-02-04T13:20:56.505993776Z"
     description: NuoDBaaS WebUI populated by the OpenAPI spec
     digest: 749c5bcd1eef559b2ed85a6a368b07e6bdbcad71ebcdbb51fa61fe27cb4eb640
     name: nuodbaas-webui
     urls:
     - nuodbaas-webui-1.0.0-23Sd3pn5rvbVTD06FCsEvA+52260f2.tgz
     version: 1.0.0-23Sd3pn5rvbVTD06FCsEvA+52260f2
-  - apiVersion: v2
-    appVersion: 1.0.0
-    created: "2025-02-03T18:43:22.192192668Z"
-    description: NuoDBaaS WebUI populated by the OpenAPI spec
-    digest: f04222a134d3de895c811532be094dcc1591c9b6362fef49decea45e09b81473
-    name: nuodbaas-webui
-    urls:
-    - nuodbaas-webui-1.0.0-23Sd3pn5rvbVTD06FCsEvA+fdb7528.tgz
-    version: 1.0.0-23Sd3pn5rvbVTD06FCsEvA+fdb7528
-generated: "2025-02-03T18:43:22.191134851Z"
+generated: "2025-02-04T13:20:56.505469722Z"
