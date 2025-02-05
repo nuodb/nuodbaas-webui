@@ -40,7 +40,7 @@ export default function TextField(props: TextFieldProps): JSX.Element {
             helperText={props.error}
             slotProps={((props.icon || props.leftIcon || fieldProps.description) && {
                 input: {
-                    endAdornment:
+                    endAdornment: props.icon &&
                         <InputAdornment position="end">
                             {props.icon && <IconButton
                                 aria-label=""
@@ -50,9 +50,9 @@ export default function TextField(props: TextFieldProps): JSX.Element {
                             </IconButton>}
                             {props.description && <InfoPopup description={props.description} />}
                         </InputAdornment>,
-                    startAdornment:
+                    startAdornment: props.leftIcon &&
                         <InputAdornment position="start">
-                            {props.leftIcon && props.leftIcon}
+                            {props.leftIcon}
                         </InputAdornment>,
                 }
             }) || undefined

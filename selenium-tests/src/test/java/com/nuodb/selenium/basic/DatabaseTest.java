@@ -74,15 +74,6 @@ public class DatabaseTest extends TestRoutines {
         });
    }
 
-   private WebElement findSingleDatabaseButton(String databaseName, String buttonLabel) {
-        List<WebElement> statusCell = waitTableElements("list_resource__table", "name", databaseName, "status");
-        assertEquals(1, statusCell.size());
-        List<WebElement> buttons = statusCell.get(0).findElements(By.tagName("button"));
-        assertEquals(1, buttons.size());
-        assertEquals(buttonLabel.toLowerCase(), buttons.get(0).getText().toLowerCase());
-        return buttons.get(0);
-   }
-
    @Test
    public void testStartStopDatabase() {
        // Setup and list databases

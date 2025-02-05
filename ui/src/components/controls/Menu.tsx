@@ -8,7 +8,7 @@ import DragHandleIcon from '@mui/icons-material/DragHandle';
 import { MenuItemProps, MenuProps } from '../../utils/types';
 
 export default function Menu(props: MenuProps): JSX.Element {
-    const { popupId, items, className, disabled } = props;
+    const { popupId, items, className } = props;
     const dataTestid = props["data-testid"];
 
     useEffect(() => {
@@ -31,10 +31,8 @@ export default function Menu(props: MenuProps): JSX.Element {
     }
 
     if (children) {
-        return <div data-testid={dataTestid} style={{ opacity: disabled ? 0.5 : 1 }} onClick={(event) => {
-            if (!disabled) {
-                PopupMenu.showMenu(props, event.currentTarget)
-            }
+        return <div data-testid={dataTestid} onClick={(event) => {
+            PopupMenu.showMenu(props, event.currentTarget)
             }}>
             <>{children}</>
         </div>;

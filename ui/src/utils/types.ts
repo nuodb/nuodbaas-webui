@@ -50,7 +50,6 @@ export type MenuItemProps = {
 
 export type MenuProps = {
     "data-testid"?: string,
-    disabled?: boolean,
     align?: "left" | "right",
     popupId?: string,
     draggable?: boolean,
