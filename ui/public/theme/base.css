@@ -249,7 +249,7 @@ html {
     text-decoration: underline;
     padding: 0;
     }
-    
+
     .NuoTableTd>button:hover {
         background-color: transparent;
         box-shadow: none;
@@ -738,6 +738,28 @@ code {
     align-items: center;
     }
 
+.NuoTableSelectedActions {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.NuoTableSelectedActions>button {
+    margin: 0 2px;
+}
+
+.deleteButton {
+    background-color: red;
+}
+
+.deleteButton:hover {
+    background-color: darkred;
+}
+
+.NuoTableSelectedActions>label {
+    margin: 0 5px;
+}
 .NuoMenuIcon {
     border: 1px solid lightgray;
     align-items: center;

@@ -13,6 +13,7 @@ import Menu from '../../controls/Menu';
 import TableSettingsColumns from './TableSettingsColumns';
 import { useEffect, useState } from 'react';
 import CustomDialog from '../custom/CustomDialog';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 function getFlattenedKeys(obj: TempAny, prefix?: string): string[] {
     let ret: string[] = [];
@@ -45,7 +46,7 @@ interface TableProps extends PageProps {
 function Table(props: TableProps) {
     const { schema, data, path, t } = props;
     const [columns, setColumns] = useState<MenuItemProps[]>([]);
-    const [selected, setSelected] = useState<boolean[]>([]);
+    const [selected, setSelected] = useState<Set<string>>(new Set());
     let navigate = useNavigate();
     const schemaPath = getSchemaPath(schema, path);
     let lastSchemaPathElement = "/" + schemaPath;
@@ -96,7 +97,6 @@ function Table(props: TableProps) {
         })
 
         setColumns(cols);
-        setSelected(data.map(() => false));
     }, [data, path, schema, t]);
 
     type TableLabelsType = {
@@ -156,6 +156,30 @@ function Table(props: TableProps) {
         }
     }
 
+    async function handleDeleteMultiple() {
+        const selectedRows = data.filter((d: any) => selected.has(d["$ref"]));
+        const editDeletePaths = selectedRows.map((row: any) => {
+            if (lastSchemaPathElement.startsWith("{")) {
+                return path + "/" + row["$ref"];
+            }
+            else {
+                // special case for /backuppolicies/{organization}/{name}/databases (or similar) where the last element specifies a resource type
+                return "/" + lastSchemaPathElement + "/" + row["$ref"];
+            }
+        });
+        const resourceLabel = t("resource.label." + editDeletePaths[0].replace(/^\//, "").split("/")[0]);
+        if ("yes" === await Dialog.confirm(
+            t("confirm.delete.resources.title", { resources: resourceLabel, count: selectedRows.length }),
+            t("confirm.delete.resources.body", { resources: resourceLabel, names: selectedRows.map((r: any) => r.name).join(", ") }), t)) {
+            let promises = await Promise.allSettled(editDeletePaths.map((dPath: any) => Rest.delete(dPath)));
+            promises.forEach((result, index) => {
+                if (result.status === "rejected") {
+                    Rest.toastError("Unable to delete " + editDeletePaths[index], result.reason);
+                }
+            })
+        }
+    }
+
     function renderMenuCell(row: any) {
         let editDeletePath: string;
         if (lastSchemaPathElement.startsWith("{")) {
@@ -196,7 +220,7 @@ function Table(props: TableProps) {
                 catch (ex) {
                     const msg = "Error in checking visibility of button.";
                     Rest.toastError(msg, String(ex));
-                    console.log(msg, ex, row);
+                    console.error(msg, ex, row);
                 }
 
                 if (menuVisible) {
@@ -265,7 +289,7 @@ function Table(props: TableProps) {
             catch (ex) {
                 const msg = "Error in custom value evaluation for field \"" + fieldName + "\"";
                 Rest.toastError(msg, String(ex));
-                console.log(msg, ex, row);
+                console.error(msg, ex, row);
                 value = ""
             }
         }
@@ -281,7 +305,8 @@ function Table(props: TableProps) {
         }
 
         return <TableCell key={fieldName}>
-            {fieldName === "name" ? <button onClick={() => {
+            {fieldName === "name" ? <button onClick={(event) => {
+                event.preventDefault();
                 navigate("/ui/resource/view" + path + "/" + row["$ref"]);
             }}>{value}</button> : value}
         </TableCell>;
@@ -298,41 +323,62 @@ function Table(props: TableProps) {
         }
     }
 
+    function renderTableSelectedActions() {
+        return <TableTh key="__all_selected__" colSpan={selected.size === 0 ? 1 : (visibleColumns.length + 2)}>
+            <div className="NuoTableSelectedActions">
+                {data.length > 0 && <input
+                    type="checkbox"
+                    data-testid="check_all"
+                    checked={selected.size === data.length}
+                    onChange={(event) => {
+                        let allSelected = selected.size === data.length;
+                        if (allSelected) {
+                            setSelected(new Set());
+                        }
+                        else {
+                            setSelected(new Set(data.map((d: any) => d["$ref"])));
+                        }
+                    }}
+                />}
+                {selected.size > 0 && <>
+                    <label>{selected.size} selected</label>
+                    <button className="deleteButton" data-testid="list_resources_multiple_delete_button" onClick={(event) => {
+                        event?.preventDefault();
+                        handleDeleteMultiple();
+                    }}><DeleteIcon />Delete</button>
+                </>
+                }
+            </div>
+        </TableTh>
+    }
+
     const tableLabels = getTableLabels();
     let visibleColumns = moveNameColumnToFront(columns.filter(col => col.selected && !schemaPath?.includes("{" + col.id + "}")));
     return (
         <TableCustom data-testid={props["data-testid"]}>
             <TableHead>
                 {data.length > 0 && <TableRow>
-                    <TableTh key="__all_selected__">
-                        {data.length > 0 && <input
-                            type="checkbox"
-                            checked={selected.length === selected.filter(s => s === true).length}
-                            onChange={(event) => {
-                                let allSelected = selected.length === selected.filter(s => s === true).length;
-                                if (allSelected) {
-                                    setSelected(selected.map(s => false));
-                                }
-                                else {
-                                    setSelected(selected.map(s => true));
-                                }
-                            }}
-                        />}
-                    </TableTh>
-                    {visibleColumns.map((column, index) => <TableTh key={column.id} data-testid={column.id}>
+                    {renderTableSelectedActions()}
+                    {selected.size === 0 && <>{visibleColumns.map((column, index) => <TableTh key={column.id} data-testid={column.id}>
                         {data.length > 0 && tableLabels[column.id]}
                     </TableTh>)}
                     <TableTh key="$ref" data-testid="$ref" className="NuoTableMenuCell">
                         {data.length > 0 && <TableSettingsColumns data={data} path={path} columns={columns} setColumns={setColumns} />}
                     </TableTh>
+                    </>}
                 </TableRow>}
             </TableHead>
             <TableBody>
                 {data.map((row: TempAny, index: number) => (
                     <TableRow key={row["$ref"] || index}>
-                        <TableCell key="__selected__"><input type="checkbox" checked={selected[index]} onChange={(event) => {
-                            let tmpSelected = [...selected];
-                            tmpSelected[index] = !tmpSelected[index];
+                        <TableCell key="__selected__"><input type="checkbox" data-testid={"check_" + index} checked={selected.has(row["$ref"])} onChange={(event) => {
+                            let tmpSelected = new Set(selected);
+                            if (tmpSelected.has(row["$ref"])) {
+                                tmpSelected.delete(row["$ref"]);
+                            }
+                            else {
+                                tmpSelected.add(row["$ref"]);
+                            }
                             setSelected(tmpSelected);
                         }} /></TableCell>
                         {visibleColumns.map(column => renderDataCell(column.id, row))}

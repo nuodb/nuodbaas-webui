@@ -237,7 +237,7 @@ function handleFormula(data: TempAny, parts: FormulaPart[]): FormulaPart {
         return value(parts[0]) !== value(parts[2]);
     }
     else {
-        console.log("ERROR: invalid formula", parts);
+        console.error("ERROR: invalid formula", parts);
         return "";
     }
 }
@@ -251,7 +251,7 @@ function handleFormula(data: TempAny, parts: FormulaPart[]): FormulaPart {
 export function evaluate(data: TempAny, formula: string): TempAny {
     let parts = splitFormulaIntoParts(formula);
     if (parts === null) {
-        console.log("invalid formula: " + formula);
+        console.error("invalid formula: " + formula);
         return "";
     }
     const ret = handleFormula(data, parts);

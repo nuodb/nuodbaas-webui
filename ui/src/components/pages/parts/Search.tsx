@@ -4,6 +4,7 @@ import React, { useState } from "react"
 import { withTranslation } from "react-i18next";
 import TextField from "../../controls/TextField"
 import { TempAny } from "../../../utils/types"
+import SearchIcon from '@mui/icons-material/Search';
 
 export function parseSearch(search: string) {
     search = search.trim();
@@ -65,6 +66,7 @@ function Search({ search, setSearch, t }: SearchProps) {
             id="search"
             label={"search, i.e. \"somename\" or \"label=key=value,!otherkey name=abc\""}
             value={searchField}
+            leftIcon={<SearchIcon />}
             onChange={({ currentTarget: input }) => {
                 setSearchField(input.value);
             }}

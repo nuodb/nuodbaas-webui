@@ -13,7 +13,6 @@ import { PageProps, TempAny } from "../../utils/types";
 import Pagination from "../controls/Pagination";
 import { withTranslation } from "react-i18next";
 import Search, { parseSearch } from "./parts/Search";
-import Menu from "../controls/Menu";
 
 type ItemsAndPathProps = {
     items: [] | null,
@@ -132,12 +131,6 @@ function ListResource(props: PageProps) {
     const createLabel = t('button.create.resource', { resource: t("resource.label." + createPathFirstPart + "_one", createPathFirstPart) });
     if (itemsAndPath.items) {
         const dataNotDeleted = itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true);
-        const multiItemsMenu = [{
-            id: "A",
-            label: "A",
-            "data-testid": "multiItemMenu",
-            onclick:()=>{}
-        }]
         return (
             <PageLayout {...props} >
                 <div className="NuoListResourceHeader">
@@ -152,7 +145,7 @@ function ListResource(props: PageProps) {
                         <Search search={search} setSearch={(search: string) => {
                             setPage(1);
                             setSearch(search);
-                        }} /><Menu popupId="multi_item_menu" items={multiItemsMenu} align="right" />
+                        }} />
                     </div>
                 <Table
                     data-testid="list_resource__table"

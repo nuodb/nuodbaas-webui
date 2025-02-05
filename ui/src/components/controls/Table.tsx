@@ -7,10 +7,14 @@ type TableProps = {
     "data-testid"?: string,
 }
 
-type ChildProps = {
+interface ChildProps {
     children?: ReactNode,
     className?: string,
     "data-testid"?: string,
+}
+
+interface CellProps extends ChildProps {
+    colSpan?: number
 }
 
 export function Table(props: TableProps): JSX.Element {
@@ -25,12 +29,12 @@ export function TableRow(props: ChildProps): JSX.Element {
     return <tr className="NuoTableTr">{props.children}</tr>
 }
 
-export function TableCell(props: ChildProps): JSX.Element {
+export function TableCell(props: CellProps): JSX.Element {
     return <td data-testid={props["data-testid"]} className={["NuoTableTd", props.className].join(" ")}>{props.children}</td>
 }
 
-export function TableTh(props: ChildProps): JSX.Element {
-    return <th data-testid={props["data-testid"]} className={["NuoTableTh", props.className].join(" ")}>{props.children}</th>
+export function TableTh(props: CellProps): JSX.Element {
+    return <th data-testid={props["data-testid"]} className={["NuoTableTh", props.className].join(" ")} colSpan={props.colSpan}>{props.children}</th>
 }
 
 export function TableBody(props: ChildProps): JSX.Element {

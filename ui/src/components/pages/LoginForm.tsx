@@ -27,8 +27,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
-    async function handleLogin(e: React.MouseEvent<HTMLButtonElement | MouseEvent>) {
-        e.preventDefault();
+    async function handleLogin() {
         let success = await Auth.login(organization + "/" + username, password);
         if (success) {
             setIsLoggedIn(true);

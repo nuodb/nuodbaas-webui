@@ -3,6 +3,7 @@
 package com.nuodb.selenium.basic;
 
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.nuodb.selenium.Constants;
@@ -46,7 +47,7 @@ public class SearchTest extends TestRoutines {
 
         // search users starting with "1" index and check that 10 users are returned
         replaceInputElementByName("search", name + "1");
-        waitElement("searchButton").click();
+        waitInputElementByName("search").sendKeys(Keys.RETURN);
         waitRestComplete();
         retry(()-> {
             var nc = waitTableElements("list_resource__table", "name", null, "name");
@@ -55,7 +56,7 @@ public class SearchTest extends TestRoutines {
 
         // search users by label existence
         replaceInputElementByName("search", "label=label1");
-        waitElement("searchButton").click();
+        waitInputElementByName("search").sendKeys(Keys.RETURN);
         waitRestComplete();
         retry(()-> {
             var nc = waitTableElements("list_resource__table", "name", null, "name");
@@ -64,7 +65,7 @@ public class SearchTest extends TestRoutines {
 
         // search users by label value
         replaceInputElementByName("search", "label=label2=" + name + "8");
-        waitElement("searchButton").click();
+        waitInputElementByName("search").sendKeys(Keys.RETURN);
         waitRestComplete();
         retry(()->{
             var nc = waitTableElements("list_resource__table", "name", null, "name");
@@ -73,7 +74,7 @@ public class SearchTest extends TestRoutines {
 
         // search users by label value and name
         replaceInputElementByName("search", "label=label2=" + name + "8" + " name=" + name + "1");
-        waitElement("searchButton").click();
+        waitInputElementByName("search").sendKeys(Keys.RETURN);
         waitRestComplete();
         retry(()-> {
             var nc = waitTableElements("list_resource__table", "name", null, "name");
@@ -82,7 +83,7 @@ public class SearchTest extends TestRoutines {
 
         // search users by partial name
         replaceInputElementByName("search", "name=" + name + "1");
-        waitElement("searchButton").click();
+        waitInputElementByName("search").sendKeys(Keys.RETURN);
         waitRestComplete();
         retry(()->{
             var nc = waitTableElements("list_resource__table", "name", null, "name");
@@ -91,7 +92,7 @@ public class SearchTest extends TestRoutines {
 
         // search users by full name
         replaceInputElementByName("search", "name=" + name + "19");
-        waitElement("searchButton").click();
+        waitInputElementByName("search").sendKeys(Keys.RETURN);
         waitRestComplete();
         retry(()->{
             var nc = waitTableElements("list_resource__table", "name", null, "name");
@@ -100,7 +101,7 @@ public class SearchTest extends TestRoutines {
 
         // search users by invalid name
         replaceInputElementByName("search", "name=" + name + "invalid");
-        waitElement("searchButton").click();
+        waitInputElementByName("search").sendKeys(Keys.RETURN);
         waitRestComplete();
         retry(()->{
             var nc = waitTableElements("list_resource__table", "name", null, "name");

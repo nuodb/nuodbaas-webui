@@ -18,6 +18,7 @@ export type TextFieldProps = {
     autoFocus?: boolean,
     disabled?: boolean,
     icon?: React.ReactNode,
+    leftIcon?: React.ReactNode,
     iconOnClick?: React.MouseEventHandler<HTMLButtonElement> | undefined,
     onChange?: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void,
     onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void,
@@ -27,6 +28,7 @@ export type TextFieldProps = {
 export default function TextField(props: TextFieldProps): JSX.Element {
     let fieldProps = { ...props };
     delete fieldProps.icon;
+    delete fieldProps.leftIcon;
     delete fieldProps.iconOnClick;
     if (isMaterial()) {
         return <MuiTextField
@@ -36,7 +38,7 @@ export default function TextField(props: TextFieldProps): JSX.Element {
             aria-details={props.description}
             error={!!props.error}
             helperText={props.error}
-            slotProps={((props.icon || fieldProps.description) && {
+            slotProps={((props.icon || props.leftIcon || fieldProps.description) && {
                 input: {
                     endAdornment:
                         <InputAdornment position="end">
@@ -47,7 +49,11 @@ export default function TextField(props: TextFieldProps): JSX.Element {
                                 {props.icon}
                             </IconButton>}
                             {props.description && <InfoPopup description={props.description} />}
-                        </InputAdornment>
+                        </InputAdornment>,
+                    startAdornment:
+                        <InputAdornment position="start">
+                            {props.leftIcon && props.leftIcon}
+                        </InputAdornment>,
                 }
             }) || undefined
             }

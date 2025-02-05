@@ -37,7 +37,9 @@
         "stop.database.title": "Stop Database",
         "stop.database.body": "Do you want to stop Database {{organization}}/{{project}}/{{name}}?",
         "delete.resource.title": "Deleting {{resources_one}} {{name}}",
-        "delete.resource.body": "Please confirm deletion of {{resources_one}} {{name}}?"
+        "delete.resource.body": "Please confirm deletion of {{resources_one}} {{name}}?",
+        "delete.resources.title": "Deleting {{count}} {{resources}}",
+        "delete.resources.body": "Please confirm deleting of {{resources}} {{names}}?"
     },
     "resource": {
         "label": {
