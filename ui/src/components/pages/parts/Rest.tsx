@@ -33,7 +33,7 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
 
     static toastError(msg: string, error: string) {
         instance && instance.setState({ errorMessage: msg });
-        console.log(msg, error);
+        console.error(msg, error);
     }
 
     static incrementPending() {
@@ -156,7 +156,7 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
                     resolve(response.data);
                 }).catch(error => {
                     Rest.log("put", url, false, data);
-                    return reject(error);
+                    reject(error);
                 }).finally(() => {
                     Rest.decrementPending();
                 })

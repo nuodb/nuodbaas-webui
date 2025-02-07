@@ -2,10 +2,9 @@
     "copyright": "(C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.",
     "button": {
         "create": "Create",
-        "create.resource": "Create {{resource}}",
+        "create.resource": "New {{resource}}",
         "delete": "Delete",
         "edit": "Edit",
-        "search": "Search",
         "save": "Save",
         "yes": "Yes",
         "no": "No",
@@ -38,7 +37,9 @@
         "stop.database.title": "Stop Database",
         "stop.database.body": "Do you want to stop Database {{organization}}/{{project}}/{{name}}?",
         "delete.resource.title": "Deleting {{resources_one}} {{name}}",
-        "delete.resource.body": "Please confirm deletion of {{resources_one}} {{name}}?"
+        "delete.resource.body": "Please confirm deletion of {{resources_one}} {{name}}?",
+        "delete.resources.title": "Deleting {{count}} {{resources}}",
+        "delete.resources.body": "Please confirm deleting of {{resources}} {{names}}?"
     },
     "resource": {
         "label": {
@@ -144,6 +145,11 @@
         "select": {
             "selectItem": "--- Select Item ---",
             "allOrgs": "All Organizations"
+        }
+    },
+    "list": {
+        "label": {
+            "management": "Management"
         }
     },
     "form": {

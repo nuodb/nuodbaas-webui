@@ -71,10 +71,9 @@ public class BackupTest extends TestRoutines {
         // verify backup was modified
         retry(()->{
             List<WebElement> labelCells = waitTableElements("list_resource__table", "name", backupName, "labels");
-            assertThat(labelCells)
-                .hasSize(1)
-                .get(0)
-                .mapContains(projectName, databaseName);
+            assertThat(labelCells).hasSize(1);
+            String text = labelCells.get(0).getText();
+            assertEquals(projectName + ": " + databaseName, text);
         });
     }
 }

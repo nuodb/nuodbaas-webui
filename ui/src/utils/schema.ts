@@ -328,7 +328,7 @@ export function getResourceEvents(path: string, multiResolve: TempAny, multiReje
                             multiResolve(mergedData);
                         }
                         else {
-                            console.log("item with id " + id + " not found for merging");
+                            console.error("item with id " + id + " not found for merging");
                         }
                     }
                     else if(event === "DELETED" && id !== null) {
@@ -547,5 +547,5 @@ export async function submitForm(urlParameters: FieldParametersType, formParamet
 
     deleteEmptyFields(values);
 
-    return Rest.put(path, values);
+    return await Rest.put(path, values);
 }

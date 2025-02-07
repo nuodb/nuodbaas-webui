@@ -68,20 +68,10 @@ public class DatabaseTest extends TestRoutines {
         // verify database was modified
         retry(()->{
             List<WebElement> labelCells = waitTableElements("list_resource__table", "name", databaseName, "labels");
-            assertThat(labelCells)
-                .hasSize(1)
-                .get(0)
-                .mapContains(projectName, databaseName);
+            assertThat(labelCells).hasSize(1);
+            String text = labelCells.get(0).getText();
+            assertEquals(projectName + ": " + databaseName, text);
         });
-   }
-
-   private WebElement findSingleDatabaseButton(String databaseName, String buttonLabel) {
-        List<WebElement> statusCell = waitTableElements("list_resource__table", "name", databaseName, "status");
-        assertEquals(1, statusCell.size());
-        List<WebElement> buttons = statusCell.get(0).findElements(By.tagName("button"));
-        assertEquals(1, buttons.size());
-        assertEquals(buttonLabel.toLowerCase(), buttons.get(0).getText().toLowerCase());
-        return buttons.get(0);
    }
 
    @Test

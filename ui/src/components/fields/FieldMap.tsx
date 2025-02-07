@@ -177,9 +177,9 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
     function getDisplayValue(): ReactNode {
         const { prefix, values } = props;
         const value = getValue(values, prefix);
-        return <dl className="map">{Object.keys(value).map(key => {
-            return <div key={key}><dt>{String(key)}</dt><dd>{getValue(values, prefix + "." + key)}</dd></div>;
-        })}</dl>
+        return Object.keys(value).map(key => {
+            return <div className={"NuoTableField_" + prefix.replaceAll(".", "_")} key={key}>{String(key)}: {getValue(values, prefix + "." + key)}</div>;
+        })
     }
 
     return { ...FieldBase(props), show, validate, getDisplayValue }

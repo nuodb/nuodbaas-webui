@@ -32,7 +32,7 @@ export default function Menu(props: MenuProps): JSX.Element {
 
     if (children) {
         return <div data-testid={dataTestid} onClick={(event) => {
-                PopupMenu.showMenu(props, event.currentTarget)
+            PopupMenu.showMenu(props, event.currentTarget)
             }}>
             <>{children}</>
         </div>;

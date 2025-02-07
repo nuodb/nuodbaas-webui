@@ -74,10 +74,9 @@ public class UserTest extends TestRoutines {
         // verify user was modified
         retry(()->{
             List<WebElement> labelsCells = waitTableElements("list_resource__table", "name", userName, "labels");
-            assertThat(labelsCells)
-                .hasSize(1)
-                .get(0)
-                .mapContains(userName, userName);
+            assertThat(labelsCells).hasSize(1);
+            String text = labelsCells.get(0).getText();
+            assertEquals(userName + ": " + userName, text);
         });
    }
 }

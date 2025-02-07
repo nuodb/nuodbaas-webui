@@ -19,7 +19,8 @@ export default function PageLayout(props: PageLayoutProps) {
         <div className="NuoRowFixed NuoForDesktop">
             {<LeftMenu className={showMenu ? "NuoLeftMenu" : "NuoLeftMenuCollapsed"} {...props} />}
             <div className="NuoPageLayoutMenuSeparator">
-                <button onClick={() => {
+                <button onClick={(event) => {
+                    event.preventDefault();
                     localStorage.setItem(HIDE_TOC, String(showMenu));
                     setShowMenu(!showMenu);
                 }}>

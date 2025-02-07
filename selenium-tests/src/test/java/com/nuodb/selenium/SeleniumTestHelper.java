@@ -164,7 +164,7 @@ public class SeleniumTestHelper {
 
         try {
             column = Integer.parseInt(searchColumn);
-            if(column < 0 || column >= searchValues.size()) {
+            if(column < 0) {
                 return -1;
             }
             return column;
@@ -233,7 +233,7 @@ public class SeleniumTestHelper {
         click("login_button");
         retryStale(()->{
             String text = waitText("path_component");
-            assertEquals("Home", text);
+            assertEquals("Management\n>\nHome", text);
         });
         waitElement("banner-done");
     }

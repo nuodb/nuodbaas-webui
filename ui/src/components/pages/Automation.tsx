@@ -39,11 +39,11 @@ function Automation(props: PageProps) {
         <div className="NuoContainerLG">
             <h1>{t("dialog.automation.title")}</h1>
             <div className="NuoButtons">
-                <Button data-testid="btnStartRecording" disabled={isRecording} variant="contained" onClick={(event) => {
+                <Button data-testid="btnStartRecording" disabled={isRecording} variant="contained" onClick={() => {
                     Rest.clearLog();
                     Rest.setIsRecording(true);
                 }}>{t("dialog.automation.startRecording")}</Button>
-                <Button data-testid="btnStopRecording" disabled={!isRecording} variant="contained" onClick={(event) => {
+                <Button data-testid="btnStopRecording" disabled={!isRecording} variant="contained" onClick={() => {
                     Rest.setIsRecording(false);
                     const log = Rest.getLog();
                     setLog(log);
