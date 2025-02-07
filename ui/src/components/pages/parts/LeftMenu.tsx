@@ -23,7 +23,6 @@ function Organization({ schema, org, orgs, setOrg, onSelection, t }: Organizatio
     let path = "/" + useParams()["*"];
 
     function selectOrg(newOrg: string) {
-        onSelection && onSelection();
         setOrg(newOrg);
         const schemaPath = getSchemaPath(schema, path + "/") || "";
         const posOrganization = schemaPath.indexOf("/{organization}");
