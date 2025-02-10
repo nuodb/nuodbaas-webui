@@ -1,18 +1,17 @@
 // (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Table from "./parts/Table";
-import { getResourceEvents, getCreatePath, getResourceByPath, getFilterField } from "../../utils/schema";
+import { getResourceEvents, getResourceByPath, getFilterField } from "../../utils/schema";
 import { Rest } from "./parts/Rest";
-import Button from "../controls/Button";
-import Path from './parts/Path'
 import PageLayout from './parts/PageLayout'
 import Auth from "../../utils/auth"
 import { PageProps, TempAny } from "../../utils/types";
 import Pagination from "../controls/Pagination";
 import { withTranslation } from "react-i18next";
 import Search, { parseSearch } from "./parts/Search";
+import ResourceHeader from "./parts/ResourceHeader";
 
 type ItemsAndPathProps = {
     items: [] | null,
@@ -23,15 +22,13 @@ type ItemsAndPathProps = {
  * handles all the /resource/list/* requests to list a resource
  */
 function ListResource(props: PageProps) {
-    const { schema, t } = props;
-    const navigate = useNavigate();
+    const { schema } = props;
     const path = "/" + useParams()["*"];
     const pageSize = 20;
 
     const [itemsAndPath, setItemsAndPath] = useState<ItemsAndPathProps>({ items: null, path });
     const [page, setPage] = useState(1);
     const [allItems, setAllItems] = useState([]);
-    const [createPath, setCreatePath] = useState<string | null>(null);
     const [abortController, setAbortController] = useState<TempAny>(null);
     const [search, setSearch] = useState("");
 
@@ -87,7 +84,6 @@ function ListResource(props: PageProps) {
                 Rest.toastError("Unable to get resource in " + path, reason);
             });
         }
-        setCreatePath(getCreatePath(schema, path));
     }, [page, path, schema, search]);
 
     useEffect(() => {
@@ -102,10 +98,6 @@ function ListResource(props: PageProps) {
         }
     }, [abortController]);
 
-    function handleCreate() {
-        navigate("/ui/resource/create" + path);
-    }
-
     function renderPaging() {
         const lastPage = Math.ceil(allItems.length / pageSize);
         return <Pagination count={lastPage} page={page} setPage={(page) => {
@@ -113,11 +105,11 @@ function ListResource(props: PageProps) {
         }} />;
     }
 
-    function getFilterValues() {
+    function getFilterValues(): string[] {
         if (!getFilterField(schema, path)) {
             return [];
         }
-        let filterValues = new Set();
+        let filterValues = new Set<string>();
         allItems.forEach((item: string) => {
             const parts = item.split("/");
             if (parts.length > 1) {
@@ -127,19 +119,11 @@ function ListResource(props: PageProps) {
         return [...filterValues];
     }
 
-    const createPathFirstPart = createPath?.replace(/^\//, "").split("/")[0];
-    const createLabel = t('button.create.resource', { resource: t("resource.label." + createPathFirstPart + "_one", createPathFirstPart) });
     if (itemsAndPath.items) {
         const dataNotDeleted = itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true);
         return (
             <PageLayout {...props} >
-                <div className="NuoListResourceHeader">
-                    <h3>{t("resource.label." + createPathFirstPart, createPathFirstPart)}</h3>
-                    <div>
-                        <Path {...props} path={path} filterValues={getFilterValues()} search={search} setSearch={setSearch} setPage={setPage} />
-                        {createPath && <div className="Nuo-p20"><Button data-testid={"list_resource__create_button_" + createPathFirstPart} variant="contained" onClick={handleCreate}>{createLabel}</Button></div>}
-                    </div>
-                </div>
+                <ResourceHeader schema={schema} path={path} type="list" filterValues={getFilterValues()} />
                 <div className="NuoTableContainer">
                     <div className="NuoTableOptions">
                         <Search search={search} setSearch={(search: string) => {

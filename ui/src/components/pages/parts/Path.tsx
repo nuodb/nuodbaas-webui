@@ -9,9 +9,16 @@ import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material';
 import { RestSpinner } from './Rest';
 import { getFilterField, getSchemaPath } from "../../../utils/schema";
-import { TempAny } from "../../../utils/types"
+import { SchemaType } from "../../../utils/types"
 
-function Path({ schema, path, filterValues, org, t }: TempAny) {
+type PathProps = {
+    schema: SchemaType;
+    path: string;
+    filterValues?: string[];
+    org?: string;
+    t: any;
+}
+function Path({ schema, path, filterValues, org, t }: PathProps) {
     const navigate = useNavigate();
 
     const StyledBreadcrumbs = styled(Breadcrumbs)({
@@ -54,7 +61,7 @@ function Path({ schema, path, filterValues, org, t }: TempAny) {
                 if (index === 0) {
                     p = t("resource.label." + p, p);
                 }
-                if (index === pathParts.length - 1 || (org !== "" && index === 0)) {
+                if (index === pathParts.length - 1 || (org && index === 0)) {
                     return <Typography key={index} color="text.primary" style={{ fontSize: "1em" }}>{p}</Typography>
                 }
                 else if (index === pathParts.length - 2 && schemaPath != null && !schemaPath.endsWith("}")) {

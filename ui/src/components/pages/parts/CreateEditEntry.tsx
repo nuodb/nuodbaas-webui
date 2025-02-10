@@ -6,13 +6,14 @@ import FieldFactory from "../../fields/FieldFactory";
 import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultValue, submitForm, getSchemaPath } from "../../../utils/schema";
 import { RestSpinner } from "./Rest";
 import Button from "../../controls/Button";
-import Accordion from "../../controls/Accordion";
 import Auth from "../../../utils/auth";
 import { setValue } from "../../fields/utils";
 import { matchesPath } from "../../../utils/schema";
 import { FieldValuesType, FieldParameterType, TempAny, StringMapType, FieldParametersType } from "../../../utils/types";
 import { getCustomizations } from "../../../utils/Customizations";
 import { withTranslation } from "react-i18next";
+import ResourceHeader from "./ResourceHeader";
+import { Tab, Tabs } from "../../controls/Tabs";
 
 type PutResourceType = {
     summary?: string;
@@ -291,19 +292,17 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
                 t
             })).show();
         });
-        if (ret && ret.length > 0 && section.title) {
-            ret = <Accordion key={section.id || "section-" + section.title.toLowerCase()} data-testid={section.id || "section-" + section.title.toLowerCase()} summary={section.title}>
-                {ret}
-            </Accordion>;
-        }
-        return ret;
+
+        const label = section.title || t("section.title.general");
+        const id = section.id || "section-" + label.toLowerCase();
+        return <Tab key={id} id={id} label={label}>{ret}</Tab>;
     }
 
-    return <div className="NuoContainerSM">
+    return <>
         <RestSpinner />
+        <ResourceHeader schema={schema} path={path} type="create" />
         <form>
             <div className="NuoFormHeader">
-            {!readonly && <h1>{data ? t("text.editEntryForPath", { path }) : t("text.createEntryForPath", { path })}</h1>}
                 <label>{putResource.summary}</label>
             </div>
             <div className="fields">
@@ -329,9 +328,11 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
                         })).show();
                     }
                     )}
-                {sectionFormParameters.map(section => {
-                    return showSectionFields(section);
-                })}
+                <Tabs>
+                    {sectionFormParameters.map(section => {
+                        return showSectionFields(section);
+                    })}
+                </Tabs>
 
                 {("_error" in errors) && <h3 style={{ color: "red" }}>{errors["_error"]}</h3>}
                 {("_errorDetail" in errors) && <div style={{ color: "red" }}>{errors["_errorDetail"]}</div>}
@@ -377,7 +378,7 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
                 </React.Fragment>}
             </div>
         </form>
-    </div>
+    </>
 }
 
 export default withTranslation()(CreateEditEntry);
