@@ -36,9 +36,6 @@ dl.map>div>dt::after {
   font-weight: bold;
 }
 
-.gap {
-  margin: 1em 0;
-}
 .MuiTextField-root {
   display: flex !important;
   flex-direction: column;

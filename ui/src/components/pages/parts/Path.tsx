@@ -14,11 +14,13 @@ import { SchemaType } from "../../../utils/types"
 type PathProps = {
     schema: SchemaType;
     path: string;
+    prefixLabel: string;
+    postfixLabel?: string;
     filterValues?: string[];
     org?: string;
     t: any;
 }
-function Path({ schema, path, filterValues, org, t }: PathProps) {
+function Path({ schema, path, prefixLabel, postfixLabel, filterValues, org, t }: PathProps) {
     const navigate = useNavigate();
 
     const StyledBreadcrumbs = styled(Breadcrumbs)({
@@ -56,29 +58,30 @@ function Path({ schema, path, filterValues, org, t }: PathProps) {
     const schemaPath = getSchemaPath(schema, path) || "";
     return <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
         <StyledBreadcrumbs data-testid="path_component" separator=">" aria-label="resources" style={{ color: "#b5b9bc", fontSize: "1em", padding: "0 20px", display: "flex", flexWrap: "nowrap" }}>
-            <Typography key="management" color="text.primary" style={{ fontSize: "1em" }}>{t("list.label.management")}</Typography>
+            {prefixLabel && <Typography key="management" color="text.primary" style={{ fontSize: "1em", textWrap: "nowrap" }}>{prefixLabel}</Typography>}
             {pathParts && pathParts.map((p: string, index: number) => {
                 if (index === 0) {
                     p = t("resource.label." + p, p);
                 }
-                if (index === pathParts.length - 1 || (org && index === 0)) {
-                    return <Typography key={index} color="text.primary" style={{ fontSize: "1em" }}>{p}</Typography>
+                if ((index === pathParts.length - 1 && !postfixLabel) || (org && index === 0)) {
+                    return <Typography key={index} color="text.primary" style={{ fontSize: "1em", textWrap: "nowrap" }}>{p}</Typography>
                 }
                 else if (index === pathParts.length - 2 && schemaPath != null && !schemaPath.endsWith("}")) {
                     let subPath = "/ui/resource/view/" + pathParts.slice(0, index + 1).join("/")
-                    return <Link underline="hover" key={index} color="inherit" href="#" onClick={() => {
+                    return <Link underline="hover" key={index} color="inherit" href="#" style={{ textWrap: "nowrap" }} onClick={() => {
                         navigate(subPath);
                     }
                     }>{p}</Link>;
                 }
                 else {
                     let subPath = "/ui/resource/list/" + pathParts.slice(0, index + 1).join("/")
-                    return <Link underline="hover" key={index} color="inherit" href="#" onClick={() => {
+                    return <Link underline="hover" key={index} color="inherit" href="#" style={{ textWrap: "nowrap" }} onClick={() => {
                         navigate(subPath);
                     }
                     }>{p}</Link>;
                 }
             })}
+            {postfixLabel && <Typography key="management" color="text.primary" style={{ fontSize: "1em", textWrap: "nowrap" }}>{postfixLabel}</Typography>}
             {renderFilter()}
         </StyledBreadcrumbs>
         <RestSpinner />

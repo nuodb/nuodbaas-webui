@@ -322,7 +322,7 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
             const ro = readonly
                 || (data && (key in urlParameters || key === "name" || formParameter["x-immutable"] === true))
                 || (key === "organization" && getSchemaPath(schema, path)?.includes("{organization}"));
-            return (FieldFactory.create({
+            return <div className="NuoGap">{(FieldFactory.create({
                 path,
                 prefix: key,
                 label: t("field.label." + key, key),
@@ -337,7 +337,7 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
                 required: false,
                 readonly: ro,
                 t
-            })).show();
+            })).show()}</div>
         });
 
         const label = section.title || t("section.title.general");

@@ -25,6 +25,10 @@ html {
     }
 }
 
+.NuoListResourceHeader {
+    display: flex;
+    flex-direction: column;
+}
 .NuoListResourceHeader>h3 {
     padding: 0 20px;
     font-size: 1.5em;
@@ -809,8 +813,9 @@ button:focus {
     display: flex;
     flex-direction: row;
     justify-content: baseline;
-    padding: 0;
-    margin: 20px 20px 0 20px;
+    padding: 5px 5px 0 5px;
+        margin: 20px 20px 0 15px;
+        overflow: overlay;
 }
 
 .NuoTabs>ul>li {
@@ -850,4 +855,7 @@ button:focus {
     margin: 0 20px 20px 20px;
     padding: 10px;
     z-index: 2 !important;
+}
+.NuoGap {
+    margin: .5em 0;
 }

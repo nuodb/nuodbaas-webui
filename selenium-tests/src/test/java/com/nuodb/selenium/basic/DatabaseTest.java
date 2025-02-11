@@ -114,8 +114,8 @@ public class DatabaseTest extends TestRoutines {
             menuCells1.clear();
             menuCells1.add(waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN));
             assertEquals(1, menuCells1.get(0).size());
-       });
-       clickPopupMenu(menuCells1.get(0).get(0), "confirm.stop.database.title");
+            clickPopupMenu(menuCells1.get(0).get(0), "confirm.stop.database.title");
+        });
        waitElement("dialog_button_no").click();
        waitRestComplete();
 
