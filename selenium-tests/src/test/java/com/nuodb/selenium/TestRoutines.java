@@ -147,6 +147,9 @@ public class TestRoutines extends SeleniumTestHelper {
         WebElement createButton = waitElement("list_resource__create_button_" + resource);
         createButton.click();
         for (int i=0; i<fieldValueList.length; i += 2) {
+            if(fieldValueList[i].startsWith("accessRule")) {
+                waitElement("section-title-access-deny-rules").click();
+            }
             WebElement element = waitInputElementByName(fieldValueList[i]);
             if(!element.getAttribute("value").equals(fieldValueList[i+1])) {
                 element.sendKeys(fieldValueList[i+1]);

@@ -1,7 +1,7 @@
 // (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Table from "./parts/Table";
 import { getResourceEvents, getResourceByPath, getFilterField } from "../../utils/schema";
 import { Rest } from "./parts/Rest";
@@ -31,6 +31,8 @@ function ListResource(props: PageProps) {
     const [allItems, setAllItems] = useState([]);
     const [abortController, setAbortController] = useState<TempAny>(null);
     const [search, setSearch] = useState("");
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!schema) {
@@ -123,7 +125,7 @@ function ListResource(props: PageProps) {
         const dataNotDeleted = itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true);
         return (
             <PageLayout {...props} >
-                <ResourceHeader schema={schema} path={path} type="list" filterValues={getFilterValues()} />
+                <ResourceHeader schema={schema} path={path} type="list" filterValues={getFilterValues()} onAction={() => navigate("/ui/resource/create" + path)} />
                 <div className="NuoTableContainer">
                     <div className="NuoTableOptions">
                         <Search search={search} setSearch={(search: string) => {

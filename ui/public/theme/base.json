@@ -94,32 +94,13 @@
         }
     },
     "forms": {
-        "/users?/{organization}": {
+        "/users?/{organization}?/{name}": {
             "sections": [
                 {
                     "fields": {
                         "organization": {},
                         "name": {},
-                        "password": {
-                            "required": true
-                        },
-                        "accessRule": {}
-                    }
-                },
-                {
-                    "title": "section.title.advanced",
-                    "fields": {
-                        "*": {}
-                    }
-                }
-            ]
-        },
-        "/users/{organization}/{name}": {
-            "sections": [
-                {
-                    "fields": {
-                        "organization": {},
-                        "name": {}
+                        "password": {}
                     }
                 },
                 {
@@ -134,12 +115,6 @@
                     "title": "section.title.labels",
                     "fields": {
                         "labels": {}
-                    }
-                },
-                {
-                    "title": "section.title.change.password",
-                    "fields": {
-                        "password": {}
                     }
                 },
                 {

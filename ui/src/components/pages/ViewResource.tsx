@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import CreateEditEntry from "./parts/CreateEditEntry";
-import Path from "./parts/Path";
 import { getResourceByPath } from "../../utils/schema";
 import { Rest } from "./parts/Rest";
 import Auth from "../../utils/auth";
@@ -40,7 +39,6 @@ function ViewResource(props: PageProps) {
 
     return (
         <PageLayout {...props}>
-            <Path schema={schema} path={path} />
             <CreateEditEntry schema={schema} path={path} data={data} readonly={true} />
         </PageLayout>
     );

@@ -20,7 +20,7 @@ export function Tabs({ children }: TabsProps) {
 
     return <div className="NuoTabs">
         <ul>{children.map((child, index) => (
-            <li
+            <li key={child.props.id} data-testid={child.props.id}
                 className={index === currentTab ? "NuoTabsSelected" : ""}
                 onClick={() => {
                     setCurrentTab(index);

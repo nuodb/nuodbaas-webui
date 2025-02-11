@@ -49,23 +49,23 @@ public class UserTest extends TestRoutines {
         clickMenu("users");
 
         // find user and start edit mode
-        retryStale(()->{
+        retry(()->{
             List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", userName, MENU_COLUMN);
             assertEquals(1, buttonsCell.size());
             clickPopupMenu(buttonsCell.get(0), "edit_button");
         });
-
-        // edit user and save
-        waitElement("section-title-labels").click();
-        waitInputElementByName("labels.key").sendKeys(userName);
-        waitInputElementByName("labels.value").sendKeys(userName);
-        waitElement("add_button_labels").click();
 
         // verify allowCrossOrganizationAccess / organization / name fields are disabled in edit mode
         String [] disabledFields = new String[]{"allowCrossOrganizationAccess", "organization", "name"};
         for(String field : disabledFields ) {
             assertFalse(waitPresentInputElementByName(field).isEnabled(), "\"" + field + "\" field is not disabled");
         }
+
+        // edit user and save
+        waitElement("section-title-labels").click();
+        waitInputElementByName("labels.key").sendKeys(userName);
+        waitInputElementByName("labels.value").sendKeys(userName);
+        waitElement("add_button_labels").click();
 
         // save user
         waitElement("create_resource__create_button").click();

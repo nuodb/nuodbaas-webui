@@ -187,6 +187,8 @@
     "text": {
         "editEntryForPath": "Edit entry for {{path}}",
         "createNewForResource": "Create new {{resources_one}}",
+        "viewForResource": "{{resources_one}}",
+        "editForResource": "Edit {{resources_one}}",
         "newResource": "New {{resources_one}}",
         "noData": "No Data"
     },

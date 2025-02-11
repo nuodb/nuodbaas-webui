@@ -14,7 +14,9 @@ import static com.nuodb.selenium.SeleniumAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class DatabaseTest extends TestRoutines {
     @Test
@@ -93,20 +95,27 @@ public class DatabaseTest extends TestRoutines {
        clickMenu("databases");
 
        // perform "Start Database" action
-       menuCells = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
-       assertEquals(1, menuCells.size());
-       clickPopupMenu(menuCells.get(0), "confirm.start.database.title");
-       waitElement("dialog_button_yes").click();
-       waitRestComplete();
+       ArrayList<List<WebElement>> menuCells1 = new ArrayList<>();
+       retry(()->{
+            menuCells1.clear();
+            menuCells1.add(waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN));
+            assertEquals(1, menuCells1.get(0).size());
+            clickPopupMenu(menuCells1.get(0).get(0), "confirm.start.database.title");
+        });
+         waitElement("dialog_button_yes").click();
+         waitRestComplete();
 
        // TODO(agr22) - workaround to refresh view - we're still running on Control Plane 2.6 for this integration test
        clickMenu("projects");
        clickMenu("databases");
 
        // find database and "Stop Database" button
-       menuCells = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
-       assertEquals(1, menuCells.size());
-       clickPopupMenu(menuCells.get(0), "confirm.stop.database.title");
+       retry(()->{
+            menuCells1.clear();
+            menuCells1.add(waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN));
+            assertEquals(1, menuCells1.get(0).size());
+       });
+       clickPopupMenu(menuCells1.get(0).get(0), "confirm.stop.database.title");
        waitElement("dialog_button_no").click();
        waitRestComplete();
 

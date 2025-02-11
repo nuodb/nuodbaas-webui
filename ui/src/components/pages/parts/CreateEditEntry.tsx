@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import FieldFactory from "../../fields/FieldFactory";
 import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultValue, submitForm, getSchemaPath } from "../../../utils/schema";
 import { RestSpinner } from "./Rest";
-import Button from "../../controls/Button";
 import Auth from "../../../utils/auth";
 import { setValue } from "../../fields/utils";
 import { matchesPath } from "../../../utils/schema";
@@ -15,17 +14,12 @@ import { withTranslation } from "react-i18next";
 import ResourceHeader from "./ResourceHeader";
 import { Tab, Tabs } from "../../controls/Tabs";
 
-type PutResourceType = {
-    summary?: string;
-}
-
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
  */
 function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
     const navigate = useNavigate();
 
-    const [putResource, setPutResource] = useState<PutResourceType>({});
     const [formParameters, setFormParameters] = useState<FieldParametersType>({});
     const [sectionFormParameters, setSectionFormParameters] = useState([]);
     const [urlParameters, setUrlParameters] = useState<FieldParametersType>({});
@@ -241,7 +235,25 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
         setValues(v);
         setFocus(v, formParams);
         setFormParameters(formParams);
-        setPutResource(putResource);
+
+        const queryParameters = (urlParams && Object.keys(urlParams)
+            .filter(key => urlParams[key].in === "query")
+            .map(key => urlParams[key])) || [];
+
+        if (queryParameters.length > 0) {
+            let params: any = {};
+            queryParameters.forEach((qp: any) => {
+                if (qp.name && qp.schema) {
+                    params[qp.name] = qp.schema;
+                }
+            })
+            if (sectionFormParams.length > 0) {
+                sectionFormParams[0].params = { ...params, ...sectionFormParams[0].params };
+            }
+            else {
+                sectionFormParams = [{ id: "section-0", params: params }];
+            }
+        }
         setSectionFormParameters(sectionFormParams);
     }, [schema, path, data, t]);
 
@@ -264,12 +276,47 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
         return success;
     }
 
+    function handleSubmit() {
+        let err = { ...errors };
+        delete err._error;
+        delete err._errorDetail;
+        setErrors(err);
+        if (!validateFields()) {
+            const errorKeys = Object.keys(errors);
+            if (errorKeys.length > 0) {
+                const inputElement = document.getElementById(errorKeys[0]);
+                if (inputElement) {
+                    inputElement.focus();
+                }
+            }
+            return;
+        }
+        submitForm(urlParameters, formParameters, data ? path : getCreatePath(schema, path), values)
+            .then(() => {
+                navigate("/ui/resource/list" + getParentPath(path));
+            })
+            .catch(error => {
+                Auth.handle401Error(error);
+                if (error.response && error.response.data && error.response.data.status) {
+                    updateErrors("_error", error.response.data.status);
+                    updateErrors("_errorDetail", error.response.data.detail);
+                }
+                else {
+                    updateErrors("_error", "Error occurred: " + JSON.stringify(error));
+                    updateErrors("_errorDetail", null);
+                }
+            });
+    }
+
     function showSectionFields(section: TempAny) {
         let ret = (section && section.params && Object.keys(section.params)
             .filter(key => {
                 const param = section.params[key];
                 return param.readOnly !== true && param.hidden !== true && key !== "resourceVersion"
             })) || [];
+        if (ret.length === 0) {
+            return <div key={section.title}></div>;
+        }
         ret = ret.map((key: string) => {
             const formParameter = { ...section.params[key] };
             const ro = readonly
@@ -300,34 +347,16 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
 
     return <>
         <RestSpinner />
-        <ResourceHeader schema={schema} path={path} type="create" />
+        <ResourceHeader schema={schema} path={path} type={readonly ? "view" : data ? "edit" : "create"} onAction={() => {
+            if (readonly) {
+                navigate("/ui/resource/edit" + path);
+            }
+            else {
+                handleSubmit();
+            }
+        }} />
         <form>
-            <div className="NuoFormHeader">
-                <label>{putResource.summary}</label>
-            </div>
             <div className="fields">
-                {urlParameters && Object.keys(urlParameters)
-                    .filter(key => urlParameters[key].in === "query")
-                    .map(key => {
-                        let urlParameter = { ...urlParameters[key] };
-                        return (FieldFactory.create({
-                            path,
-                            prefix: key,
-                            label: t("field.label." + key, key),
-                            parameter: urlParameter,
-                            values,
-                            errors,
-                            updateErrors,
-                            setValues,
-                            autoFocus: key === focusField,
-                            required: false,
-                            expand: false,
-                            hideTitle: false,
-                            readonly: readonly || !!data,
-                            t
-                        })).show();
-                    }
-                    )}
                 <Tabs>
                     {sectionFormParameters.map(section => {
                         return showSectionFields(section);
@@ -336,46 +365,6 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
 
                 {("_error" in errors) && <h3 style={{ color: "red" }}>{errors["_error"]}</h3>}
                 {("_errorDetail" in errors) && <div style={{ color: "red" }}>{errors["_errorDetail"]}</div>}
-
-                {!readonly && <Button data-testid="create_resource__create_button" variant="contained" onClick={() => {
-                    let err = { ...errors };
-                    delete err._error;
-                    delete err._errorDetail;
-                    setErrors(err);
-                    if (!validateFields()) {
-                        const errorKeys = Object.keys(errors);
-                        if (errorKeys.length > 0) {
-                            const inputElement = document.getElementById(errorKeys[0]);
-                            if (inputElement) {
-                                inputElement.focus();
-                            }
-                        }
-                        return;
-                    }
-                    submitForm(urlParameters, formParameters, data ? path : getCreatePath(schema, path), values)
-                        .then(() => {
-                            navigate("/ui/resource/list" + getParentPath(path));
-                        })
-                        .catch(error => {
-                            Auth.handle401Error(error);
-                            if (error.response && error.response.data && error.response.data.status) {
-                                updateErrors("_error", error.response.data.status);
-                                updateErrors("_errorDetail", error.response.data.detail);
-                            }
-                            else {
-                                updateErrors("_error", "Error occurred: " + JSON.stringify(error));
-                                updateErrors("_errorDetail", null);
-                            }
-                        });
-                }}>{(data && t("button.save")) || t("button.create")}</Button>}
-                {readonly && <React.Fragment>
-                    <Button variant="contained" onClick={() => {
-                        navigate("/ui/resource/edit" + path);
-                    }}>Edit</Button>
-                    <Button variant="contained" onClick={() => {
-                        navigate("/ui/resource/list" + getParentPath(path));
-                    }}>Close</Button>
-                </React.Fragment>}
             </div>
         </form>
     </>
