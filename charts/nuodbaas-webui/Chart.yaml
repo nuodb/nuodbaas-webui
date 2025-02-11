@@ -3,5 +3,14 @@
 apiVersion: v2
 name: nuodbaas-webui
 description: NuoDBaaS WebUI populated by the OpenAPI spec
+keywords:
+- nuodb
+- rest
+home: https://github.com/nuodb/nuodbaas-webui/charts/nuodbaas-webui
+maintainers:
+- name: NuoDB
+  email: support@nuodb.com
+icon: https://raw.githubusercontent.com/nuodb/nuodb-helm-charts/master/images/nuodb.svg
+type: application
 version: "1.0.0"
 appVersion: "1.0.0"
