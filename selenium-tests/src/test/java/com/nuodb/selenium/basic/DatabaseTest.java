@@ -3,7 +3,6 @@
 package com.nuodb.selenium.basic;
 
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.nuodb.selenium.Constants;
@@ -16,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class DatabaseTest extends TestRoutines {
     @Test

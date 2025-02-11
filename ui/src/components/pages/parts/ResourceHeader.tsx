@@ -6,6 +6,9 @@ import Path from "./Path";
 import { SchemaType } from "../../../utils/types";
 import { getCreatePath, getSchemaPath } from "../../../utils/schema";
 import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
+import CreateIcon from '@mui/icons-material/Create';
+import SaveIcon from '@mui/icons-material/Save';
 
 type ResourceHeaderProps = {
     schema: SchemaType;
@@ -53,10 +56,10 @@ function ResourceHeader({ schema, path, type, filterValues, onAction, t }: Resou
         <h3>{title}</h3>
         <div>
             <Path schema={schema} path={path} prefixLabel={t("list.label.management")} postfixLabel={postfixLabel} filterValues={filterValues} />
-            {type === "list" && createPath && <div className="Nuo-p20"><Button data-testid={"list_resource__create_button_" + createPathFirstPart} variant="contained" onClick={onAction}>{createLabel}</Button></div>}
+            {type === "list" && createPath && <div className="Nuo-p20"><Button data-testid={"list_resource__create_button_" + createPathFirstPart} variant="contained" onClick={onAction}><AddIcon />{createLabel}</Button></div>}
             {type === "view" && <div className="Nuo-p20"><Button data-testid={"list_resource__edit_button"} variant="contained" onClick={onAction}><EditIcon />{t("button.edit")}</Button></div>}
-            {type === "create" && <div className="Nuo-p20"><Button data-testid={"create_resource__create_button"} variant="contained" onClick={onAction}><EditIcon />{t("button.create")}</Button></div>}
-            {type === "edit" && <div className="Nuo-p20"><Button data-testid={"create_resource__create_button"} variant="contained" onClick={onAction}><EditIcon />{t("button.save")}</Button></div>}
+            {type === "create" && <div className="Nuo-p20"><Button data-testid={"create_resource__create_button"} variant="contained" onClick={onAction}><CreateIcon />{t("button.create")}</Button></div>}
+            {type === "edit" && <div className="Nuo-p20"><Button data-testid={"create_resource__create_button"} variant="contained" onClick={onAction}><SaveIcon />{t("button.save")}</Button></div>}
         </div>
     </div>
 
