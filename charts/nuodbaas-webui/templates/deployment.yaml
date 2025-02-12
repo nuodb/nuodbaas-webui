@@ -3,43 +3,72 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nuodbaas-webui
+  name: {{ include "nuodbaas-webui.fullname" . }}
   labels:
     {{- include "nuodbaas-webui.labels" . | nindent 4 }}
 spec:
-  replicas: {{ .Values.nuodbaasWebui.replicaCount }}
+  {{- if not .Values.nuodbaasWebui.autoscaling.enabled }}
+  replicas: {{ .Values.nuodbaasWebui.replicas }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "nuodbaas-webui.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      {{- if .Values.nuodbaasWebui.podAnnotations }}
+      annotations:
+        {{- include "nuodbaas-webui.podAnnotations" . | nindent 8 }}
+      {{- end }}
       labels:
         {{- include "nuodbaas-webui.selectorLabels" . | nindent 8 }}
+        {{- include "nuodbaas-webui.podLabels" . | nindent 8 }}
     spec:
-      {{- with .Values.nuodbaasWebui.image.pullSecrets }}
+      {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
+        {{- include "nuodbaas-webui.toYaml" (list $ .) | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "nuodbaas-webui.serviceAccountName" . }}
+      securityContext:
+        {{- include "nuodbaas-webui.toYaml" (list . .Values.nuodbaasWebui.podSecurityContext) | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.nuodbaasWebui.image.repository }}:{{ .Values.nuodbaasWebui.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.nuodbaasWebui.image.pullPolicy }}
+        - name: webui
+          securityContext:
+            {{- include "nuodbaas-webui.toYaml" (list . .Values.nuodbaasWebui.securityContext) | nindent 12 }}
+          image: "{{ tpl .Values.image.repository . }}:{{  default .Chart.AppVersion (tpl .Values.image.tag .) }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http-alt
               containerPort: 8080
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http-alt
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http-alt
-          resources:
-            {{- toYaml .Values.nuodbaasWebui.resources | nindent 12 }}
           env:
             - name: NUODB_CP_REST_URL
               value: {{ .Values.nuodbaasWebui.cpUrl }}
             - name: NUODBAAS_WEBUI_PATH_PREFIX
               value: {{ .Values.nuodbaasWebui.ingress.pathPrefix }}
+          livenessProbe:
+            {{- include "nuodbaas-webui.probe" . | nindent 12 }}
+            timeoutSeconds: {{ max (sub .Values.nuodbaasWebui.livenessTimeoutSeconds 5) 5 }}
+            periodSeconds: {{ .Values.nuodbaasWebui.livenessTimeoutSeconds }}
+            failureThreshold: 6
+          readinessProbe:
+            {{- include "nuodbaas-webui.probe" . | nindent 12 }}
+            timeoutSeconds: {{ max (sub .Values.nuodbaasWebui.readinessTimeoutSeconds 5) 5 }}
+            periodSeconds: {{ .Values.nuodbaasWebui.readinessTimeoutSeconds }}
+          resources:
+            {{- include "nuodbaas-webui.toYaml" (list $ .Values.nuodbaasWebui.resources) | nindent 12 }}
+      {{- with .Values.nuodbaasWebui.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nuodbaasWebui.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nuodbaasWebui.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nuodbaasWebui.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- include "nuodbaas-webui.toYaml" (list $ .) | nindent 8 }}
+      {{- end }}

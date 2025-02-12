@@ -1,25 +1,122 @@
 # (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
 # Default values for nuodbaas-webui.
+
+serviceAccount:
+  # Specifies whether a service account should be created.
+  create: true
+
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template.
+  name: ""
+
+  # Annotations to add to the service account
+  annotations: {}
+
+image:
+  repository: ghcr.io/nuodb/nuodbaas-webui
+  pullPolicy: IfNotPresent
+  tag: ""
+  # Optionally specify an array of imagePullSecrets.
+  # Secrets must be manually created in the namespace.
+  # ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
+  pullSecrets: []
+
+# Labels are passed to all resources created by this Helm chart.
+resourceLabels: {}
+
+# NuoDBaaS WebUI
 nuodbaasWebui:
-  replicaCount: 1
-  image:
-    repository: ghcr.io/nuodb/nuodbaas-webui
-    pullPolicy: IfNotPresent
-    pullSecrets: []
-    tag: ""
-  resources:
-    limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
+  # Provide a name in place of the chart name for `app:` labels.
+  nameOverride: ""
+
+  # Provide a name to substitute for the full names of resources.
+  fullnameOverride: ""
+
+  # NuoDB Operator pod replicas
+  replicas: 1
+  cpUrl: /nuodb-cp
+
+  # Pod labels useful for integrating 3rd party products. Map value will pass
+  # through to the pod as supplied. String value will be templated and the
+  # result is passed.
+  podLabels: {}
+
+  # Pod annotations useful for integrating 3rd party products. Map value will
+  # pass through to the pod as supplied. String value will be templated and the
+  # result is passed.
+  podAnnotations: {}
+
+  # Affinity, selector, and tolerations They are expanded as YAML, and can
+  # include variable and template references.
+  affinity: {}
+  nodeSelector: {}
+  tolerations: []
+
+  ## Topology Spread Constraints
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
+  ##
+  topologySpreadConstraints: []
+
+  # Liveness probe timeout in seconds.
+  livenessTimeoutSeconds: 30
+
+  # Readiness probe timeout in seconds
+  readinessTimeoutSeconds: 10
+
+  # Use HTTP probe rather than a command-line (exec) probe
+  useHttpProbe: true
+
+  # Sets user defined environment variables.
+  env: {}
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  resources: {}
+    # limits:
+    #   cpu: 500m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 10m
+    #   memory: 64Mi
+
+  networkPolicy:
+    # Enable creation of NetworkPolicy resources. See
+    # https://kubernetes.io/docs/concepts/services-networking/network-policies/
+    enabled: false
+
   service:
     type: ClusterIP
+    port: 8080
+
   ingress:
-    pathPrefix: ui
-    hosts:
-      - nuodbaas-webui.local
+    enabled: false
     className: ""
-  cpUrl: /nuodb-cp
+    annotations: {}
+      # kubernetes.io/ingress.class: haproxy
+      # ingress.kubernetes.io/ssl-passthrough: "true"
+    setDefaultBackend: false
+    pathPrefix: webui
+    rewritePath: true
+    hosts: []
+      # - host: nuodb-cp-example.local
+      #   paths:
+      #     - path: /
+      #       pathType: Prefix
+    tls: []
+      # - secretName: chart-example-tls
+      #   hosts:
+      #     - chart-example.local
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 5
+    targetAverageUtilization:
+      cpu: 80
+      # memory: 80

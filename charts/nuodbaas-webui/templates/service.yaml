@@ -1,15 +1,13 @@
-# (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
-
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ include "nuodbaas-webui.fullname" . }}
   labels:
     {{- include "nuodbaas-webui.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.nuodbaasWebui.service.type }}
   ports:
-    - port: 8080
+    - port: {{ .Values.nuodbaasWebui.service.port }}
       targetPort: http-alt
       protocol: TCP
       name: http-alt
