@@ -1,34 +1,72 @@
-# (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
-
+{{- if .Values.nuodbaasWebui.ingress.enabled -}}
+{{- $fullName := include "nuodbaas-webui.fullname" . -}}
+{{- $svcPort := .Values.nuodbaasWebui.service.port -}}
+{{- if and .Values.nuodbaasWebui.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.nuodbaasWebui.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.nuodbaasWebui.ingress.annotations "kubernetes.io/ingress.class" .Values.nuodbaasWebui.ingress.className }}
+  {{- end }}
+{{- end }}
+{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" -}}
 apiVersion: networking.k8s.io/v1
+{{- else if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- else -}}
+apiVersion: extensions/v1beta1
+{{- end }}
 kind: Ingress
 metadata:
-  name: {{ .Chart.Name }}
+  name: {{ $fullName }}
   labels:
     {{- include "nuodbaas-webui.labels" . | nindent 4 }}
+  annotations:
+    {{- if .Values.nuodbaasWebui.ingress.rewritePath }}
+    {{- with .Values.nuodbaasWebui.ingress.pathPrefix }}
+    haproxy.org/path-rewrite: /{{ . }}/(.*) /\1
+    {{- end -}}
+    {{- end -}}
+    {{- with .Values.nuodbaasWebui.ingress.annotations }}
+      {{- toYaml . | nindent 4 -}}
+    {{- end }}
 spec:
-  {{- if .Values.nuodbaasWebui.ingress.className }}
+  {{- if and .Values.nuodbaasWebui.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
   ingressClassName: {{ .Values.nuodbaasWebui.ingress.className }}
   {{- end }}
+  {{- if .Values.nuodbaasWebui.ingress.tls }}
+  tls:
+    {{- range .Values.nuodbaasWebui.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.nuodbaasWebui.ingress.setDefaultBackend }}
+  defaultBackend:
+    {{- include "nuodbaas-webui.ingress.backend" . | nindent 4 }}
+  {{- end }}
   rules:
+    {{- with .Values.nuodbaasWebui.ingress.pathPrefix }}
     - http:
         paths:
-          - path: "/{{ .Values.nuodbaasWebui.ingress.pathPrefix }}"
+          - path: /{{ . }}
+            {{- if semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion }}
             pathType: Prefix
+            {{- end }}
             backend:
-              service:
-                name: {{ $.Chart.Name }}
-                port:
-                  number: 8080
+              {{- include "nuodbaas-webui.ingress.backend" $ | nindent 14 }}
+    {{- end }}
     {{- range .Values.nuodbaasWebui.ingress.hosts }}
-    - host: {{ . | quote }}
+    - host: {{ .host | quote }}
       http:
         paths:
-          - path: "/{{ $.Values.nuodbaasWebui.ingress.pathPrefix }}"
-            pathType: Prefix
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if and .pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: {{ .pathType }}
+            {{- end }}
             backend:
-              service:
-                name: {{ $.Chart.Name }}
-                port:
-                  number: 8080
+              {{- include "nuodbaas-webui.ingress.backend" $ | nindent 14 }}
+          {{- end }}
     {{- end }}
+{{- end }}
