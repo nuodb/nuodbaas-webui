@@ -243,7 +243,6 @@ html {
 
 .NuoTableTd {
     background-color: white;
-    opacity: .8;
 }
 .NuoTableTd>button {
     border: none;

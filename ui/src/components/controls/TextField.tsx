@@ -40,7 +40,7 @@ export default function TextField(props: TextFieldProps): JSX.Element {
             helperText={props.error}
             slotProps={((props.icon || props.leftIcon || fieldProps.description) && {
                 input: {
-                    endAdornment: props.icon &&
+                    endAdornment: (props.icon || props.description) &&
                         <InputAdornment position="end">
                             {props.icon && <IconButton
                                 aria-label=""
@@ -48,7 +48,7 @@ export default function TextField(props: TextFieldProps): JSX.Element {
                             >
                                 {props.icon}
                             </IconButton>}
-                            {props.description && <InfoPopup description={props.description} />}
+                            <InfoPopup description={props.description} />
                         </InputAdornment>,
                     startAdornment: props.leftIcon &&
                         <InputAdornment position="start">
@@ -68,7 +68,7 @@ export default function TextField(props: TextFieldProps): JSX.Element {
                     event.preventDefault();
                     props.iconOnClick && props.iconOnClick(event);
                 }}>{props.icon}</button>}
-                {props.description && <InfoPopup description={props.description} />}
+                <InfoPopup description={props.description} />
             </div>
             {props.error !== "" && <div className="NuoFieldError">{props.error}</div>}
         </div>
