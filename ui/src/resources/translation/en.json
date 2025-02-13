@@ -45,14 +45,14 @@
         "label": {
             "backuppolicies": "Backup policies",
             "backuppolicies_one": "Backup policy",
-            "backups": "Backups",
-            "backups_one": "Backup",
-            "databases": "Databases",
-            "databases_one": "Database",
-            "projects": "Projects",
-            "projects_one": "Project",
-            "users": "Users",
-            "users_one": "User"
+            "backups": "backups",
+            "backups_one": "backup",
+            "databases": "databases",
+            "databases_one": "database",
+            "projects": "projects",
+            "projects_one": "project",
+            "users": "users",
+            "users_one": "user"
         }
     },
     "field": {

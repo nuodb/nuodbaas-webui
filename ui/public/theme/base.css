@@ -33,6 +33,7 @@ html {
     padding: 0 20px;
     font-size: 1.5em;
     margin: 0;
+    text-transform: capitalize;
 }
 
 .NuoListResourceHeader>div {
@@ -41,6 +42,9 @@ html {
     justify-content: space-between;
     align-items: center;
     margin-right: 15px;
+}
+.MuiBreadcrumbs-li {
+    text-transform: capitalize;
 }
 @media (min-width: 601px) {
     .NuoContainerLG {
@@ -163,6 +167,7 @@ html {
     transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
     border-radius: 10px;
         margin: 15px;
+        padding: 10px 0;
 }
 
 .NuoTableTable {
@@ -541,6 +546,7 @@ code {
     font-size: 0.9em;
     text-align: left;
         color: #7a8088;
+    text-transform: capitalize;
 }
 
 .NuoLeftMenuItem>svg {
@@ -812,7 +818,6 @@ button:focus {
 .NuoTabs>ul {
     display: flex;
     flex-direction: row;
-    justify-content: baseline;
     padding: 5px 5px 0 5px;
         margin: 20px 20px 0 15px;
         overflow: overlay;
@@ -823,7 +828,6 @@ button:focus {
     flex-direction: column;
     background-color: #fff;
     color: rgba(0, 0, 0, 0.87);
-    margin: 0 15px 15px 15px 15px;
     padding: 10px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.2);
     z-index: 0;
@@ -838,7 +842,6 @@ button:focus {
     background-color: #fff;
     color: rgba(0, 0, 0, 0.87);
     border-radius: 10px 10px 0 0;
-    margin: 0 15px 15px 15px 15px;
     border-bottom: 0 !important;
     z-index: 1 !important;
 }
@@ -856,6 +859,6 @@ button:focus {
     padding: 10px;
     z-index: 2 !important;
 }
-.NuoGap {
+.NuoFieldContainer {
     margin: .5em 0;
 }

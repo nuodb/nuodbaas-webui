@@ -25,7 +25,7 @@ export default function FieldObject(props: FieldProps): FieldBaseType {
             if (defaultValue !== null) {
                 setValue(values, prefixKey, defaultValue);
             }
-            return <div key={key} className="NuoGap">{(FieldFactory.create({
+            return <div key={key} className="NuoFieldContainer">{(FieldFactory.create({
                 ...props,
                 prefix: prefixKey,
                 parameter: properties[key],
