@@ -14,6 +14,10 @@ import { withTranslation } from "react-i18next";
 import ResourceHeader from "./ResourceHeader";
 import { Tab, Tabs } from "../../controls/Tabs";
 
+type SectionFormParameterType = {
+    params: FieldParametersType;
+};
+
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
  */
@@ -21,11 +25,12 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
     const navigate = useNavigate();
 
     const [formParameters, setFormParameters] = useState<FieldParametersType>({});
-    const [sectionFormParameters, setSectionFormParameters] = useState([]);
+    const [sectionFormParameters, setSectionFormParameters] = useState<SectionFormParameterType[]>([]);
     const [urlParameters, setUrlParameters] = useState<FieldParametersType>({});
     const [values, setValues]: FieldValuesType = useState({});
     const [errors, setErrors] = useState<StringMapType>({});
-    const [focusField, setFocusField] = useState(null);
+    const [focusField, setFocusField] = useState<string | null>(null);
+    const [currentTab, setCurrentTab] = useState<number>(0);
 
     function updateErrors(key: string, value: string | null): void {
         setErrors((errs: StringMapType) => {
@@ -267,13 +272,45 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
         }
     }
 
-    function validateFields() {
-        let success = true;
+    function getErrorFields() {
+        let errs = { ...errors };
+        function updateErrors_(key: string, value: string | null) {
+            updateErrors(key, value);
+            if (value === null || value === undefined) {
+                delete errs[key];
+            }
+            else {
+                errs[key] = value;
+            }
+        }
+
         Object.keys(formParameters).forEach((key: string) => {
             let parameter: TempAny = formParameters[key];
-            success = FieldFactory.validateProps({ path, prefix: key, label: t("field.label." + key), parameter, values, updateErrors, setValues, t }) && success;
+            FieldFactory.validateProps({ path, prefix: key, label: t("field.label." + key), parameter, values, updateErrors: updateErrors_, setValues, t });
         });
-        return success;
+        return errs;
+    }
+
+    function findTabIndex(fieldName: string) {
+        function hasField(params: FieldParametersType, fieldName: string) {
+            if (fieldName in params) {
+                return true;
+            }
+            Object.keys(params).forEach(key => {
+                if (params[key].type === "object") {
+                    const properties = params[key].properties;
+                    if (properties && hasField(properties, fieldName)) {
+                        return true;
+                    }
+                }
+            })
+        }
+        for (let i = 0; i < sectionFormParameters.length; i++) {
+            if (hasField(sectionFormParameters[i].params, fieldName)) {
+                return i;
+            };
+        }
+        return -1;
     }
 
     function handleSubmit() {
@@ -281,12 +318,20 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
         delete err._error;
         delete err._errorDetail;
         setErrors(err);
-        if (!validateFields()) {
-            const errorKeys = Object.keys(errors);
-            if (errorKeys.length > 0) {
-                const inputElement = document.getElementById(errorKeys[0]);
-                if (inputElement) {
-                    inputElement.focus();
+        err = getErrorFields();
+        if (Object.keys(err).length > 0) {
+            const errKeys = Object.keys(err);
+            if (errKeys.length > 0) {
+                const tabIndex = findTabIndex(errKeys[0]);
+                if (currentTab !== tabIndex) {
+                    setCurrentTab(tabIndex);
+                    setFocusField(errKeys[0]);
+                }
+                else {
+                    const inputElement = document.getElementById(errKeys[0]);
+                    if (inputElement) {
+                        inputElement.focus();
+                    }
                 }
             }
             return;
@@ -357,7 +402,7 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
         }} />
         <form>
             <div className="fields">
-                <Tabs>
+                <Tabs currentTab={currentTab} setCurrentTab={setCurrentTab}>
                     {sectionFormParameters.map(section => {
                         return showSectionFields(section);
                     })}

@@ -1,6 +1,6 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
-import { ReactElement, ReactNode, useState } from "react"
+import { ReactElement, ReactNode } from "react"
 
 type TabProps = {
     id: string;
@@ -14,11 +14,12 @@ export function Tab({ children }: TabProps) {
 
 type TabsProps = {
     children: ReactElement[];
+    currentTab: number;
+    setCurrentTab: (tab: number) => void;
 }
 
-export function Tabs({ children }: TabsProps) {
+export function Tabs({ children, currentTab, setCurrentTab }: TabsProps) {
     children = children.filter(child => child.props.id && child.props.label && child.props.children);
-    const [currentTab, setCurrentTab] = useState<number>(0);
 
     return <div className="NuoTabs">
         <ul>{children.map((child, index) => (
