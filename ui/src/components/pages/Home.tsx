@@ -7,7 +7,7 @@ import { withTranslation } from "react-i18next";
 
 function Home(props: PageProps) {
     return <PageLayout {...props}>
-        <Path schema={props.schema} path="Home" filterValues={[]} />
+        <Path schema={props.schema} prefixLabel={"Home"} path="Home" filterValues={[]} />
     </PageLayout>;
 }
 

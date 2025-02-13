@@ -7,7 +7,7 @@ import { withTranslation } from "react-i18next";
 
 function OrganizationOverview(props: PageProps) {
     return <PageLayout {...props}>
-        <Path schema={props.schema} path="Organization Overview" filterValues={[]} />
+        <Path schema={props.schema} prefixLabel="Organization" path="Organization Overview" filterValues={[]} />
     </PageLayout>;
 }
 

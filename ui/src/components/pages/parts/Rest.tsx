@@ -210,9 +210,9 @@ export function RestSpinner() {
             onClose={() => instance?.setState({ errorMessage: null })}
         />
         {instance.state.pendingRequests > 0 ?
-            <CircularProgress color="inherit" size="1em" />
+            <CircularProgress className="RestSpinner" color="inherit" />
             :
-            <div data-testid="rest_spinner__complete">&nbsp;</div>
+            <div data-testid="rest_spinner__complete" className="RestSpinner">&nbsp;</div>
         }
     </React.Fragment>;
 }

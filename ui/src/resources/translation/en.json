@@ -186,11 +186,15 @@
     },
     "text": {
         "editEntryForPath": "Edit entry for {{path}}",
-        "createEntryForPath": "Create entry for {{path}}",
+        "createNewForResource": "Create new {{resources_one}}",
+        "viewForResource": "{{resources_one}}",
+        "editForResource": "Edit {{resources_one}}",
+        "newResource": "New {{resources_one}}",
         "noData": "No Data"
     },
     "section": {
         "title": {
+            "general": "General",
             "advanced": "Advanced",
             "access.deny.rules": "Access/Deny Rules",
             "labels": "Labels",
