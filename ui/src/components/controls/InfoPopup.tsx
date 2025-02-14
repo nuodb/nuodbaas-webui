@@ -10,5 +10,5 @@ type InfoPopupProps = {
 export default function InfoPopup(props: InfoPopupProps): JSX.Element {
     const { description } = props;
 
-    return (description && <div className="NuoInfoPopup"><label>{description}</label><InfoIconOutlined /></div>) || <></>;
+    return (description && <div className="NuoInfoPopup NuoInfoPopupHover"><label>{description}</label><InfoIconOutlined /></div>) || <></>;
 }

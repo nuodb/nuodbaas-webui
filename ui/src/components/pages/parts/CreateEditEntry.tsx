@@ -293,7 +293,14 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
         }
         submitForm(urlParameters, formParameters, data ? path : getCreatePath(schema, path), values)
             .then(() => {
-                navigate("/ui/resource/list" + getParentPath(path));
+                if (data) {
+                //edit mode
+                    navigate("/ui/resource/list" + getParentPath(path));
+                }
+                else {
+                    //create mode
+                    navigate("/ui/resource/list" + path);
+                }
             })
             .catch(error => {
                 Auth.handle401Error(error);
@@ -322,7 +329,7 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
             const ro = readonly
                 || (data && (key in urlParameters || key === "name" || formParameter["x-immutable"] === true))
                 || (key === "organization" && getSchemaPath(schema, path)?.includes("{organization}"));
-            return <div className="NuoGap">{(FieldFactory.create({
+            return <div className="NuoFieldContainer" key={key}>{(FieldFactory.create({
                 path,
                 prefix: key,
                 label: t("field.label." + key, key),
