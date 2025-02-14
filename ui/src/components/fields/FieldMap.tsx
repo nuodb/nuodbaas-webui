@@ -145,7 +145,7 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
                     <TableRow>
                         <TableCell>{t("field.label." + prefix, prefix)} {t("field.map.header.label.key")}</TableCell>
                         <TableCell>{t("field.label." + prefix, prefix)} {t("field.map.header.label.value")}</TableCell>
-                        <TableCell className="NuoTableMenuCell"><InfoPopup description={parameter.description} /></TableCell>
+                        <TableCell><InfoPopup description={parameter.description} /></TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>

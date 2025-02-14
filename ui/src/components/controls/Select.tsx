@@ -32,7 +32,7 @@ export default function Select(props: SelectProps): JSX.Element {
             <MuiSelect labelId={"label_" + id} name={id} label={label} {...props} value={props.value || ""}
                 endAdornment={(description) &&
                     <InputAdornment position="end">
-                        {description && <InfoPopup description={description} />}
+                        <InfoPopup description={description} />
                     </InputAdornment>
                 }
                 sx={{
@@ -53,7 +53,7 @@ export default function Select(props: SelectProps): JSX.Element {
                 {children}
             </select>
             {required && <span>Required</span>}
-            {description && <InfoPopup description={description} />}
+            <InfoPopup description={description} />
         </div>;
     }
 }
