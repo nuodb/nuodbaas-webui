@@ -274,6 +274,8 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
 
     function getErrorFields() {
         let errs = { ...errors };
+        delete errs._error;
+        delete errs._errorDetail;
         function updateErrors_(key: string, value: string | null) {
             updateErrors(key, value);
             if (value === null || value === undefined) {
@@ -313,6 +315,29 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
         return -1;
     }
 
+    function getTabIndexesWithErrors(): number[] {
+        let errs: { [key: string]: string } = {};
+        function updateErrors_(key: string, value: string | null) {
+            if (value) {
+                errs[key] = value;
+            }
+        }
+
+        Object.keys(formParameters).forEach((key: string) => {
+            let parameter: TempAny = formParameters[key];
+            FieldFactory.validateProps({ path, prefix: key, label: t("field.label." + key), parameter, values, updateErrors: updateErrors_, setValues, t });
+        });
+
+        let ret: number[] = [];
+        Object.keys(errs).forEach((field: string) => {
+            const index = findTabIndex(field);
+            if (!ret.includes(index)) {
+                ret.push(index);
+            }
+        })
+        return ret;
+    }
+
     function handleSubmit() {
         let err = { ...errors };
         delete err._error;
@@ -321,8 +346,8 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
         err = getErrorFields();
         if (Object.keys(err).length > 0) {
             const errKeys = Object.keys(err);
-            if (errKeys.length > 0) {
-                const tabIndex = findTabIndex(errKeys[0]);
+            const tabIndex = findTabIndex(errKeys[0]);
+            if (tabIndex !== -1) {
                 if (currentTab !== tabIndex) {
                     setCurrentTab(tabIndex);
                     setFocusField(errKeys[0]);
@@ -397,6 +422,13 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
         return <Tab key={id} id={id} label={label}>{ret}</Tab>;
     }
 
+    let badges: { [key: number]: number } = {};
+    if (!readonly) {
+        getTabIndexesWithErrors().forEach(index => {
+            badges[index] = -1;
+        })
+    }
+
     return <>
         <RestSpinner />
         <ResourceHeader schema={schema} path={path} type={readonly ? "view" : data ? "edit" : "create"} onAction={() => {
@@ -409,7 +441,7 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
         }} />
         <form>
             <div className="fields">
-                <Tabs currentTab={currentTab} setCurrentTab={setCurrentTab}>
+                <Tabs currentTab={currentTab} setCurrentTab={setCurrentTab} badges={badges}>
                     {sectionFormParameters.map(section => {
                         return showSectionFields(section);
                     })}

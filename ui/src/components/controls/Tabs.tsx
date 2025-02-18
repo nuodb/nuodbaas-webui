@@ -16,9 +16,14 @@ type TabsProps = {
     children: ReactElement[];
     currentTab: number;
     setCurrentTab: (tab: number) => void;
+    badges?: { [key: number]: number };
 }
 
-export function Tabs({ children, currentTab, setCurrentTab }: TabsProps) {
+function badge(count: number) {
+    return <div className="NuoBadge">{count < 0 ? "" : count}</div>
+}
+
+export function Tabs({ children, currentTab, setCurrentTab, badges }: TabsProps) {
     children = children.filter(child => child.props.id && child.props.label && child.props.children);
 
     return <div className="NuoTabs">
@@ -29,7 +34,7 @@ export function Tabs({ children, currentTab, setCurrentTab }: TabsProps) {
                     setCurrentTab(index);
                 }}
             >
-                {child.props.label}
+                {child.props.label}{badges && (index in badges) && badge(badges[index])}
             </li>))}
             <li style={{ display: "flex", flex: "1 1 auto" }}></li>
         </ul>
