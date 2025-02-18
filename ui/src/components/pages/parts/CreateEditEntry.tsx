@@ -295,17 +295,19 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
 
     function findTabIndex(fieldName: string) {
         function hasField(params: FieldParametersType, fieldName: string) {
-            if (fieldName in params) {
-                return true;
+            const posPeriod = fieldName.indexOf(".");
+            if (posPeriod === -1) {
+                return fieldName in params;
             }
-            Object.keys(params).forEach(key => {
-                if (params[key].type === "object") {
-                    const properties = params[key].properties;
-                    if (properties && hasField(properties, fieldName)) {
-                        return true;
-                    }
+            const firstPart = fieldName.substring(0, posPeriod);
+            if (firstPart in params && params[firstPart].type === "object") {
+                const properties = params[firstPart].properties;
+                const remainingPart = fieldName.substring(posPeriod + 1);
+                if (properties && hasField(properties, remainingPart)) {
+                    return true;
                 }
-            })
+            }
+            return false;
         }
         for (let i = 0; i < sectionFormParameters.length; i++) {
             if (hasField(sectionFormParameters[i].params, fieldName)) {
@@ -316,22 +318,12 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
     }
 
     function getTabIndexesWithErrors(): number[] {
-        let errs: { [key: string]: string } = {};
-        function updateErrors_(key: string, value: string | null) {
-            if (value) {
-                errs[key] = value;
-            }
-        }
-
-        Object.keys(formParameters).forEach((key: string) => {
-            let parameter: TempAny = formParameters[key];
-            FieldFactory.validateProps({ path, prefix: key, label: t("field.label." + key), parameter, values, updateErrors: updateErrors_, setValues, t });
-        });
+        let errs = { ...errors };
 
         let ret: number[] = [];
         Object.keys(errs).forEach((field: string) => {
             const index = findTabIndex(field);
-            if (!ret.includes(index)) {
+            if (index >= 0 && !ret.includes(index)) {
                 ret.push(index);
             }
         })
