@@ -95,6 +95,9 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
         if (!prefix) {
             prefix = props.prefix;
         }
+        if (!parameter) {
+            parameter = props.parameter;
+        }
         if (value === undefined) {
             value = getValue(values, prefix);
         }

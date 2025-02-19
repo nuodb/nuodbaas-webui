@@ -1,6 +1,6 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
-import { ReactElement, ReactNode, useState } from "react"
+import { ReactElement, ReactNode } from "react"
 
 type TabProps = {
     id: string;
@@ -14,11 +14,17 @@ export function Tab({ children }: TabProps) {
 
 type TabsProps = {
     children: ReactElement[];
+    currentTab: number;
+    setCurrentTab: (tab: number) => void;
+    badges?: { [key: number]: number };
 }
 
-export function Tabs({ children }: TabsProps) {
+function badge(count: number) {
+    return <div className="NuoBadge">{count < 0 ? "" : count}</div>
+}
+
+export function Tabs({ children, currentTab, setCurrentTab, badges }: TabsProps) {
     children = children.filter(child => child.props.id && child.props.label && child.props.children);
-    const [currentTab, setCurrentTab] = useState<number>(0);
 
     return <div className="NuoTabs">
         <ul>{children.map((child, index) => (
@@ -28,7 +34,7 @@ export function Tabs({ children }: TabsProps) {
                     setCurrentTab(index);
                 }}
             >
-                {child.props.label}
+                {child.props.label}{badges && (index in badges) && badge(badges[index])}
             </li>))}
             <li style={{ display: "flex", flex: "1 1 auto" }}></li>
         </ul>

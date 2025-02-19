@@ -824,7 +824,8 @@ button:focus {
 
 .NuoTabs>ul>li {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+        align-items: center;
     background-color: #fff;
     color: rgba(0, 0, 0, 0.87);
     padding: 10px;
@@ -860,4 +861,14 @@ button:focus {
 }
 .NuoFieldContainer {
     margin: .5em 0;
+}
+.NuoBadge {
+    min-width: 10px;
+    min-height: 10px;
+    background-color: red;
+    margin: 0 0 0 5px;
+    border-radius: 99999px;
+    padding: 3px;
+    font-size: 13px;
+    color: white;
 }
