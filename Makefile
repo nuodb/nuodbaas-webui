@@ -20,7 +20,7 @@ IMG_REPO := nuodbaas-webui
 VERSION := $(shell grep -e "^appVersion:" charts/nuodbaas-webui/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
 SHA := $(shell git rev-parse --short HEAD)
 VERSION_SHA ?= ${VERSION}-${SHA}
-UNCOMMITTED := $(shell rm -f get_helm.sh && git status --porcelain)
+UNCOMMITTED := $(shell git status --porcelain)
 
 # The help target prints out all targets with their descriptions organized
 # beneath their categories. The categories are represented by '##@' and the
@@ -63,28 +63,11 @@ deploy-image-ecr: build-image ## deploy Docker image to AWS
 	else \
 		sed -i "s/^version: \".*\"/version: \"${VERSION_SHA}\"/g" charts/nuodbaas-webui/Chart.yaml && \
 		sed -i "s/^appVersion: \".*\"/appVersion: \"${VERSION_SHA}\"/g" charts/nuodbaas-webui/Chart.yaml && \
-		docker tag "${IMG_REPO}:latest" "${ECR_ACCOUNT_URL}/${IMG_REPO}-docker:${VERSION_SHA}" && \
 		helm package charts/nuodbaas-webui && \
 		git checkout HEAD -- charts/nuodbaas-webui/Chart.yaml && \
-		docker push "${ECR_ACCOUNT_URL}/${IMG_REPO}-docker:${VERSION_SHA}" && \
 		helm push nuodbaas-webui-*.tgz "oci://${ECR_ACCOUNT_URL}/" && \
 		rm nuodbaas-webui-*.tgz \
 		; \
-	fi
-
-.PHONY: deploy-image-github
-deploy-image-github: build-image ## deploy Docker image to Github
-	@if [ "${GH_USER}" = "" ] || [ "${GH_TOKEN}" = "" ]; then \
-		echo "GH_USER and GH_TOKEN environment variable must be set"; \
-		exit 1; \
-	elif [ "${UNCOMMITTED}" != "" ] ; then \
-		echo "Uncommitted changes in GIT. Will not push to Github." && \
-		echo "${UNCOMMITTED}" && \
-		exit 1; \
-	else \
-		./build_utils.sh uploadDockerImage \
-        && ./build_utils.sh createHelmPackage \
-		&& ./build_utils.sh uploadHelmPackage; \
 	fi
 
 .PHONY: install-crds

@@ -60,6 +60,15 @@ jobs:
           command: |
             echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_USER" --password-stdin
       - run:
+          name: Checking if Docker image exists already
+          command: |
+            if [ ./build_utils.sh dockerImageExists ]; then
+                echo "Docker Image exists already - no need to build image."
+                circleci-agent step halt
+            else
+              echo "Docker Image needs to be built."
+            fi
+      - run:
           name: Build Image
           command: make build-image
       - run:
@@ -76,8 +85,11 @@ jobs:
           name: Deploy Docker image / Helm Charts to ECR
           command: make deploy-image-ecr
       - run:
-          name: Deploy Docker image / Helm Charts to Github
-          command: make deploy-image-github
+          name: Deploy Docker images
+          command: ./build_utils.sh deployDockerImage
+      - run:
+          name: Deploy Helm Charts
+          command: ./build_utils.sh createAndUploadHelmPackage
       - run:
           name: Save test results
           command: |

@@ -1,12 +1,15 @@
 #!/bin/bash
 # (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 REPOSITORY="nuodbaas-webui"
-DOCKER_REGISTRY_GITHUB="ghcr.io/nuodb/${REPOSITORY}"
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 CHART_FILE="charts/${REPOSITORY}/Chart.yaml"
 VALUES_FILE="charts/${REPOSITORY}/values.yaml"
 APP_VERSION="$(sed -n -E 's/^appVersion: *"?([^ "]*)"?.*/\1/p' "$CHART_FILE")"
 VERSION="$(sed -n -E 's/^version: *"?([^ "]*)"?.*/\1/p' "$CHART_FILE")"
+GIT_HASH="$(git rev-parse --short HEAD)"
+GITHUB_DOCKER_IMAGE="ghcr.io/nuodb/${REPOSITORY}:${VERSION}-${GIT_HASH}"
+AWS_DOCKER_IMAGE="${ECR_ACCOUNT_URL}/${REPOSITORY}-docker:${VERSION}-${GIT_HASH}"
+
 if [[ "${BRANCH}" == rel/* ]] ; then
     RELEASE_BRANCH_VERSION="$(echo "${BRANCH}" | cut -d / -f2)"
     RELEASE_BRANCH_MAJOR_MINOR="$(echo "${RELEASE_BRANCH_VERSION}" | cut -d . -f1,2)"
@@ -14,7 +17,6 @@ else
     RELEASE_BRANCH_VERSION=""
     RELEASE_BRANCH_MAJOR_MINOR=""
 fi
-GIT_HASH="$(git rev-parse --short HEAD)"
 
 function fail() {
     printf "ERROR: $1\n" >&2
@@ -51,29 +53,6 @@ function helmChartExists() {
     fi
 }
 
-# Returns the docker image location (and tag) based on branch info
-function getDockerImageTag() {
-    if [ "${BRANCH}" == "main" ] ; then
-        # development builds
-        echo "${DOCKER_REGISTRY_GITHUB}:${VERSION}-${GIT_HASH}"
-    elif [ -z "${RELEASE_BRANCH_VERSION}" ] ; then
-        # personal branch
-        echo "${DOCKER_REGISTRY_GITHUB}:$(echo $BRANCH | tr -cd '[:alnum:]')"
-    else
-        # release branch
-        if dockerImageExists ${DOCKER_REGISTRY_GITHUB}:${VERSION} ; then
-            echo "${DOCKER_REGISTRY_GITHUB}:${VERSION}-${GIT_HASH}"
-        else
-            echo "${DOCKER_REGISTRY_GITHUB}:${VERSION}"
-        fi
-    fi
-    exit 0
-}
-
-if [ "$1" == "getDockerImageTag" ] ; then
-    getDockerImageTag
-fi
-
 # creates helm package
 # adjusts helm chart version according to branch info with these rules:
 # - sets docker repository tag in values.yaml to the value set in Chart.yaml:appVersion
@@ -83,7 +62,7 @@ fi
 #     - use VERSION if it doesn't exist yet (first release build)
 #     - use VERSION-HELM_HASH+GIT_HASH otherwise
 #   - otherwise (all personal branches) don't add to chart
-if [ "$1" == "createHelmPackage" ] ; then
+function createHelmPackage() {
     mkdir -p build
     rm -rf build/charts
     cp -r charts build/
@@ -100,7 +79,7 @@ if [ "$1" == "createHelmPackage" ] ; then
             echo "This is the first build with a non-existing helm chart. Publishing chart..."
             SNAPSHOT="${VERSION}"
         fi
-    elif [ "${BRANCH}" == "main" ] ; then
+    elif [ "${BRANCH}" == "main" ] || [ "${BRANCH}" === "agr22/COPYRIGHT" ]; then
         SNAPSHOT="${VERSION}-${HELM_HASH}+${GIT_HASH}"
     else
         echo "Personal branch ${BRANCH} - not publishing chart"
@@ -118,17 +97,15 @@ if [ "$1" == "createHelmPackage" ] ; then
     docker run nuodbaas-webui tgz_static > build/static_files/${REPOSITORY}-html-${SNAPSHOT}.tgz
     cp build/static_files/${REPOSITORY}-html-${SNAPSHOT}.tgz build/static_files/${REPOSITORY}-html-${VERSION}-latest.tgz
     exit 0
-fi
+}
 
-if [ "$1" == "uploadHelmPackage" ] ; then
+function uploadHelmPackageGit() {
     if [ "$(ls build/charts/*.tgz 2> /dev/null)" == "" ] ; then
         echo "No Helm chart generated."
         exit 0
     fi
 
-    # Make sure there are no uncommitted changes
-    GIT_STATUS="$(git status --porcelain)"
-    [ "$GIT_STATUS" = "" ] || fail "Cannot publish charts with uncommitted changes:\n$GIT_STATUS"
+    helm push nuodbaas-webui-*.tgz "oci://${ECR_ACCOUNT_URL}/"
 
     # Checkout gh-pages and fast forward to origin
     git checkout gh-pages
@@ -163,23 +140,46 @@ if [ "$1" == "uploadHelmPackage" ] ; then
 
     git checkout -
     exit 0
+}
+
+if [ "$1" == "deployDockerImages" ] ; then
+    if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" === "agr22/COPYRIGHT" ]; then
+        GIT_STATUS="$(git status --porcelain)"
+        if [ "${GIT_STATUS}" != "" ] ; then
+            echo "Uncommitted changes in GIT. Will not push to GHCR."
+            echo "${GIT_STATUS}"
+            exit 1
+        else
+            docker tag "${REPOSITORY}:latest" "${GITHUB_DOCKER_IMAGE}" && \
+            docker push "${GITHUB_DOCKER_IMAGE}" && \
+            docker tag "${REPOSITORY}:latest" "${AWS_DOCKER_IMAGE}" && \
+            docker push "${AWS_DOCKER_IMAGE}" && \
+            exit 0
+        fi
+    else
+        echo "Docker images are only uploaded from the \"main\" branch."
+        exit 0
+    fi
+
 fi
 
-if [ "$1" == "uploadDockerImage" ] ; then
-    DOCKER_IMAGE_TAG=$(getDockerImageTag)
-	if [ "${UNCOMMITTED}" != "" ] ; then
-		echo "Uncommitted changes in GIT. Will not push to GHCR."
-		echo "${UNCOMMITTED}"
-		exit 1
-	else
-		docker tag "nuodbaas-webui:latest" "${DOCKER_IMAGE_TAG}" && \
-        docker push "${DOCKER_IMAGE_TAG}"
-	fi
-
-    exit 0
+if [ "$1" == "dockerImageExists" ] ; then
+    if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" === "agr22/COPYRIGHT" ]; then
+        if dockerImageExists ${GITHUB_DOCKER_IMAGE} ; then
+            exit 0
+        fi
+    fi
+    exit 1
 fi
 
-echo "$0 getDockerImageTag"
-echo "$0 createHelmPackage"
-echo "$0 uploadHelmPackage"
-echo "$0 uploadDockerImage"
+if [ "$1" == "createAndUploadHelmPackage" ] ; then
+    # Make sure there are no uncommitted changes
+    GIT_STATUS="$(git status --porcelain)"
+    [ "$GIT_STATUS" = "" ] || fail "Cannot publish charts with uncommitted changes:\n$GIT_STATUS"
+
+    createHelmPackage && uploadHelmPackageAws && uploadHelmPackageGit
+fi
+
+echo "$0 dockerImageExists"
+echo "$0 createAndUploadHelmPackage"
+echo "$0 deployDockerImages"
