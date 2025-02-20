@@ -1,7 +1,7 @@
 #!/bin/bash
 # (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 REPOSITORY="nuodbaas-webui"
-DOCKER_REGISTRY="ghcr.io/nuodb/${REPOSITORY}"
+DOCKER_REGISTRY_GITHUB="ghcr.io/nuodb/${REPOSITORY}"
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 CHART_FILE="charts/${REPOSITORY}/Chart.yaml"
 VALUES_FILE="charts/${REPOSITORY}/values.yaml"
@@ -55,16 +55,16 @@ function helmChartExists() {
 function getDockerImageTag() {
     if [ "${BRANCH}" == "main" ] ; then
         # development builds
-        echo "${DOCKER_REGISTRY}:${VERSION}-${GIT_HASH}"
+        echo "${DOCKER_REGISTRY_GITHUB}:${VERSION}-${GIT_HASH}"
     elif [ -z "${RELEASE_BRANCH_VERSION}" ] ; then
         # personal branch
-        echo "${DOCKER_REGISTRY}:$(echo $BRANCH | tr -cd '[:alnum:]')"
+        echo "${DOCKER_REGISTRY_GITHUB}:$(echo $BRANCH | tr -cd '[:alnum:]')"
     else
         # release branch
-        if dockerImageExists ${DOCKER_REGISTRY}:${VERSION} ; then
-            echo "${DOCKER_REGISTRY}:${VERSION}-${GIT_HASH}"
+        if dockerImageExists ${DOCKER_REGISTRY_GITHUB}:${VERSION} ; then
+            echo "${DOCKER_REGISTRY_GITHUB}:${VERSION}-${GIT_HASH}"
         else
-            echo "${DOCKER_REGISTRY}:${VERSION}"
+            echo "${DOCKER_REGISTRY_GITHUB}:${VERSION}"
         fi
     fi
     exit 0

@@ -48,10 +48,17 @@ jobs:
             ECR_ACCOUNT_URL="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
             echo "export ECR_ACCOUNT_URL=\"$ECR_ACCOUNT_URL\"" >> "$BASH_ENV"
       - run:
+          name: Validate Copyrights
+          command: make copyright
+      - run:
           name: Login to ECR for Docker and Helm
           command: |
             aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
             aws ecr get-login-password --region "$AWS_REGION" | helm registry login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
+      - run:
+          name: Login to Github Container Registry
+          command: |
+            echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_USER" --password-stdin
       - run:
           name: Build Image
           command: make build-image
@@ -68,6 +75,9 @@ jobs:
       - run:
           name: Deploy Docker image / Helm Charts to ECR
           command: make deploy-image-ecr
+      - run:
+          name: Deploy Docker image / Helm Charts to Github
+          command: make deploy-image-github
       - run:
           name: Save test results
           command: |

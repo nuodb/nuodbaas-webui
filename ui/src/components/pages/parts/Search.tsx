@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { useState } from "react"
 import { withTranslation } from "react-i18next";

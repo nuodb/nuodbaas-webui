@@ -55,6 +55,7 @@ copyright: ### check copyrights
 deploy-image-ecr: build-image ## deploy Docker image to AWS
 	@if [ "${ECR_ACCOUNT_URL}" = "" ] ; then \
 		echo "ECR_ACCOUNT_URL environment variable must be set"; \
+		exit 1; \
 	elif [ "${UNCOMMITTED}" != "" ] ; then \
 		echo "Uncommitted changes in GIT. Will not push to ECR." && \
 		echo "${UNCOMMITTED}" && \
@@ -67,6 +68,21 @@ deploy-image-ecr: build-image ## deploy Docker image to AWS
 		git checkout HEAD -- charts/nuodbaas-webui/Chart.yaml && \
 		docker push "${ECR_ACCOUNT_URL}/${IMG_REPO}-docker:${VERSION_SHA}" && \
 		helm push nuodbaas-webui-*.tgz "oci://${ECR_ACCOUNT_URL}/"; \
+	fi
+
+.PHONY: deploy-image-github
+deploy-image-github: build-image ## deploy Docker image to Github
+	@if [ "${GH_USER}" = "" ] || [ "${GH_TOKEN}" ]; then \
+		echo "GH_USER and GH_TOKEN environment variable must be set"; \
+		exit 1; \
+	elif [ "${UNCOMMITTED}" != "" ] ; then \
+		echo "Uncommitted changes in GIT. Will not push to Github." && \
+		echo "${UNCOMMITTED}" && \
+		exit 1; \
+	else \
+		./build_utils.sh uploadDockerImage \
+        && ./build_utils.sh createHelmPackage \
+		&& ./build_utils.sh uploadHelmPackage \
 	fi
 
 .PHONY: install-crds

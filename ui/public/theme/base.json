@@ -1,5 +1,5 @@
 {
-    "copyright": "(C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.",
+    "copyright": "(C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.",
     "views": {
         "/databases?/{organization}?/{project}": {
             "columns": [
