@@ -99,7 +99,7 @@ function createHelmPackage() {
     exit 0
 }
 
-function uploadHelmPackageGit() {
+function uploadHelmPackage() {
     if [ "$(ls build/charts/*.tgz 2> /dev/null)" == "" ] ; then
         echo "No Helm chart generated."
         exit 0
@@ -143,7 +143,7 @@ function uploadHelmPackageGit() {
 }
 
 if [ "$1" == "deployDockerImages" ] ; then
-    if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" === "agr22/COPYRIGHT" ]; then
+    if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" == "agr22/COPYRIGHT" ]; then
         GIT_STATUS="$(git status --porcelain)"
         if [ "${GIT_STATUS}" != "" ] ; then
             echo "Uncommitted changes in GIT. Will not push to GHCR."
@@ -164,7 +164,7 @@ if [ "$1" == "deployDockerImages" ] ; then
 fi
 
 if [ "$1" == "dockerImageExists" ] ; then
-    if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" === "agr22/COPYRIGHT" ]; then
+    if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" == "agr22/COPYRIGHT" ]; then
         if dockerImageExists ${GITHUB_DOCKER_IMAGE} ; then
             exit 0
         fi
@@ -177,7 +177,7 @@ if [ "$1" == "createAndUploadHelmPackage" ] ; then
     GIT_STATUS="$(git status --porcelain)"
     [ "$GIT_STATUS" = "" ] || fail "Cannot publish charts with uncommitted changes:\n$GIT_STATUS"
 
-    createHelmPackage && uploadHelmPackageAws && uploadHelmPackageGit
+    createHelmPackage && uploadHelmPackage
 fi
 
 echo "$0 dockerImageExists"
