@@ -72,7 +72,7 @@ deploy-image-ecr: build-image ## deploy Docker image to AWS
 
 .PHONY: deploy-image-github
 deploy-image-github: build-image ## deploy Docker image to Github
-	@if [ "${GH_USER}" = "" ] || [ "${GH_TOKEN}" ]; then \
+	@if [ "${GH_USER}" = "" ] || [ "${GH_TOKEN}" = "" ]; then \
 		echo "GH_USER and GH_TOKEN environment variable must be set"; \
 		exit 1; \
 	elif [ "${UNCOMMITTED}" != "" ] ; then \
@@ -82,7 +82,7 @@ deploy-image-github: build-image ## deploy Docker image to Github
 	else \
 		./build_utils.sh uploadDockerImage \
         && ./build_utils.sh createHelmPackage \
-		&& ./build_utils.sh uploadHelmPackage \
+		&& ./build_utils.sh uploadHelmPackage; \
 	fi
 
 .PHONY: install-crds
