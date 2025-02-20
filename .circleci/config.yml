@@ -224,7 +224,7 @@ workflows:
       - promote_build:
           requires:
             - "Build and deploy"
-          name: "Promote to DBaaS DEV"
+          name: "Optionally Promote to DBaaS DEV"
       - create_release:
           requires:
             - "Build and deploy"

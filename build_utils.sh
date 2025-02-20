@@ -168,8 +168,9 @@ fi
 if [ "$1" == "doesImageExist" ] ; then
     if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" == "agr22/COPYRIGHT" ]; then
         doesImageExist ${GIT_DOCKER_IMAGE_SHA}
+    else
+        echo "no"
     fi
-    echo "no"
     exit 0
 fi
 
