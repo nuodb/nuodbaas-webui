@@ -168,7 +168,7 @@ fi
 if [ "$1" == "dockerImageExists" ] ; then
     if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" == "agr22/COPYRIGHT" ]; then
         dockerImageExists ${GIT_DOCKER_IMAGE_SHA}
-        echo $?
+        exit $?
     fi
     exit 1
 fi
