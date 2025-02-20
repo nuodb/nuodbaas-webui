@@ -41,7 +41,7 @@ help: ## Display this help.
 ##@ Production Builds
 
 .PHONY: all
-all: run-integration-tests deploy-image-ecr copyright ## build, test + deploy everything
+all: run-integration-tests copyright ## build, test + deploy everything
 
 .PHONY: build-image
 build-image:  ## build UI and create Docker image
@@ -50,25 +50,6 @@ build-image:  ## build UI and create Docker image
 .PHONY: copyright
 copyright: ### check copyrights
 	./copyright.sh
-
-.PHONY: deploy-image-ecr
-deploy-image-ecr: build-image ## deploy Docker image to AWS
-	@if [ "${ECR_ACCOUNT_URL}" = "" ] ; then \
-		echo "ECR_ACCOUNT_URL environment variable must be set"; \
-		exit 1; \
-	elif [ "${UNCOMMITTED}" != "" ] ; then \
-		echo "Uncommitted changes in GIT. Will not push to ECR." && \
-		echo "${UNCOMMITTED}" && \
-		exit 1; \
-	else \
-		sed -i "s/^version: \".*\"/version: \"${VERSION_SHA}\"/g" charts/nuodbaas-webui/Chart.yaml && \
-		sed -i "s/^appVersion: \".*\"/appVersion: \"${VERSION_SHA}\"/g" charts/nuodbaas-webui/Chart.yaml && \
-		helm package charts/nuodbaas-webui && \
-		git checkout HEAD -- charts/nuodbaas-webui/Chart.yaml && \
-		helm push nuodbaas-webui-*.tgz "oci://${ECR_ACCOUNT_URL}/" && \
-		rm nuodbaas-webui-*.tgz \
-		; \
-	fi
 
 .PHONY: install-crds
 install-crds: $(KWOKCTL) $(KUBECTL) $(HELM)

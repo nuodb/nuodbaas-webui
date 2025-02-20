@@ -86,9 +86,6 @@ jobs:
           when: always
           command: make teardown-integration-tests
       - run:
-          name: Deploy Docker image / Helm Charts to ECR
-          command: make deploy-image-ecr
-      - run:
           name: Deploy Docker images
           command: ./build_utils.sh deployDockerImages
       - run:

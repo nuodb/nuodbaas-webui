@@ -150,10 +150,10 @@ if [ "$1" == "deployDockerImages" ] ; then
             echo "${GIT_STATUS}"
             exit 1
         else
-            docker tag "${REPOSITORY}:latest" "${GITHUB_DOCKER_IMAGE}" && \
-            docker push "${GITHUB_DOCKER_IMAGE}" && \
             docker tag "${REPOSITORY}:latest" "${AWS_DOCKER_IMAGE}" && \
             docker push "${AWS_DOCKER_IMAGE}" && \
+            docker tag "${REPOSITORY}:latest" "${GITHUB_DOCKER_IMAGE}" && \
+            docker push "${GITHUB_DOCKER_IMAGE}" && \
             exit 0
         fi
     else
@@ -165,9 +165,8 @@ fi
 
 if [ "$1" == "dockerImageExists" ] ; then
     if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" == "agr22/COPYRIGHT" ]; then
-        if dockerImageExists ${GITHUB_DOCKER_IMAGE} ; then
-            exit 0
-        fi
+        dockerImageExists ${GITHUB_DOCKER_IMAGE}
+        echo $?
     fi
     exit 1
 fi
