@@ -7,8 +7,10 @@ VALUES_FILE="charts/${REPOSITORY}/values.yaml"
 APP_VERSION="$(sed -n -E 's/^appVersion: *"?([^ "]*)"?.*/\1/p' "$CHART_FILE")"
 VERSION="$(sed -n -E 's/^version: *"?([^ "]*)"?.*/\1/p' "$CHART_FILE")"
 GIT_HASH="$(git rev-parse --short HEAD)"
-GITHUB_DOCKER_IMAGE="ghcr.io/nuodb/${REPOSITORY}:${VERSION}-${GIT_HASH}"
-AWS_DOCKER_IMAGE="${ECR_ACCOUNT_URL}/${REPOSITORY}-docker:${VERSION}-${GIT_HASH}"
+GIT_DOCKER_IMAGE_RELEASE="ghcr.io/nuodb/${REPOSITORY}:${VERSION}"
+GIT_DOCKER_IMAGE_SHA="${GIT_DOCKER_IMAGE_RELEASE}-${GIT_HASH}"
+AWS_DOCKER_IMAGE_RELEASE="${ECR_ACCOUNT_URL}/${REPOSITORY}-docker:${VERSION}"
+AWS_DOCKER_IMAGE_SHA="${AWS_DOCKER_RELEASE}-${GIT_HASH}"
 
 if [[ "${BRANCH}" == rel/* ]] ; then
     RELEASE_BRANCH_VERSION="$(echo "${BRANCH}" | cut -d / -f2)"
@@ -150,10 +152,10 @@ if [ "$1" == "deployDockerImages" ] ; then
             echo "${GIT_STATUS}"
             exit 1
         else
-            docker tag "${REPOSITORY}:latest" "${AWS_DOCKER_IMAGE}" && \
-            docker push "${AWS_DOCKER_IMAGE}" && \
-            docker tag "${REPOSITORY}:latest" "${GITHUB_DOCKER_IMAGE}" && \
-            docker push "${GITHUB_DOCKER_IMAGE}" && \
+            docker tag "${REPOSITORY}:latest" "${AWS_DOCKER_IMAGE_SHA}" && \
+            docker push "${AWS_DOCKER_IMAGE_SHA}" && \
+            docker tag "${REPOSITORY}:latest" "${GIT_DOCKER_IMAGE_SHA}" && \
+            docker push "${GIT_DOCKER_IMAGE_SHA}" && \
             exit 0
         fi
     else
@@ -165,7 +167,7 @@ fi
 
 if [ "$1" == "dockerImageExists" ] ; then
     if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" == "agr22/COPYRIGHT" ]; then
-        dockerImageExists ${GITHUB_DOCKER_IMAGE}
+        dockerImageExists ${GIT_DOCKER_IMAGE_SHA}
         echo $?
     fi
     exit 1
@@ -179,6 +181,33 @@ if [ "$1" == "createAndUploadHelmPackage" ] ; then
     createHelmPackage && uploadHelmPackage
 fi
 
+if [ "$1" == "createRelease" ] && [ "$2" != "" ] ; then
+    if [ "$APP_VERSION" != "$VERSION" ] || [ "$APP_VERSION" != "$2" ] ; then
+        echo "Versions do not match. Will not create a release"
+        echo "appVersion = \"$APP_VERSION\""
+        echo "version = \"$VERSION\""
+        echo "provided version = \"$2\""
+        exit 1
+    else
+        GIT_DOCKER_RELEASE="ghcr.io/nuodb/${REPOSITORY}:${VERSION}"
+        AWS_DOCKER_RELEASE="${ECR_ACCOUNT_URL}/${REPOSITORY}-docker:${VERSION}"
+
+        docker pull "${GIT_DOCKER_IMAGE_SHA}" && \
+        docker tag "${GIT_DOCKER_IMAGE_SHA}" "${AWS_DOCKER_IMAGE_RELEASE}" && \
+        docker tag "${GIT_DOCKER_IMAGE_SHA}" "${GIT_DOCKER_IMAGE_RELEASE}" && \
+        docker push "${AWS_DOCKER_IMAGE_RELEASE} && \
+        docker push "${GIT_DOCKER_IMAGE_RELEASE} && \
+        \
+        mkdir -p build && \
+        rm -rf build/charts && \
+        cp -r charts build/ && \
+        (cd build/charts && helm package ${REPOSITORY}) && \
+        uploadHelmPackage
+
+    fi
+fi
+
 echo "$0 dockerImageExists"
 echo "$0 createAndUploadHelmPackage"
 echo "$0 deployDockerImages"
+echo "$0 createRelease <version number>"
