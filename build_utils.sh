@@ -81,7 +81,7 @@ function createHelmPackage() {
             echo "This is the first build with a non-existing helm chart. Publishing chart..."
             SNAPSHOT="${VERSION}"
         fi
-    elif [ "${BRANCH}" == "main" ] || [ "${BRANCH}" == "agr22/COPYRIGHT" ]; then
+    elif [ "${BRANCH}" == "main" ] ; then
         SNAPSHOT="${VERSION}-${HELM_HASH}+${GIT_HASH}"
     else
         echo "Personal branch ${BRANCH} - not publishing chart"
@@ -107,7 +107,7 @@ function uploadHelmPackage() {
         exit 0
     fi
 
-    helm push nuodbaas-webui-*.tgz "oci://${ECR_ACCOUNT_URL}/"
+    helm push build/charts/nuodbaas-webui-*.tgz "oci://${ECR_ACCOUNT_URL}/"
 
     # Checkout gh-pages and fast forward to origin
     git checkout gh-pages
@@ -145,7 +145,7 @@ function uploadHelmPackage() {
 }
 
 if [ "$1" == "deployDockerImages" ] ; then
-    if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" == "agr22/COPYRIGHT" ]; then
+    if [ "${BRANCH}" == "main" ]; then
         GIT_STATUS="$(git status --porcelain)"
         if [ "${GIT_STATUS}" != "" ] ; then
             echo "Uncommitted changes in GIT. Will not push to GHCR."
@@ -162,11 +162,10 @@ if [ "$1" == "deployDockerImages" ] ; then
         echo "Docker images are only uploaded from the \"main\" branch."
         exit 0
     fi
-
 fi
 
 if [ "$1" == "doesImageExist" ] ; then
-    if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" == "agr22/COPYRIGHT" ]; then
+    if [ "${BRANCH}" == "main" ]; then
         doesImageExist ${GIT_DOCKER_IMAGE_SHA}
     else
         echo "no"
