@@ -41,6 +41,10 @@ jobs:
       - aws-cli/setup
       - helm/install-helm-client
       - run:
+          name: Clean up get_helm.sh
+          command: |
+            rm -f get_helm.sh
+      - run:
           name: Check that AWS environment variables were supplied
           command: |
             : ${AWS_REGION:?"Must specify AWS region"}
