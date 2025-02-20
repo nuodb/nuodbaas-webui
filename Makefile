@@ -67,7 +67,9 @@ deploy-image-ecr: build-image ## deploy Docker image to AWS
 		helm package charts/nuodbaas-webui && \
 		git checkout HEAD -- charts/nuodbaas-webui/Chart.yaml && \
 		docker push "${ECR_ACCOUNT_URL}/${IMG_REPO}-docker:${VERSION_SHA}" && \
-		helm push nuodbaas-webui-*.tgz "oci://${ECR_ACCOUNT_URL}/"; \
+		helm push nuodbaas-webui-*.tgz "oci://${ECR_ACCOUNT_URL}/" && \
+		rm nuodbaas-webui-*.tgz \
+		; \
 	fi
 
 .PHONY: deploy-image-github
