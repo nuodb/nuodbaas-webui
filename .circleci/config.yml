@@ -157,7 +157,7 @@ jobs:
       image: ubuntu-2204:2023.10.1
     resource_class: medium
     environment:
-      CREATE_RELEASE: << pipeline.parameters.create_release
+      CREATE_RELEASE: << pipeline.parameters.create_release >>
     steps:
       - checkout
       - aws-cli/setup
