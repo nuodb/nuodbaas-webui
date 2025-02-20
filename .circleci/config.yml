@@ -66,8 +66,7 @@ jobs:
       - run:
           name: Checking if Docker image exists already
           command: |
-            ./build_utils.sh dockerImageExists
-            if [ $? -eq 0 ]; then
+            if [ "$(./build_utils.sh doesImageExist)" == "yes" ] ; then
                 echo "Docker Image exists already - no need to build image."
                 circleci-agent step halt
             else

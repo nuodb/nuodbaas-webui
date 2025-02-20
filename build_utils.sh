@@ -28,12 +28,12 @@ function fail() {
 set -e
 
 # $1 = docker image with tag
-function dockerImageExists() {
+function doesImageExist() {
     FIRST_LINE="$(docker manifest inspect $1 2>&1 | head -1)"
     if [ $? -eq 0 ] && [ "${FIRST_LINE}" == "{" ] ; then
-        return 0
+        echo "yes"
     elif [[ "${FIRST_LINE}" == 'no such manifest'* ]] || [[ "${FIRST_LINE}" == 'manifest unknown'* ]]; then
-        return 1
+        echo "no"
     else
         fail "Unable to check if Docker Image $1 exists: ${FIRST_LINE}"
     fi
@@ -165,12 +165,12 @@ if [ "$1" == "deployDockerImages" ] ; then
 
 fi
 
-if [ "$1" == "dockerImageExists" ] ; then
+if [ "$1" == "doesImageExist" ] ; then
     if [ "${BRANCH}" == "main" ] || [ "${BRANCH}" == "agr22/COPYRIGHT" ]; then
-        dockerImageExists ${GIT_DOCKER_IMAGE_SHA}
-        exit $?
+        doesImageExist ${GIT_DOCKER_IMAGE_SHA}
     fi
-    exit 1
+    echo "no"
+    exit 0
 fi
 
 if [ "$1" == "createAndUploadHelmPackage" ] ; then
@@ -207,7 +207,7 @@ if [ "$1" == "createRelease" ] && [ "$2" != "" ] ; then
     fi
 fi
 
-echo "$0 dockerImageExists"
+echo "$0 doesImageExist"
 echo "$0 createAndUploadHelmPackage"
 echo "$0 deployDockerImages"
 echo "$0 createRelease <version number>"
