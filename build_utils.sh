@@ -10,7 +10,7 @@ GIT_HASH="$(git rev-parse --short HEAD)"
 GIT_DOCKER_IMAGE_RELEASE="ghcr.io/nuodb/${REPOSITORY}:${VERSION}"
 GIT_DOCKER_IMAGE_SHA="${GIT_DOCKER_IMAGE_RELEASE}-${GIT_HASH}"
 AWS_DOCKER_IMAGE_RELEASE="${ECR_ACCOUNT_URL}/${REPOSITORY}-docker:${VERSION}"
-AWS_DOCKER_IMAGE_SHA="${AWS_DOCKER_RELEASE}-${GIT_HASH}"
+AWS_DOCKER_IMAGE_SHA="${AWS_DOCKER_IMAGE_RELEASE}-${GIT_HASH}"
 
 if [[ "${BRANCH}" == rel/* ]] ; then
     RELEASE_BRANCH_VERSION="$(echo "${BRANCH}" | cut -d / -f2)"
@@ -179,6 +179,7 @@ if [ "$1" == "createAndUploadHelmPackage" ] ; then
     [ "$GIT_STATUS" = "" ] || fail "Cannot publish charts with uncommitted changes:\n$GIT_STATUS"
 
     createHelmPackage && uploadHelmPackage
+    exit $?
 fi
 
 if [ "$1" == "createRelease" ] && [ "$2" != "" ] ; then
@@ -189,9 +190,6 @@ if [ "$1" == "createRelease" ] && [ "$2" != "" ] ; then
         echo "provided version = \"$2\""
         exit 1
     else
-        GIT_DOCKER_RELEASE="ghcr.io/nuodb/${REPOSITORY}:${VERSION}"
-        AWS_DOCKER_RELEASE="${ECR_ACCOUNT_URL}/${REPOSITORY}-docker:${VERSION}"
-
         docker pull "${GIT_DOCKER_IMAGE_SHA}" && \
         docker tag "${GIT_DOCKER_IMAGE_SHA}" "${AWS_DOCKER_IMAGE_RELEASE}" && \
         docker tag "${GIT_DOCKER_IMAGE_SHA}" "${GIT_DOCKER_IMAGE_RELEASE}" && \
@@ -203,7 +201,7 @@ if [ "$1" == "createRelease" ] && [ "$2" != "" ] ; then
         cp -r charts build/ && \
         (cd build/charts && helm package ${REPOSITORY}) && \
         uploadHelmPackage
-
+        exit $?
     fi
 fi
 
