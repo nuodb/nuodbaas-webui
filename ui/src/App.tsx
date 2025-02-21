@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import './utils/i18n';
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import LoginForm from "./components/pages/LoginForm";
-import Home from "./components/pages/Home";
 import ListResource from "./components/pages/ListResource";
 import CreateResource from "./components/pages/CreateResource";
 import EditResource from "./components/pages/EditResource";
@@ -71,6 +70,16 @@ export default function App() {
     });
   }, [schema, isLoggedIn]);
 
+  function getHomeUrl() {
+    const credentials = Auth.getCredentials();
+    if (credentials) {
+      return "/ui/resource/list/databases/" + encodeURIComponent(credentials.username.split("/")[0]);
+    }
+    else {
+      return "/ui/resource/list/databases";
+    }
+  }
+
   return (
     <div className="App" data-testid={orgs.length > 0 ? "banner-done" : ""}>
       <GlobalErrorBoundary>
@@ -86,7 +95,6 @@ export default function App() {
                 <Schema setSchema={setSchema} />
                 <Routes>
                   <Route path="/" element={<Navigate to="/ui" />} />
-                  <Route path="/ui" element={<Home {...pageProps} />} />
                   <Route path="/ui/error" element={<ErrorPage {...pageProps} />} />
                   <Route path="/ui/resource/list/*" element={<ListResource {...pageProps} />} />
                   <Route path="/ui/resource/create/*" element={<CreateResource {...pageProps} />} />
@@ -95,6 +103,7 @@ export default function App() {
                   <Route path="/ui/settings" element={<Settings {...pageProps} />} />
                   <Route path="/ui/automation" element={<Automation {...pageProps} />} />
                   <Route path="/ui/page/organization" element={<OrganizationOverview {...pageProps} />} />
+                  <Route path="/ui" element={<Navigate to={getHomeUrl()} />} />
                   <Route path="/*" element={<NotFound {...pageProps} />} />
                 </Routes>
               </React.Fragment>
@@ -102,7 +111,7 @@ export default function App() {
               <Routes>
                 <Route path="/ui/login" element={<LoginForm setIsLoggedIn={setIsLoggedIn} />} />
                 <Route path="/ui/error" element={<ErrorPage {...pageProps} />} />
-                <Route path="/*" element={<Navigate to={"/ui/login?redirect=" + encodeURIComponent(window.location.pathname)} />} />
+                <Route path="/*" element={<Navigate to={"/ui/login?redirecta=" + encodeURIComponent(window.location.pathname)} />} />
               </Routes>
             }
           </BrowserRouter>
