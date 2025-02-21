@@ -1,3 +1,4 @@
+# (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 {{- if .Values.nuodbaasWebui.ingress.enabled -}}
 {{- $fullName := include "nuodbaas-webui.fullname" . -}}
 {{- $svcPort := .Values.nuodbaasWebui.service.port -}}

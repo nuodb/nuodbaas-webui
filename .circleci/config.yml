@@ -1,4 +1,4 @@
-# (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+# (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 # CircleCI 2.1 configuration file
 version: 2.1
@@ -41,6 +41,10 @@ jobs:
       - aws-cli/setup
       - helm/install-helm-client
       - run:
+          name: Clean up get_helm.sh
+          command: |
+            rm -f get_helm.sh
+      - run:
           name: Check that AWS environment variables were supplied
           command: |
             : ${AWS_REGION:?"Must specify AWS region"}
@@ -48,10 +52,26 @@ jobs:
             ECR_ACCOUNT_URL="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
             echo "export ECR_ACCOUNT_URL=\"$ECR_ACCOUNT_URL\"" >> "$BASH_ENV"
       - run:
+          name: Validate Copyrights
+          command: make copyright
+      - run:
           name: Login to ECR for Docker and Helm
           command: |
             aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
             aws ecr get-login-password --region "$AWS_REGION" | helm registry login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
+      - run:
+          name: Login to Github Container Registry
+          command: |
+            echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_USER" --password-stdin
+      - run:
+          name: Checking if Docker image exists already
+          command: |
+            if [ "$(./build_utils.sh doesImageExist)" == "yes" ] ; then
+                echo "Docker Image exists already - no need to build image."
+                circleci-agent step halt
+            else
+              echo "Docker Image needs to be built."
+            fi
       - run:
           name: Build Image
           command: make build-image
@@ -66,8 +86,11 @@ jobs:
           when: always
           command: make teardown-integration-tests
       - run:
-          name: Deploy Docker image / Helm Charts to ECR
-          command: make deploy-image-ecr
+          name: Deploy Docker images
+          command: ./build_utils.sh deployDockerImages
+      - run:
+          name: Deploy Helm Charts
+          command: ./build_utils.sh createAndUploadHelmPackage
       - run:
           name: Save test results
           command: |
@@ -128,6 +151,37 @@ jobs:
             GIT_COMMITTER_NAME: promotebot[bot]
             GIT_COMMITTER_EMAIL: support@nuodb.com
 
+  create_release:
+    machine:
+      image: ubuntu-2204:2023.10.1
+    resource_class: medium
+    environment:
+      CREATE_RELEASE: << pipeline.parameters.create_release >>
+    steps:
+      - checkout
+      - aws-cli/setup
+      - helm/install-helm-client
+      - run:
+          name: Check that AWS environment variables were supplied
+          command: |
+            : ${AWS_REGION:?"Must specify AWS region"}
+            AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account | sed 's/^"\(.*\)"$/\1/g')"
+            ECR_ACCOUNT_URL="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
+            echo "export ECR_ACCOUNT_URL=\"$ECR_ACCOUNT_URL\"" >> "$BASH_ENV"
+      - run:
+          name: Login to ECR for Docker and Helm
+          command: |
+            aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
+            aws ecr get-login-password --region "$AWS_REGION" | helm registry login --username AWS --password-stdin "$ECR_ACCOUNT_URL"
+      - run:
+          name: Login to Github Container Registry
+          command: |
+            echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_USER" --password-stdin
+      - run:
+          name: Optionally creating release
+          command: |
+            ./build_utils.sh createRelease "${CREATE_RELEASE}"
+
 commands:
   check_skip_promotion:
     description: |
@@ -154,6 +208,11 @@ parameters:
     default: false
     description: |
       Promotes NuoDBaaS WebUI build into internal DBaaS cluster
+  create_release:
+    type: string
+    default: ""
+    description: |
+      Create a Release. Pass in the version number to create - it has to match up with the appVersion and version in charts/nuodbaas-webui/Chart.yaml
 
 workflows:
   version: 2
@@ -165,4 +224,8 @@ workflows:
       - promote_build:
           requires:
             - "Build and deploy"
-          name: "Promote to DBaaS DEV"
+          name: "Optionally Promote to DBaaS DEV"
+      - create_release:
+          requires:
+            - "Build and deploy"
+          name: "Optionally Create Release"

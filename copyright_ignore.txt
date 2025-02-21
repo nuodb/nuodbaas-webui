@@ -2,6 +2,7 @@
 ^\./ui/node_modules/
 ^\./.git/
 ^\./selenium-tests/target/
+^\./selenium-tests/files/kubeconfig
 ^\./ui/package-lock.json$
 \.md$
 \./ui/public/favicon.ico$
