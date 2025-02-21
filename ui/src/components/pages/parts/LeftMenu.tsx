@@ -163,7 +163,7 @@ export default function LeftMenu(props: LeftMenuProps) {
     })
 
     const data = {
-        "overview": {
+/*        "overview": {
             label: "Overview",
             children: {
                 "organization": {
@@ -171,7 +171,7 @@ export default function LeftMenu(props: LeftMenuProps) {
                     path: "/ui/page/organization",
                 }
             }
-        },
+        },*/
         "management": {
             label: "Management",
             children

@@ -233,7 +233,7 @@ public class SeleniumTestHelper {
         click("login_button");
         retryStale(()->{
             String text = waitText("path_component");
-            assertEquals("Home\n>\nHome", text);
+            assertEquals("Management\n>\nDatabases\n>\nAcme", text);
         });
         waitElement("banner-done");
     }
