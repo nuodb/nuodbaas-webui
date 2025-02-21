@@ -111,7 +111,7 @@ export default function App() {
               <Routes>
                 <Route path="/ui/login" element={<LoginForm setIsLoggedIn={setIsLoggedIn} />} />
                 <Route path="/ui/error" element={<ErrorPage {...pageProps} />} />
-                <Route path="/*" element={<Navigate to={"/ui/login?redirecta=" + encodeURIComponent(window.location.pathname)} />} />
+                <Route path="/*" element={<Navigate to={"/ui/login?redirect=" + encodeURIComponent(window.location.pathname)} />} />
               </Routes>
             }
           </BrowserRouter>
