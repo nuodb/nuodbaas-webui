@@ -3,7 +3,8 @@
 services:
   selenium:
     image: "selenium/standalone-chrome"
-    shm_size: '4gb'
+    volumes:
+      - /dev/shm:/dev/shm
     ports:
       - "4444:4444"
       - "7900:7900"
