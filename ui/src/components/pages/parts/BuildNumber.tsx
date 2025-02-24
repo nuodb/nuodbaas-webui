@@ -8,7 +8,7 @@ type BuildNumberProps = {
 export default function BuildNumber({ className }: BuildNumberProps) {
     return <div className={className}>
         Build:&nbsp;
-        {process.env.REACT_APP_GIT_SHA && process.env.REACT_APP_GIT_SHA.substring(0, 7)}
+        {process.env.REACT_APP_GIT_SHA && process.env.REACT_APP_GIT_SHA}
         &nbsp;/&nbsp;
         {preval`module.exports = new Date().toISOString();`}
     </div>

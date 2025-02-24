@@ -45,7 +45,7 @@ all: run-integration-tests copyright ## build, test + deploy everything
 
 .PHONY: build-image
 build-image:  ## build UI and create Docker image
-	@docker build -t "${IMG_REPO}:latest" --build-arg "REACT_APP_GIT_SHA=${SHA}" -f docker/production/Dockerfile .
+	@docker build -t "${IMG_REPO}:latest" --build-arg "REACT_APP_GIT_SHA=${VERSION_SHA}" -f docker/production/Dockerfile .
 
 .PHONY: copyright
 copyright: ### check copyrights
