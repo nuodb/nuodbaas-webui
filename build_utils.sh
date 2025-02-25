@@ -107,9 +107,7 @@ function uploadHelmPackage() {
     fi
 
     helm push build/charts/nuodbaas-webui-*-latest.tgz "oci://${ECR_ACCOUNT_URL}"
-    rm build/charts/nuodbaas-webui-*-latest.tgz
-    helm push build/charts/nuodbaas-webui-*.tgz "oci://${ECR_ACCOUNT_URL}"
-    rm build/charts/nuodbaas-webui-*.tgz
+    helm push build/charts/nuodbaas-webui-*+*.tgz "oci://${ECR_ACCOUNT_URL}"
 
     # Checkout gh-pages and fast forward to origin
     git checkout gh-pages
