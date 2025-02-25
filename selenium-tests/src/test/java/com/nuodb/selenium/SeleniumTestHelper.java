@@ -49,6 +49,8 @@ public class SeleniumTestHelper {
         if("true".equals(System.getProperty(SHOW_CHROME_DEVTOOLS)) || "true".equals(System.getenv(SHOW_CHROME_DEVTOOLS))) {
             options.addArguments("--auto-open-devtools-for-tabs");
         }
+        chrome_options.add_argument('--no-sandbox');
+        chrome_options.add_argument('--disable-dev-shm-usage');
         driver = new RemoteWebDriver(hubUrl, options);
     }
 
