@@ -47,7 +47,10 @@ public class SeleniumTestHelper {
         URL hubUrl = new URL("http://localhost:4444/wd/hub");
         ChromeOptions options = new ChromeOptions();
         if("true".equals(System.getProperty(SHOW_CHROME_DEVTOOLS)) || "true".equals(System.getenv(SHOW_CHROME_DEVTOOLS))) {
-            options.addArguments("--auto-open-devtools-for-tabs");
+            options.addArguments("--auto-open-devtools-for-tabs", "--no-sandbox", "--disable-dev-shm-usage");
+        }
+        else {
+            options.addArguments("--no-sandbox", "--disable-dev-shm-usage");
         }
         driver = new RemoteWebDriver(hubUrl, options);
     }

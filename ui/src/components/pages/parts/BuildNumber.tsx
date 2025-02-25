@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import preval from 'preval.macro'
 
@@ -8,7 +8,7 @@ type BuildNumberProps = {
 export default function BuildNumber({ className }: BuildNumberProps) {
     return <div className={className}>
         Build:&nbsp;
-        {process.env.REACT_APP_GIT_SHA && process.env.REACT_APP_GIT_SHA.substring(0, 7)}
+        {process.env.REACT_APP_GIT_SHA && process.env.REACT_APP_GIT_SHA}
         &nbsp;/&nbsp;
         {preval`module.exports = new Date().toISOString();`}
     </div>

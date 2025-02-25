@@ -85,7 +85,7 @@ function createHelmPackage() {
         SNAPSHOT="${VERSION}-${HELM_HASH}+${GIT_HASH}"
     else
         echo "Personal branch ${BRANCH} - not publishing chart"
-        exit 0
+        return 0
     fi
 
     echo "Applying \"${SNAPSHOT}\" and \"${VERSION}-latest\" to Helm Chart"
@@ -98,13 +98,12 @@ function createHelmPackage() {
     mkdir -p build/static_files
     docker run nuodbaas-webui tgz_static > build/static_files/${REPOSITORY}-html-${SNAPSHOT}.tgz
     cp build/static_files/${REPOSITORY}-html-${SNAPSHOT}.tgz build/static_files/${REPOSITORY}-html-${VERSION}-latest.tgz
-    exit 0
 }
 
 function uploadHelmPackage() {
     if [ "$(ls build/charts/*.tgz 2> /dev/null)" == "" ] ; then
         echo "No Helm chart generated."
-        exit 0
+        return 0
     fi
 
     helm push build/charts/nuodbaas-webui-*.tgz "oci://${ECR_ACCOUNT_URL}/"
@@ -141,7 +140,6 @@ function uploadHelmPackage() {
     fi
 
     git checkout -
-    exit 0
 }
 
 if [ "$1" == "deployDockerImages" ] ; then
