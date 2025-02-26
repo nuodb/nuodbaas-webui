@@ -55,49 +55,28 @@ function helmChartExists() {
     fi
 }
 
-# creates helm package
-# adjusts helm chart version according to branch info with these rules:
-# - sets docker repository tag in values.yaml to the value set in Chart.yaml:appVersion
-# - sets helm chart version in Chart.yaml:
-#   - if main, use VERSION-HELM_HASH+GIT_HASH
-#   - if a rel/* branch:
-#     - use VERSION if it doesn't exist yet (first release build)
-#     - use VERSION-HELM_HASH+GIT_HASH otherwise
-#   - otherwise (all personal branches) don't add to chart
+# creates helm package with VERSION-GIT_HASH tag
 function createHelmPackage() {
     mkdir -p build
     rm -rf build/charts
     cp -r charts build/
-    HELM_HASH=$(grep -r -n -e ^ charts | sort | shasum -a 256 | cut -b -32 | xxd -r -p | base64 | tr -d '/+=')
     if [ ! -z ${RELEASE_BRANCH_VERSION} ] ; then
         if [ "${RELEASE_BRANCH_MAJOR_MINOR}" != "${VERSION}" ] ; then
             fail "Helm Chart version ${VERSION} must match with major/minor version of branch name ${RELEASE_BRANCH_MAJOR_MINOR}"
         fi
-
-        if helmChartExists https://nuodb.github.io/${REPOSITORY}/index.yaml ${REPOSITORY} ${VERSION} ; then
-            echo "Helm chart with version ${VERSION} exists. Updating with hash"
-            SNAPSHOT="${VERSION}-${HELM_HASH}+${GIT_HASH}"
-        else
-            echo "This is the first build with a non-existing helm chart. Publishing chart..."
-            SNAPSHOT="${VERSION}"
-        fi
-    elif [ "${BRANCH}" == "main" ] ; then
-        SNAPSHOT="${VERSION}-${HELM_HASH}+${GIT_HASH}"
-    else
-        echo "Personal branch ${BRANCH} - not publishing chart"
+    elif [ "${BRANCH}" != "main" ] ; then
+        echo "Not a main or rel/* branch - ${BRANCH} - not publishing chart"
         return 0
     fi
 
-    echo "Applying \"${SNAPSHOT}\" and \"${VERSION}-latest\" to Helm Chart"
-    cat ${CHART_FILE} | sed "s/^version: .*/version: \"${SNAPSHOT}\"/g" > build/${CHART_FILE}
-    (cd build/charts && helm package ${REPOSITORY})
-    cat ${CHART_FILE} | sed "s/^version: .*/version: \"${VERSION}-latest\"/g" > build/${CHART_FILE}
+    SNAPSHOT="${VERSION}-${GIT_HASH}"
+    echo "Applying \"${SNAPSHOT}\" to Helm Chart"
+    cat ${CHART_FILE} | sed "s/^version: .*/version: \"${SNAPSHOT}\"/g" | sed "s/^appVersion: .*/appVersion: \"${SNAPSHOT}\"/g" > build/${CHART_FILE}
     (cd build/charts && helm package ${REPOSITORY})
 
     echo "Create tgz file from static files"
     mkdir -p build/static_files
     docker run nuodbaas-webui tgz_static > build/static_files/${REPOSITORY}-html-${SNAPSHOT}.tgz
-    cp build/static_files/${REPOSITORY}-html-${SNAPSHOT}.tgz build/static_files/${REPOSITORY}-html-${VERSION}-latest.tgz
 }
 
 function uploadHelmPackage() {
@@ -106,8 +85,7 @@ function uploadHelmPackage() {
         return 0
     fi
 
-    helm push build/charts/nuodbaas-webui-*-latest.tgz "oci://${ECR_ACCOUNT_URL}"
-    helm push build/charts/nuodbaas-webui-*+*.tgz "oci://${ECR_ACCOUNT_URL}"
+    helm push build/charts/nuodbaas-webui-*.tgz "oci://${ECR_ACCOUNT_URL}"
 
     # Checkout gh-pages and fast forward to origin
     git checkout gh-pages
