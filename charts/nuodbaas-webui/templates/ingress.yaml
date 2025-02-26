@@ -1,5 +1,5 @@
 # (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
-{{- if .Values.nuodbaasWebui.ingress.enabled -}}
+{{- if .Values.nuodbaasWebui.ingress.enabled }}
 {{- $fullName := include "nuodbaas-webui.fullname" . -}}
 {{- $svcPort := .Values.nuodbaasWebui.service.port -}}
 {{- if and .Values.nuodbaasWebui.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
@@ -7,7 +7,7 @@
   {{- $_ := set .Values.nuodbaasWebui.ingress.annotations "kubernetes.io/ingress.class" .Values.nuodbaasWebui.ingress.className }}
   {{- end }}
 {{- end }}
-{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" -}}
+{{- if .Capabilities.APIVersions.Has "networking.k8s.io/v1/Ingress" }}
 apiVersion: networking.k8s.io/v1
 {{- else if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1/Ingress" -}}
 apiVersion: networking.k8s.io/v1beta1
