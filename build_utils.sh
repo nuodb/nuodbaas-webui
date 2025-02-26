@@ -151,6 +151,10 @@ if [ "$1" == "doesImageExist" ] ; then
 fi
 
 if [ "$1" == "createAndUploadHelmPackage" ] ; then
+    # Make sure there are no uncommitted changes
+    GIT_STATUS="$(git status --porcelain)"
+    [ "$GIT_STATUS" = "" ] || fail "Cannot publish charts with uncommitted changes:\n$GIT_STATUS"
+
     createHelmPackage && uploadHelmPackage
     exit $?
 fi
