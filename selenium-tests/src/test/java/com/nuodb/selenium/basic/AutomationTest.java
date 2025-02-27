@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nuodb.selenium.Constants;
 import com.nuodb.selenium.TestRoutines;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,7 +15,7 @@ public class AutomationTest extends TestRoutines {
     @Test
     public void testRecordingCreateAndDeleteUsers() throws JsonProcessingException {
         // Start Recording
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login();
         clickUserMenu("automation");
         clearSessionStorage("nuodbaas-webui-recorded");
         clearSessionStorage("nuodbaas-webui-isRecording");

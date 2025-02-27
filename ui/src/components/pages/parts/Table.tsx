@@ -99,6 +99,10 @@ function Table(props: TableProps) {
         setColumns(cols);
     }, [data, path, schema, t]);
 
+    useEffect(() => {
+        setSelected(new Set<string>());
+    }, [path, schema]);
+
     type TableLabelsType = {
         [key: string]: string
     }
@@ -177,6 +181,7 @@ function Table(props: TableProps) {
                     Rest.toastError("Unable to delete " + editDeletePaths[index], result.reason);
                 }
             })
+            setSelected(new Set());
         }
     }
 
@@ -330,7 +335,7 @@ function Table(props: TableProps) {
                     type="checkbox"
                     data-testid="check_all"
                     checked={selected.size === data.length}
-                    onChange={(event) => {
+                    onChange={() => {
                         let allSelected = selected.size === data.length;
                         if (allSelected) {
                             setSelected(new Set());

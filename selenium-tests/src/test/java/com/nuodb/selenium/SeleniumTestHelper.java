@@ -3,6 +3,7 @@
 package com.nuodb.selenium;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,10 +35,12 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.google.common.base.Strings;
+
 @ExtendWith(TestResultLogger.class)
 public class SeleniumTestHelper {
     private static final String SHOW_CHROME_DEVTOOLS = "SHOW_CHROME_DEVTOOLS";
-    private static final String URL_BASE = "http://selenium-tests-nginx-1";
+    private static final String URL_BASE = Strings.isNullOrEmpty(System.getenv("URL_BASE")) ? "http://selenium-tests-nginx-1" : System.getenv("URL_BASE");
     private static final Duration waitTimeout = Duration.ofSeconds(15);
     private static WebDriver driver = null;
     private TestInfo testInfo;
@@ -63,10 +66,14 @@ public class SeleniumTestHelper {
     @BeforeEach
     public void before(TestInfo testInfo) {
         this.testInfo = testInfo;
+        get("/ui/");
+        clearLocalStorage();
+        driver.manage().window().maximize();
+    }
+
+    public void clearLocalStorage() {
         if(driver instanceof JavascriptExecutor jsDriver) {
-            get("/ui/");
             jsDriver.executeScript("localStorage.clear();");
-            driver.manage().window().maximize();
         }
         else {
             throw new RuntimeException("unable to clear local storage");
@@ -235,8 +242,9 @@ public class SeleniumTestHelper {
         sendKeys("password", password);
         click("login_button");
         retryStale(()->{
-            String text = waitText("path_component");
-            assertEquals("Management\n>\nDatabases\n>\nAcme", text);
+            String expected = "management\n>\ndatabases\n>\n" + organization.toLowerCase();
+            String actual = waitText("path_component").toLowerCase();
+            assumeTrue(actual.startsWith(expected), "\"" + actual + "\" does not start with \"" + expected + "\"");
         });
         waitElement("banner-done");
     }

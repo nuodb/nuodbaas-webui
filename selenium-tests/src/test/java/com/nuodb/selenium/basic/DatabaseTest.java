@@ -5,7 +5,6 @@ package com.nuodb.selenium.basic;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebElement;
 
-import com.nuodb.selenium.Constants;
 import com.nuodb.selenium.TestRoutines;
 
 import static com.nuodb.selenium.SeleniumAssert.assertThat;
@@ -19,7 +18,7 @@ import java.util.List;
 public class DatabaseTest extends TestRoutines {
     @Test
     public void testCreateDatabase() throws MalformedURLException {
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login();
         String projectName = createProject();
         String databaseName = createDatabase(projectName);
 
@@ -31,7 +30,7 @@ public class DatabaseTest extends TestRoutines {
     @Test
     public void testListCreateAndDeleteDatabases() {
         // Setup and list databases
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login();
         String projectName = createProject();
         String databaseName = createDatabase(projectName);
 
@@ -49,7 +48,7 @@ public class DatabaseTest extends TestRoutines {
     @Test
     public void testEditDatabase() {
         // Setup and list databases
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login();
         String projectName = createProject();
         String databaseName = createDatabase(projectName);
 
@@ -77,7 +76,7 @@ public class DatabaseTest extends TestRoutines {
    @Test
    public void testStartStopDatabase() {
        // Setup and list databases
-       login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+       login();
        String projectName = createProject();
        String databaseName = createDatabase(projectName);
 

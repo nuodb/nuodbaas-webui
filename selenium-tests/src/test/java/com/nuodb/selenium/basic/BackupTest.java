@@ -4,7 +4,6 @@ package com.nuodb.selenium.basic;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebElement;
 
-import com.nuodb.selenium.Constants;
 import com.nuodb.selenium.TestRoutines;
 
 import static com.nuodb.selenium.SeleniumAssert.assertThat;
@@ -17,7 +16,7 @@ import java.util.List;
 public class BackupTest extends TestRoutines {
     @Test
     public void testCreateBackup() throws MalformedURLException {
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login();
         String projectName = createProject();
         String databaseName = createDatabase(projectName);
         String backupName = createBackup(projectName, databaseName);
@@ -30,7 +29,7 @@ public class BackupTest extends TestRoutines {
     @Test
     public void testListCreateAndDeleteBackups() {
         // Setup and list Backups
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login();
         String projectName = createProject();
         String databaseName = createDatabase(projectName);
         String backupName = createBackup(projectName, databaseName);
@@ -49,7 +48,7 @@ public class BackupTest extends TestRoutines {
     @Test
     public void testEditBackup() {
         // Setup and list backups
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login();
         String projectName = createProject();
         String databaseName = createDatabase(projectName);
         String backupName = createBackup(projectName, databaseName);
