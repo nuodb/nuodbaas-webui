@@ -5,7 +5,6 @@ package com.nuodb.selenium.basic;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
-import com.nuodb.selenium.Constants;
 import com.nuodb.selenium.TestRoutines;
 
 import java.net.MalformedURLException;
@@ -16,7 +15,7 @@ public class BannerTest extends TestRoutines {
 
     @Test
     public void testMenuBanner() throws MalformedURLException {
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login();
 
         // make sure all menu items are present
         for(String menuItem : expectedMenuItems) {

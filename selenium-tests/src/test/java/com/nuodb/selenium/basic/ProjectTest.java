@@ -5,7 +5,6 @@ package com.nuodb.selenium.basic;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebElement;
 
-import com.nuodb.selenium.Constants;
 import com.nuodb.selenium.TestRoutines;
 
 import static com.nuodb.selenium.SeleniumAssert.assertThat;
@@ -18,14 +17,14 @@ import java.util.List;
 public class ProjectTest extends TestRoutines {
     @Test
     public void testCreateProject() throws MalformedURLException {
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login();
         createProject();
     }
 
     @Test
     public void testListCreateAndDeleteProjects() {
         // Setup and list projects
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login();
         String projectName = createProject();
         clickMenu("projects");
 
@@ -44,7 +43,7 @@ public class ProjectTest extends TestRoutines {
     @Test
     public void testEditProject() {
         // Setup and list projects
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login();
         String projectName = createProject();
 
         // resource versions are getting updated in the background a few times by the control plane / operator preventing an update later.

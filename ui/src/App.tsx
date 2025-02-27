@@ -41,7 +41,7 @@ export default function App() {
     }
 
     // get orgs by scanning all accessible users and projects
-    Promise.all([Rest.get("/users"), Rest.get("/projects")]).then((usersAndProjects: any[]) => {
+    Promise.all([Rest.get("/users?listAccessible=true"), Rest.get("/projects?listAccessible=true")]).then((usersAndProjects: any[]) => {
       const data: any = [...usersAndProjects[0].items, ...usersAndProjects[1].items];
       let orgs: string[] = [];
       data.forEach((item: string) => {
@@ -51,22 +51,19 @@ export default function App() {
         }
       });
       setOrgs(orgs);
-      if (orgs.length === 1) {
-        setOrg(orgs[0]);
-      }
-      else {
-        // get selected org from URL path
-        let org = "";
-        let path = window.location.pathname;
-        if (path.startsWith("/ui/resource/")) {
-          path = path.substring("/ui/resource/".length);
-          const posSlash = path.indexOf("/");
-          if (posSlash !== -1) {
-            org = getOrgFromPath(schema, path.substring(posSlash));
-          }
+
+      // get selected org from URL path
+      let org = "";
+      let path = window.location.pathname;
+      if (path.startsWith("/ui/resource/")) {
+        path = path.substring("/ui/resource/".length);
+        const posSlash = path.indexOf("/");
+        if (posSlash !== -1) {
+          org = getOrgFromPath(schema, path.substring(posSlash));
         }
-        setOrg(org);
       }
+      setOrg(org);
+
     });
   }, [schema, isLoggedIn]);
 

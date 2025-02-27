@@ -5,7 +5,6 @@ package com.nuodb.selenium.basic;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebElement;
 
-import com.nuodb.selenium.Constants;
 import com.nuodb.selenium.TestRoutines;
 
 import static com.nuodb.selenium.SeleniumAssert.assertThat;
@@ -19,14 +18,14 @@ import java.util.List;
 public class UserTest extends TestRoutines {
     @Test
     public void testCreateUser() throws MalformedURLException {
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login();
         createUser();
     }
 
     @Test
     public void testListCreateAndDeleteUsers() {
         // Setup and list users
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login();
         String userName = createUser();
         clickMenu("users");
 
@@ -44,7 +43,7 @@ public class UserTest extends TestRoutines {
     @Test
     public void testEditUser() {
         // Setup and list users
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login();
         String userName = createUser();
         clickMenu("users");
 

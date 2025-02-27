@@ -3,7 +3,6 @@ package com.nuodb.selenium.advanced;
 
 import org.junit.jupiter.api.Test;
 
-import com.nuodb.selenium.Constants;
 import com.nuodb.selenium.TestRoutines;
 import com.nuodb.selenium.basic.BannerTest;
 
@@ -11,7 +10,7 @@ public class RandomClicks extends TestRoutines {
 
     @Test
     public void testRandomClicks() {
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login();
         for(int i=0; i<3; i++) {
             String projectName = createProject();
             String databaseName = createDatabase(projectName);

@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.nuodb.selenium.Constants;
 import com.nuodb.selenium.TestRoutines;
 
 
@@ -18,7 +17,7 @@ public class ListResourceTest extends TestRoutines {
     @Test
     public void testDeleteMultipleUsers() {
         // Setup and list users
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login();
         String userNames[] = { createUser(), createUser() };
         clickMenu("users");
 

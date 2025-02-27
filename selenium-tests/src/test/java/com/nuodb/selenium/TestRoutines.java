@@ -38,19 +38,29 @@ import org.openqa.selenium.WebElement;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 
 public class TestRoutines extends SeleniumTestHelper {
-    public static final String CP_URL = "http://localhost:8081";
-    public static final String CP_USERNAME = Constants.ADMIN_ORGANIZATION + "/" + Constants.ADMIN_USER;
-    public static final String CP_AUTHORIZATION = "Basic " + Base64.getEncoder().encodeToString(
-        (CP_USERNAME + ":" + Constants.ADMIN_PASSWORD)
-        .getBytes(StandardCharsets.UTF_8));
+    public static final String TEST_ORGANIZATION = getenv("TEST_ORGANIZATION", "integrationtest");
+    public static final String TEST_ADMIN_USER = getenv("TEST_ADMIN_USER", "admin");
+    public static final String TEST_ADMIN_PASSWORD = getenv("TEST_ADMIN_PASSWORD", "passw0rd");
+    public static final String CP_URL = getenv("CP_URL", "http://localhost:8081");
     public static final String MENU_COLUMN = "$ref";
 
     private static final int MAX_RETRIES = 10;
     private static final Duration RETRY_WAIT_TIME = Duration.ofMillis(500);
 
     Map<Resource, Set<String>> createdResources = new HashMap<>();
+
+    private static String getenv(String key, String default_) {
+        String value = System.getenv(key);
+        if(Strings.isNullOrEmpty(value)) {
+            return default_;
+        }
+        else {
+            return value;
+        }
+    }
 
     @AfterEach
     public void after() {
@@ -60,7 +70,7 @@ public class TestRoutines extends SeleniumTestHelper {
             try {
                 List<String> items = getResourcesRest(resource);
                 for(String item : items) {
-                    if(resource != Resource.users || !item.equals(CP_USERNAME)) {
+                    if(resource != Resource.users || !item.equals(TEST_ORGANIZATION + "/" + TEST_ADMIN_USER)) {
                         System.out.println("Deleting resource " + resource.name() + "/" + item);
                         try {
                             deleteResourceRest(resource, item);
@@ -75,6 +85,10 @@ public class TestRoutines extends SeleniumTestHelper {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void login() {
+        login(TEST_ORGANIZATION, TEST_ADMIN_USER, TEST_ADMIN_PASSWORD);
     }
 
     /* keep in right order - it deletes the resources from the bottom up */
@@ -97,7 +111,7 @@ public class TestRoutines extends SeleniumTestHelper {
         StringBuilder sb = new StringBuilder();
         if(prefix == null) {
             sb.append("s");
-        }
+    }
         else {
             sb.append(prefix);
         }
@@ -177,7 +191,8 @@ public class TestRoutines extends SeleniumTestHelper {
      * @return
      */
     public String rest(ClassicHttpRequest request) throws IOException {
-        request.setHeader("Authorization", CP_AUTHORIZATION);
+        request.setHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString(
+            (TEST_ORGANIZATION + "/" + TEST_ADMIN_USER + ":" + TEST_ADMIN_PASSWORD).getBytes(StandardCharsets.UTF_8)));
         try(CloseableHttpClient httpClient = HttpClients.createDefault()) {
             return httpClient.execute(request, new HttpClientResponseHandler<String>(){
                 @Override
@@ -276,7 +291,7 @@ public class TestRoutines extends SeleniumTestHelper {
 
     /** Returns list of items of the specified resource */
     public List<String> getResourcesRest(Resource resource) throws IOException {
-        HttpGet request = new HttpGet(CP_URL + "/" + resource.name());
+        HttpGet request = new HttpGet(CP_URL + "/" + resource.name() + "?listAccessible=true");
         String body = restRetry(request, HttpHostConnectException.class);
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -297,10 +312,10 @@ public class TestRoutines extends SeleniumTestHelper {
     public String createUser() {
         String name = shortUnique("u");
         createResource(Resource.users, name,
-            "organization", "acme",
+            "organization", TEST_ORGANIZATION,
             "name", name,
-            "password", "passw0rd",
-            "accessRule.allow.0", "all:acme"
+            "password", TEST_ADMIN_PASSWORD,
+            "accessRule.allow.0", "all:" + TEST_ORGANIZATION
         );
         return name;
     }
@@ -312,7 +327,7 @@ public class TestRoutines extends SeleniumTestHelper {
     public String createProject() {
         String name = shortUnique("p");
         createResource(Resource.projects, name,
-            "organization", "acme",
+            "organization", TEST_ORGANIZATION,
             "name", name,
             "sla", "dev",
             "tier", "n0.nano"
@@ -327,7 +342,7 @@ public class TestRoutines extends SeleniumTestHelper {
     public String createDatabase(String projectName) {
         String name = shortUnique("d");
         createResource(Resource.databases, name,
-            "organization", "acme",
+            "organization", TEST_ORGANIZATION,
             "project", projectName,
             "name", name,
             "dbaPassword", "passw0rd"
@@ -342,7 +357,7 @@ public class TestRoutines extends SeleniumTestHelper {
     public String createBackup(String projectName, String databaseName) {
         String name = shortUnique("b");
         createResource(Resource.backups, name,
-            "organization", "acme",
+            "organization", TEST_ORGANIZATION,
             "project", projectName,
             "database", databaseName,
             "name", name

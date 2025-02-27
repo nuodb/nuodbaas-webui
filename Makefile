@@ -73,6 +73,11 @@ setup-integration-tests: build-image install-crds ## setup containers before run
 		--data-binary \
             '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"acme\", \"accessRule\":{\"allow\": \"all:*\"}}' \
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
+	@docker exec selenium-tests-nuodb-cp-1 bash -c "curl \
+		http://localhost:8080/users/integrationtest/admin \
+		--data-binary \
+            '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"integrationtest\", \"accessRule\":{\"allow\": \"all:integrationtest\"}}' \
+		-X PUT -H \"Content-Type: application/json\" > /dev/null"
 
 .PHONY: teardown-integration-tests
 teardown-integration-tests: $(KWOKCTL) ## clean up containers used by integration tests
