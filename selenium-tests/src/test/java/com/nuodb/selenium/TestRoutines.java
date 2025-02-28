@@ -111,7 +111,7 @@ public class TestRoutines extends SeleniumTestHelper {
         StringBuilder sb = new StringBuilder();
         if(prefix == null) {
             sb.append("s");
-        }
+    }
         else {
             sb.append(prefix);
         }
