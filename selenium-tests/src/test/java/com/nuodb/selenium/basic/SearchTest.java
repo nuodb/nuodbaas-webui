@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import com.nuodb.selenium.Constants;
 import com.nuodb.selenium.TestRoutines;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,26 +17,27 @@ public class SearchTest extends TestRoutines {
     @Test
     public void testSearch() throws IOException {
         String body = """
-            {"organization":"acme",
+            {"organization":"%%%TEST_ORGANIZATION%%%",
                 "name": "%%%NAME%%%",
                 "password": "passw0rd",
-                "accessRule": {"allow": "all:acme"},
+                "accessRule": {"allow": "all:%%%TEST_ORGANIZATION%%%"},
                 "labels": {
                     "label1": "value1",
                     "label2": "%%%VALUE2%%%"
                 }
             }
         """;
+        body = body.replaceAll("%%%TEST_ORGANIZATION%%%", TEST_ORGANIZATION);
 
         // Setup users
         String name = shortUnique("u");
         for(int i=10; i<=99; i++) {
-            System.out.println("Creating user /acme/" + (name + i));
-            createResourceRest(Resource.users, "/acme/" + (name + i), body.replaceAll("%%%NAME%%%", name + i).replaceAll("%%%VALUE2%%%", (name + (i%10))));
+            System.out.println("Creating user /" + TEST_ORGANIZATION + "/" + (name + i));
+            createResourceRest(Resource.users, "/" + TEST_ORGANIZATION + "/" + (name + i), body.replaceAll("%%%NAME%%%", name + i).replaceAll("%%%VALUE2%%%", (name + (i%10))));
         }
 
         // verify we have full page of users
-        login(Constants.ADMIN_ORGANIZATION, Constants.ADMIN_USER, Constants.ADMIN_PASSWORD);
+        login();
         clickMenu("users");
         waitRestComplete();
         retry(()->{

@@ -170,8 +170,8 @@ if [ "$1" == "createRelease" ] && [ "$2" != "" ] ; then
         docker pull "${GIT_DOCKER_IMAGE_SHA}" && \
         docker tag "${GIT_DOCKER_IMAGE_SHA}" "${AWS_DOCKER_IMAGE_RELEASE}" && \
         docker tag "${GIT_DOCKER_IMAGE_SHA}" "${GIT_DOCKER_IMAGE_RELEASE}" && \
-        docker push "${AWS_DOCKER_IMAGE_RELEASE} && \
-        docker push "${GIT_DOCKER_IMAGE_RELEASE} && \
+        docker push "${AWS_DOCKER_IMAGE_RELEASE}" && \
+        docker push "${GIT_DOCKER_IMAGE_RELEASE}" && \
         \
         mkdir -p build && \
         rm -rf build/charts && \
