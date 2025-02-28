@@ -3,25 +3,7 @@ entries:
   nuodbaas-webui:
   - apiVersion: v2
     appVersion: 1.1.0
-    created: "2025-02-26T18:55:44.304125346Z"
-    description: NuoDBaaS WebUI populated by the OpenAPI spec
-    digest: 1e592c4d0f0d3020b02ef375cba7342bbd113d840f495020d52c9a2a959283e8
-    home: https://github.com/nuodb/nuodbaas-webui/charts/nuodbaas-webui
-    icon: https://raw.githubusercontent.com/nuodb/nuodb-helm-charts/master/images/nuodb.svg
-    keywords:
-    - nuodb
-    - rest
-    maintainers:
-    - email: support@nuodb.com
-      name: NuoDB
-    name: nuodbaas-webui
-    type: application
-    urls:
-    - nuodbaas-webui-1.1.0.tgz
-    version: 1.1.0
-  - apiVersion: v2
-    appVersion: 1.1.0
-    created: "2025-02-26T18:55:44.30357886Z"
+    created: "2025-02-28T13:59:00.540790977Z"
     description: NuoDBaaS WebUI populated by the OpenAPI spec
     digest: 80612c804c99479a3412f53bb593680fafedec79eff59f62a230f8d9a9491e51
     home: https://github.com/nuodb/nuodbaas-webui/charts/nuodbaas-webui
@@ -39,7 +21,7 @@ entries:
     version: 1.1.0-latest
   - apiVersion: v2
     appVersion: 1.1.0-f18a368
-    created: "2025-02-26T18:55:44.303059683Z"
+    created: "2025-02-28T13:59:00.54035925Z"
     description: NuoDBaaS WebUI populated by the OpenAPI spec
     digest: 264b173de611eb16b10a9a960fb41d19cee349217ce9943de41ef3672dc47ad3
     home: https://github.com/nuodb/nuodbaas-webui/charts/nuodbaas-webui
@@ -57,7 +39,7 @@ entries:
     version: 1.1.0-f18a368
   - apiVersion: v2
     appVersion: 1.1.0
-    created: "2025-02-26T18:55:44.302508589Z"
+    created: "2025-02-28T13:59:00.53947839Z"
     description: NuoDBaaS WebUI populated by the OpenAPI spec
     digest: 11112ecfb0c78679e7518dcf63c79d70161a5d3b10301ec87d6eb4c69f39dac7
     home: https://github.com/nuodb/nuodbaas-webui/charts/nuodbaas-webui
@@ -74,8 +56,26 @@ entries:
     - nuodbaas-webui-1.1.0-AyS5tDFsByvzjNzU84MRWQ+c19a114.tgz
     version: 1.1.0-AyS5tDFsByvzjNzU84MRWQ+c19a114
   - apiVersion: v2
+    appVersion: 1.1.0-835ca73
+    created: "2025-02-28T13:59:00.538527945Z"
+    description: NuoDBaaS WebUI populated by the OpenAPI spec
+    digest: 73718c77bb082416c0d50f395d290f44050c415e8128bf1c17884ff5baec55ea
+    home: https://github.com/nuodb/nuodbaas-webui/charts/nuodbaas-webui
+    icon: https://raw.githubusercontent.com/nuodb/nuodb-helm-charts/master/images/nuodb.svg
+    keywords:
+    - nuodb
+    - rest
+    maintainers:
+    - email: support@nuodb.com
+      name: NuoDB
+    name: nuodbaas-webui
+    type: application
+    urls:
+    - nuodbaas-webui-1.1.0-835ca73.tgz
+    version: 1.1.0-835ca73
+  - apiVersion: v2
     appVersion: 1.1.0-3b6a215
-    created: "2025-02-26T18:55:44.301941744Z"
+    created: "2025-02-28T13:59:00.537472164Z"
     description: NuoDBaaS WebUI populated by the OpenAPI spec
     digest: 45141f6f4b392baeee51fd0f8148d1849ce5c5c713fcbd5cf38abac3c9e9b3ac
     home: https://github.com/nuodb/nuodbaas-webui/charts/nuodbaas-webui
@@ -93,7 +93,7 @@ entries:
     version: 1.1.0-3b6a215
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-02-26T18:55:44.301382122Z"
+    created: "2025-02-28T13:59:00.537056373Z"
     description: NuoDBaaS WebUI populated by the OpenAPI spec
     digest: 60f420cf4244388cf01b11360aeea9c577e8561e3fef04e0831acbea0bcb99f8
     name: nuodbaas-webui
@@ -102,7 +102,7 @@ entries:
     version: 1.0.0
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-02-26T18:55:44.301107721Z"
+    created: "2025-02-28T13:59:00.53684699Z"
     description: NuoDBaaS WebUI populated by the OpenAPI spec
     digest: 36f1e195a9c98e84b76614b1b15a8d593c06bc6dc6211f92c758a066edc0db8e
     name: nuodbaas-webui
@@ -111,11 +111,11 @@ entries:
     version: 1.0.0-latest
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2025-02-26T18:55:44.300805842Z"
+    created: "2025-02-28T13:59:00.536628112Z"
     description: NuoDBaaS WebUI populated by the OpenAPI spec
     digest: 749c5bcd1eef559b2ed85a6a368b07e6bdbcad71ebcdbb51fa61fe27cb4eb640
     name: nuodbaas-webui
     urls:
     - nuodbaas-webui-1.0.0-23Sd3pn5rvbVTD06FCsEvA+52260f2.tgz
     version: 1.0.0-23Sd3pn5rvbVTD06FCsEvA+52260f2
-generated: "2025-02-26T18:55:44.300303691Z"
+generated: "2025-02-28T13:59:00.536260574Z"
