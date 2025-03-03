@@ -101,7 +101,8 @@ nuodbaasWebui:
       # kubernetes.io/ingress.class: haproxy
       # ingress.kubernetes.io/ssl-passthrough: "true"
     setDefaultBackend: false
-    pathPrefix: webui
+    pathPrefix: ui
+    pathPrefixAlternate: webui
     rewritePath: true
     hosts: []
       # - host: nuodb-cp-example.local
