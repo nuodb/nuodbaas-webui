@@ -47,16 +47,22 @@ spec:
     {{- include "nuodbaas-webui.ingress.backend" . | nindent 4 }}
   {{- end }}
   rules:
-    {{- with .Values.nuodbaasWebui.ingress.pathPrefix }}
     - http:
         paths:
-          - path: /{{ . }}
+          - path: /{{ .Values.nuodbaasWebui.ingress.pathPrefix }}
             {{- if semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion }}
             pathType: Prefix
             {{- end }}
             backend:
               {{- include "nuodbaas-webui.ingress.backend" $ | nindent 14 }}
-    {{- end }}
+          {{- if .Values.nuodbaasWebui.ingress.pathPrefixAlternate }}
+          - path: /{{ .Values.nuodbaasWebui.ingress.pathPrefixAlternate }}
+            {{- if semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              {{- include "nuodbaas-webui.ingress.backend" $ | nindent 14 }}
+          {{- end }}
     {{- range .Values.nuodbaasWebui.ingress.hosts }}
     - host: {{ .host | quote }}
       http:

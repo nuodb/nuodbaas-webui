@@ -25,6 +25,7 @@ All configurable parameters for each top-level scope are detailed below, organiz
 | `nuodbaasWebui.resources.requests.memory` | Specify memory requests | `128Mi` |
 | `nuodbaasWebui.service.type` | Specify service type | `ClusterIP` |
 | `nuodbaasWebui.pathPrefix` | Specify NuoDBaaS WebUI prefix | `ui` |
+| `nuodbaasWebui.pathPrefixAlternate` | Specify alternate NuoDBaaS WebUI prefix | `webui` |
 | `nuodbaasWebui.cpUrl` | The URL used to send requests to the Control Plane REST service | `/nuodb-cp` |
 
 ## Uninstalling the Chart
