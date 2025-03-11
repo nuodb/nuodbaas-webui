@@ -1,6 +1,6 @@
 // (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Auth from "../../utils/auth";
 import Button from '../controls/Button';
@@ -8,6 +8,7 @@ import TextField from '../controls/TextField';
 import BuildNumber from "./parts/BuildNumber"
 import { withTranslation } from 'react-i18next';
 import { TempAny } from '../../utils/types';
+import { Rest } from './parts/Rest';
 
 interface Props {
     setIsLoggedIn: (isLoggedIn: boolean) => void,
@@ -26,6 +27,31 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [providers, setProviders] = useState([]);
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const provider = urlParams.get("provider");
+        const ticket = urlParams.get("ticket");
+        if (provider && ticket) {
+            const service = window.location.protocol + "//" + window.location.host + "/ui/login?provider=" + encodeURIComponent(provider);
+            Rest.get("/login/providers/" + encodeURIComponent(provider)
+                + "?service=" + encodeURIComponent(service) + "&ticket=" + encodeURIComponent(ticket))
+                .then((data: TempAny) => {
+                    localStorage.setItem("credentials", JSON.stringify({
+                        token: data.token,
+                        expiresAtTime: data.expiresAtTime,
+                        username: "ds/agr22"
+                    }));
+                    navigate("/ui");
+                }).catch(reason => console.log("login failed", reason));
+        }
+        else {
+            Rest.get("/login/providers").then((data: TempAny) => {
+                setProviders(data);
+            });
+        }
+    }, []);
 
     async function handleLogin() {
         let success = await Auth.login(organization + "/" + username, password);
@@ -49,6 +75,11 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                         <TextField required data-testid="password" id="password" type="password" label="Password" value={password} onChange={(event) => setPassword(event.target.value)} />
                         {error && <h3 data-testid="error_message" style={{ color: "red" }}>{error}</h3>}
                         <Button data-testid="login_button" variant="contained" type="submit" onClick={handleLogin}>Login</Button>
+                        {providers.filter((provider: TempAny) => provider.id !== "local").map((provider: TempAny) => {
+                            return <Button data-testid="login_cas" variant="contained" onClick={() => {
+                                window.location.href = provider.providerUrl + "?service=" + encodeURIComponent(window.location.protocol + "//" + window.location.host + "/ui/login?provider=" + provider.id);
+                            }}>Login with {provider.label}</Button>
+                        })}
                     </div>
                 </form>
             </div>
