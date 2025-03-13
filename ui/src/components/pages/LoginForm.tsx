@@ -28,12 +28,14 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [providers, setProviders] = useState([]);
+    const [progressMessage, setProgressMessage] = useState("");
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const provider = urlParams.get("provider");
         const ticket = urlParams.get("ticket");
         if (provider && ticket) {
+            setProgressMessage("Logging in to provider " + provider);
             const service = window.location.protocol + "//" + window.location.host + "/ui/login?provider=" + encodeURIComponent(provider);
             Rest.get("/login/providers/" + encodeURIComponent(provider)
                 + "?service=" + encodeURIComponent(service) + "&ticket=" + encodeURIComponent(ticket))
@@ -41,10 +43,13 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                     localStorage.setItem("credentials", JSON.stringify({
                         token: data.token,
                         expiresAtTime: data.expiresAtTime,
-                        username: "ds/agr22"
+                        username: data.username
                     }));
-                    navigate("/ui");
-                }).catch(reason => console.log("login failed", reason));
+                    window.location.href = "/ui";
+                }).catch(reason => {
+                    setError("Login failed");
+                    console.error("Login Failed", reason);
+                });
         }
         else {
             Rest.get("/login/providers").then((data: TempAny) => {
@@ -68,6 +73,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
         <React.Fragment>
             <div className="NuoLoginForm">
                 <img alt="" />
+                {progressMessage ? <h2>{progressMessage}</h2> :
                 <form>
                     <div className="fields">
                         <TextField required data-testid="organization" id="organization" label="Organization" value={organization} onChange={(event) => setOrganization(event.target.value)} />
@@ -82,6 +88,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                         })}
                     </div>
                 </form>
+                }
             </div>
             <BuildNumber className="AbsoluteBottomRight BuildNumber" />
         </React.Fragment>
