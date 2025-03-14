@@ -81,10 +81,10 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                         <TextField required data-testid="password" id="password" type="password" label="Password" value={password} onChange={(event) => setPassword(event.target.value)} />
                         {error && <h3 data-testid="error_message" style={{ color: "red" }}>{error}</h3>}
                         <Button data-testid="login_button" variant="contained" type="submit" onClick={handleLogin}>Login</Button>
-                            {providers.filter((provider: TempAny) => provider.id !== "local").map((provider: TempAny) => {
+                            {providers.filter((provider: TempAny) => provider.name !== "local").map((provider: TempAny) => {
                             return <Button data-testid="login_cas" variant="contained" onClick={() => {
-                                window.location.href = provider.providerUrl + "?service=" + encodeURIComponent(window.location.protocol + "//" + window.location.host + "/ui/login?provider=" + provider.id);
-                            }}>Login with {provider.label}</Button>
+                                window.location.href = provider.providerUrl + "?service=" + encodeURIComponent(window.location.protocol + "//" + window.location.host + "/ui/login?provider=" + provider.name);
+                            }}>Login with {provider.description}</Button>
                         })}
                     </div>
                 </form>
