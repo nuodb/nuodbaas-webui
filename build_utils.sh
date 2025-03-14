@@ -9,8 +9,10 @@ VERSION="$(sed -n -E 's/^version: *"?([^ "]*)"?.*/\1/p' "$CHART_FILE")"
 GIT_HASH="$(git rev-parse --short HEAD)"
 GIT_DOCKER_IMAGE_RELEASE="ghcr.io/nuodb/${REPOSITORY}:${VERSION}"
 GIT_DOCKER_IMAGE_SHA="${GIT_DOCKER_IMAGE_RELEASE}-${GIT_HASH}"
+GIT_DOCKER_IMAGE_TEST="${GIT_DOCKER_IMAGE_RELEASE}-${GIT_HASH}.test"
 AWS_DOCKER_IMAGE_RELEASE="${ECR_ACCOUNT_URL}/${REPOSITORY}-docker:${VERSION}"
 AWS_DOCKER_IMAGE_SHA="${AWS_DOCKER_IMAGE_RELEASE}-${GIT_HASH}"
+AWS_DOCKER_IMAGE_TEST="${AWS_DOCKER_IMAGE_RELEASE}-${GIT_HASH}.test"
 
 if [[ "${BRANCH}" == rel/* ]] ; then
     RELEASE_BRANCH_VERSION="$(echo "${BRANCH}" | cut -d / -f2)"
@@ -108,7 +110,9 @@ function uploadHelmPackage() {
         COMMIT_MSG="Add static files + chart ${NEW_CHART} to index"
     fi
 
-    mv build/static_files/*.tgz ./
+    if [ -d build/static_files ] ; then
+        mv build/static_files/*.tgz ./
+    fi
 
     git add *.tgz
     git commit -m "${COMMIT_MSG}"
@@ -133,6 +137,10 @@ if [ "$1" == "deployDockerImages" ] ; then
             docker push "${AWS_DOCKER_IMAGE_SHA}" && \
             docker tag "${REPOSITORY}:latest" "${GIT_DOCKER_IMAGE_SHA}" && \
             docker push "${GIT_DOCKER_IMAGE_SHA}" && \
+            docker tag "${REPOSITORY}:test" "${AWS_DOCKER_IMAGE_TEST}" && \
+            docker push "${AWS_DOCKER_IMAGE_TEST}" && \
+            docker tag "${REPOSITORY}:test" "${GIT_DOCKER_IMAGE_TEST}" && \
+            docker push "${GIT_DOCKER_IMAGE_TEST}" && \
             exit 0
         fi
     else

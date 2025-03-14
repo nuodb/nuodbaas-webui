@@ -76,6 +76,9 @@ jobs:
           name: Build Image
           command: make build-image
       - run:
+          name: Build Integration Test Image
+          command: make build-integration-tests-docker
+      - run:
           name: Setup Integration Test Environment
           command: make setup-integration-tests
       - run:
