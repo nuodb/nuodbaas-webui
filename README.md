@@ -46,3 +46,23 @@ make teardown-integration-tests
 The Integration tests are regular JUnit tests going against the Selenium container, which can be run in debug mode in your IDE as well. Location: `selenium-tests/src/test/java/com/nuodb/selenium`. Make sure you run `make setup-integration-tests` beforehand.
 
 To monitor the UI while the tests are running, go to this URL: `http://localhost:7900/?autoconnect=1&resize=scale&password=secret⁠`
+
+# Run embedded Integration Tests in a Selenium Docker container (Production tests)
+
+Run tests like this:
+
+```
+MVN_TEST="com/nuodb/selenium/basic/**" make run-smoke-tests-docker
+```
+
+Following environment variables can be modifed (showing the default):
+
+```
+TEST_ORGANIZATION=integrationtest
+TEST_ADMIN_USER=admin
+TEST_ADMIN_PASSWORD=passw0rd
+
+Following environment variables are required when running the docker container directly:
+CP_URL - URL to the NuoDB DBaaS Control Plane, i.e. http://localhost:8081
+URL_Base - URL to the NuoDB WebUI, i.e. http://localhost
+```
