@@ -22,6 +22,7 @@ import { PopupMenu } from './components/controls/Menu';
 import { NUODBAAS_WEBUI_ISRECORDING, Rest } from './components/pages/parts/Rest';
 import OrganizationOverview from './components/pages/OrganizationOverview';
 import { getOrgFromPath } from './utils/schema';
+import Toast from './components/controls/Toast';
 
 /**
  * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
@@ -84,6 +85,7 @@ export default function App() {
           <CssBaseline />
           <PopupMenu />
           <Dialog />
+          <Toast />
           <Rest isRecording={isRecording} setIsRecording={setIsRecording} />
           <BrowserRouter>
             {isLoggedIn

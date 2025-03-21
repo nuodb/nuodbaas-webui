@@ -1,5 +1,6 @@
 // (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
+import Toast from "../components/controls/Toast";
 import { Rest } from "../components/pages/parts/Rest";
 import Auth from "./auth"
 import { FieldValuesType, TempAny, SchemaType, FieldParametersType } from "./types";
@@ -390,7 +391,7 @@ export function getResourceEvents(path: string, multiResolve: TempAny, multiReje
                 .catch(reason => multiReject(reason));
         }
         else if(error.status) {
-            Rest.toastError("Cannot retrieve resource for path " + path, error.status + " " + error.message);
+            Toast.show("Cannot retrieve resource for path " + path, error.status + " " + error.message);
         }
         else {
             //request was aborted. Ignore.

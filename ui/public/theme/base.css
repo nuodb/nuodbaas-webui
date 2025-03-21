@@ -872,3 +872,24 @@ button:focus {
     font-size: 13px;
     color: white;
 }
+.NuoToast {
+    left: 50%;
+    right: auto;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%);
+    position: absolute;
+}
+
+.NuoToast>div {
+    box-shadow: 0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 6px 10px 0px rgba(0, 0, 0, 0.14), 0px 1px 18px 0px rgba(0, 0, 0, 0.12);
+    opacity: 1;
+    transform: none;
+    transition: opacity 225ms cubic-bezier(0.4, 0, 0.2, 1), transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 8px 15px;
+    border-radius: 5px;
+    background-color: black;
+    color: white;
+    margin: 5px;
+}
