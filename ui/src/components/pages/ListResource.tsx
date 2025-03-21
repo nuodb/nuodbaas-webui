@@ -12,6 +12,7 @@ import Pagination from "../controls/Pagination";
 import { withTranslation } from "react-i18next";
 import Search, { parseSearch } from "./parts/Search";
 import ResourceHeader from "./parts/ResourceHeader";
+import Toast from "../controls/Toast";
 
 type ItemsAndPathProps = {
     items: [] | null,
@@ -83,7 +84,7 @@ function ListResource(props: PageProps) {
                     })
                 );
             }).catch((reason) => {
-                Rest.toastError("Unable to get resource in " + path, reason);
+                Toast.show("Unable to get resource in " + path, reason);
             });
         }
     }, [page, path, schema, search]);

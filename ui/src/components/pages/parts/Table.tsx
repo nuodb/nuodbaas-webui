@@ -14,6 +14,7 @@ import TableSettingsColumns from './TableSettingsColumns';
 import { useEffect, useState } from 'react';
 import CustomDialog from '../custom/CustomDialog';
 import DeleteIcon from '@mui/icons-material/Delete';
+import Toast from '../../controls/Toast';
 
 function getFlattenedKeys(obj: TempAny, prefix?: string): string[] {
     let ret: string[] = [];
@@ -155,7 +156,7 @@ function Table(props: TableProps) {
                 .then(() => {
                     window.location.reload();
                 }).catch((error) => {
-                    Rest.toastError("Unable to delete " + deletePath, error);
+                    Toast.show("Unable to delete " + deletePath, error);
                 });
         }
     }
@@ -178,7 +179,7 @@ function Table(props: TableProps) {
             let promises = await Promise.allSettled(editDeletePaths.map((dPath: any) => Rest.delete(dPath)));
             promises.forEach((result, index) => {
                 if (result.status === "rejected") {
-                    Rest.toastError("Unable to delete " + editDeletePaths[index], result.reason);
+                    Toast.show("Unable to delete " + editDeletePaths[index], result.reason);
                 }
             })
             setSelected(new Set());
@@ -224,7 +225,7 @@ function Table(props: TableProps) {
                 }
                 catch (ex) {
                     const msg = "Error in checking visibility of button.";
-                    Rest.toastError(msg, String(ex));
+                    Toast.show(msg, String(ex));
                     console.error(msg, ex, row);
                 }
 
@@ -244,7 +245,7 @@ function Table(props: TableProps) {
                             if (menu.patch) {
                                 Rest.patch(path + "/" + row["$ref"], menu.patch)
                                     .catch((error) => {
-                                        Rest.toastError("Unable to update " + path + "/" + row["$ref"], error);
+                                        Toast.show("Unable to update " + path + "/" + row["$ref"], error);
                                     })
                             }
                             else if (menu.link) {
@@ -293,7 +294,7 @@ function Table(props: TableProps) {
             }
             catch (ex) {
                 const msg = "Error in custom value evaluation for field \"" + fieldName + "\"";
-                Rest.toastError(msg, String(ex));
+                Toast.show(msg, String(ex));
                 console.error(msg, ex, row);
                 value = ""
             }
