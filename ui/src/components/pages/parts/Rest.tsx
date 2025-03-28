@@ -155,6 +155,23 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
         });
     }
 
+    static async post(path: string, data: JsonType) {
+        return new Promise((resolve, reject) => {
+            Rest.incrementPending();
+            const url = Auth.getNuodbCpRestUrl(path);
+            axios.post(url, data, { headers: Auth.getHeaders() })
+                .then(response => {
+                    Rest.log("post", url, true, data);
+                    resolve(response.data);
+                }).catch(error => {
+                    Rest.log("post", url, false, data);
+                    reject(error);
+                }).finally(() => {
+                    Rest.decrementPending();
+                })
+        });
+    }
+
     static async delete(path: string) {
         return new Promise((resolve, reject) => {
             Rest.incrementPending();
