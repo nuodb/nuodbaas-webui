@@ -37,8 +37,8 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
         if (provider && ticket) {
             setProgressMessage("Logging in to provider " + provider);
             const service = window.location.protocol + "//" + window.location.host + "/ui/login?provider=" + encodeURIComponent(provider);
-            Rest.get("/login/providers/" + encodeURIComponent(provider)
-                + "?service=" + encodeURIComponent(service) + "&ticket=" + encodeURIComponent(ticket))
+            Rest.post("/login/providers/" + encodeURIComponent(provider)
+                + "?service=" + encodeURIComponent(service) + "&ticket=" + encodeURIComponent(ticket), "")
                 .then((data: TempAny) => {
                     localStorage.setItem("credentials", JSON.stringify({
                         token: data.token,
