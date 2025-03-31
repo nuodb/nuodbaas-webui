@@ -65,6 +65,7 @@
             "accessRule.deny": "Deny",
             "name": "Name",
             "labels": "Labels",
+            "search": "search, i.e. \"somename\" or \"label=key=value,!otherkey name=abc\"",
             "sla": "SLA",
             "tier": "Tier",
             "properties": "Properties",

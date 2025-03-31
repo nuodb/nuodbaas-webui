@@ -65,6 +65,7 @@
             "accessRule.deny": "Ablehnen",
             "name": "Name",
             "labels": "Etiketten",
+            "search": "Suche, d. h. \"somename\" oder \"label=key=value,!otherkey name=abc\"",
             "sla": "SLA",
             "tier": "Tier",
             "properties": "Eigenschaften",
