@@ -872,3 +872,12 @@ button:focus {
     font-size: 13px;
     color: white;
 }
+.NuoMoreValue {
+    display: inline;
+    color: blue;
+    cursor: pointer;
+}
+
+.NuoMoreValueExpanded {
+    display: inline;
+}

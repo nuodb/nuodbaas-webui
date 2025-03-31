@@ -190,7 +190,8 @@
         "viewForResource": "{{resources_one}}",
         "editForResource": "Edit {{resources_one}}",
         "newResource": "New {{resources_one}}",
-        "noData": "No Data"
+        "noData": "No Data",
+        "more": "More"
     },
     "section": {
         "title": {

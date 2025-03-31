@@ -14,6 +14,7 @@ import TableSettingsColumns from './TableSettingsColumns';
 import { useEffect, useState } from 'react';
 import CustomDialog from '../custom/CustomDialog';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { getRecursiveValue } from '../../fields/FieldBase';
 
 function getFlattenedKeys(obj: TempAny, prefix?: string): string[] {
     let ret: string[] = [];
@@ -119,32 +120,6 @@ function Table(props: TableProps) {
             }
         });
         return ret;
-    }
-
-    function showValue(value: TempAny) {
-        if (value === undefined || value === null) {
-            return "";
-        }
-        else if (typeof value === "object") {
-            if (Array.isArray(value)) {
-                return value.map((v, index) => <div key={index}>{showValue(v)}</div>);
-            }
-            else {
-                return <dl className="map">{Object.keys(value).map(key => <div key={key}><dt>{String(key)}</dt><dd>{showValue(value[key])}</dd></div>)}</dl>
-            }
-        }
-        else if (typeof value === "string") {
-            if (value.indexOf("\n") !== -1) {
-                value = value.substring(0, value.indexOf("\n")) + "...";
-            }
-            if (value.length > 80) {
-                value = value.substring(0, 80) + "...";
-            }
-            return String(value);
-        }
-        else {
-            return String(value);
-        }
     }
 
     async function handleDelete(row: TempAny, deletePath: string) {
@@ -289,7 +264,7 @@ function Table(props: TableProps) {
         let value;
         if (cf && cf.value) {
             try {
-                value = showValue(evaluate(row, cf.value));
+                value = getRecursiveValue(evaluate(row, cf.value), t);
             }
             catch (ex) {
                 const msg = "Error in custom value evaluation for field \"" + fieldName + "\"";

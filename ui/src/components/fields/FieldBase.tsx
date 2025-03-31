@@ -1,6 +1,6 @@
 // (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import { getValue } from "./utils";
 import { FieldValuesType, FieldParameterType, TempAny } from "../../utils/types";
 
@@ -63,6 +63,8 @@ export interface FieldProps extends FieldPropsValidate {
 
     /** used by FieldMessage to indicate an error message */
     message?: string;
+
+    t: any;
 }
 
 export interface FieldBaseType {
@@ -120,39 +122,51 @@ export default function FieldBase(props: FieldProps): FieldBaseType {
         throw new Error("show() must be implemented");
     };
 
-    function getRecursiveValue(value: TempAny) {
-        if (value === undefined || value === null) {
-            return "";
-        }
-        if (typeof value === "object") {
-            if (Array.isArray(value)) {
-                return <>{value.map(v => <div>{getRecursiveValue(v)}</div>)}</>;
-            }
-            else {
-                return <dl className="map">{Object.keys(value).map(key => {
-                    return <div key={key}><dt>{String(key)}</dt><dd>{getRecursiveValue(value[key])}</dd></div>;
-                })}</dl>
-            }
-        }
-
-        let strValue = String(value);
-        if (strValue.indexOf("\n") !== -1) {
-            strValue = strValue.substring(0, strValue.indexOf("\n")) + "...";
-        }
-        if (strValue.length > 80) {
-            strValue = strValue.substring(0, 80) + "...";
-        }
-        return strValue;
-    }
-
     /**
      * shows display value of the field (read only)
      * @returns display value
      */
     function getDisplayValue(): ReactNode {
         const { prefix, values } = props;
-        return getRecursiveValue(getValue(values, prefix));
+        return getRecursiveValue(getValue(values, prefix), props.t);
     }
 
     return { props, validate, show, getDisplayValue }
+}
+
+export function getRecursiveValue(value: TempAny, t: any) {
+    if (value === undefined || value === null) {
+        return "";
+    }
+    if (typeof value === "object") {
+        if (Array.isArray(value)) {
+            return <>{value.map(v => <div>{getRecursiveValue(v, t)}</div>)}</>;
+        }
+        else {
+            return <dl className="map">{Object.keys(value).map(key => {
+                return <div key={key}><dt>{String(key)}</dt><dd>{getRecursiveValue(value[key], t)}</dd></div>;
+            })}</dl>
+        }
+    }
+
+    let strValue = String(value);
+    let moreValue;
+    if (strValue.indexOf("\n") !== -1) {
+        moreValue = strValue.substring(strValue.indexOf("\n"));
+        strValue = strValue.substring(0, strValue.indexOf("\n"));
+    }
+    else if (strValue.length > 80) {
+        moreValue = strValue.substring(80);
+        strValue = strValue.substring(0, 80);
+    }
+    if (moreValue) {
+        return <>{strValue}<div className="NuoMoreValue" data-morevalue={moreValue} onClick={(element: React.MouseEvent<HTMLDivElement>) => {
+            element.currentTarget.innerHTML = element.currentTarget.getAttribute("data-morevalue") || "";
+            element.currentTarget.removeAttribute("data-morevalue");
+            element.currentTarget.className = "NuoMoreValueExpanded";
+        }}> {t("text.more")}</div></>;
+    }
+    else {
+        return strValue;
+    }
 }
