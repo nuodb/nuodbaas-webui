@@ -2,7 +2,6 @@
 
 import React, { ReactNode } from "react"
 import CircularProgress from '@mui/material/CircularProgress';
-import Snackbar from '@mui/material/Snackbar';
 import axios from "axios";
 import Auth from "../../../utils/auth";
 import { JsonType, RestLogEntry, RestMethodType } from "../../../utils/types";
@@ -11,7 +10,6 @@ let instance: Rest | null = null;
 
 interface State {
     pendingRequests: number,
-    errorMessage?: string | null,
 }
 
 const AUTOMATION_LOG = "nuodbaas-webui-recorded";
@@ -20,7 +18,6 @@ export const NUODBAAS_WEBUI_ISRECORDING = "nuodbaas-webui-isRecording";
 export class Rest extends React.Component<{ isRecording: boolean, setIsRecording: (isRecording: boolean) => void }> {
     state: State = {
         pendingRequests: 0,
-        errorMessage: null,
     }
 
     componentDidMount() {
@@ -30,11 +27,6 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
     }
 
     lastTimestamp = new Date();
-
-    static toastError(msg: string, error: string) {
-        instance && instance.setState({ errorMessage: msg });
-        console.error(msg, error);
-    }
 
     static incrementPending() {
         if (instance === null) {
@@ -163,6 +155,23 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
         });
     }
 
+    static async post(path: string, data: JsonType) {
+        return new Promise((resolve, reject) => {
+            Rest.incrementPending();
+            const url = Auth.getNuodbCpRestUrl(path);
+            axios.post(url, data, { headers: Auth.getHeaders() })
+                .then(response => {
+                    Rest.log("post", url, true, data);
+                    resolve(response.data);
+                }).catch(error => {
+                    Rest.log("post", url, false, data);
+                    reject(error);
+                }).finally(() => {
+                    Rest.decrementPending();
+                })
+        });
+    }
+
     static async delete(path: string) {
         return new Promise((resolve, reject) => {
             Rest.incrementPending();
@@ -202,13 +211,6 @@ export function RestSpinner() {
     if (!instance) return null;
 
     return <React.Fragment>
-        <Snackbar
-            open={instance.state.errorMessage !== null}
-            autoHideDuration={5000}
-            anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            message={instance.state.errorMessage}
-            onClose={() => instance?.setState({ errorMessage: null })}
-        />
         {instance.state.pendingRequests > 0 ?
             <CircularProgress className="RestSpinner" color="inherit" />
             :
