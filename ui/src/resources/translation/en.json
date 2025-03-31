@@ -1,6 +1,7 @@
 {
     "copyright": "(C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.",
     "button": {
+        "advanced": "Advanced",
         "create": "Create",
         "create.resource": "New {{resource}}",
         "delete": "Delete",
@@ -156,7 +157,8 @@
     "form": {
         "settings": {
             "label": {
-                "theme": "Theme"
+                "theme": "Theme",
+                "title": "Settings"
             }
         }
     },
