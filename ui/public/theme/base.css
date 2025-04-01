@@ -872,6 +872,7 @@ button:focus {
     font-size: 13px;
     color: white;
 }
+
 .NuoToast {
     left: 50%;
     right: auto;
@@ -892,4 +893,13 @@ button:focus {
     background-color: black;
     color: white;
     margin: 5px;
+}
+.NuoMoreValue {
+    display: inline;
+    color: blue;
+    cursor: pointer;
+}
+
+.NuoMoreValueExpanded {
+    display: inline;
 }

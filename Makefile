@@ -108,7 +108,7 @@ run-integration-tests: build-image setup-integration-tests ## run integration te
 ##@ Development Environment
 
 .PHONY: start-dev
-start-dev: setup-integration-tests ## launch WebUI/ControlPlane/Proxy for development environment
+start-dev: stop-dev setup-integration-tests ## launch WebUI/ControlPlane/Proxy for development environment
 	(cd ui && npm install && npm start &)
 	docker run --rm -d --name nuodb-webui-dev -v `pwd`/docker/development/default.conf:/etc/nginx/conf.d/default.conf --network=host -it nginx:stable-alpine
 
@@ -118,6 +118,10 @@ stop-dev: teardown-integration-tests ## stop development environment processes (
 	if [ "$$PID" != "" ] ; then kill -9 $$PID; fi
 	@PID=$(shell docker ps -aq --filter "name=nuodb-webui-dev"); \
 	if [ "$$PID" != "" ] ; then docker stop $$PID; fi
+	@DOT_KWOK_OWNER=$(shell stat -c '%U' ~/.kwok 2>/dev/null); \
+	if [ "$$DOT_KWOK_OWNER" = "root" ] ; then sudo rm -r ~/.kwok; fi
+	@rm -rf ~/.kwok
+
 
 $(KWOKCTL): $(KUBECTL)
 	mkdir -p bin
