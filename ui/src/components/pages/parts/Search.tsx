@@ -64,7 +64,7 @@ function Search({ search, setSearch, t }: SearchProps) {
             required={false}
             data-testid="searchField"
             id="search"
-            label={"search, i.e. \"somename\" or \"label=key=value,!otherkey name=abc\""}
+            label={t("field.label.search")}
             value={searchField}
             leftIcon={<SearchIcon />}
             onChange={({ currentTarget: input }) => {
