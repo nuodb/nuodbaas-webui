@@ -150,13 +150,13 @@ export function getRecursiveValue(value: TempAny, t: any) {
     }
 
     let strValue = String(value);
-    let moreValue;
+    let moreValue = "";
     if (strValue.indexOf("\n") !== -1) {
         moreValue = strValue.substring(strValue.indexOf("\n"));
         strValue = strValue.substring(0, strValue.indexOf("\n"));
     }
-    else if (strValue.length > 80) {
-        moreValue = strValue.substring(80);
+    if (strValue.length > 80) {
+        moreValue = strValue.substring(80) + moreValue;
         strValue = strValue.substring(0, 80);
     }
     if (moreValue) {
