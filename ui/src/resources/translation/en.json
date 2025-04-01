@@ -1,6 +1,7 @@
 {
     "copyright": "(C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.",
     "button": {
+        "advanced": "Advanced",
         "create": "Create",
         "create.resource": "New {{resource}}",
         "delete": "Delete",
@@ -65,6 +66,7 @@
             "accessRule.deny": "Deny",
             "name": "Name",
             "labels": "Labels",
+            "search": "search, i.e. \"somename\" or \"label=key=value,!otherkey name=abc\"",
             "sla": "SLA",
             "tier": "Tier",
             "properties": "Properties",
@@ -155,7 +157,8 @@
     "form": {
         "settings": {
             "label": {
-                "theme": "Theme"
+                "theme": "Theme",
+                "title": "Settings"
             }
         }
     },

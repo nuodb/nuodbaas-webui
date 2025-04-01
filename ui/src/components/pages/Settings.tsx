@@ -76,7 +76,7 @@ function Settings(props: PageProps) {
 
     return (<PageLayout {...props}>
         <div className="NuoContainerSM">
-            <h1>Settings</h1>
+            <h1>{t("form.settings.label.title")}</h1>
             {advanced ? renderAdvanced() : renderBasic()}
             <div style={{ color: "red" }}>{error}</div>
             <Button onClick={() => {
@@ -92,15 +92,15 @@ function Settings(props: PageProps) {
                 catch (ex) {
                     setError("Invalid JSON input: " + ex);
                 }
-            }}>Save</Button>&nbsp;
+            }}>{t("button.save")}</Button>&nbsp;
             <Button onClick={() => {
                 navigate("/ui");
-            }}>Cancel</Button>
+            }}>{t("button.cancel")}</Button>
             &nbsp;
             {!advanced &&
                 <Button onClick={() => {
                     setAdvanced(true);
-                }}>Advanced</Button>
+                }}>{t("button.advanced")}</Button>
             }
         </div ></PageLayout>
     );
