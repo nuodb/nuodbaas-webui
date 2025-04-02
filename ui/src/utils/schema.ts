@@ -268,6 +268,12 @@ function concatChunks(chunk1: Uint8Array, chunk2: Uint8Array) : Uint8Array {
     return ret;
 }
 
+let monitoredPaths = new Set<string>();
+
+export function hasMonitoredPath(path: string) : boolean {
+    return monitoredPaths.has(path.split("?")[0]);
+}
+
 /**
  * Gets event streaming resource by path (fall back to non-streaming resource on failure)
  * @param {*} path
@@ -281,6 +287,7 @@ export function getResourceEvents(path: string, multiResolve: TempAny, multiReje
 
     Rest.getStream("events" + path, eventsAbortController)
       .then(async (response: TempAny) => {
+        monitoredPaths.add(path.split("?")[0]);
         let event = null;
         let data = null;
         let id = null;
@@ -382,6 +389,7 @@ export function getResourceEvents(path: string, multiResolve: TempAny, multiReje
                 }
             }
         }
+        monitoredPaths.delete(path.split("?")[0]);
       })
       .catch((error) => {
         if(error.status === 404) {
@@ -396,6 +404,7 @@ export function getResourceEvents(path: string, multiResolve: TempAny, multiReje
         else {
             //request was aborted. Ignore.
         }
+        monitoredPaths.delete(path.split("?")[0]);
       });
 
       return eventsAbortController;
