@@ -3,7 +3,7 @@
 import { useNavigate } from 'react-router-dom';
 import { withTranslation } from "react-i18next";
 import { TableBody, TableTh, TableCell, Table as TableCustom, TableHead, TableRow } from '../../controls/Table';
-import { getResourceByPath, getCreatePath, getChild, replaceVariables, getSchemaPath } from "../../../utils/schema";
+import { getResourceByPath, getCreatePath, getChild, replaceVariables, getSchemaPath, hasMonitoredPath } from "../../../utils/schema";
 import FieldFactory from "../../fields/FieldFactory";
 import { Rest } from "./Rest";
 import Dialog from "./Dialog";
@@ -129,7 +129,9 @@ function Table(props: TableProps) {
         if ("yes" === await Dialog.confirm(t("confirm.delete.resource.title", row), t("confirm.delete.resource.body", row), t)) {
             Rest.delete(deletePath)
                 .then(() => {
-                    window.location.reload();
+                    if (!hasMonitoredPath(path)) {
+                        window.location.reload();
+                    }
                 }).catch((error) => {
                     Toast.show("Unable to delete " + deletePath, error);
                 });
@@ -158,6 +160,9 @@ function Table(props: TableProps) {
                 }
             })
             setSelected(new Set());
+            if (!hasMonitoredPath(path)) {
+                window.location.reload();
+            }
         }
     }
 
