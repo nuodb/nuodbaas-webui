@@ -389,7 +389,6 @@ export function getResourceEvents(path: string, multiResolve: TempAny, multiReje
                 }
             }
         }
-        monitoredPaths.delete(path.split("?")[0]);
       })
       .catch((error) => {
         if(error.status === 404) {
@@ -404,6 +403,8 @@ export function getResourceEvents(path: string, multiResolve: TempAny, multiReje
         else {
             //request was aborted. Ignore.
         }
+      })
+      .finally(()=>{
         monitoredPaths.delete(path.split("?")[0]);
       });
 
