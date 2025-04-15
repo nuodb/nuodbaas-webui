@@ -9,6 +9,7 @@ import BuildNumber from "./parts/BuildNumber"
 import { withTranslation } from 'react-i18next';
 import { TempAny } from '../../utils/types';
 import { Rest } from './parts/Rest';
+import axios from 'axios';
 
 interface Props {
     setIsLoggedIn: (isLoggedIn: boolean) => void,
@@ -29,11 +30,25 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     const [error, setError] = useState("");
     const [providers, setProviders] = useState([]);
     const [progressMessage, setProgressMessage] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [activeForm, setActiveForm] = useState<"local" | "3ds" | null>(null);
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const provider = urlParams.get("provider");
         const ticket = urlParams.get("ticket");
+
+        axios.get("/providers.json")
+            .then((response) => {
+                setProviders(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching providers:", error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+
         if (provider && ticket) {
             setProgressMessage("Logging in to provider " + provider);
             const service = window.location.protocol + "//" + window.location.host + "/ui/login?provider=" + encodeURIComponent(provider);
@@ -51,12 +66,11 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                     console.error("Login Failed", reason);
                 });
         }
-        else {
-            Rest.get("/login/providers").then((data: TempAny) => {
-                setProviders(data);
-            });
-        }
     }, []);
+
+    if (loading) {
+        return <div>Loading providers...</div>;
+    }
 
     async function handleLogin() {
         let success = await Auth.login(organization + "/" + username, password);
@@ -75,18 +89,29 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                 <img alt="" />
                 {progressMessage ? <h2>{progressMessage}</h2> :
                 <form>
-                    <div className="fields">
-                        <TextField required data-testid="organization" id="organization" label="Organization" value={organization} onChange={(event) => setOrganization(event.target.value)} />
-                        <TextField required data-testid="username" id="username" label="Username" value={username} onChange={(event) => setUsername(event.target.value)} />
-                        <TextField required data-testid="password" id="password" type="password" label="Password" value={password} onChange={(event) => setPassword(event.target.value)} />
-                        {error && <h3 data-testid="error_message" style={{ color: "red" }}>{error}</h3>}
-                        <Button data-testid="login_button" variant="contained" type="submit" onClick={handleLogin}>Login</Button>
-                            {providers.filter((provider: TempAny) => provider.name !== "local").map((provider: TempAny) => {
-                            return <Button data-testid="login_cas" variant="contained" onClick={() => {
-                                window.location.href = provider.providerUrl + "?service=" + encodeURIComponent(window.location.protocol + "//" + window.location.host + "/ui/login?provider=" + provider.name);
-                            }}>Login with {provider.description}</Button>
-                        })}
-                    </div>
+
+                        {Array.isArray(providers) && providers.length > 0 && (
+
+                            <div style={{ display: "flex", gap: "1rem", margin: "10px" }}>
+                                {providers.filter((provider: TempAny) => provider.name == "local").map((provider: TempAny) => (
+                                    <Button data-testid="login_local" variant="contained" type="submit" onClick={() => setActiveForm("local")}>Local Login</Button>
+                                ))}
+
+                                {providers.filter((provider: TempAny) => provider.name == "cas").map((provider: TempAny) => (
+                                    <Button data-testid="login_cas" variant="contained" type="submit" onClick={() => { window.location.href = provider.providerUrl + "?service=" + encodeURIComponent(window.location.protocol + "//" + window.location.host + "/ui/login?provider=" + provider.name) }}>Login with {provider.description}</Button>
+                                ))}
+                            </div>
+                        )}
+
+                        {activeForm === "local" && (
+                            <div className="fields">
+                                <TextField required data-testid="organization" id="organization" label="Organization" value={organization} onChange={(event) => setOrganization(event.target.value)} />
+                                <TextField required data-testid="username" id="username" label="Username" value={username} onChange={(event) => setUsername(event.target.value)} />
+                                <TextField required data-testid="password" id="password" type="password" label="Password" value={password} onChange={(event) => setPassword(event.target.value)} />
+                                {error && <h3 data-testid="error_message" style={{ color: "red" }}>{error}</h3>}
+                                <Button data-testid="login_button" variant="contained" type="submit" onClick={handleLogin}>Login</Button>
+                            </div>
+                        )}
                 </form>
                 }
             </div>
