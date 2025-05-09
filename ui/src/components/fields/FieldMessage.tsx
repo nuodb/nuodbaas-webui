@@ -12,7 +12,7 @@ export default function FieldMessage(props: FieldProps): FieldBaseType {
     function show(): ReactNode {
         const { prefix, parameter } = props;
         console.error("ERROR: Invalid object", prefix, parameter);
-        if (process && process.env && process.env.NODE_ENV === "development") {
+        if (import.meta.env.PROD === false) {
             return <h1 key={props.prefix}>{props.message}</h1>;
         }
         else {
