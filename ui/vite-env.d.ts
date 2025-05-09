@@ -1,3 +1,5 @@
+// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+
 /// <reference types="vite/client" />
 /// <reference types="vite/types/importMeta.d.ts" />
 declare const BUILD_DATE: string;

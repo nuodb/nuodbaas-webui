@@ -1,4 +1,5 @@
 
+// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
