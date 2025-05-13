@@ -58,15 +58,42 @@ install-crds: $(KWOKCTL) $(KUBECTL) $(HELM)
 	@$(KWOKCTL) create cluster --wait 120s
 	@$(KWOKCTL) get kubeconfig | sed "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kwok-kwok-kube-apiserver:6443/g" > selenium-tests/files/kubeconfig
 	@$(KUBECTL) apply -f selenium-tests/files/nuodb-cp-runtime-config.yaml --context kwok-kwok -n default
-	@$(HELM) install -n default nuodb-cp-crd nuodb-cp-crd --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION)
+	@if [ -d ../nuodb-control-plane/charts/nuodb-cp-crd/templates ] ; then \
+		find ../nuodb-control-plane/charts/nuodb-cp-crd/templates -name "*.yaml" | while read line; do $(KUBECTL) apply -f $$line; done; \
+	else \
+		$(HELM) install -n default nuodb-cp-crd nuodb-cp-crd --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION); \
+	fi
 	@rm -rf nuodb-cp-crd
 
+.PHONY: build-cp
+build-cp:
+	@if [ -f ../nuodb-control-plane/Makefile ] ; then \
+		cd ../nuodb-control-plane; make docker-build; \
+	else \
+		docker pull ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION); \
+		docker tag ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION) nuodb/nuodb-control-plane; \
+	fi
+
+.PHONY: build-sql
+build-sql:
+	@if [ -f ../nuodbaas-sql/Makefile ] ; then \
+		cd ../nuodbaas-sql; make build-image; \
+	else \
+		docker pull ghcr.io/nuodb/nuodbaas-sql:1.0.0-31ce3c4; \
+		docker tag ghcr.io/nuodb/nuodbaas-sql:1.0.0-31ce3c4 nuodbaas-sql; \
+	fi
+
 .PHONY: setup-integration-tests
-setup-integration-tests: build-image install-crds ## setup containers before running integration tests
+setup-integration-tests: build-image install-crds build-cp build-sql ## setup containers before running integration tests
 	@if [ "$(NUODB_CP_URL_BASE)" = "" ] ; then \
 		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_URL_BASE%%%#http://localhost:8081#g" > docker/development/default.conf; \
 	else \
 		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_URL_BASE%%%#$(NUODB_CP_URL_BASE)#g" > docker/development/default.conf; \
+	fi
+	@if [ "$(NUODB_SQL_URL_BASE)" = "" ] ; then \
+		cat docker/development/default.conf.template | sed "s#%%%NUODB_SQL_URL_BASE%%%#http://localhost:8082#g" > docker/development/default.conf; \
+	else \
+		cat docker/development/default.conf.template | sed "s#%%%NUODB_SQL_URL_BASE%%%#$(NUODB_SQL_URL_BASE)#g" > docker/development/default.conf; \
 	fi
 	@NUODB_CP_VERSION=$(NUODB_CP_VERSION) docker compose -f selenium-tests/compose.yaml up --wait
 	@kubectl apply -f docker/development/samples.yaml --context kwok-kwok -n default

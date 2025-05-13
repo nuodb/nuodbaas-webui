@@ -30,7 +30,7 @@ services:
       retries: 3
       start_period: 60s
   nuodb-cp:
-    image: "ghcr.io/nuodb/nuodb-cp-images:${NUODB_CP_VERSION}"
+    image: "nuodb/nuodb-control-plane"
     ports:
       - "8081:8080"
     command:
@@ -41,6 +41,20 @@ services:
       - ./files/kubeconfig:/home/nuodb/.kube/config
     healthcheck:
       test: curl --fail http://nuodb-cp:8080/healthz
+      interval: 5s
+      timeout: 30s
+      retries: 3
+      start_period: 60s
+  nuodbaas-sql:
+    image: "nuodbaas-sql"
+    ports:
+      - "8082:8080"
+    networks:
+      - kwok-kwok
+    volumes:
+      - ./files/kubeconfig:/root/.kube/config
+    healthcheck:
+      test: curl --fail http://nuodbaas-sql:8080/sql
       interval: 5s
       timeout: 30s
       retries: 3
