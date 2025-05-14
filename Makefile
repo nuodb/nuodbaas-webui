@@ -16,6 +16,7 @@ KIND=$(shell pwd)/bin/kind
 KIND_CONTROL_PLANE="kind-kind"
 KUBECTL := $(shell pwd)/bin/kubectl
 HELM := $(shell pwd)/bin/helm
+REMOVE_KIND_ON_STOP=/tmp/remove_kind_on_stop
 
 IMG_REPO := nuodbaas-webui
 VERSION := $(shell grep -e "^appVersion:" charts/nuodbaas-webui/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
@@ -56,10 +57,11 @@ copyright: ### check copyrights
 
 .PHONY: install-crds
 install-crds: $(KIND) $(KUBECTL) $(HELM)
-	@if [ "$$($(KIND) get clusters)" = "kind" ] ; then \
+	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
 		echo "Kind cluster exists already"; \
 	else \
 		$(KIND) create cluster --wait 120s --config selenium-tests/kind.yaml; \
+		touch $(REMOVE_KIND_ON_STOP) \
 	fi
 	@$(KIND) export kubeconfig
 	@$(KIND) export kubeconfig --kubeconfig selenium-tests/files/kubeconfig
@@ -117,7 +119,10 @@ setup-integration-tests: build-image install-crds build-cp build-sql ## setup co
 .PHONY: teardown-integration-tests
 teardown-integration-tests: $(KIND) ## clean up containers used by integration tests
 	@NUODB_CP_VERSION=$(NUODB_CP_VERSION) docker compose -f selenium-tests/compose.yaml down 2> /dev/null
-	@$(KIND) delete cluster 2> /dev/null || true
+	@if [ -f $(REMOVE_KIND_ON_STOP) ] ; then \
+		rm $(REMOVE_KIND_ON_STOP) \
+		$(KIND) delete cluster 2> /dev/null || true \
+	fi
 
 .PHONY: run-integration-tests-only
 run-integration-tests-only: ## integration tests without setup/teardown
