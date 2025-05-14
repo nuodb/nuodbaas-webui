@@ -1,5 +1,3 @@
-import { Event as WebSocketEvent } from 'ws';
-
 export enum SqlWebsocketOperations {
     EXECUTE, EXECUTE_QUERY, EXECUTE_BATCH, EXECUTE_UPDATE, PREPARED_EXECUTE, PREPARED_EXECUTE_QUERY, PREPARED_EXECUTE_UPDATE, SET_SAVEPOINT,ROLLBACK,RELEASE_SAVEPOINT,COMMIT,
 };
@@ -75,7 +73,8 @@ export default function SqlWebsocket(organization: string, project: string, data
                 resolve(response);
             });
             nextTransactionId++;
-            ws?.send(JSON.stringify(request.toString()));
+            console.log("STEP1", JSON.stringify(request));
+            ws?.send(JSON.stringify(request));
         });
     }
 }

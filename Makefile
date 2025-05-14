@@ -7,14 +7,15 @@ export PATH := $(BIN_DIR):$(PATH)
 OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ARCH := $(shell uname -m | sed "s/x86_64/amd64/g")
 
-KWOKCTL_VERSION ?= 0.5.1
+KIND_VERSION ?= 0.27.0
 KUBECTL_VERSION ?= 1.28.3
 HELM_VERSION ?= 3.16.2
 NUODB_CP_VERSION ?= 2.7.0
 
-KWOKCTL := bin/kwokctl
-KUBECTL := bin/kubectl
-HELM := bin/helm
+KIND=$(shell pwd)/bin/kind
+KIND_CONTROL_PLANE="kind-kind"
+KUBECTL := $(shell pwd)/bin/kubectl
+HELM := $(shell pwd)/bin/helm
 
 IMG_REPO := nuodbaas-webui
 VERSION := $(shell grep -e "^appVersion:" charts/nuodbaas-webui/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
@@ -54,10 +55,15 @@ copyright: ### check copyrights
 	./copyright.sh
 
 .PHONY: install-crds
-install-crds: $(KWOKCTL) $(KUBECTL) $(HELM)
-	@$(KWOKCTL) create cluster --wait 120s
-	@$(KWOKCTL) get kubeconfig | sed "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kwok-kwok-kube-apiserver:6443/g" > selenium-tests/files/kubeconfig
-	@$(KUBECTL) apply -f selenium-tests/files/nuodb-cp-runtime-config.yaml --context kwok-kwok -n default
+install-crds: $(KIND) $(KUBECTL) $(HELM)
+	@if [ "$$($(KIND) get clusters)" = "kind" ] ; then \
+		echo "Kind cluster exists already"; \
+	else \
+		$(KIND) create cluster --wait 120s --config selenium-tests/kind.yaml; \
+	fi
+	@$(KIND) export kubeconfig
+	@$(KIND) export kubeconfig --kubeconfig selenium-tests/files/kubeconfig
+	@$(KUBECTL) apply -f selenium-tests/files/nuodb-cp-runtime-config.yaml --context $(KIND_CONTROL_PLANE) -n default
 	@if [ -d ../nuodb-control-plane/charts/nuodb-cp-crd/templates ] ; then \
 		find ../nuodb-control-plane/charts/nuodb-cp-crd/templates -name "*.yaml" | while read line; do $(KUBECTL) apply -f $$line; done; \
 	else \
@@ -96,7 +102,7 @@ setup-integration-tests: build-image install-crds build-cp build-sql ## setup co
 		cat docker/development/default.conf.template | sed "s#%%%NUODB_SQL_URL_BASE%%%#$(NUODB_SQL_URL_BASE)#g" > docker/development/default.conf; \
 	fi
 	@NUODB_CP_VERSION=$(NUODB_CP_VERSION) docker compose -f selenium-tests/compose.yaml up --wait
-	@kubectl apply -f docker/development/samples.yaml --context kwok-kwok -n default
+	@kubectl apply -f docker/development/samples.yaml --context $(KIND_CONTROL_PLANE) -n default
 	@docker exec selenium-tests-nuodb-cp-1 bash -c "curl \
 		http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true \
 		--data-binary \
@@ -109,9 +115,9 @@ setup-integration-tests: build-image install-crds build-cp build-sql ## setup co
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
 
 .PHONY: teardown-integration-tests
-teardown-integration-tests: $(KWOKCTL) ## clean up containers used by integration tests
+teardown-integration-tests: $(KIND) ## clean up containers used by integration tests
 	@NUODB_CP_VERSION=$(NUODB_CP_VERSION) docker compose -f selenium-tests/compose.yaml down 2> /dev/null
-	@$(KWOKCTL) delete cluster 2> /dev/null || true
+	@$(KIND) delete cluster 2> /dev/null || true
 
 .PHONY: run-integration-tests-only
 run-integration-tests-only: ## integration tests without setup/teardown
@@ -145,22 +151,23 @@ stop-dev: teardown-integration-tests ## stop development environment processes (
 	if [ "$$PID" != "" ] ; then kill -9 $$PID; fi
 	@PID=$(shell docker ps -aq --filter "name=nuodb-webui-dev"); \
 	if [ "$$PID" != "" ] ; then docker stop $$PID; fi
-	@DOT_KWOK_OWNER=$(shell stat -c '%U' ~/.kwok 2>/dev/null); \
-	if [ "$$DOT_KWOK_OWNER" = "root" ] ; then sudo rm -r ~/.kwok; fi
-	@rm -rf ~/.kwok
+	@DOT_KIND_OWNER=$(shell stat -c '%U' ~/.kind 2>/dev/null); \
+	if [ "$$DOT_KIND_OWNER" = "root" ] ; then sudo rm -r ~/.kind; fi
+	@rm -rf ~/.kind
 
 
-$(KWOKCTL): $(KUBECTL)
-	mkdir -p bin
-	curl -L -s https://github.com/kubernetes-sigs/kwok/releases/download/v$(KWOKCTL_VERSION)/kwokctl-$(OS)-$(ARCH) -o $(KWOKCTL)
-	chmod +x $(KWOKCTL)
+$(KIND): $(KUBECTL)
+	mkdir -p $(shell dirname ${KIND})
+	curl -f -Lo ${KIND} https://kind.sigs.k8s.io/dl/v${KIND_VERSION}/kind-${OS}-${ARCH}
+	chmod +x ${KIND}
 
 $(KUBECTL):
-	mkdir -p bin
+	echo ${KUBECTL}
+	mkdir -p $(shell dirname ${KUBECTL})
 	curl -L -s https://storage.googleapis.com/kubernetes-release/release/v$(KUBECTL_VERSION)/bin/$(OS)/$(ARCH)/kubectl -o $(KUBECTL)
 	chmod +x $(KUBECTL)
 
 $(HELM):
-	mkdir -p bin
+	mkdir -p $(shell dirname ${HELM})
 	curl -L -s https://get.helm.sh/helm-v$(HELM_VERSION)-$(OS)-$(ARCH).tar.gz | tar -xzf - -O $(OS)-$(ARCH)/helm > $(HELM)
 	chmod +x $(HELM)
