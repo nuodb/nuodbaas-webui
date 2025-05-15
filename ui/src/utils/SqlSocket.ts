@@ -1,3 +1,5 @@
+// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+
 import axios from "axios";
 
 export type SqlOperationType =
