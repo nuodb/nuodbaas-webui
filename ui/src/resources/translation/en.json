@@ -160,6 +160,13 @@
                 "theme": "Theme",
                 "title": "Settings"
             }
+        },
+        "login": {
+            "label": {
+                "loginWith": "Login With {{providerDesc}} ",
+                "goBack": "Go Back",
+                "loadingProvider": "Loading Provider...."
+            }
         }
     },
     "dialog": {
