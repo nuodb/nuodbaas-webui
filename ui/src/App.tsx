@@ -103,7 +103,7 @@ export default function App() {
                   <Route path="/ui/settings" element={<Settings {...pageProps} />} />
                   <Route path="/ui/automation" element={<Automation {...pageProps} />} />
                   <Route path="/ui/page/organization" element={<OrganizationOverview {...pageProps} />} />
-                  <Route path="/ui/page/sql/:organization/:project/:database/:schema" element={<SqlPage {...pageProps} />} />
+                  <Route path="/ui/page/sql/:organization/:project/:database" element={<SqlPage {...pageProps} />} />
                   <Route path="/ui" element={<Navigate to={getHomeUrl()} />} />
                   <Route path="/*" element={<NotFound {...pageProps} />} />
                 </Routes>

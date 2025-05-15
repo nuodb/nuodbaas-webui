@@ -10,7 +10,7 @@ ARCH := $(shell uname -m | sed "s/x86_64/amd64/g")
 KIND_VERSION ?= 0.27.0
 KUBECTL_VERSION ?= 1.28.3
 HELM_VERSION ?= 3.16.2
-NUODB_CP_VERSION ?= 2.7.0
+NUODB_CP_VERSION ?= 2.8.1
 
 KIND=$(shell pwd)/bin/kind
 KIND_CONTROL_PLANE="kind-kind"
@@ -61,11 +61,11 @@ install-crds: $(KIND) $(KUBECTL) $(HELM)
 		echo "Kind cluster exists already"; \
 	else \
 		$(KIND) create cluster --wait 120s --config selenium-tests/kind.yaml; \
-		touch $(REMOVE_KIND_ON_STOP) \
+		touch $(REMOVE_KIND_ON_STOP); \
 	fi
 	@$(KIND) export kubeconfig
 	@$(KIND) export kubeconfig --kubeconfig selenium-tests/files/kubeconfig
-	@$(KUBECTL) apply -f selenium-tests/files/nuodb-cp-runtime-config.yaml --context $(KIND_CONTROL_PLANE) -n default
+	@sed -i "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kind-control-plane:6443/g" selenium-tests/files/kubeconfig
 	@if [ -d ../nuodb-control-plane/charts/nuodb-cp-crd/templates ] ; then \
 		find ../nuodb-control-plane/charts/nuodb-cp-crd/templates -name "*.yaml" | while read line; do $(KUBECTL) apply -f $$line; done; \
 	else \
@@ -82,6 +82,41 @@ build-cp:
 		docker tag ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION) nuodb/nuodb-control-plane; \
 	fi
 
+.PHONY: deploy-cp
+deploy-cp: build-cp
+	@if [ -d ../nuodb-control-plane/charts/nuodb-cp-rest ] ; then \
+		$(KIND) load docker-image nuodb/nuodb-control-plane; \
+		helm upgrade --install --wait -n default nuodb-cp ../nuodb-control-plane/charts/nuodb-cp-rest --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
+	else \
+		helm upgrade --install --wait -n default nuodb-cp https://nuodb.github.io/nuodb-cp-releases/charts/nuodb-cp-rest  --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
+	fi
+
+.PHONY: undeploy-cp
+undeploy-cp:
+	@helm uninstall --ignore-not-found -n default nuodb-cp || true;
+
+.PHONY: build-operator
+build-cp:
+	@if [ -f ../nuodb-control-plane/Makefile ] ; then \
+		cd ../nuodb-control-plane; make docker-build; \
+	else \
+		docker pull ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION); \
+		docker tag ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION) nuodb/nuodb-control-plane; \
+	fi
+
+.PHONY: deploy-operator
+deploy-operator: build-operator
+	@if [ -d ../nuodb-control-plane/charts/nuodb-cp-operator ] ; then \
+		$(KIND) load docker-image nuodb/nuodb-control-plane; \
+		helm upgrade --install --wait -n default nuodb-operator ../nuodb-control-plane/charts/nuodb-cp-operator --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest; \
+	else \
+		helm upgrade --install --wait -n default nuodb-operator https://nuodb.github.io/nuodb-cp-releases/charts/nuodb-cp-operator; \
+	fi
+
+.PHONY: undeploy-operator
+undeploy-operator:
+	@helm uninstall --ignore-not-found -n default nuodb-operator || true;
+
 .PHONY: build-sql
 build-sql:
 	@if [ -f ../nuodbaas-sql/Makefile ] ; then \
@@ -91,37 +126,68 @@ build-sql:
 		docker tag ghcr.io/nuodb/nuodbaas-sql:1.0.0-31ce3c4 nuodbaas-sql; \
 	fi
 
+.PHONY: deploy-sql
+deploy-sql: build-sql
+	@if [ -d ../nuodbaas-sql/charts/nuodbaas-sql ] ; then \
+		$(KIND) load docker-image nuodbaas-sql; \
+		helm upgrade --install --wait -n default nuodbaas-sql ../nuodbaas-sql/charts/nuodbaas-sql --set image.repository=nuodbaas-sql --set image.tag=latest --set nuodbaasSql.ingress.enabled=true; \
+	fi
+
+.PHONY: undeploy-sql
+undeploy-sql: build-sql
+	@helm uninstall --ignore-not-found -n default nuodbaas-sql; \
+
+.PHONY: build-webui
+build-webui:
+	@if [ -f ../nuodbaas-webui/Makefile ] ; then \
+		cd ../nuodbaas-webui; make build-image; \
+	else \
+		docker pull ghcr.io/nuodb/nuodbaas-webui \
+		docker tag ghcr.io/nuodb/nuodbaas-webui nuodbaas-webui; \
+	fi
+
+.PHONY: deploy-webui
+deploy-webui: build-webui
+	@if [ -d ../nuodbaas-webui/charts/nuodbaas-webui ] ; then \
+		$(KIND) load docker-image nuodbaas-webui; \
+		helm upgrade --install --wait -n default nuodbaas-webui ../nuodbaas-webui/charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=latest --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api; \
+	fi
+
+.PHONY: undeploy-webui
+undeploy-webui:
+	@helm uninstall --ignore-not-found -n default nuodbaas-webui; \
+
 .PHONY: setup-integration-tests
-setup-integration-tests: build-image install-crds build-cp build-sql ## setup containers before running integration tests
+setup-integration-tests: build-image install-crds deploy-cp deploy-sql deploy-webui ## setup containers before running integration tests
 	@if [ "$(NUODB_CP_URL_BASE)" = "" ] ; then \
 		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_URL_BASE%%%#http://localhost:8081#g" > docker/development/default.conf; \
 	else \
 		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_URL_BASE%%%#$(NUODB_CP_URL_BASE)#g" > docker/development/default.conf; \
 	fi
 	@if [ "$(NUODB_SQL_URL_BASE)" = "" ] ; then \
-		cat docker/development/default.conf.template | sed "s#%%%NUODB_SQL_URL_BASE%%%#http://localhost:8082#g" > docker/development/default.conf; \
+		cat docker/development/default.conf.template | sed "s#%%%NUODB_SQL_URL_BASE%%%#http://localhost#g" > docker/development/default.conf; \
 	else \
 		cat docker/development/default.conf.template | sed "s#%%%NUODB_SQL_URL_BASE%%%#$(NUODB_SQL_URL_BASE)#g" > docker/development/default.conf; \
 	fi
-	@NUODB_CP_VERSION=$(NUODB_CP_VERSION) docker compose -f selenium-tests/compose.yaml up --wait
+	@docker compose -f selenium-tests/compose.yaml up --wait
 	@kubectl apply -f docker/development/samples.yaml --context $(KIND_CONTROL_PLANE) -n default
-	@docker exec selenium-tests-nuodb-cp-1 bash -c "curl \
+	@kubectl exec -n default -it $(shell kubectl get pod -n default -l "app=nuodb-cp-nuodb-cp-rest" -o name) -- bash -c "curl \
 		http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true \
 		--data-binary \
             '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"acme\", \"accessRule\":{\"allow\": \"all:*\"}}' \
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
-	@docker exec selenium-tests-nuodb-cp-1 bash -c "curl \
+	@kubectl exec -n default -it $(shell kubectl get pod -n default -l "app=nuodb-cp-nuodb-cp-rest" -o name) -- bash -c "curl \
 		http://localhost:8080/users/integrationtest/admin \
 		--data-binary \
             '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"integrationtest\", \"accessRule\":{\"allow\": \"all:integrationtest\"}}' \
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
 
 .PHONY: teardown-integration-tests
-teardown-integration-tests: $(KIND) ## clean up containers used by integration tests
-	@NUODB_CP_VERSION=$(NUODB_CP_VERSION) docker compose -f selenium-tests/compose.yaml down 2> /dev/null
+teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-cp undeploy-operator ## clean up containers used by integration tests
+	@docker compose -f selenium-tests/compose.yaml down
 	@if [ -f $(REMOVE_KIND_ON_STOP) ] ; then \
-		rm $(REMOVE_KIND_ON_STOP) \
-		$(KIND) delete cluster 2> /dev/null || true \
+		rm $(REMOVE_KIND_ON_STOP) ; \
+		$(KIND) delete cluster 2> /dev/null || true ; \
 	fi
 
 .PHONY: run-integration-tests-only
@@ -134,7 +200,7 @@ build-integration-tests-docker:
 
 .PHONY: run-smoke-tests-docker-only
 run-smoke-tests-docker-only: build-integration-tests-docker
-	@cd selenium-tests && docker run -e URL_BASE=http://selenium-tests-nginx-1 -e CP_URL="http://selenium-tests-nuodb-cp-1:8080" -e MVN_TEST=${MVN_TEST} --net kwok-kwok -it "${IMG_REPO}:test" && cd ..
+	@cd selenium-tests && docker run -e URL_BASE=http://selenium-tests-nginx-1 -e CP_URL="http://selenium-tests-nuodb-cp-1:8080" -e MVN_TEST=${MVN_TEST} --net kind -it "${IMG_REPO}:test" && cd ..
 
 .PHONY: run-smoke-tests-docker
 run-smoke-tests-docker: setup-integration-tests ## integration tests without setup/teardown (docker version)
@@ -142,6 +208,8 @@ run-smoke-tests-docker: setup-integration-tests ## integration tests without set
 .PHONY: run-integration-tests
 run-integration-tests: build-image setup-integration-tests ## run integration tests (+setup)
 	${MAKE} run-integration-tests-only teardown-integration-tests || (${MAKE} teardown-integration-tests && exit 1)
+
+
 
 ##@ Development Environment
 

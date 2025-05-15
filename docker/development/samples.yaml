@@ -32,7 +32,40 @@ spec:
             cpu: 500m
             memory: 500Mi
         memoryOption: 500Mi
-
+---
+apiVersion: cp.nuodb.com/v1beta1
+kind: HelmFeature
+metadata:
+  name: pico-resources
+spec:
+  values:
+    admin:
+      resources:
+        limits:
+          cpu: 100m
+          memory: 100Mi
+        requests:
+          cpu: 100m
+          memory: 100Mi
+    database:
+      sm:
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        memoryOption: 100Mi
+      te:
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        memoryOption: 100Mi
 ---
 apiVersion: cp.nuodb.com/v1beta1
 kind: HelmFeature
@@ -48,6 +81,22 @@ spec:
       persistence:
         enabled: true
         size: 5Gi
+
+---
+apiVersion: cp.nuodb.com/v1beta1
+kind: HelmFeature
+metadata:
+  name: pico-disk
+spec:
+  values:
+    admin:
+      persistence:
+        enabled: true
+        size: 100Mi
+    database:
+      persistence:
+        enabled: true
+        size: 500Mi
 
 ---
 apiVersion: cp.nuodb.com/v1beta1
@@ -171,7 +220,7 @@ metadata:
 spec:
   values:
     nuodb:
-      serviceAccount: serviceaccount
+      serviceAccount: default
 
 ---
 apiVersion: cp.nuodb.com/v1beta1
@@ -326,6 +375,27 @@ spec:
   features:
   - name: nano-resources
   - name: nano-disk
+  - name: n0-replicas
+  - name: kube-inspector
+  - name: archive-sync-workaround
+  - name: ssl-passthrough
+  - name: backup-hooks-fsfreeze
+  - name: backup-hooks-hotsnap
+
+---
+apiVersion: cp.nuodb.com/v1beta1
+kind: ServiceTier
+metadata:
+  name: n0.pico
+  annotations:
+    description: |-
+      An entry type NuoDB service for evaluation purposes with minimal viable \
+      specification and general purpose disks. The database will be started with 1 \
+      Storage Manager and 1 Transaction Engine.
+spec:
+  features:
+  - name: pico-resources
+  - name: pico-disk
   - name: n0-replicas
   - name: kube-inspector
   - name: archive-sync-workaround
