@@ -42,28 +42,15 @@ export type SqlResponse = {
 };
 
 export type SqlType = {
-    execute: (sql: string) => Promise<SqlResponse>;
-    executeQuery: (sql: string) => Promise<SqlResponse>;
+    runCommand: (operation: SqlOperationType, args: any[]) => Promise<SqlResponse>;
 }
 
 export default function SqlSocket(organization: string, project: string, database: string, schema: string, dbUsername: string, dbPassword: string) : SqlType {
     let nextTransactionId = 0;
 
-    return { execute, executeQuery };
+    return { runCommand };
 
-    async function execute(sql: string): Promise<SqlResponse> {
-        return await anyCommand("EXECUTE_QUERY", [sql]);
-    }
-
-    async function executeQuery(sql: string): Promise<SqlResponse> {
-        return await anyCommand("EXECUTE_QUERY", [sql]);
-    }
-
-    async function setCredentials(dbUsername: string, dbPassword: string): Promise<SqlResponse> {
-        return await anyCommand("SET_CREDENTIALS", [dbUsername, dbPassword]);
-    }
-
-    async function anyCommand(operation: SqlOperationType, args: any[]) : Promise<SqlResponse> {
+    async function runCommand(operation: SqlOperationType, args: any[]) : Promise<SqlResponse> {
         let request : SqlRequest = {operation: operation.toString(), args, requestId: String(nextTransactionId)};
         nextTransactionId++;
         const response = await axios.post(

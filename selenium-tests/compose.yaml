@@ -4,17 +4,13 @@ services:
   selenium:
     image: "selenium/standalone-chrome:131.0"
     shm_size: '2gb'
-    ports:
-      - "4444:4444"
-      - "7900:7900"
     depends_on:
       - nginx
-    networks:
-      - kind
+    network_mode: host
     environment:
       - SE_VNC_NO_PASSWORD=true
     healthcheck:
-      test: curl --fail http://selenium:4444/ || exit 1
+      test: curl --fail http://localhost:4444/ || exit 1
       interval: 5s
       timeout: 30s
       retries: 3
