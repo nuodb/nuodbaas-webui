@@ -144,10 +144,10 @@ undeploy-sql: build-sql
 
 .PHONY: build-webui
 build-webui:
-	@if [ -f ../nuodbaas-webui/Makefile ] ; then \
-		cd ../nuodbaas-webui; make build-image; \
+	@if [ -f Makefile ] ; then \
+		make build-image; \
 	else \
-		docker pull ghcr.io/nuodb/nuodbaas-webui \
+		docker pull ghcr.io/nuodb/nuodbaas-webui; \
 		docker tag ghcr.io/nuodb/nuodbaas-webui nuodbaas-webui; \
 	fi
 
