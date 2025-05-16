@@ -166,13 +166,13 @@ setup-integration-tests: build-image install-crds deploy-cp deploy-sql deploy-we
 		cat docker/development/default.conf.template | sed "s#%%%NUODB_SQL_URL_BASE%%%#$(NUODB_SQL_URL_BASE)#g" > docker/development/default.conf; \
 	fi
 	@docker compose -f selenium-tests/compose.yaml up --wait
-	@kubectl apply -f docker/development/samples.yaml --context $(KIND_CONTROL_PLANE) -n default
-	@kubectl exec -n default -it $(shell kubectl get pod -n default -l "app=nuodb-cp-nuodb-cp-rest" -o name) -- bash -c "curl \
+	@$(KUBECTL) apply -f docker/development/samples.yaml --context $(KIND_CONTROL_PLANE) -n default
+	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-nuodb-cp-rest" -o name) -- bash -c "curl \
 		http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true \
 		--data-binary \
             '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"acme\", \"accessRule\":{\"allow\": \"all:*\"}}' \
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
-	@kubectl exec -n default -it $(shell kubectl get pod -n default -l "app=nuodb-cp-nuodb-cp-rest" -o name) -- bash -c "curl \
+	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-nuodb-cp-rest" -o name) -- bash -c "curl \
 		http://localhost:8080/users/integrationtest/admin \
 		--data-binary \
             '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"integrationtest\", \"accessRule\":{\"allow\": \"all:integrationtest\"}}' \
@@ -231,7 +231,6 @@ $(KIND): $(KUBECTL)
 	chmod +x ${KIND}
 
 $(KUBECTL):
-	echo ${KUBECTL}
 	mkdir -p $(shell dirname ${KUBECTL})
 	curl -L -s https://storage.googleapis.com/kubernetes-release/release/v$(KUBECTL_VERSION)/bin/$(OS)/$(ARCH)/kubectl -o $(KUBECTL)
 	chmod +x $(KUBECTL)
