@@ -103,17 +103,8 @@ deploy-cp: build-cp
 undeploy-cp:
 	@helm uninstall --ignore-not-found -n default nuodb-cp || true;
 
-.PHONY: build-operator
-build-cp:
-	@if [ -f ../nuodb-control-plane/Makefile ] ; then \
-		cd ../nuodb-control-plane; make docker-build; \
-	else \
-		docker pull ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION); \
-		docker tag ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION) nuodb/nuodb-control-plane; \
-	fi
-
 .PHONY: deploy-operator
-deploy-operator: build-operator
+deploy-operator: build-cp
 	@if [ -d ../nuodb-control-plane/charts/nuodb-cp-operator ] ; then \
 		$(KIND) load docker-image nuodb/nuodb-control-plane; \
 		helm upgrade --install --wait -n default nuodb-operator ../nuodb-control-plane/charts/nuodb-cp-operator --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest; \
