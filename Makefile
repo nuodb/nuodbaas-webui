@@ -73,6 +73,14 @@ install-crds: $(KIND) $(KUBECTL) $(HELM)
 	fi
 	@rm -rf nuodb-cp-crd
 
+.PHONY: uninstall-crds
+uninstall-crds: $(KIND) $(KUBECTL) $(HELM)
+	@if [ -d ../nuodb-control-plane/charts/nuodb-cp-crd/templates ] ; then \
+		find ../nuodb-control-plane/charts/nuodb-cp-crd/templates -name "*.yaml" | while read line; do $(KUBECTL) delete -f $$line; done; \
+	else \
+		$(HELM) uninstall -n default nuodb-cp-crd; \
+	fi
+
 .PHONY: build-cp
 build-cp:
 	@if [ -f ../nuodb-control-plane/Makefile ] ; then \
@@ -88,7 +96,7 @@ deploy-cp: build-cp
 		$(KIND) load docker-image nuodb/nuodb-control-plane; \
 		helm upgrade --install --wait -n default nuodb-cp ../nuodb-control-plane/charts/nuodb-cp-rest --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
 	else \
-		helm upgrade --install --wait -n default nuodb-cp https://nuodb.github.io/nuodb-cp-releases/charts/nuodb-cp-rest  --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
+		helm upgrade --install --wait -n default nuodb-cp nuodb-cp-rest --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION)  --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
 	fi
 
 .PHONY: undeploy-cp
@@ -121,9 +129,6 @@ undeploy-operator:
 build-sql:
 	@if [ -f ../nuodbaas-sql/Makefile ] ; then \
 		cd ../nuodbaas-sql; make build-image; \
-	else \
-		docker pull ghcr.io/nuodb/nuodbaas-sql:1.0.0-31ce3c4; \
-		docker tag ghcr.io/nuodb/nuodbaas-sql:1.0.0-31ce3c4 nuodbaas-sql; \
 	fi
 
 .PHONY: deploy-sql
@@ -183,7 +188,7 @@ setup-integration-tests: build-image install-crds deploy-cp deploy-sql deploy-we
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
 
 .PHONY: teardown-integration-tests
-teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-cp undeploy-operator ## clean up containers used by integration tests
+teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-cp undeploy-operator uninstall-crds ## clean up containers used by integration tests
 	@docker compose -f selenium-tests/compose.yaml down
 	@if [ -f $(REMOVE_KIND_ON_STOP) ] ; then \
 		rm $(REMOVE_KIND_ON_STOP) ; \
