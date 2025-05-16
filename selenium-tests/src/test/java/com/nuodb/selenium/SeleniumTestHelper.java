@@ -39,7 +39,7 @@ import com.google.common.base.Strings;
 @ExtendWith(TestResultLogger.class)
 public class SeleniumTestHelper {
     private static final String SHOW_CHROME_DEVTOOLS = "SHOW_CHROME_DEVTOOLS";
-    private static final String URL_BASE = Strings.isNullOrEmpty(System.getenv("URL_BASE")) ? "http://selenium-tests-nginx-1" : System.getenv("URL_BASE");
+    private static final String URL_BASE = Strings.isNullOrEmpty(System.getenv("URL_BASE")) ? "http://localhost" : System.getenv("URL_BASE");
     private static final Duration waitTimeout = Duration.ofSeconds(15);
     private static WebDriver driver = null;
     private TestInfo testInfo;

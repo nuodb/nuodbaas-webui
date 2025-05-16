@@ -9,6 +9,7 @@ import CreateResource from "./components/pages/CreateResource";
 import EditResource from "./components/pages/EditResource";
 import ViewResource from "./components/pages/ViewResource";
 import ErrorPage from "./components/pages/ErrorPage";
+import SqlPage from "./components/pages/SqlPage";
 import Schema from "./components/pages/parts/Schema";
 import CssBaseline from '@mui/material/CssBaseline';
 import NotFound from "./components/pages/NotFound";
@@ -102,6 +103,7 @@ export default function App() {
                   <Route path="/ui/settings" element={<Settings {...pageProps} />} />
                   <Route path="/ui/automation" element={<Automation {...pageProps} />} />
                   <Route path="/ui/page/organization" element={<OrganizationOverview {...pageProps} />} />
+                  <Route path="/ui/page/sql/:organization/:project/:database" element={<SqlPage {...pageProps} />} />
                   <Route path="/ui" element={<Navigate to={getHomeUrl()} />} />
                   <Route path="/*" element={<NotFound {...pageProps} />} />
                 </Routes>
