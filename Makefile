@@ -66,6 +66,7 @@ install-crds: $(KIND) $(KUBECTL) $(HELM)
 		$(KIND) export kubeconfig; \
 		$(KIND) export kubeconfig --kubeconfig selenium-tests/files/kubeconfig; \
 		$(KUBECTL) apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml; \
+		$(KUBECTL) wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=60s; \
 		touch $(REMOVE_KIND_ON_STOP); \
 	fi
 	@sed -i "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kind-control-plane:6443/g" selenium-tests/files/kubeconfig
