@@ -179,6 +179,8 @@ setup-integration-tests: build-image install-crds deploy-cp deploy-sql deploy-we
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
 	@docker ps
 	@$(KUBECTL) describe ingress -A
+	curl http://localhost/
+	curl http://localhost/api/databases
 
 .PHONY: teardown-integration-tests
 teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-cp undeploy-operator uninstall-crds ## clean up containers used by integration tests

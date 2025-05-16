@@ -39,14 +39,14 @@ import com.google.common.base.Strings;
 @ExtendWith(TestResultLogger.class)
 public class SeleniumTestHelper {
     private static final String SHOW_CHROME_DEVTOOLS = "SHOW_CHROME_DEVTOOLS";
-    private static final String URL_BASE = Strings.isNullOrEmpty(System.getenv("URL_BASE")) ? "http://127.0.0.1" : System.getenv("URL_BASE");
+    private static final String URL_BASE = Strings.isNullOrEmpty(System.getenv("URL_BASE")) ? "http://localhost" : System.getenv("URL_BASE");
     private static final Duration waitTimeout = Duration.ofSeconds(15);
     private static WebDriver driver = null;
     private TestInfo testInfo;
 
     @BeforeAll
     public static void beforeAll() throws IOException, InterruptedException {
-        URL hubUrl = new URL("http://127.0.0.1:4444/wd/hub");
+        URL hubUrl = new URL("http://localhost:4444/wd/hub");
         ChromeOptions options = new ChromeOptions();
         if("true".equals(System.getProperty(SHOW_CHROME_DEVTOOLS)) || "true".equals(System.getenv(SHOW_CHROME_DEVTOOLS))) {
             options.addArguments("--auto-open-devtools-for-tabs", "--no-sandbox", "--disable-dev-shm-usage");

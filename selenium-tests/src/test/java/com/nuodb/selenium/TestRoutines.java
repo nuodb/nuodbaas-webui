@@ -44,7 +44,7 @@ public class TestRoutines extends SeleniumTestHelper {
     public static final String TEST_ORGANIZATION = getenv("TEST_ORGANIZATION", "integrationtest");
     public static final String TEST_ADMIN_USER = getenv("TEST_ADMIN_USER", "admin");
     public static final String TEST_ADMIN_PASSWORD = getenv("TEST_ADMIN_PASSWORD", "passw0rd");
-    public static final String CP_URL = getenv("CP_URL", "http://127.0.0.1/api");
+    public static final String CP_URL = getenv("CP_URL", "http://localhost/api");
     public static final String MENU_COLUMN = "$ref";
 
     private static final int MAX_RETRIES = 10;
