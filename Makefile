@@ -59,12 +59,15 @@ copyright: ### check copyrights
 install-crds: $(KIND) $(KUBECTL) $(HELM)
 	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
 		echo "Kind cluster exists already"; \
+		$(KIND) export kubeconfig; \
+		$(KIND) export kubeconfig --kubeconfig selenium-tests/files/kubeconfig; \
 	else \
 		$(KIND) create cluster --wait 120s --config selenium-tests/kind.yaml; \
+		$(KIND) export kubeconfig; \
+		$(KIND) export kubeconfig --kubeconfig selenium-tests/files/kubeconfig; \
+		$(KUBECTL) apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml; \
 		touch $(REMOVE_KIND_ON_STOP); \
 	fi
-	@$(KIND) export kubeconfig
-	@$(KIND) export kubeconfig --kubeconfig selenium-tests/files/kubeconfig
 	@sed -i "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kind-control-plane:6443/g" selenium-tests/files/kubeconfig
 	@if [ -d ../nuodb-control-plane/charts/nuodb-cp-crd/templates ] ; then \
 		find ../nuodb-control-plane/charts/nuodb-cp-crd/templates -name "*.yaml" | while read line; do $(KUBECTL) apply -f $$line; done; \
