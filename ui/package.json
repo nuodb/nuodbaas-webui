@@ -45,7 +45,6 @@
       "last 1 safari version"
     ]
   },
-  "homepage": "/ui",
   "devDependencies": {
     "@vitejs/plugin-react": "^4.4.1",
     "ts-node": "^10.9.2",

@@ -82,7 +82,7 @@ uninstall-crds: $(KIND) $(KUBECTL) $(HELM)
 	@if [ -d ../nuodb-control-plane/charts/nuodb-cp-crd/templates ] ; then \
 		find ../nuodb-control-plane/charts/nuodb-cp-crd/templates -name "*.yaml" | while read line; do $(KUBECTL) delete -f $$line; done; \
 	else \
-		$(HELM) uninstall -n default nuodb-cp-crd; \
+		$(HELM) uninstall --ignore-not-found -n default nuodb-cp-crd; \
 	fi
 
 .PHONY: build-cp
@@ -105,7 +105,7 @@ deploy-cp: build-cp
 
 .PHONY: undeploy-cp
 undeploy-cp:
-	@helm uninstall --ignore-not-found -n default nuodb-cp || true;
+	@$(HELM) uninstall --ignore-not-found -n default nuodb-cp || true;
 
 .PHONY: deploy-operator
 deploy-operator: build-cp
@@ -118,7 +118,7 @@ deploy-operator: build-cp
 
 .PHONY: undeploy-operator
 undeploy-operator:
-	@helm uninstall --ignore-not-found -n default nuodb-operator || true;
+	@$(HELM) uninstall --ignore-not-found -n default nuodb-operator || true;
 
 .PHONY: build-sql
 build-sql:
@@ -135,7 +135,7 @@ deploy-sql: build-sql
 
 .PHONY: undeploy-sql
 undeploy-sql: build-sql
-	@helm uninstall --ignore-not-found -n default nuodbaas-sql; \
+	@$(HELM) uninstall --ignore-not-found -n default nuodbaas-sql; \
 
 .PHONY: build-webui
 build-webui:
@@ -155,7 +155,7 @@ deploy-webui: build-webui
 
 .PHONY: undeploy-webui
 undeploy-webui:
-	@helm uninstall --ignore-not-found -n default nuodbaas-webui; \
+	@$(HELM) uninstall --ignore-not-found -n default nuodbaas-webui; \
 
 .PHONY: setup-integration-tests
 setup-integration-tests: build-image install-crds deploy-cp deploy-sql deploy-webui ## setup containers before running integration tests
@@ -185,8 +185,6 @@ setup-integration-tests: build-image install-crds deploy-cp deploy-sql deploy-we
 	@$(KUBECTL) describe ingress -A
 	@$(KUBECTL) describe pods -A
 	@$(KUBECTL) get pods -A
-	curl http://localhost/
-	curl http://localhost/api/databases
 
 .PHONY: teardown-integration-tests
 teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-cp undeploy-operator uninstall-crds ## clean up containers used by integration tests

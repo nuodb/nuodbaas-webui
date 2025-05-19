@@ -164,10 +164,7 @@ public class TestRoutines extends SeleniumTestHelper {
             if(fieldValueList[i].startsWith("accessRule")) {
                 waitElement("section-title-access-deny-rules").click();
             }
-            WebElement element = waitInputElementByName(fieldValueList[i]);
-            if(!element.getAttribute("value").equals(fieldValueList[i+1])) {
-                element.sendKeys(fieldValueList[i+1]);
-            }
+            replaceInputElementByName(fieldValueList[i], fieldValueList[i+1]);
         }
         waitElement("create_resource__create_button").click();
         createdResources.computeIfAbsent(resource, n -> new HashSet<String>()).add(name);

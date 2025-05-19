@@ -55,7 +55,7 @@ public class ProjectTest extends TestRoutines {
             clickPopupMenu(buttonsCell.get(0), "edit_button");
 
             // edit project and save
-            replaceInputElementByName("tier", "n0.small");
+            replaceInputElementByName("tier", "tier.n0.small");
             waitElement("section-title-advanced").click();
             waitElement("section-maintenance").click();
             replaceInputElementByName("maintenance.expiresIn", "30d");

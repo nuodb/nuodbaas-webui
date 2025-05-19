@@ -2,6 +2,7 @@
 
 package com.nuodb.selenium;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.File;
@@ -130,6 +131,11 @@ public class SeleniumTestHelper {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(testId));
     }
 
+    public WebElement waitElementById(String id) {
+        WebDriverWait wait = new WebDriverWait(driver, waitTimeout);
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(id)));
+    }
+
     public WebElement waitElementPresent(String id) {
         By testId = By.xpath("//*[@data-testid='" + id + "']");
         WebDriverWait wait = new WebDriverWait(driver, waitTimeout);
@@ -148,11 +154,35 @@ public class SeleniumTestHelper {
         return wait.until(ExpectedConditions.presenceOfElementLocated(testId));
     }
 
+    public WebElement getParent(WebElement element) {
+        return element.findElement(By.xpath("./.."));
+    }
+
     public void replaceInputElementByName(String name, String value) {
-        WebElement element = waitInputElementByName(name);
-        element.click();
-        element.sendKeys(Keys.chord(Keys.CONTROL, "A"));
-        element.sendKeys(value);
+        WebElement element = waitPresentInputElementByName(name);
+        String className = element.getAttribute("class");
+        if(className != null && className.contains("MuiSelect")) {
+            getParent(element).click();
+            element = waitElementById("menu-" + name);
+            List<WebElement> liElements = element.findElements(By.tagName("li"));
+            boolean found = false;
+            for(WebElement liElement : liElements) {
+                if(value.equals(liElement.getText())) {
+                    liElement.click();
+                    found = true;
+                    break;
+                }
+            }
+            assertTrue(found);
+        }
+        else {
+            element = waitInputElementByName(name); //ensure present input element is interactable
+            if(!element.getAttribute("value").equals(value)) {
+                element.click();
+                element.sendKeys(Keys.chord(Keys.CONTROL, "A"));
+                element.sendKeys(value);
+            }
+        }
     }
 
     public String waitText(String id) {
