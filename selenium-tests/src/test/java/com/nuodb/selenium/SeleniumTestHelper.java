@@ -236,6 +236,7 @@ public class SeleniumTestHelper {
 
     public void login(String organization, String username, String password) {
         get("/ui/");
+        click("local");
         sendKeys("organization", organization);
         sendKeys("username", username);
         sendKeys("password", password);
