@@ -53,7 +53,9 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
         }
         else {
             Rest.get("/login/providers").then((data: TempAny) => {
-                setProviders(data);
+                if (typeof data === 'object' && !Array.isArray(data)) {
+                    setProviders(data);
+                }
             });
         }
     }, []);

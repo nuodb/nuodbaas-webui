@@ -87,10 +87,6 @@ public class DatabaseTest extends TestRoutines {
        waitElement("dialog_button_yes").click();
        waitRestComplete();
 
-       // TODO(agr22) - workaround to refresh view - we're still running on Control Plane 2.6 for this integration test
-       clickMenu("projects");
-       clickMenu("databases");
-
        // perform "Start Database" action
        ArrayList<List<WebElement>> menuCells1 = new ArrayList<>();
        retry(()->{
@@ -101,10 +97,6 @@ public class DatabaseTest extends TestRoutines {
         });
          waitElement("dialog_button_yes").click();
          waitRestComplete();
-
-       // TODO(agr22) - workaround to refresh view - we're still running on Control Plane 2.6 for this integration test
-       clickMenu("projects");
-       clickMenu("databases");
 
        // find database and "Stop Database" button
        retry(()->{
