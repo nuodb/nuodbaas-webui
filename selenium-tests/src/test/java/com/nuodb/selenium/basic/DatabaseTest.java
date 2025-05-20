@@ -90,6 +90,8 @@ public class DatabaseTest extends TestRoutines {
        // perform "Start Database" action
        ArrayList<List<WebElement>> menuCells1 = new ArrayList<>();
        retry(60, 1000, ()->{
+            clickMenu(Resource.projects.name());
+            clickMenu(Resource.databases.name());
             menuCells1.clear();
             menuCells1.add(waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN));
             assertEquals(1, menuCells1.get(0).size());

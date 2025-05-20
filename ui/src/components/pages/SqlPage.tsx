@@ -40,13 +40,13 @@ function SqlPage(props: PageProps) {
     function renderLogin() {
         return <>
             <div className="NuoFieldContainer">
-                <TextField id="dbUsername" label={t("form.sqleditor.dbUsername")} value={dbUsername} onChange={(event) => setDbUsername(event.currentTarget.value)} />
+                <TextField id="dbUsername" label={t("form.sqleditor.label.dbUsername")} value={dbUsername} onChange={(event) => setDbUsername(event.currentTarget.value)} />
             </div>
             <div className="NuoFieldContainer">
-                <TextField id="dbPassword" label={t("form.sqleditor.dbPassword")} value={dbPassword} onChange={(event) => setDbPassword(event.currentTarget.value)} />
+                <TextField id="dbPassword" type="password" label={t("form.sqleditor.label.dbPassword")} value={dbPassword} onChange={(event) => setDbPassword(event.currentTarget.value)} />
             </div>
             <div className="NuoFieldContainer">
-                <TextField id="dbSchema" label={t("form.sqleditor.dbSchema")} value={dbSchema} onChange={(event) => setDbSchema(event.currentTarget.value)} />
+                <TextField id="dbSchema" label={t("form.sqleditor.label.dbSchema")} value={dbSchema} onChange={(event) => setDbSchema(event.currentTarget.value)} />
             </div>
             <div className="NuoFieldContainer">
             <Button disabled={!params.organization || !params.project || !params.database || !dbUsername || !dbPassword || !dbSchema} onClick={async () => {
