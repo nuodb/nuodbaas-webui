@@ -161,6 +161,13 @@
                 "theme": "Theme",
                 "title": "Settings"
             }
+        },
+        "sqleditor": {
+            "label": {
+                "dbUsername": "DB Username",
+                "dbPassword": "DB Password",
+                "dbSchema": "DB Schema"
+            }
         }
     },
     "dialog": {

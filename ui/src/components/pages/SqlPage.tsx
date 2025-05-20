@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableRow, TableTh } from '../co
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import { styled } from '@mui/material';
+import { t } from 'i18next';
 
 function SqlPage(props: PageProps) {
     const params = useParams();
@@ -39,13 +40,13 @@ function SqlPage(props: PageProps) {
     function renderLogin() {
         return <>
             <div className="NuoFieldContainer">
-                <TextField id="dbUsername" label="DB Username" value={dbUsername} onChange={(event) => setDbUsername(event.currentTarget.value)} />
+                <TextField id="dbUsername" label={t("form.sqleditor.dbUsername")} value={dbUsername} onChange={(event) => setDbUsername(event.currentTarget.value)} />
             </div>
             <div className="NuoFieldContainer">
-                <TextField id="dbPassword" label="DB Password" value={dbPassword} onChange={(event) => setDbPassword(event.currentTarget.value)} />
+                <TextField id="dbPassword" label={t("form.sqleditor.dbPassword")} value={dbPassword} onChange={(event) => setDbPassword(event.currentTarget.value)} />
             </div>
             <div className="NuoFieldContainer">
-                <TextField id="dbSchema" label="DB Schema" value={dbSchema} onChange={(event) => setDbSchema(event.currentTarget.value)} />
+                <TextField id="dbSchema" label={t("form.sqleditor.dbSchema")} value={dbSchema} onChange={(event) => setDbSchema(event.currentTarget.value)} />
             </div>
             <div className="NuoFieldContainer">
             <Button disabled={!params.organization || !params.project || !params.database || !dbUsername || !dbPassword || !dbSchema} onClick={async () => {

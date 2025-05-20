@@ -100,7 +100,7 @@ deploy-cp: build-cp
 		$(KIND) load docker-image nuodb/nuodb-control-plane; \
 		helm upgrade --install --wait -n default nuodb-cp ../nuodb-control-plane/charts/nuodb-cp-rest --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
 	else \
-		helm upgrade --install --wait -n default nuodb-cp nuodb-cp-rest --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION)  --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
+		helm upgrade --install --wait -n default nuodb-cp nuodb-cp-rest --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION) --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
 	fi
 
 .PHONY: undeploy-cp
@@ -113,7 +113,7 @@ deploy-operator: build-cp
 		$(KIND) load docker-image nuodb/nuodb-control-plane; \
 		helm upgrade --install --wait -n default nuodb-operator ../nuodb-control-plane/charts/nuodb-cp-operator --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest; \
 	else \
-		helm upgrade --install --wait -n default nuodb-operator https://nuodb.github.io/nuodb-cp-releases/charts/nuodb-cp-operator; \
+		helm upgrade --install --wait -n default nuodb-operator nuodb-cp-operator --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION); \
 	fi
 
 .PHONY: undeploy-operator
@@ -158,7 +158,7 @@ undeploy-webui:
 	@$(HELM) uninstall --ignore-not-found -n default nuodbaas-webui; \
 
 .PHONY: setup-integration-tests
-setup-integration-tests: build-image install-crds deploy-cp deploy-sql deploy-webui ## setup containers before running integration tests
+setup-integration-tests: build-image install-crds deploy-cp deploy-operator deploy-sql deploy-webui ## setup containers before running integration tests
 	@if [ "$(NUODB_CP_URL_BASE)" = "" ] ; then \
 		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_URL_BASE%%%#http://localhost:8081#g" > docker/development/default.conf; \
 	else \
@@ -170,7 +170,6 @@ setup-integration-tests: build-image install-crds deploy-cp deploy-sql deploy-we
 		cat docker/development/default.conf.template | sed "s#%%%NUODB_SQL_URL_BASE%%%#$(NUODB_SQL_URL_BASE)#g" > docker/development/default.conf; \
 	fi
 	@docker compose -f selenium-tests/compose.yaml up --wait
-	@$(KUBECTL) apply -f docker/development/samples.yaml --context $(KIND_CONTROL_PLANE) -n default
 	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-nuodb-cp-rest" -o name) -- bash -c "curl \
 		http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true \
 		--data-binary \
