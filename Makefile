@@ -78,7 +78,7 @@ install-crds: $(KIND) $(KUBECTL) $(HELM)
 	@rm -rf nuodb-cp-crd
 
 .PHONY: uninstall-crds
-uninstall-crds: $(KIND) $(KUBECTL) $(HELM)
+uninstall-crds: $(KUBECTL) $(HELM)
 	@if [ -d ../nuodb-control-plane/charts/nuodb-cp-crd/templates ] ; then \
 		find ../nuodb-control-plane/charts/nuodb-cp-crd/templates -name "*.yaml" | while read line; do $(KUBECTL) delete -f $$line; done; \
 	else \
@@ -95,29 +95,29 @@ build-cp:
 	fi
 
 .PHONY: deploy-cp
-deploy-cp: build-cp
+deploy-cp: build-cp $(HELM) $(KIND)
 	@if [ -d ../nuodb-control-plane/charts/nuodb-cp-rest ] ; then \
 		$(KIND) load docker-image nuodb/nuodb-control-plane; \
-		helm upgrade --install --wait -n default nuodb-cp ../nuodb-control-plane/charts/nuodb-cp-rest --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
+		$(HELM) upgrade --install --wait -n default nuodb-cp ../nuodb-control-plane/charts/nuodb-cp-rest --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
 	else \
-		helm upgrade --install --wait -n default nuodb-cp nuodb-cp-rest --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION) --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
+		$(HELM) upgrade --install --wait -n default nuodb-cp nuodb-cp-rest --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION) --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
 	fi
 
 .PHONY: undeploy-cp
-undeploy-cp:
+undeploy-cp: $(HELM)
 	@$(HELM) uninstall --ignore-not-found -n default nuodb-cp || true;
 
 .PHONY: deploy-operator
-deploy-operator: build-cp
+deploy-operator: build-cp $(HELM) $(KIND)
 	@if [ -d ../nuodb-control-plane/charts/nuodb-cp-operator ] ; then \
 		$(KIND) load docker-image nuodb/nuodb-control-plane; \
-		helm upgrade --install --wait -n default nuodb-operator ../nuodb-control-plane/charts/nuodb-cp-operator --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest; \
+		$(HELM) upgrade --install --wait -n default nuodb-operator ../nuodb-control-plane/charts/nuodb-cp-operator --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest; \
 	else \
-		helm upgrade --install --wait -n default nuodb-operator nuodb-cp-operator --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION); \
+		$(HELM) upgrade --install --wait -n default nuodb-operator nuodb-cp-operator --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION); \
 	fi
 
 .PHONY: undeploy-operator
-undeploy-operator:
+undeploy-operator: $(HELM)
 	@$(HELM) uninstall --ignore-not-found -n default nuodb-operator || true;
 
 .PHONY: build-sql
@@ -127,14 +127,14 @@ build-sql:
 	fi
 
 .PHONY: deploy-sql
-deploy-sql: build-sql
+deploy-sql: build-sql $(HELM) $(KIND)
 	@if [ -d ../nuodbaas-sql/charts/nuodbaas-sql ] ; then \
 		$(KIND) load docker-image nuodbaas-sql; \
-		helm upgrade --install --wait -n default nuodbaas-sql ../nuodbaas-sql/charts/nuodbaas-sql --set image.repository=nuodbaas-sql --set image.tag=latest --set nuodbaasSql.ingress.enabled=true; \
+		$(HELM) upgrade --install --wait -n default nuodbaas-sql ../nuodbaas-sql/charts/nuodbaas-sql --set image.repository=nuodbaas-sql --set image.tag=latest --set nuodbaasSql.ingress.enabled=true; \
 	fi
 
 .PHONY: undeploy-sql
-undeploy-sql: build-sql
+undeploy-sql: build-sql $(HELM)
 	@$(HELM) uninstall --ignore-not-found -n default nuodbaas-sql; \
 
 .PHONY: build-webui
@@ -147,18 +147,18 @@ build-webui:
 	fi
 
 .PHONY: deploy-webui
-deploy-webui: build-webui
+deploy-webui: build-webui $(HELM) $(KIND)
 	@if [ -d charts/nuodbaas-webui ] ; then \
 		$(KIND) load docker-image nuodbaas-webui; \
-		helm upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=latest --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api; \
+		$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=latest --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api; \
 	fi
 
 .PHONY: undeploy-webui
-undeploy-webui:
+undeploy-webui: $(HELM)
 	@$(HELM) uninstall --ignore-not-found -n default nuodbaas-webui; \
 
 .PHONY: setup-integration-tests
-setup-integration-tests: build-image install-crds deploy-cp deploy-operator deploy-sql deploy-webui ## setup containers before running integration tests
+setup-integration-tests: $(KUBECTL) build-image install-crds deploy-cp deploy-operator deploy-sql deploy-webui ## setup containers before running integration tests
 	@if [ "$(NUODB_CP_URL_BASE)" = "" ] ; then \
 		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_URL_BASE%%%#http://localhost:8081#g" > docker/development/default.conf; \
 	else \
@@ -232,7 +232,7 @@ stop-dev: teardown-integration-tests ## stop development environment processes (
 	@rm -rf ~/.kind
 
 
-$(KIND): $(KUBECTL)
+$(KIND):
 	mkdir -p $(shell dirname ${KIND})
 	curl -f -Lo ${KIND} https://kind.sigs.k8s.io/dl/v${KIND_VERSION}/kind-${OS}-${ARCH}
 	chmod +x ${KIND}
