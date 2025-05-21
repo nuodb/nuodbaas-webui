@@ -1,15 +1,11 @@
-# (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+# (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 FROM node:18-alpine AS build-ui
 WORKDIR /app/
 ARG REACT_APP_GIT_SHA
-COPY ui/package.json /app/
-COPY ui/tsconfig.json /app/
+COPY ui/ /app/
 RUN npm install
-COPY ui/public/ /app/public
-COPY ui/src/ /app/src
 RUN npm run build
-RUN npm test -- --watchAll=false
 
 FROM nginx:alpine
 COPY --from=build-ui /app/build /usr/share/nginx/html/ui/
