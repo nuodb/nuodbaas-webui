@@ -44,7 +44,7 @@ public class TestRoutines extends SeleniumTestHelper {
     public static final String TEST_ORGANIZATION = getenv("TEST_ORGANIZATION", "integrationtest");
     public static final String TEST_ADMIN_USER = getenv("TEST_ADMIN_USER", "admin");
     public static final String TEST_ADMIN_PASSWORD = getenv("TEST_ADMIN_PASSWORD", "passw0rd");
-    public static final String CP_URL = getenv("CP_URL", "http://localhost:8081");
+    public static final String CP_URL = getenv("CP_URL", "http://localhost/api");
     public static final String MENU_COLUMN = "$ref";
 
     private static final int MAX_RETRIES = 10;
@@ -164,10 +164,7 @@ public class TestRoutines extends SeleniumTestHelper {
             if(fieldValueList[i].startsWith("accessRule")) {
                 waitElement("section-title-access-deny-rules").click();
             }
-            WebElement element = waitInputElementByName(fieldValueList[i]);
-            if(!element.getAttribute("value").equals(fieldValueList[i+1])) {
-                element.sendKeys(fieldValueList[i+1]);
-            }
+            replaceInputElementByName(fieldValueList[i], fieldValueList[i+1]);
         }
         waitElement("create_resource__create_button").click();
         createdResources.computeIfAbsent(resource, n -> new HashSet<String>()).add(name);

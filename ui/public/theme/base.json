@@ -60,6 +60,10 @@
                     ],
                     "visible": "maintenance.isDisabled=false",
                     "confirm": "confirm.stop.database.body"
+                },
+                {
+                    "label": "button.sql.editor",
+                    "link": "/ui/page/sql/{organization}/{project}/{name}"
                 }
             ]
         },

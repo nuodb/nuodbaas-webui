@@ -18,6 +18,7 @@
         "stop.database": "Stop Database",
         "show.databases": "Show Databases",
         "show.backups": "Show Backups",
+        "sql.editor": "SQL Editor",
         "settings": "Settings",
         "automation": "Automation",
         "logout": "Logout",
@@ -100,7 +101,8 @@
             "retention.settings.relativeToLast": "Relative to last",
             "retention.settings.promoteLatestToHourly": "Promote latest to hourly",
             "retention.settings.promoteLatestToDaily": "Promote latest to daily",
-            "retention.settings.promoteLatestToMonthly": "Promote latest to monthly"
+            "retention.settings.promoteLatestToMonthly": "Promote latest to monthly",
+            "sql.operation": "Operation"
         },
         "crontab": {
             "minute": "Minute",
@@ -159,6 +161,13 @@
             "label": {
                 "theme": "Theme",
                 "title": "Settings"
+            }
+        },
+        "sqleditor": {
+            "label": {
+                "dbUsername": "DB Username",
+                "dbPassword": "DB Password",
+                "dbSchema": "DB Schema"
             }
         }
     },
