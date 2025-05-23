@@ -5,7 +5,6 @@ import { SqlResponse, SqlType } from "../../../utils/SqlSocket";
 import SqlResultsRender from "./SqlResultsRender";
 import Pagination from "../../controls/Pagination";
 import { useEffect, useState } from "react";
-import { LastPage } from "@mui/icons-material";
 
 type SqlBrowseTabProps = {
     sqlConnection: SqlType;
@@ -20,7 +19,7 @@ type SqlResponseState = {
 
 function SqlBrowseTab({sqlConnection, table}: SqlBrowseTabProps) {
     const [state, setState] = useState<SqlResponseState>({sqlResponse: undefined, page:1, lastPage:1});
-    const DEFAULT_PAGE_SIZE = 3;
+    const DEFAULT_PAGE_SIZE = 100;
 
     useEffect(()=> {
         refreshResults(1, 1, table);

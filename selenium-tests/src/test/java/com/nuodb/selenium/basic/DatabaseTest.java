@@ -101,7 +101,9 @@ public class DatabaseTest extends TestRoutines {
          waitRestComplete();
 
        // find database and "Stop Database" button
-       retry(()->{
+       retry(60,1000,()->{
+            clickMenu(Resource.projects.name());
+            clickMenu(Resource.databases.name());
             menuCells1.clear();
             menuCells1.add(waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN));
             assertEquals(1, menuCells1.get(0).size());
