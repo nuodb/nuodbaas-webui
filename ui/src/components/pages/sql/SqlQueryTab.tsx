@@ -8,6 +8,7 @@ import Select, { SelectOption } from '../../controls/Select';
 import TextField from '../../controls/TextField';
 import Button from '../../controls/Button';
 import SqlResultsRender from './SqlResultsRender';
+import Toast from '../../controls/Toast';
 
 type SqlQueryTabProps = {
     sqlConnection: SqlType;
@@ -26,7 +27,7 @@ function SqlQueryTab({sqlConnection, dbTable}: SqlQueryTabProps) {
     return <><form>
         <div className="NuoRow NuoFieldContainer">
             <div className="NuoRowFixed">
-                <Select id="operation" label={t("field.operation.label")} value={operation} autoFocus={true} onChange={({ target: input }) => {
+                <Select id="operation" label={t("field.label.sql.operation")} value={operation} autoFocus={true} onChange={({ target: input }) => {
                     setOperation(input.value);
                 }} disabled={false}>
                     {SqlOperations.map((operation: string) => <SelectOption key={operation} value={operation}>{operation}</SelectOption>)}
@@ -34,7 +35,15 @@ function SqlQueryTab({sqlConnection, dbTable}: SqlQueryTabProps) {
             </div>
             <TextField required data-testid="sqlQuery" id="sqlQuery" label="SQL Query" value={sqlQuery} onChange={(event: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) => setSqlQuery(event.target.value)} />
             <Button data-testid="submitSql" disabled={!sqlConnection} variant="contained" type="submit" onClick={async ()=>{
-                setResults(await sqlConnection.runCommand("EXECUTE_QUERY", [sqlQuery]));
+                const response: SqlResponse = await sqlConnection.runCommand(operation, [sqlQuery]);
+                if (response.status === "SUCCESS") {
+                    let shortQuery = sqlQuery.replaceAll("\n", " ");
+                    if (shortQuery.length > 80) {
+                        shortQuery = shortQuery.substring(0, 80) + "...";
+                    }
+                    Toast.show("SUCCESS: " + shortQuery, null);
+                }
+                setResults(response);
             }}>Submit</Button>
         </div>
     </form>

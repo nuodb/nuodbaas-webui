@@ -37,8 +37,7 @@ function SqlPagedQuery({pageSize, sqlConnection, sqlQuery}: SqlQueryProps) {
             const countResults = await sqlConnection.runCommand("EXECUTE_QUERY", ["SELECT count(*) FROM (" + sqlQuery + ") total"]);
             if(countResults.status === "SUCCESS" && countResults.rows && countResults.rows[0] && countResults.rows[0].values) {
                 const totalRows = countResults.rows[0].values[0];
-                setLastPage(Math.ceil(totalRows / pageSize) + (page-1));
-                console.log("lastPage", Math.ceil(totalRows / pageSize) + (page-1));
+                setLastPage(Math.ceil(totalRows / pageSize));
             }
         }
         else {

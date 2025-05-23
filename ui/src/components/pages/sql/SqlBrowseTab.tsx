@@ -39,7 +39,7 @@ function SqlBrowseTab({sqlConnection, table}: SqlBrowseTabProps) {
             const countResults = await sqlConnection.runCommand("EXECUTE_QUERY", ["SELECT count(*) FROM (" + sqlQuery + ") total"]);
             if(countResults.status === "SUCCESS" && countResults.rows && countResults.rows[0] && countResults.rows[0].values) {
                 const totalRows = countResults.rows[0].values[0];
-                state.lastPage = Math.ceil(totalRows / DEFAULT_PAGE_SIZE) + (page-1);
+                state.lastPage = Math.ceil(totalRows / DEFAULT_PAGE_SIZE);
             }
         }
         setState(state);
