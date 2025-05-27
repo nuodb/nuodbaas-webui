@@ -101,8 +101,7 @@
             "retention.settings.relativeToLast": "Relative to last",
             "retention.settings.promoteLatestToHourly": "Promote latest to hourly",
             "retention.settings.promoteLatestToDaily": "Promote latest to daily",
-            "retention.settings.promoteLatestToMonthly": "Promote latest to monthly",
-            "sql.operation": "Operation"
+            "retention.settings.promoteLatestToMonthly": "Promote latest to monthly"
         },
         "crontab": {
             "minute": "Minute",
@@ -167,7 +166,14 @@
             "label": {
                 "dbUsername": "DB Username",
                 "dbPassword": "DB Password",
-                "dbSchema": "DB Schema"
+                "dbSchema": "DB Schema",
+                "title": "SQL Editor",
+                "allFieldsRequired": "All fields are required"
+            },
+            "button": {
+                "login": "Login",
+                "executing": "Executing...",
+                "submit": "Submit"
             }
         }
     },

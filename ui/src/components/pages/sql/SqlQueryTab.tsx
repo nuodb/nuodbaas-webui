@@ -3,8 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { withTranslation } from "react-i18next";
 import { t } from 'i18next';
-import { SqlOperations, SqlOperationType, SqlResponse, SqlType } from '../../../utils/SqlSocket';
-import Select, { SelectOption } from '../../controls/Select';
+import { SqlResponse, SqlType } from '../../../utils/SqlSocket';
 import TextField from '../../controls/TextField';
 import Button from '../../controls/Button';
 import SqlResultsRender from './SqlResultsRender';
@@ -14,10 +13,10 @@ type SqlQueryTabProps = {
     sqlConnection: SqlType;
     dbTable: string;
 }
-function SqlQueryTab({sqlConnection, dbTable}: SqlQueryTabProps) {
-    const [operation, setOperation] = useState<SqlOperationType>("EXECUTE_QUERY");
+function SqlQueryTab({ sqlConnection, dbTable }: SqlQueryTabProps) {
     const [results, setResults] = useState<SqlResponse|undefined>(undefined);
     const [sqlQuery, setSqlQuery] = useState("");
+    const [executing, setExecuting] = useState(false);
 
     useEffect(()=>{
         setSqlQuery("select * from `" + dbTable + "` limit 100");
@@ -26,16 +25,10 @@ function SqlQueryTab({sqlConnection, dbTable}: SqlQueryTabProps) {
 
     return <><form>
         <div className="NuoRow NuoFieldContainer">
-            <div className="NuoRowFixed">
-                <Select id="operation" label={t("field.label.sql.operation")} value={operation} autoFocus={true} onChange={({ target: input }) => {
-                    setOperation(input.value);
-                }} disabled={false}>
-                    {SqlOperations.map((operation: string) => <SelectOption key={operation} value={operation}>{operation}</SelectOption>)}
-                </Select>
-            </div>
-            <TextField required data-testid="sqlQuery" id="sqlQuery" label="SQL Query" value={sqlQuery} onChange={(event: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) => setSqlQuery(event.target.value)} />
-            <Button data-testid="submitSql" disabled={!sqlConnection} variant="contained" type="submit" onClick={async ()=>{
-                const response: SqlResponse = await sqlConnection.runCommand(operation, [sqlQuery]);
+            <TextField disabled={!sqlConnection || executing} required data-testid="sqlQuery" id="sqlQuery" label="SQL Query" value={sqlQuery} onChange={(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSqlQuery(event.target.value)} />
+            <Button data-testid="submitSql" disabled={!sqlConnection || executing} variant="contained" type="submit" onClick={async () => {
+                setExecuting(true);
+                const response: SqlResponse = await sqlConnection.runCommand("EXECUTE", [sqlQuery]);
                 if (response.status === "SUCCESS") {
                     let shortQuery = sqlQuery.replaceAll("\n", " ");
                     if (shortQuery.length > 80) {
@@ -44,7 +37,8 @@ function SqlQueryTab({sqlConnection, dbTable}: SqlQueryTabProps) {
                     Toast.show("SUCCESS: " + shortQuery, null);
                 }
                 setResults(response);
-            }}>Submit</Button>
+                setExecuting(false);
+            }}>{executing ? t("form.sqleditor.button.executing") : t("form.sqleditor.button.submit")}</Button>
         </div>
     </form>
     <SqlResultsRender results={results} />

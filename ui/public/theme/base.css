@@ -904,6 +904,8 @@ button:focus {
     display: inline;
 }
 .NuoSqlError {
-    white-space: pre-line;
+    white-space: preserve nowrap;
     color: red;
+    font-size: .8em;
+        font-family: monospace;
 }

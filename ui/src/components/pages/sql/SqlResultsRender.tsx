@@ -14,7 +14,7 @@ function SqlResultsRender({results}: SqlTableProps) {
         return null;
     }
     else if (results.error) {
-        return <div className="NuoSqlError">{results.error.split("\n").map((line, index) => <div key={index}>{line}</div>)}</div>
+        return <div className="NuoSqlError">{results.error}</div>
     }
     return <Table>
         <TableHead>

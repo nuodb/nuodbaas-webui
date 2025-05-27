@@ -43,12 +43,13 @@ export type SqlResponse = {
 
 export type SqlType = {
     runCommand: (operation: SqlOperationType, args: any[]) => Promise<SqlResponse>;
+    getDefaultSchema: () => string;
 }
 
 export default function SqlSocket(organization: string, project: string, database: string, schema: string, dbUsername: string, dbPassword: string) : SqlType {
     let nextTransactionId = 0;
 
-    return { runCommand };
+    return { runCommand, getDefaultSchema };
 
     async function runCommand(operation: SqlOperationType, args: any[]) : Promise<SqlResponse> {
         let request : SqlRequest = {operation: operation.toString(), args, requestId: String(nextTransactionId)};
@@ -60,5 +61,9 @@ export default function SqlSocket(organization: string, project: string, databas
                 "Authorization": "Basic " + btoa(dbUsername + ":" + dbPassword)
             }});
         return response.data;
+    }
+
+    function getDefaultSchema() {
+        return schema;
     }
 }

@@ -7,16 +7,22 @@ export PATH := $(BIN_DIR):$(PATH)
 OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ARCH := $(shell uname -m | sed "s/x86_64/amd64/g")
 
+KWOKCTL_VERSION ?= 0.5.1
 KIND_VERSION ?= 0.27.0
 KUBECTL_VERSION ?= 1.28.3
 HELM_VERSION ?= 3.16.2
 NUODB_CP_VERSION ?= 2.8.1
 
+NUODB_CP_REPO ?= ../nuodb-control-plane
+
+K8S_TYPE ?= kind
+K8S_NETWORK ?= $(shell if [ "${K8S_TYPE}" = "kwok"] ; then echo "kwok-kwok"; else echo "kind"; fi)
+KWOKCTL := bin/kwokctl
 KIND=$(shell pwd)/bin/kind
 KIND_CONTROL_PLANE="kind-kind"
 KUBECTL := $(shell pwd)/bin/kubectl
 HELM := $(shell pwd)/bin/helm
-REMOVE_KIND_ON_STOP=/tmp/remove_kind_on_stop
+REMOVE_K8S_ON_STOP=/tmp/remove_k8s_on_stop
 
 IMG_REPO := nuodbaas-webui
 VERSION := $(shell grep -e "^appVersion:" charts/nuodbaas-webui/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
@@ -55,23 +61,32 @@ build-image:  ## build UI and create Docker image
 copyright: ### check copyrights
 	./copyright.sh
 
-.PHONY: install-crds
-install-crds: $(KIND) $(KUBECTL) $(HELM)
-	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
-		echo "Kind cluster exists already"; \
-		$(KIND) export kubeconfig; \
-		$(KIND) export kubeconfig --kubeconfig selenium-tests/files/kubeconfig; \
+.PHONY: create-cluster
+create-cluster: $(KIND) $(KUBECTL)
+	@if [ "$(K8S_TYPE)" = "kwok" ] ; then \
+		$(KWOKCTL) create cluster --wait 120s; \
+		$(KWOKCTL) get kubeconfig | sed "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kwok-kwok-kube-apiserver:6443/g" > selenium-tests/files/kubeconfig; \
+		$(KUBECTL) apply -f selenium-tests/files/nuodb-cp-runtime-config.yaml --context kwok-kwok -n default; \
 	else \
-		$(KIND) create cluster --wait 120s --config selenium-tests/kind.yaml; \
-		$(KIND) export kubeconfig; \
-		$(KIND) export kubeconfig --kubeconfig selenium-tests/files/kubeconfig; \
-		$(KUBECTL) apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml; \
-		$(KUBECTL) wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=60s; \
-		touch $(REMOVE_KIND_ON_STOP); \
-	fi
+		if [ "`$(KIND) get clusters`" = "kind" ] ; then \
+			echo "Kind cluster exists already"; \
+			$(KIND) export kubeconfig; \
+			$(KIND) export kubeconfig --kubeconfig selenium-tests/files/kubeconfig; \
+		else \
+			$(KIND) create cluster --wait 120s --config selenium-tests/kind.yaml; \
+			$(KIND) export kubeconfig; \
+			$(KIND) export kubeconfig --kubeconfig selenium-tests/files/kubeconfig; \
+			$(KUBECTL) apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml; \
+			$(KUBECTL) wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=60s; \
+			touch $(REMOVE_K8S_ON_STOP); \
+		fi; \
+	fi;
+
+.PHONY: install-crds
+install-crds: create-cluster $(HELM)
 	@sed -i "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kind-control-plane:6443/g" selenium-tests/files/kubeconfig
-	@if [ -d ../nuodb-control-plane/charts/nuodb-cp-crd/templates ] ; then \
-		find ../nuodb-control-plane/charts/nuodb-cp-crd/templates -name "*.yaml" | while read line; do $(KUBECTL) apply -f $$line; done; \
+	@if [ -d $(NUODB_CP_REPO)/charts/nuodb-cp-crd/templates ] ; then \
+		$(HELM) install -n default nuodb-cp-crd $(NUODB_CP_REPO)/charts/nuodb-cp-crd; \
 	else \
 		$(HELM) install -n default nuodb-cp-crd nuodb-cp-crd --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION); \
 	fi
@@ -79,16 +94,12 @@ install-crds: $(KIND) $(KUBECTL) $(HELM)
 
 .PHONY: uninstall-crds
 uninstall-crds: $(KUBECTL) $(HELM)
-	@if [ -d ../nuodb-control-plane/charts/nuodb-cp-crd/templates ] ; then \
-		find ../nuodb-control-plane/charts/nuodb-cp-crd/templates -name "*.yaml" | while read line; do $(KUBECTL) delete -f $$line; done; \
-	else \
-		$(HELM) uninstall --ignore-not-found -n default nuodb-cp-crd; \
-	fi
+	$(HELM) uninstall --ignore-not-found -n default nuodb-cp-crd
 
 .PHONY: build-cp
 build-cp:
-	@if [ -f ../nuodb-control-plane/Makefile ] ; then \
-		cd ../nuodb-control-plane; make docker-build; \
+	@if [ -f $(NUODB_CP_REPO)/Makefile ] ; then \
+		make -C $(NUODB_CP_REPO) docker-build; \
 	else \
 		docker pull ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION); \
 		docker tag ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION) nuodb/nuodb-control-plane; \
@@ -96,9 +107,11 @@ build-cp:
 
 .PHONY: deploy-cp
 deploy-cp: build-cp $(HELM) $(KIND)
-	@if [ -d ../nuodb-control-plane/charts/nuodb-cp-rest ] ; then \
-		$(KIND) load docker-image nuodb/nuodb-control-plane; \
-		$(HELM) upgrade --install --wait -n default nuodb-cp ../nuodb-control-plane/charts/nuodb-cp-rest --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
+	@if [ -d $(NUODB_CP_REPO)/charts/nuodb-cp-rest ] ; then \
+		if [ "${K8S_TYPE}" = "kind"]; then \
+			$(KIND) load docker-image nuodb/nuodb-control-plane; \
+		fi; \
+		$(HELM) upgrade --install --wait -n default nuodb-cp $(NUODB_CP_REPO)/charts/nuodb-cp-rest --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
 	else \
 		$(HELM) upgrade --install --wait -n default nuodb-cp nuodb-cp-rest --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION) --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
 	fi
@@ -109,9 +122,11 @@ undeploy-cp: $(HELM)
 
 .PHONY: deploy-operator
 deploy-operator: build-cp $(HELM) $(KIND)
-	@if [ -d ../nuodb-control-plane/charts/nuodb-cp-operator ] ; then \
-		$(KIND) load docker-image nuodb/nuodb-control-plane; \
-		$(HELM) upgrade --install --wait -n default nuodb-operator ../nuodb-control-plane/charts/nuodb-cp-operator --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest; \
+	@if [ -d $(NUODB_CP_REPO)/charts/nuodb-cp-operator ] ; then \
+		if [ "${K8S_TYPE}" = "kind" ] ; then \
+			$(KIND) load docker-image nuodb/nuodb-control-plane; \
+		fi; \
+		$(HELM) upgrade --install --wait -n default nuodb-operator $(NUODB_CP_REPO)/charts/nuodb-cp-operator --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest; \
 	else \
 		$(HELM) upgrade --install --wait -n default nuodb-operator nuodb-cp-operator --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION); \
 	fi
@@ -129,7 +144,9 @@ build-sql:
 .PHONY: deploy-sql
 deploy-sql: build-sql $(HELM) $(KIND)
 	@if [ -d ../nuodbaas-sql/charts/nuodbaas-sql ] ; then \
-		$(KIND) load docker-image nuodbaas-sql; \
+		if [ "${K8S_TYPE}" = "kind" ] ; then \
+			$(KIND) load docker-image nuodbaas-sql; \
+		fi; \
 		$(HELM) upgrade --install --wait -n default nuodbaas-sql ../nuodbaas-sql/charts/nuodbaas-sql --set image.repository=nuodbaas-sql --set image.tag=latest --set nuodbaasSql.ingress.enabled=true; \
 	fi
 
@@ -149,7 +166,9 @@ build-webui:
 .PHONY: deploy-webui
 deploy-webui: build-webui $(HELM) $(KIND)
 	@if [ -d charts/nuodbaas-webui ] ; then \
-		$(KIND) load docker-image nuodbaas-webui; \
+		if [ "${K8S_TYPE}" = "kind" ] ; then \
+			$(KIND) load docker-image nuodbaas-webui; \
+		fi; \
 		$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=latest --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api; \
 	fi
 
@@ -186,11 +205,15 @@ setup-integration-tests: $(KUBECTL) build-image install-crds deploy-cp deploy-op
 	@$(KUBECTL) get pods -A
 
 .PHONY: teardown-integration-tests
-teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-cp undeploy-operator uninstall-crds ## clean up containers used by integration tests
+teardown-integration-tests: $(KWOKCTL) $(KIND) undeploy-sql undeploy-webui undeploy-operator undeploy-cp uninstall-crds ## clean up containers used by integration tests
 	@docker compose -f selenium-tests/compose.yaml down
-	@if [ -f $(REMOVE_KIND_ON_STOP) ] ; then \
-		rm $(REMOVE_KIND_ON_STOP) ; \
-		$(KIND) delete cluster 2> /dev/null || true ; \
+	@if [ -f $(REMOVE_K8S_ON_STOP) ] ; then \
+		rm $(REMOVE_K8S_ON_STOP) ; \
+		if [ "$(K8S_TYPE)" = "kwok" ] ; then \
+			$(KWOKCTL) delete cluster 2> /dev/null || true; \
+		else \
+			$(KIND) delete cluster 2> /dev/null || true ; \
+		fi; \
 	fi
 
 .PHONY: run-integration-tests-only
@@ -203,7 +226,7 @@ build-integration-tests-docker:
 
 .PHONY: run-smoke-tests-docker-only
 run-smoke-tests-docker-only: build-integration-tests-docker
-	@cd selenium-tests && docker run -e URL_BASE=http://selenium-tests-nginx-1 -e CP_URL="http://selenium-tests-nuodb-cp-1:8080" -e MVN_TEST=${MVN_TEST} --net kind -it "${IMG_REPO}:test" && cd ..
+	@cd selenium-tests && docker run -e URL_BASE=http://selenium-tests-nginx-1 -e CP_URL="http://selenium-tests-nuodb-cp-1:8080" -e MVN_TEST=${MVN_TEST} --net ${K8S_NETWORK} -it "${IMG_REPO}:test" && cd ..
 
 .PHONY: run-smoke-tests-docker
 run-smoke-tests-docker: setup-integration-tests ## integration tests without setup/teardown (docker version)
@@ -227,10 +250,18 @@ stop-dev: teardown-integration-tests ## stop development environment processes (
 	if [ "$$PID" != "" ] ; then kill -9 $$PID; fi
 	@PID=$(shell docker ps -aq --filter "name=nuodb-webui-dev"); \
 	if [ "$$PID" != "" ] ; then docker stop $$PID; fi
+	@DOT_KWOK_OWNER=$(shell stat -c '%U' ~/.kwok 2>/dev/null); \
+	if [ "$$DOT_KWOK_OWNER" = "root" ] ; then sudo rm -r ~/.kwok; fi
+	@rm -rf ~/.kwok
 	@DOT_KIND_OWNER=$(shell stat -c '%U' ~/.kind 2>/dev/null); \
 	if [ "$$DOT_KIND_OWNER" = "root" ] ; then sudo rm -r ~/.kind; fi
 	@rm -rf ~/.kind
 
+
+$(KWOKCTL): $(KUBECTL)
+	mkdir -p bin
+	curl -L -s https://github.com/kubernetes-sigs/kwok/releases/download/v$(KWOKCTL_VERSION)/kwokctl-$(OS)-$(ARCH) -o $(KWOKCTL)
+	chmod +x $(KWOKCTL)
 
 $(KIND):
 	mkdir -p $(shell dirname ${KIND})

@@ -31,7 +31,7 @@ function SqlPage(props: PageProps) {
     });
 
     async function refreshTables(s: SqlType) {
-        const results = await s.runCommand("EXECUTE_QUERY", ["SELECT tablename FROM system.tables where type = 'TABLE'"]);
+        const results = await s.runCommand("EXECUTE_QUERY", ["SELECT tablename FROM system.tables where type = 'TABLE' and schema = '" + s.getDefaultSchema() + "'"]);
         if (results.error) {
             Toast.show(results.error, results);
             setDbTables([]);
@@ -58,7 +58,7 @@ function SqlPage(props: PageProps) {
 
     return <PageLayout {...props}>
         <div className="NuoListResourceHeader">
-            <h3>SQL Editor</h3>
+            <h3>{t("form.sqleditor.label.title")}</h3>
             <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
                 <StyledBreadcrumbs data-testid="path_component" separator=">" aria-label="resources" style={{ color: "#b5b9bc", fontSize: "1em", padding: "0 20px", display: "flex", flexWrap: "nowrap" }}>
                     {[params.organization, params.project, params.database].map(name => {

@@ -20,7 +20,7 @@ function SqlLogin({setSqlConnection}: SqlLoginProps) {
     const [dbSchema, setDbSchema] = useState("");
     const [error, setError] = useState<string|undefined>("");
 
-    return <>
+    return <form>
         <div className="NuoFieldContainer">
             <TextField
                 id="dbUsername"
@@ -47,19 +47,22 @@ function SqlLogin({setSqlConnection}: SqlLoginProps) {
             />
         </div>
         <div className="NuoFieldContainer">
-        <Button disabled={!params.organization || !params.project || !params.database || !dbUsername || !dbPassword || !dbSchema} onClick={async () => {
-            if (params.organization && params.project && params.database && dbSchema) {
-                const conn = SqlSocket(params.organization, params.project, params.database, dbSchema, dbUsername, dbPassword);
-                const response: SqlResponse = await conn.runCommand("EXECUTE_QUERY", ["SELECT 1 FROM DUAL"]);
-                setError(response.error);
-                if(!response.error) {
-                    setSqlConnection(conn);
+            <Button type="submit" onClick={async () => {
+                if (params.organization && params.project && params.database && dbUsername && dbPassword && dbSchema) {
+                    const conn = SqlSocket(params.organization, params.project, params.database, dbSchema, dbUsername, dbPassword);
+                    const response: SqlResponse = await conn.runCommand("EXECUTE_QUERY", ["SELECT 1 FROM DUAL"]);
+                    setError(response.error);
+                    if (!response.error) {
+                        setSqlConnection(conn);
+                    }
                 }
-            }
-        }}>Login</Button>
+                else {
+                    setError(t("form.sqleditor.label.allFieldsRequired"))
+                }
+            }}>{t("form.sqleditor.button.login")}</Button>
         </div>
         <div className="NuoSqlError">{error}</div>
-    </>;
+    </form>;
 }
 
 export default withTranslation()(SqlLogin);
