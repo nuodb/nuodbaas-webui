@@ -903,3 +903,9 @@ button:focus {
 .NuoMoreValueExpanded {
     display: inline;
 }
+.NuoSqlError {
+    white-space: preserve nowrap;
+    color: red;
+    font-size: .8em;
+        font-family: monospace;
+}

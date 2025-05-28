@@ -18,6 +18,7 @@
         "stop.database": "Stop Database",
         "show.databases": "Show Databases",
         "show.backups": "Show Backups",
+        "sql.editor": "SQL Editor",
         "settings": "Settings",
         "automation": "Automation",
         "logout": "Logout",
@@ -159,6 +160,20 @@
             "label": {
                 "theme": "Theme",
                 "title": "Settings"
+            }
+        },
+        "sqleditor": {
+            "label": {
+                "dbUsername": "DB Username",
+                "dbPassword": "DB Password",
+                "dbSchema": "DB Schema",
+                "title": "SQL Editor",
+                "allFieldsRequired": "All fields are required"
+            },
+            "button": {
+                "login": "Login",
+                "executing": "Executing...",
+                "submit": "Submit"
             }
         }
     },

@@ -30,7 +30,7 @@ export default function PageLayout(props: PageLayoutProps) {
         </div>
         <div className="NuoColumn NuoContainerLG">
             <div>{schema && <Banner {...props} isRecording={isRecording} />}</div>
-            <div>{children}</div>
+            <div className="NuoColumn">{children}</div>
         </div>
     </div>
 }
