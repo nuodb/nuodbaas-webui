@@ -46,24 +46,6 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
         const provider = urlParams.get("provider");
         const ticket = urlParams.get("ticket");
 
-        axios.get("/ui/providers.json")
-            .then((response) => {
-                if (response.data.length === 1) {
-                    setSelectedProvider(response.data[0]);
-                }
-                setProviders(response.data);
-            })
-            .catch((error) => {
-                console.error("Error fetching providers:", error);
-            })
-            .finally(() => {
-                // Don't set loading to false here if we are handling ticket login
-                if (!provider || !ticket) {
-                    setLoading(false);
-                    setInitializing(false);
-                }
-            });
-
         if (provider && ticket) {
             setProgressMessage("Logging in to provider " + provider);
             const service = window.location.protocol + "//" + window.location.host + "/ui/login?provider=" + encodeURIComponent(provider);
@@ -81,9 +63,20 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                     console.error("Login Failed", reason);
                 });
         } else {
-            Rest.get("/login/providers").then((data: TempAny) => {
-                setProviders(data);
-            });
+            Rest.get("/login/providers")
+                .then((data: TempAny) => {
+                    if (data.length === 1) {
+                        setSelectedProvider(data[0]);
+                    }
+                    setProviders(data);
+                }).catch((error) => {
+                    console.error("Error fetching providers:", error);
+                }).finally(() => {
+                    if (!provider || !ticket) {
+                        setLoading(false);
+                        setInitializing(false);
+                    }
+                });
         }
     }, []);
 
@@ -120,7 +113,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
             <div className="NuoLoginForm">
                 <img alt="" />
                 {progressMessage && <h2>{progressMessage}</h2>}
-                {loading ? <div className="NuoModal" > <div className="spinner" /> t{"form.login.label.loadingProvider"}</div> :
+                {loading ? <div className="NuoModal" > <div className="spinner" /> {t("form.login.label.loadingProvider")}</div> :
                     !selectedProvider && (
                         <div className="NuoProviderButton">
                             {providers.length !== 1 && providers.map((provider: Provider) => (
