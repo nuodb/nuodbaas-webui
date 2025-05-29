@@ -965,3 +965,9 @@ button:focus {
         transform: rotate(360deg);
     }
 }
+.NuoSqlError {
+    white-space: preserve nowrap;
+    color: red;
+    font-size: .8em;
+        font-family: monospace;
+}

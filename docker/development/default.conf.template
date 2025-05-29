@@ -18,6 +18,15 @@ server {
     proxy_buffering off;
   }
 
+  location /api/sql/ {
+    proxy_pass %%%NUODB_SQL_URL_BASE%%%/sql/;
+  }
+
+  location /api/ws/sql/ {
+    proxy_pass %%%NUODB_SQL_URL_BASE%%%/ws/sql/
+    proxy_buffering off;
+  }
+
   location / {
     proxy_pass http://localhost:3000/;
   }

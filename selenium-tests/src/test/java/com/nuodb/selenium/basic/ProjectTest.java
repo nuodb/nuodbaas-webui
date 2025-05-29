@@ -33,7 +33,7 @@ public class ProjectTest extends TestRoutines {
 
         // verify project is gone
         waitRestComplete();
-        retry(()->{
+        retry(30, 1000, ()->{
             List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", projectName, MENU_COLUMN);
             assertEquals(0, buttonsCell.size());
         });
