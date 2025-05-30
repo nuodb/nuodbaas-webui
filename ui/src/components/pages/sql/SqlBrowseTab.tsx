@@ -5,10 +5,13 @@ import { SqlResponse, SqlType } from "../../../utils/SqlSocket";
 import SqlResultsRender from "./SqlResultsRender";
 import Pagination from "../../controls/Pagination";
 import { useEffect, useState } from "react";
+import SqlFilter, { filterToWhereClause, SqlFilterType } from "./SqlFilter";
+import Button from "../../controls/Button";
 
 type SqlBrowseTabProps = {
     sqlConnection: SqlType;
     table: string;
+    t: any;
 };
 
 type SqlResponseState = {
@@ -17,18 +20,21 @@ type SqlResponseState = {
     lastPage: number;
 };
 
-function SqlBrowseTab({sqlConnection, table}: SqlBrowseTabProps) {
+function SqlBrowseTab({ sqlConnection, table, t }: SqlBrowseTabProps) {
     const [state, setState] = useState<SqlResponseState>({sqlResponse: undefined, page:1, lastPage:1});
+    const [filter, setFilter] = useState<SqlFilterType>({});
+    const [showFilterDialog, setShowFilterDialog] = useState<Boolean>(false);
     const DEFAULT_PAGE_SIZE = 100;
 
     useEffect(()=> {
-        refreshResults(1, 1, table);
+        refreshResults(1, 1, table, filter);
     }, [table]);
 
-    async function refreshResults(page: number, lastPage: number, table: string) {
-        const sqlQuery = "select * from `" + table + "`";
-        const sqlLimitQuery = sqlQuery + " limit " + String(DEFAULT_PAGE_SIZE) + " offset " + String((page-1)*DEFAULT_PAGE_SIZE);
-        const sqlResponse = await sqlConnection.runCommand("EXECUTE_QUERY", [sqlLimitQuery]);
+    async function refreshResults(page: number, lastPage: number, table: string, filter: SqlFilterType) {
+        let sqlQuery = "SELECT * FROM `" + table + "`";
+        sqlQuery += filterToWhereClause(filter);
+        sqlQuery += " limit " + String(DEFAULT_PAGE_SIZE) + " offset " + String((page - 1) * DEFAULT_PAGE_SIZE);
+        const sqlResponse = await sqlConnection.runCommand("EXECUTE_QUERY", [sqlQuery]);
         let state = {
             sqlResponse,
             page,
@@ -41,6 +47,18 @@ function SqlBrowseTab({sqlConnection, table}: SqlBrowseTabProps) {
                 state.lastPage = Math.ceil(totalRows / DEFAULT_PAGE_SIZE);
             }
         }
+        if (sqlResponse.columns) {
+            let initFilter: SqlFilterType = {};
+            sqlResponse.columns.forEach(column => {
+                if (column.name in filter) {
+                    initFilter[column.name] = { ...filter[column.name] };
+                }
+                else {
+                    initFilter[column.name] = { type: "LIKE_PERCENT", value: "" };
+                }
+            });
+            setFilter(initFilter);
+        }
         setState(state);
     }
 
@@ -48,12 +66,20 @@ function SqlBrowseTab({sqlConnection, table}: SqlBrowseTabProps) {
         return <SqlResultsRender results={state.sqlResponse} />
     }
     return <>
+        <Button onClick={async () =>
+            setShowFilterDialog(true)
+        }>Filter</Button>
+        {showFilterDialog && <SqlFilter columns={state?.sqlResponse?.columns || []} filter={filter} setFilter={(newFilter) => {
+            setFilter(newFilter);
+            setShowFilterDialog(false);
+            refreshResults(state.page, state.lastPage, table, newFilter);
+        }} />}
         <SqlResultsRender results={state.sqlResponse} />
         <Pagination
             count={state.lastPage}
             page={state.page}
             setPage={(page) => {
-                refreshResults(page, state.lastPage, table);
+                refreshResults(page, state.lastPage, table, filter);
             }}
         />
     </>
