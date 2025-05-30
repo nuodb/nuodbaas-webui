@@ -30,15 +30,15 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     const [providers, setProviders] = useState([]);
     const [progressMessage, setProgressMessage] = useState("");
 
+    // Specify redirect URL so that provider name is supplied as query parameter
+    const redirectUrl = encodeURIComponent(window.location.protocol + "//" + window.location.host + "/ui/login?provider={name}");
+
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const provider = urlParams.get("provider");
-        const ticket = urlParams.get("ticket");
-        if (provider && ticket) {
+        if (provider) {
             setProgressMessage("Logging in to provider " + provider);
-            const service = window.location.protocol + "//" + window.location.host + "/ui/login?provider=" + encodeURIComponent(provider);
-            Rest.post("/login/providers/" + encodeURIComponent(provider)
-                + "?service=" + encodeURIComponent(service) + "&ticket=" + encodeURIComponent(ticket), "")
+            Rest.get("/login/providers/" + encodeURIComponent(provider) + "/token" + window.location.search + "&redirectUrl=" + redirectUrl, "")
                 .then((data: TempAny) => {
                     localStorage.setItem("credentials", JSON.stringify({
                         token: data.token,
@@ -52,9 +52,9 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                 });
         }
         else {
-            Rest.get("/login/providers").then((data: TempAny) => {
-                if (typeof data === 'object' && !Array.isArray(data)) {
-                    setProviders(data);
+            Rest.get("/login/providers?redirectUrl=" + redirectUrl).then((data: TempAny) => {
+                if (typeof data === "object" && "items" in data) {
+                    setProviders(data.items);
                 }
             });
         }
@@ -83,9 +83,9 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                         <TextField required data-testid="password" id="password" type="password" label="Password" value={password} onChange={(event) => setPassword(event.target.value)} />
                         {error && <h3 data-testid="error_message" style={{ color: "red" }}>{error}</h3>}
                         <Button data-testid="login_button" variant="contained" type="submit" onClick={handleLogin}>Login</Button>
-                            {providers.filter((provider: TempAny) => provider.name !== "local").map((provider: TempAny) => {
-                            return <Button data-testid="login_cas" variant="contained" onClick={() => {
-                                window.location.href = provider.providerUrl + "?service=" + encodeURIComponent(window.location.protocol + "//" + window.location.host + "/ui/login?provider=" + provider.name);
+                        {providers.map((provider: TempAny) => {
+                            return <Button data-testid={"login_" + provider.name} variant="contained" onClick={() => {
+                                window.location.href = provider.url + "&redirectUrl=" + redirectUrl;
                             }}>Login with {provider.description}</Button>
                         })}
                     </div>
