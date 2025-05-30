@@ -31,14 +31,14 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     const [progressMessage, setProgressMessage] = useState("");
 
     // Specify redirect URL so that provider name is supplied as query parameter
-    const redirectUrl = window.location.protocol + "//" + window.location.host + "/ui/login?provider={name}";
+    const redirectUrl = encodeURIComponent(window.location.protocol + "//" + window.location.host + "/ui/login?provider={name}");
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const provider = urlParams.get("provider");
         if (provider) {
             setProgressMessage("Logging in to provider " + provider);
-            Rest.get("/login/providers/" + encodeURIComponent(provider) + "/token" + window.location.search + "&redirectUrl=" + encodeURIComponent(redirectUrl), "")
+            Rest.get("/login/providers/" + encodeURIComponent(provider) + "/token" + window.location.search + "&redirectUrl=" + redirectUrl, "")
                 .then((data: TempAny) => {
                     localStorage.setItem("credentials", JSON.stringify({
                         token: data.token,
@@ -52,7 +52,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                 });
         }
         else {
-            Rest.get("/login/providers?redirectUrl=" + encodeURIComponent(redirectUrl)).then((data: TempAny) => {
+            Rest.get("/login/providers?redirectUrl=" + redirectUrl).then((data: TempAny) => {
                 if (typeof data === "object" && "items" in data) {
                     setProviders(data.items);
                 }
@@ -85,7 +85,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                         <Button data-testid="login_button" variant="contained" type="submit" onClick={handleLogin}>Login</Button>
                         {providers.map((provider: TempAny) => {
                             return <Button data-testid={"login_" + provider.name} variant="contained" onClick={() => {
-                                window.location.href = provider.url + "&redirectUrl=" + encodeURIComponent(redirectUrl);
+                                window.location.href = provider.url + "&redirectUrl=" + redirectUrl;
                             }}>Login with {provider.description}</Button>
                         })}
                     </div>
