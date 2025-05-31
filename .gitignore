@@ -5,8 +5,10 @@ ui/package-lock.json
 ui/build
 selenium-tests/files/kubeconfig
 bin/
+tmp/
 selenium-tests/target
 .project
 .classpath
 build
 docker/development/default.conf
+/.metadata/

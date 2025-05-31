@@ -1,0 +1,19 @@
+# (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+
+apiVersion: cp.nuodb.com/v1beta1
+kind: IdentityProvider
+metadata:
+  annotations:
+    description: Central Authentication Service
+  name: cas-idp
+spec:
+  cas:
+    serverUrl: https://127.0.0.1/cas
+  resolveUser:
+    accessRule:
+      value: |
+        {"allow": ["read:ds"]}
+    name:
+      jsonPath: $.user
+    organization:
+      value: ds

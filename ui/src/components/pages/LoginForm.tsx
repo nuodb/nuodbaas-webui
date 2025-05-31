@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from "react-router-dom";
+import Box from '@mui/material/Box';
+import LinearProgress from '@mui/material/LinearProgress';
 import Auth from "../../utils/auth";
 import Button from '../controls/Button';
 import TextField from '../controls/TextField';
@@ -33,11 +35,20 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     // Specify redirect URL so that provider name is supplied as query parameter
     const redirectUrl = encodeURIComponent(window.location.protocol + "//" + window.location.host + "/ui/login?provider={name}");
 
+    function loginFailed(err: Error) {
+        console.error("Login Failed", err);
+        var detailMsg = err?.response?.data?.detail
+        if (!detailMsg) {
+            detailMsg = err.message
+        }
+        setError("Login failed: " + detailMsg);
+    }
+
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const provider = urlParams.get("provider");
         if (provider) {
-            setProgressMessage("Logging in to provider " + provider);
+            setProgressMessage("Logging in with " + provider + "...");
             Rest.get("/login/providers/" + encodeURIComponent(provider) + "/token" + window.location.search + "&redirectUrl=" + redirectUrl, "")
                 .then((data: TempAny) => {
                     localStorage.setItem("credentials", JSON.stringify({
@@ -46,10 +57,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                         username: data.username
                     }));
                     window.location.href = "/ui";
-                }).catch(reason => {
-                    setError("Login failed");
-                    console.error("Login Failed", reason);
-                });
+                }).catch(loginFailed);
         }
         else {
             Rest.get("/login/providers?redirectUrl=" + redirectUrl).then((data: TempAny) => {
@@ -61,13 +69,13 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     }, []);
 
     async function handleLogin() {
-        let success = await Auth.login(organization + "/" + username, password);
-        if (success) {
+        let err = await Auth.login(organization + "/" + username, password);
+        if (!err) {
             setIsLoggedIn(true);
             navigate(searchParams.get("redirect") || "/ui");
         }
         else {
-            setError("Invalid Credentials")
+            loginFailed(err)
         }
     }
 
@@ -75,7 +83,23 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
         <React.Fragment>
             <div className="NuoLoginForm">
                 <img alt="" />
-                {progressMessage ? <h2>{progressMessage}</h2> :
+                {progressMessage
+                ?
+                <center>
+                    <Box sx={{ width: 'fit-content' }}>
+                        <LinearProgress variant={error ? "determinate" : "indeterminate"} color="inherit" />
+                        <div data-testid="progress_message">{progressMessage}</div>
+                    </Box>
+                    {error &&
+                    <div>
+                        <h3 data-testid="error_message" style={{ color: "red" }}>{error}</h3>
+                        <Button data-testid="back_button" variant="contained" type="submit" onClick={() => {
+                            window.location.href = window.location.protocol + "//" + window.location.host + "/ui/login";
+                        }}>Back to Login</Button>
+                    </div>
+                    }
+                </center>
+                :
                 <form>
                     <div className="fields">
                         <TextField required data-testid="organization" id="organization" label="Organization" value={organization} onChange={(event) => setOrganization(event.target.value)} />
@@ -83,7 +107,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                         <TextField required data-testid="password" id="password" type="password" label="Password" value={password} onChange={(event) => setPassword(event.target.value)} />
                         {error && <h3 data-testid="error_message" style={{ color: "red" }}>{error}</h3>}
                         <Button data-testid="login_button" variant="contained" type="submit" onClick={handleLogin}>Login</Button>
-                        {providers.map((provider: TempAny) => {
+                        {providers.filter((provider: TempAny) => provider.description).map((provider: TempAny) => {
                             return <Button data-testid={"login_" + provider.name} variant="contained" onClick={() => {
                                 window.location.href = provider.url + "&redirectUrl=" + redirectUrl;
                             }}>Login with {provider.description}</Button>
