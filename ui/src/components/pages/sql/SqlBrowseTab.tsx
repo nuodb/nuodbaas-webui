@@ -33,7 +33,7 @@ function SqlBrowseTab({ sqlConnection, table, t }: SqlBrowseTabProps) {
     }, [table]);
 
     async function refreshResults(args: SqlResponseState) {
-        const { page, lastPage, filter, orderBy, isAscending } = args;
+        const { page, filter, orderBy, isAscending } = args;
 
         let sqlQuery = "SELECT * FROM `" + table + "`";
         sqlQuery += filterToWhereClause(filter);
@@ -52,6 +52,9 @@ function SqlBrowseTab({ sqlConnection, table, t }: SqlBrowseTabProps) {
                 const totalRows = countResults.rows[0].values[0];
                 newState.lastPage = Math.ceil(totalRows / DEFAULT_PAGE_SIZE);
             }
+        }
+        else if (sqlResponse.rows && sqlResponse.rows.length === 0) {
+            newState.lastPage = 1;
         }
         if (sqlResponse.columns) {
             let initFilter: SqlFilterType = {};

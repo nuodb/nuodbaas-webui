@@ -3,7 +3,7 @@
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableTh } from '../../controls/Table';
 import { withTranslation } from 'react-i18next';
-import { ColumnMetaData, SqlResponse } from '../../../utils/SqlSocket';
+import { ColumnMetaData } from '../../../utils/SqlSocket';
 import Select, { SelectOption } from '../../controls/Select';
 import TextField from '../../controls/TextField';
 import Button from '../../controls/Button';
