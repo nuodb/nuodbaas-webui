@@ -35,6 +35,15 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     // Specify redirect URL so that provider name is supplied as query parameter
     const redirectUrl = encodeURIComponent(window.location.protocol + "//" + window.location.host + "/ui/login?provider={name}");
 
+    function loginFailed(err: Error) {
+        console.error("Login Failed", err);
+        var detailMsg = err?.response?.data?.detail
+        if (!detailMsg) {
+            detailMsg = err.message
+        }
+        setError("Login failed: " + detailMsg);
+    }
+
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const provider = urlParams.get("provider");
@@ -48,14 +57,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                         username: data.username
                     }));
                     window.location.href = "/ui";
-                }).catch(ex => {
-                    var detailMsg = ex?.response?.data?.detail
-                    if (!detailMsg) {
-                        detailMsg = ex.message
-                    }
-                    setError("Login failed: " + detailMsg);
-                    console.error("Login Failed", ex);
-                });
+                }).catch(loginFailed);
         }
         else {
             Rest.get("/login/providers?redirectUrl=" + redirectUrl).then((data: TempAny) => {
@@ -67,13 +69,13 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     }, []);
 
     async function handleLogin() {
-        let success = await Auth.login(organization + "/" + username, password);
-        if (success) {
+        let err = await Auth.login(organization + "/" + username, password);
+        if (!err) {
             setIsLoggedIn(true);
             navigate(searchParams.get("redirect") || "/ui");
         }
         else {
-            setError("Invalid Credentials")
+            loginFailed(err)
         }
     }
 
