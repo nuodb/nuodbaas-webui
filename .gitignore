@@ -11,4 +11,4 @@ selenium-tests/target
 .classpath
 build
 docker/development/default.conf
-/.metadata/
+nuodb-control-plane/
