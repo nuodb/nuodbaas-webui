@@ -6,7 +6,6 @@ import SqlResultsRender from "./SqlResultsRender";
 import Pagination from "../../controls/Pagination";
 import { useEffect, useState } from "react";
 import SqlFilter, { filterToWhereClause, SqlFilterType } from "./SqlFilter";
-import Button from "../../controls/Button";
 
 type SqlBrowseTabProps = {
     sqlConnection: SqlType;
@@ -18,33 +17,40 @@ type SqlResponseState = {
     sqlResponse: SqlResponse|undefined;
     page: number;
     lastPage: number;
+    filter: SqlFilterType;
+    orderBy: string;
+    isAscending: boolean;
 };
 
 function SqlBrowseTab({ sqlConnection, table, t }: SqlBrowseTabProps) {
-    const [state, setState] = useState<SqlResponseState>({sqlResponse: undefined, page:1, lastPage:1});
-    const [filter, setFilter] = useState<SqlFilterType>({});
+    const [state, setState] = useState<SqlResponseState>({ sqlResponse: undefined, page: 1, lastPage: 1, filter: {}, orderBy: "", isAscending: true });
     const [showFilterDialog, setShowFilterDialog] = useState<Boolean>(false);
     const DEFAULT_PAGE_SIZE = 100;
 
     useEffect(()=> {
-        refreshResults(1, 1, table, filter);
+        const newState = { ...state, page: 1, lastPage: 1, filter: {} };
+        refreshResults(newState);
     }, [table]);
 
-    async function refreshResults(page: number, lastPage: number, table: string, filter: SqlFilterType) {
+    async function refreshResults(args: SqlResponseState) {
+        const { page, lastPage, filter, orderBy, isAscending } = args;
+
         let sqlQuery = "SELECT * FROM `" + table + "`";
         sqlQuery += filterToWhereClause(filter);
-        sqlQuery += " limit " + String(DEFAULT_PAGE_SIZE) + " offset " + String((page - 1) * DEFAULT_PAGE_SIZE);
-        const sqlResponse = await sqlConnection.runCommand("EXECUTE_QUERY", [sqlQuery]);
-        let state = {
+        if (orderBy) {
+            sqlQuery += " ORDER BY `" + orderBy + "` " + (isAscending ? "ASC" : "DESC");
+        }
+        const sqlQueryWithLimit = sqlQuery + " limit " + String(DEFAULT_PAGE_SIZE) + " offset " + String((page - 1) * DEFAULT_PAGE_SIZE);
+        const sqlResponse = await sqlConnection.runCommand("EXECUTE_QUERY", [sqlQueryWithLimit]);
+        let newState: SqlResponseState = {
+            ...args,
             sqlResponse,
-            page,
-            lastPage
         };
         if(sqlResponse.status === "SUCCESS" && sqlResponse.rows && sqlResponse.rows.length === DEFAULT_PAGE_SIZE) {
             const countResults = await sqlConnection.runCommand("EXECUTE_QUERY", ["SELECT count(*) FROM (" + sqlQuery + ") total"]);
             if(countResults.status === "SUCCESS" && countResults.rows && countResults.rows[0] && countResults.rows[0].values) {
                 const totalRows = countResults.rows[0].values[0];
-                state.lastPage = Math.ceil(totalRows / DEFAULT_PAGE_SIZE);
+                newState.lastPage = Math.ceil(totalRows / DEFAULT_PAGE_SIZE);
             }
         }
         if (sqlResponse.columns) {
@@ -57,29 +63,43 @@ function SqlBrowseTab({ sqlConnection, table, t }: SqlBrowseTabProps) {
                     initFilter[column.name] = { type: "LIKE_PERCENT", value: "" };
                 }
             });
-            setFilter(initFilter);
+            newState.filter = initFilter;
         }
-        setState(state);
+        setState(newState);
     }
 
     if(!state.sqlResponse || state.sqlResponse.error) {
-        return <SqlResultsRender results={state.sqlResponse} />
+        return <SqlResultsRender results={state.sqlResponse} setShowFilterDialog={setShowFilterDialog} />
     }
     return <>
-        <Button onClick={async () =>
-            setShowFilterDialog(true)
-        }>Filter</Button>
-        {showFilterDialog && <SqlFilter columns={state?.sqlResponse?.columns || []} filter={filter} setFilter={(newFilter) => {
-            setFilter(newFilter);
+        {showFilterDialog && <SqlFilter columns={state?.sqlResponse?.columns || []} filter={state.filter} setFilter={(newFilter) => {
+            const newState = { ...state, filter: newFilter };
+            setState(newState);
             setShowFilterDialog(false);
-            refreshResults(state.page, state.lastPage, table, newFilter);
+            refreshResults(newState);
         }} />}
-        <SqlResultsRender results={state.sqlResponse} />
+        <SqlResultsRender
+            results={state.sqlResponse}
+            orderBy={state.orderBy}
+            setOrderBy={(orderBy: string) => {
+                const newState = { ...state, orderBy, isAscending: true };
+                setState(newState);
+                refreshResults(newState);
+            }}
+            isAscending={state.isAscending}
+            setIsAscending={(isAscending: boolean) => {
+                const newState = { ...state, isAscending };
+                setState(newState);
+                refreshResults(newState);
+            }}
+            isFiltered={!!Object.keys(state.filter).find(key => !!state.filter[key].value)}
+            setShowFilterDialog={setShowFilterDialog}
+        />
         <Pagination
             count={state.lastPage}
             page={state.page}
             setPage={(page) => {
-                refreshResults(page, state.lastPage, table, filter);
+                refreshResults({ ...state, page });
             }}
         />
     </>

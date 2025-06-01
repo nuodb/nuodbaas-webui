@@ -909,3 +909,20 @@ button:focus {
     font-size: .8em;
         font-family: monospace;
 }
+.NuoFilterActive,
+.NuoFilterInactive {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+}
+
+.NuoFilterInactive {
+    color: #cdd1d6;
+}
+
+.NuoFilterActive {
+    background-color: blue;
+    color: white;
+    border-radius: 5px;
+}

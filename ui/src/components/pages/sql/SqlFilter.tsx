@@ -94,21 +94,19 @@ const FilterOptions: { id: string, label: string, string?: ((value: string) => s
         id: "BETWEEN",
         label: "BETWEEN",
         string: (value: string) => (
-            "BETWEEN ("
+            "BETWEEN "
             + value.split(",")
                 .map(v => v.trim())
                 .filter(v => v != "")
                 .map(v => "'" + v.replaceAll("'", "''") + "'")
                 .join(" AND ")
-            + ")"
         ),
         number: (value: string) => (
-            "BETWEEN ("
+            "BETWEEN "
             + value.split(",")
                 .map(v => v.trim())
                 .filter(v => v != "")
                 .join(" AND ")
-            + ")"
         )
     },
     {

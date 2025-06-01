@@ -59,7 +59,7 @@ copyright: ### check copyrights
 
 .PHONY: create-cluster
 create-cluster: $(KIND) $(KUBECTL)
-	if [ "`$(KIND) get clusters`" = "kind" ] ; then \
+	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
 		echo "Kind cluster exists already"; \
 		$(KIND) export kubeconfig; \
 		$(KIND) export kubeconfig --kubeconfig selenium-tests/files/kubeconfig; \
