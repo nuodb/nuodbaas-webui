@@ -88,7 +88,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                 <center>
                     <Box sx={{ width: 'fit-content' }}>
                         <LinearProgress variant={error ? "determinate" : "indeterminate"} color="inherit" />
-                        <div id="progress_message">{progressMessage}</div>
+                        <div data-testid="progress_message">{progressMessage}</div>
                     </Box>
                     {error &&
                     <div>
