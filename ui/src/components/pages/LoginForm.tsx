@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from "react-router-dom";
+import Box from '@mui/material/Box';
+import LinearProgress from '@mui/material/LinearProgress';
 import Auth from "../../utils/auth";
 import Button from '../controls/Button';
 import TextField from '../controls/TextField';
@@ -37,7 +39,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
         const urlParams = new URLSearchParams(window.location.search);
         const provider = urlParams.get("provider");
         if (provider) {
-            setProgressMessage("Logging in to provider " + provider);
+            setProgressMessage("Logging in with " + provider);
             Rest.get("/login/providers/" + encodeURIComponent(provider) + "/token" + window.location.search + "&redirectUrl=" + redirectUrl, "")
                 .then((data: TempAny) => {
                     localStorage.setItem("credentials", JSON.stringify({
@@ -75,7 +77,13 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
         <React.Fragment>
             <div className="NuoLoginForm">
                 <img alt="" />
-                {progressMessage ? <h2>{progressMessage}</h2> :
+                {progressMessage
+                ?
+                <Box sx={{ width: 'fit-content' }}>
+                    <LinearProgress />
+                    <div id="progress_message">{progressMessage}</div>
+                </Box>
+                :
                 <form>
                     <div className="fields">
                         <TextField required data-testid="organization" id="organization" label="Organization" value={organization} onChange={(event) => setOrganization(event.target.value)} />
@@ -83,7 +91,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                         <TextField required data-testid="password" id="password" type="password" label="Password" value={password} onChange={(event) => setPassword(event.target.value)} />
                         {error && <h3 data-testid="error_message" style={{ color: "red" }}>{error}</h3>}
                         <Button data-testid="login_button" variant="contained" type="submit" onClick={handleLogin}>Login</Button>
-                        {providers.map((provider: TempAny) => {
+                        {providers.filter((provider: TempAny) => provider.description).map((provider: TempAny) => {
                             return <Button data-testid={"login_" + provider.name} variant="contained" onClick={() => {
                                 window.location.href = provider.url + "&redirectUrl=" + redirectUrl;
                             }}>Login with {provider.description}</Button>
