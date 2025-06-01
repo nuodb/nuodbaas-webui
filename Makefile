@@ -100,7 +100,7 @@ build-cp:
 deploy-cp: build-cp $(HELM) $(KIND)
 	@if [ -d $(NUODB_CP_REPO)/charts/nuodb-cp-rest ] ; then \
 		if [ "${K8S_TYPE}" = "kind" ]; then \
-			$(KIND) load docker-image nuodb/nuodb-control-plane; \
+			$(KIND) load docker-image nuodb/nuodb-control-plane:latest; \
 		fi; \
 		$(HELM) upgrade --install --wait -n default nuodb-cp $(NUODB_CP_REPO)/charts/nuodb-cp-rest --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
 	else \
@@ -115,7 +115,7 @@ undeploy-cp: $(HELM)
 deploy-operator: build-cp $(HELM) $(KIND)
 	@if [ -d $(NUODB_CP_REPO)/charts/nuodb-cp-operator ] ; then \
 		if [ "${K8S_TYPE}" = "kind" ] ; then \
-			$(KIND) load docker-image nuodb/nuodb-control-plane; \
+			$(KIND) load docker-image nuodb/nuodb-control-plane:latest; \
 		fi; \
 		$(HELM) upgrade --install --wait -n default nuodb-operator $(NUODB_CP_REPO)/charts/nuodb-cp-operator --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest; \
 	else \
@@ -136,7 +136,7 @@ build-sql:
 deploy-sql: build-sql $(HELM) $(KIND)
 	@if [ -d ../nuodbaas-sql/charts/nuodbaas-sql ] ; then \
 		if [ "${K8S_TYPE}" = "kind" ] ; then \
-			$(KIND) load docker-image nuodbaas-sql; \
+			$(KIND) load docker-image nuodbaas-sql:latest; \
 		fi; \
 		$(HELM) upgrade --install --wait -n default nuodbaas-sql ../nuodbaas-sql/charts/nuodbaas-sql --set image.repository=nuodbaas-sql --set image.tag=latest --set nuodbaasSql.ingress.enabled=true; \
 	fi
@@ -158,7 +158,7 @@ build-webui:
 deploy-webui: build-webui $(HELM) $(KIND)
 	@if [ -d charts/nuodbaas-webui ] ; then \
 		if [ "${K8S_TYPE}" = "kind" ] ; then \
-			$(KIND) load docker-image nuodbaas-webui; \
+			$(KIND) load docker-image nuodbaas-webui:latest; \
 		fi; \
 		$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=latest --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api; \
 	fi
