@@ -5,7 +5,7 @@ kind: IdentityProvider
 metadata:
   annotations:
     description: Central Authentication Service
-  name: cas
+  name: cas-idp
 spec:
   cas:
     serverUrl: https://127.0.0.1/cas
