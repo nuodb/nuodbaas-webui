@@ -48,9 +48,9 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                         username: data.username
                     }));
                     window.location.href = "/ui";
-                }).catch(reason => {
+                }).catch(ex => {
                     setError("Login failed");
-                    console.error("Login Failed", reason);
+                    console.error("Login Failed", ex);
                 });
         }
         else {
@@ -81,9 +81,10 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                 ?
                 <center>
                     <Box sx={{ width: 'fit-content' }}>
-                        <LinearProgress color="inherit" />
+                        <LinearProgress variant={error ? "determinate" : "indeterminate"} color="inherit" />
                         <div id="progress_message">{progressMessage}</div>
                     </Box>
+                    {error && <h3 data-testid="error_message" style={{ color: "red" }}>{error}</h3>}
                 </center>
                 :
                 <form>
