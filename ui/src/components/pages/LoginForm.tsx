@@ -39,7 +39,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
         const urlParams = new URLSearchParams(window.location.search);
         const provider = urlParams.get("provider");
         if (provider) {
-            setProgressMessage("Logging in with " + provider);
+            setProgressMessage("Logging in with " + provider + "...");
             Rest.get("/login/providers/" + encodeURIComponent(provider) + "/token" + window.location.search + "&redirectUrl=" + redirectUrl, "")
                 .then((data: TempAny) => {
                     localStorage.setItem("credentials", JSON.stringify({
@@ -79,10 +79,12 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                 <img alt="" />
                 {progressMessage
                 ?
-                <Box sx={{ width: 'fit-content' }}>
-                    <LinearProgress />
-                    <div id="progress_message">{progressMessage}</div>
-                </Box>
+                <center>
+                    <Box sx={{ width: 'fit-content' }}>
+                        <LinearProgress color="inherit" />
+                        <div id="progress_message">{progressMessage}</div>
+                    </Box>
+                </center>
                 :
                 <form>
                     <div className="fields">
