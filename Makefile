@@ -117,6 +117,7 @@ deploy-operator: build-cp $(HELM) $(KIND)
 		if [ "${K8S_TYPE}" = "kind" ] ; then \
 			$(KIND) load docker-image nuodb/nuodb-control-plane:latest; \
 		fi; \
+		$(HELM) dependency update $(NUODB_CP_REPO)/charts/nuodb-cp-operator; \
 		$(HELM) upgrade --install --wait -n default nuodb-operator $(NUODB_CP_REPO)/charts/nuodb-cp-operator --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest; \
 	else \
 		$(HELM) upgrade --install --wait -n default nuodb-operator nuodb-cp-operator --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION); \
