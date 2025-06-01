@@ -84,7 +84,14 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                         <LinearProgress variant={error ? "determinate" : "indeterminate"} color="inherit" />
                         <div id="progress_message">{progressMessage}</div>
                     </Box>
-                    {error && <h3 data-testid="error_message" style={{ color: "red" }}>{error}</h3>}
+                    {error &&
+                    <div>
+                        <h3 data-testid="error_message" style={{ color: "red" }}>{error}</h3>
+                        <Button data-testid="back_button" variant="contained" type="submit" onClick={() => {
+                            window.location.href = window.location.protocol + "//" + window.location.host + "/ui/login";
+                        }}>Back to Login</Button>
+                    </div>
+                    }
                 </center>
                 :
                 <form>
