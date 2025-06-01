@@ -191,6 +191,7 @@ setup-integration-tests: $(KUBECTL) build-image install-crds deploy-cp deploy-op
 		--data-binary \
             '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"integrationtest\", \"accessRule\":{\"allow\": \"all:integrationtest\"}}' \
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
+	$(KUBECTL) apply -f selenium-tests/files/cas-idp.yaml
 	@docker ps
 	@$(KUBECTL) describe ingress -A
 	@$(KUBECTL) describe pods -A
@@ -224,7 +225,6 @@ run-smoke-tests-docker: setup-integration-tests ## integration tests without set
 .PHONY: run-integration-tests
 run-integration-tests: build-image setup-integration-tests ## run integration tests (+setup)
 	${MAKE} run-integration-tests-only teardown-integration-tests || (${MAKE} teardown-integration-tests && exit 1)
-
 
 
 ##@ Development Environment
