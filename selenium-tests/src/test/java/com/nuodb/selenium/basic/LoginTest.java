@@ -54,7 +54,7 @@ public class LoginTest extends TestRoutines {
     }
 
     @Test
-    public void testInvalidIdpLoginRequest() throws MalformedURLException {
+    public void testUnsuccessfulIdpLogin() throws MalformedURLException {
         get("/ui/login?provider=cas-idp&ticket=ST-123");
         assertEquals("Logging in with cas-idp...", waitText("progress_message"));
         assertEquals("Login failed: Unable to authenticate user with CAS provider cas-idp", waitText("error_message"));
