@@ -49,7 +49,11 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                     }));
                     window.location.href = "/ui";
                 }).catch(ex => {
-                    setError("Login failed");
+                    var detailMsg = ex?.response?.data?.detail
+                    if (!detailMsg) {
+                        detailMsg = ex.message
+                    }
+                    setError("Login failed: " + detailMsg);
                     console.error("Login Failed", ex);
                 });
         }
