@@ -37,6 +37,7 @@ jobs:
     resource_class: medium
     environment:
       NUODB_CP_REPO: ./nuodb-control-plane
+      NUODB_CP_COMMIT: e98e2b890cda772f07da6bd91991a75868d0f2b6
     steps:
       - checkout
       - aws-cli/setup
@@ -71,6 +72,7 @@ jobs:
           name: "Checkout NuoDB Control Plane repo"
           command: |
             git clone git@github.com:nuodb/nuodb-control-plane.git
+            cd nuodb-control-plane && git checkout "$NUODB_CP_COMMIT"
       - run:
           name: Checking if Docker image exists already
           command: |
