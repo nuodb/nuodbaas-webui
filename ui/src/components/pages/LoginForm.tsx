@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Box from '@mui/material/Box';
-import LinearProgress from '@mui/material/LinearProgress';
+import CircularProgress from '@mui/material/CircularProgress';
 import Auth from "../../utils/auth";
 import Button from '../controls/Button';
 import TextField from '../controls/TextField';
@@ -87,7 +87,12 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                 ?
                 <center>
                     <Box sx={{ width: 'fit-content' }}>
-                        <LinearProgress variant={error ? "determinate" : "indeterminate"} color="inherit" />
+                        {error
+                        ?
+                        <CircularProgress variant="determinate" color="error" value="100" />
+                        :
+                        <CircularProgress color="inherit" />
+                        }
                         <div data-testid="progress_message">{progressMessage}</div>
                     </Box>
                     {error &&
