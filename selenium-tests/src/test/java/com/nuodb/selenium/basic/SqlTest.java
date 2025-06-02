@@ -29,7 +29,7 @@ public class SqlTest extends TestRoutines {
         assertEquals(1, buttonsCell.size());
 
         // wait for database to become available
-        tr.retry(60, 1000, ()-> {
+        tr.retry(180, 1000, ()-> {
             List<WebElement> stateCell = tr.waitTableElements("list_resource__table", "name", databaseName, "state");
             assertEquals(1, stateCell.size());
             assertEquals("Available", stateCell.get(0).getText());
