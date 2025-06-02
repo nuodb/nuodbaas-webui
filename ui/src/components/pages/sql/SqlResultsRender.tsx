@@ -44,7 +44,7 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
                 {results.columns?.map((column, index: number) => <TableTh key={index}>
                     <div className="NuoRow">
                         {column.name}
-                        <div onClick={() => sort(column.name)}>
+                        {orderBy !== undefined && <div onClick={() => sort(column.name)}>
                             {orderBy === column.name ?
                                 (isAscending ?
                                     <ExpandLessIcon />
@@ -52,16 +52,20 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
                                     <ExpandMoreIcon />)
                                 :
                                 <UnfoldMoreIcon style={{ color: "lightgray" }} />}
-                        </div>
+                        </div>}
                     </div>
                 </TableTh>)}
-                <TableTh className="NuoTableMenuCell"><div className={isFiltered ? "NuoFilterActive" : "NuoFilterInactive"} onClick={() => setShowFilterDialog(true)}><FilterListIcon /></div></TableTh>
+                {isFiltered !== undefined && <TableTh className="NuoTableMenuCell">
+                    <div className={isFiltered ? "NuoFilterActive" : "NuoFilterInactive"} onClick={() => setShowFilterDialog(true)}>
+                        <FilterListIcon />
+                    </div>
+                </TableTh>}
             </TableRow>
         </TableHead>
         <TableBody>
             {results.rows?.map((row, index) => <TableRow key={index}>
-                {row.values.map((col, cindex) => <TableCell key={cindex}>{col}</TableCell>)}
-                <TableCell>&nbsp;</TableCell>
+                {row.values.map((col, cindex) => <TableCell key={cindex}>{String(col)}</TableCell>)}
+                {isFiltered !== undefined && <TableCell>&nbsp;</TableCell>}
             </TableRow>)}
         </TableBody>
     </Table>

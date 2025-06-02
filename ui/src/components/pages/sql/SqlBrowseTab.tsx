@@ -5,7 +5,7 @@ import { SqlResponse, SqlType } from "../../../utils/SqlSocket";
 import SqlResultsRender from "./SqlResultsRender";
 import Pagination from "../../controls/Pagination";
 import { useEffect, useState } from "react";
-import SqlFilter, { filterToWhereClause, SqlFilterType } from "./SqlFilter";
+import SqlFilter, { filterToWhereClause, getFilterConditionOptions, SqlFilterType } from "./SqlFilter";
 
 type SqlBrowseTabProps = {
     sqlConnection: SqlType;
@@ -17,8 +17,8 @@ type SqlResponseState = {
     sqlResponse: SqlResponse|undefined;
     page: number;
     lastPage: number;
-    filter: SqlFilterType;
-    orderBy: string;
+    filter?: SqlFilterType;
+    orderBy?: string;
     isAscending: boolean;
 };
 
@@ -28,7 +28,7 @@ function SqlBrowseTab({ sqlConnection, table, t }: SqlBrowseTabProps) {
     const DEFAULT_PAGE_SIZE = 100;
 
     useEffect(()=> {
-        const newState = { ...state, page: 1, lastPage: 1, filter: {} };
+        const newState = { ...state, page: 1, lastPage: 1, filter: {}, orderBy: "" };
         refreshResults(newState);
     }, [table]);
 
@@ -36,7 +36,9 @@ function SqlBrowseTab({ sqlConnection, table, t }: SqlBrowseTabProps) {
         const { page, filter, orderBy, isAscending } = args;
 
         let sqlQuery = "SELECT * FROM `" + table + "`";
-        sqlQuery += filterToWhereClause(filter);
+        if (filter && state.sqlResponse && state.sqlResponse.columns) {
+            sqlQuery += filterToWhereClause(state.sqlResponse.columns, filter);
+        }
         if (orderBy) {
             sqlQuery += " ORDER BY `" + orderBy + "` " + (isAscending ? "ASC" : "DESC");
         }
@@ -56,14 +58,14 @@ function SqlBrowseTab({ sqlConnection, table, t }: SqlBrowseTabProps) {
         else if (sqlResponse.rows && sqlResponse.rows.length === 0) {
             newState.lastPage = 1;
         }
-        if (sqlResponse.columns) {
+        if (sqlResponse.columns && filter !== undefined) {
             let initFilter: SqlFilterType = {};
             sqlResponse.columns.forEach(column => {
                 if (column.name in filter) {
                     initFilter[column.name] = { ...filter[column.name] };
                 }
                 else {
-                    initFilter[column.name] = { type: "LIKE_PERCENT", value: "" };
+                    initFilter[column.name] = { type: getFilterConditionOptions(column.type)[0].id, value: "" };
                 }
             });
             newState.filter = initFilter;
@@ -74,12 +76,15 @@ function SqlBrowseTab({ sqlConnection, table, t }: SqlBrowseTabProps) {
     if(!state.sqlResponse || state.sqlResponse.error) {
         return <SqlResultsRender results={state.sqlResponse} setShowFilterDialog={setShowFilterDialog} />
     }
+    const isFiltered = state.filter && !!Object.keys(state.filter).find(key => !!(state.filter && state.filter[key].value));
     return <>
-        {showFilterDialog && <SqlFilter columns={state?.sqlResponse?.columns || []} filter={state.filter} setFilter={(newFilter) => {
-            const newState = { ...state, filter: newFilter };
-            setState(newState);
+        {showFilterDialog && state.filter && <SqlFilter columns={state?.sqlResponse?.columns || []} filter={state.filter} setFilter={(newFilter) => {
+            if (newFilter) {
+                const newState = { ...state, filter: newFilter, page: 1, lastPage: 1 };
+                setState(newState);
+                refreshResults(newState);
+            }
             setShowFilterDialog(false);
-            refreshResults(newState);
         }} />}
         <SqlResultsRender
             results={state.sqlResponse}
@@ -95,7 +100,7 @@ function SqlBrowseTab({ sqlConnection, table, t }: SqlBrowseTabProps) {
                 setState(newState);
                 refreshResults(newState);
             }}
-            isFiltered={!!Object.keys(state.filter).find(key => !!state.filter[key].value)}
+            isFiltered={isFiltered}
             setShowFilterDialog={setShowFilterDialog}
         />
         <Pagination

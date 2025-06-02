@@ -11,12 +11,13 @@ import DialogMaterial from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import DialogTitle from '@mui/material/DialogTitle';
+import { t } from 'i18next';
 
 function sqlString(value: string) {
     return "'" + value.replaceAll("'", "''") + "'";
 }
 
-const FilterOptions: { id: string, label: string, string?: ((value: string) => string), number?: ((value: string) => string) }[] = [
+const FilterOptions: { id: string, label: string, string?: ((value: string) => string), number?: ((value: string) => string), boolean?: ((value: string) => string) }[] = [
     {
         id: "LIKE_PERCENT",
         label: "LIKE %...%",
@@ -41,13 +42,35 @@ const FilterOptions: { id: string, label: string, string?: ((value: string) => s
         id: "EQUAL",
         label: "=",
         string: (value:string) => "= " + sqlString(value),
-        number: (value:string) => "= " + value
+        number: (value: string) => "= " + value,
+        boolean: (value: string) => "= " + value
     },
     {
         id: "NOT_EQUAL",
         label: "!=",
         string: (value:string)=> "!= " + sqlString(value),
-        number: (value:string)=> "!= " + value
+        number: (value: string) => "!= " + value,
+        boolean: (value: string) => "!= " + value
+    },
+    {
+        id: "GREATER",
+        label: ">",
+        number: (value: string) => "> " + value
+    },
+    {
+        id: "GREATER_EQUAL",
+        label: ">=",
+        number: (value: string) => ">= " + value
+    },
+    {
+        id: "LESS",
+        label: "<",
+        number: (value: string) => "< " + value,
+    },
+    {
+        id: "LESS_EQUAL",
+        label: "<=",
+        number: (value: string) => "<= " + value
     },
     {
         id: "REGEXP",
@@ -132,22 +155,55 @@ const FilterOptions: { id: string, label: string, string?: ((value: string) => s
     },
 ];
 
-export function filterToWhereClause(filter: SqlFilterType) : string {
+function isNumber(sqlType: string) {
+    return ["BIGINT", "BIT", "DECIMAL", "DOUBLE", "FLOAT", "INTEGER", "NUMERIC", "SMALLINT", "TINYINT"].includes(sqlType.toUpperCase());
+}
+
+function isString(sqlType: string) {
+    return ["CHAR", "DATE", "LONGNVARCHAR", "LONGVARCHAR", "NCHAR", "NVARCHAR", "TIME", "TIME_WITH_TIMEZONE", "TIMESTAMP", "TIMESTAMP_WITH_TIMEZONE", "VARCHAR"].includes(sqlType.toUpperCase());
+}
+
+function isBoolean(sqlType: string) {
+    return "BOOLEAN" === sqlType.toUpperCase();
+}
+
+// SQL types being neither a number or string - not supported for filtering
+// ARRAY
+// BINARY
+// BLOB
+// CLOB
+// DATALINK
+// DISTINCT
+// JAVA_OBJECT
+// LONGVARBINARY
+// NCLOB
+// NULL
+// OTHER
+// REAL
+// REF
+// REF_CURSOR
+// ROWID
+// SQLXML
+// STRUCT
+// VARBINARY
+
+
+export function filterToWhereClause(columns: ColumnMetaData[], filter: SqlFilterType): string {
     let ret = "";
-    Object.keys(filter).forEach((key,index)=>{
-        const oneFilter = FilterOptions.find(fo=>fo.id === filter[key].type);
-        console.log("oneFilter", oneFilter, filter[key].type);
-        if(oneFilter && oneFilter.string && filter[key].value) {
+    Object.keys(filter).forEach(key => {
+        const sqlType = columns?.find(c => c.name === key)?.type || "";
+        const oneFilter = FilterOptions.find(fo => fo.id === filter[key].type);
+        const convertFunc = (isString(sqlType) && oneFilter?.string) || (isNumber(sqlType) && oneFilter?.number) || (isBoolean(sqlType) && oneFilter?.boolean);
+        if (convertFunc && filter[key].value) {
             if(ret) {
                 ret += " AND ";
             }
             else {
                 ret = " WHERE ";
             }
-            ret += "`" + key + "` " + oneFilter.string(filter[key].value);
+            ret += "`" + key + "` " + convertFunc(filter[key].value);
         }
     })
-    console.log("filterToWhereClause", filter, ret);
     return ret;
 }
 
@@ -161,14 +217,22 @@ export type SqlFilterType = {
 type SqlFilterProps = {
     columns: ColumnMetaData[];
     filter: SqlFilterType;
-    setFilter: (filter: SqlFilterType)=>void;
+    setFilter: (filter: SqlFilterType | undefined) => void;
 };
+
+export function getFilterConditionOptions(columnType: string) {
+    return FilterOptions
+        .filter(fo => (
+            fo.boolean && isBoolean(columnType)
+            || fo.string && isString(columnType)
+            || fo.number && isNumber(columnType)
+        ))
+}
 
 function SqlFilter({columns, filter, setFilter}: SqlFilterProps) {
     const [editFilter, setEditFilter] = useState<SqlFilterType>({});
 
     useEffect(() => {
-        console.log("filter", filter);
         setEditFilter(JSON.parse(JSON.stringify(filter)));
     }, [columns]);
 
@@ -179,14 +243,16 @@ function SqlFilter({columns, filter, setFilter}: SqlFilterProps) {
 <Table>
         <TableHead>
             <TableRow>
-                <TableTh>Field Name</TableTh>
-                <TableTh>Condition</TableTh>
-                <TableTh>Value</TableTh>
+                <TableTh>{t("form.sqleditor.label.fieldName")}</TableTh>
+                        <TableTh>{t("form.sqleditor.label.dataType")}</TableTh>
+                <TableTh>{t("form.sqleditor.label.condition")}</TableTh>
+                <TableTh>{t("form.sqleditor.label.value")}</TableTh>
             </TableRow>
         </TableHead>
         <TableBody>
             {columns.map((column, index: number) => <TableRow key={index}>
                 <TableCell>{column.name}</TableCell>
+                <TableCell>{column.type}</TableCell>
                 <TableCell>
                     <Select id={column.name} value={editFilter[column.name]?.type || ""} onChange={(event: ChangeEvent<HTMLSelectElement>)=>{
                         let f = {...editFilter};
@@ -194,25 +260,40 @@ function SqlFilter({columns, filter, setFilter}: SqlFilterProps) {
                         f[column.name].type = event.target.value;
                         setEditFilter(f);
                     }}>
-                        {FilterOptions.map(fo => <SelectOption value={fo.id}>{fo.label}</SelectOption>)}
+                        {getFilterConditionOptions(column.type)
+                            .map(fo => <SelectOption value={fo.id}>{fo.label}</SelectOption>)
+                        }
                     </Select>
                 </TableCell>
                 <TableCell>
-                    <TextField id={column.name} label="" value={editFilter[column.name]?.value || ""} onChange={(event: ChangeEvent<HTMLInputElement|HTMLTextAreaElement>)=>{
-                        let f = {...editFilter};
-                        f[column.name] = {...f[column.name]};
-                        f[column.name].value = event.currentTarget.value;
-                        setEditFilter(f);
-                        console.log("F", f);
-                    }}/>
+                    {column.type === "BOOLEAN"
+                        ?
+                        <Select id={column.name} label="" value={editFilter[column.name]?.value || ""} onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+                            let f = { ...editFilter };
+                            f[column.name] = { ...f[column.name] };
+                            f[column.name].value = event.target.value;
+                            setEditFilter(f);
+                        }}>
+                            <SelectOption value="">{t("button.unassigned")}</SelectOption>
+                            <SelectOption value="false">{t("button.false")}</SelectOption>
+                            <SelectOption value="true">{t("button.true")}</SelectOption>
+                        </Select>
+                        :
+                        <TextField id={column.name} label="" value={editFilter[column.name]?.value || ""} onChange={(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+                            let f = { ...editFilter };
+                            f[column.name] = { ...f[column.name] };
+                            f[column.name].value = event.currentTarget.value;
+                            setEditFilter(f);
+                        }} />
+                    }
                 </TableCell>
             </TableRow>)}
         </TableBody>
     </Table>
     </DialogContent>
     <DialogActions>
-        <Button data-testid={"dialog_button_ok"} onClick={() => {setFilter(editFilter)}}>Ok</Button>
-        <Button data-testid={"dialog_button_cancel"} onClick={() => {setFilter(filter)}}>Cancel</Button>
+        <Button data-testid={"dialog_button_ok"} onClick={() => {setFilter(editFilter)}}>{t("button.ok")}</Button>
+            <Button data-testid={"dialog_button_cancel"} onClick={() => { setFilter(undefined) }}>{t("button.cancel")}</Button>
         </DialogActions>
 </DialogMaterial>;
 }
