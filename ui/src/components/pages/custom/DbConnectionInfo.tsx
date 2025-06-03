@@ -26,7 +26,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
         "DB_USER=\"<db username, i.e. 'dba'>\"",
         "DB_PASSWORD=\"<db password>\"",
         "CA_PEM=\"" + caPem + "\"",
-        "echo \"select tables\" | bin/nuosql " + dbName + "@" + sqlEndpoint + ":" + port + " \\",
+        "echo \"select tables\" | bin/nuosql " + dbName + "@" + sqlEndpoint + ":" + (port ? ":" + port : "") + " \\",
         "--user \"$DB_USER\" \\",
         "--password \"$DB_PASSWORD\" \\",
         "--connection-property trustedCertificates=\"$CA_PEM\""
