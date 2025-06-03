@@ -50,9 +50,9 @@ function SqlPage(props: PageProps) {
         }
         let tabs = [];
         if (dbTable) {
-            tabs.push(<Tab id="browse" label="Browse"><SqlBrowseTab sqlConnection={sqlConnection} table={dbTable} /></Tab>);
+            tabs.push(<Tab id="browse" label={t("form.sqleditor.label.tab.browse")}><SqlBrowseTab sqlConnection={sqlConnection} table={dbTable} /></Tab>);
         }
-        tabs.push(<Tab id="query" label="Query"><SqlQueryTab sqlConnection={sqlConnection} dbTable={dbTable} /></Tab>);
+        tabs.push(<Tab id="query" label={t("form.sqleditor.label.tab.query")}><SqlQueryTab sqlConnection={sqlConnection} dbTable={dbTable} /></Tab>);
         return <Tabs currentTab={tabIndex} setCurrentTab={(tabIndex) => setTabIndex(tabIndex)}>{tabs}</Tabs>
     }
 
