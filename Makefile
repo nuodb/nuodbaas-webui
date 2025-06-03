@@ -186,11 +186,14 @@ setup-integration-tests: $(KUBECTL) build-image install-crds deploy-cp deploy-op
 	@$(KUBECTL) describe pods -A
 	@$(KUBECTL) get pods -A
 
-.PHONY: teardown-integration-tests
-teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-operator undeploy-cp uninstall-crds ## clean up containers used by integration tests
+.PHONY: dumpk8s
+dumpk8s:
 	@$(KUBECTL) describe ingress -A
 	@$(KUBECTL) describe pods -A
 	@$(KUBECTL) get pods -A
+
+.PHONY: teardown-integration-tests
+teardown-integration-tests: $(KIND) dumpk8s undeploy-sql undeploy-webui undeploy-operator undeploy-cp uninstall-crds ## clean up containers used by integration tests
 	@docker compose -f selenium-tests/compose.yaml down
 	@if [ -f $(REMOVE_K8S_ON_STOP) ] ; then \
 		rm $(REMOVE_K8S_ON_STOP) ; \
