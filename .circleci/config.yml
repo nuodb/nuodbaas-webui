@@ -89,11 +89,11 @@ jobs:
           when: always
           command: make teardown-integration-tests
       - run:
-          name: Deploy Docker images
-          command: ./build_utils.sh deployDockerImages
-      - run:
           name: Deploy Helm Charts
           command: ./build_utils.sh createAndUploadHelmPackage
+      - run:
+          name: Deploy Docker images
+          command: ./build_utils.sh deployDockerImages
       - run:
           name: Save test results
           command: |
