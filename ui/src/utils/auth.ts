@@ -51,10 +51,10 @@ export default class Auth {
                             expiresAtTime: response.data.expiresAtTime,
                             username
                         }));
-                        resolve(true);
+                        resolve(null);
                     }
                 })
-                .catch(() => resolve(false));
+                .catch(resolve);
         });
     }
 
