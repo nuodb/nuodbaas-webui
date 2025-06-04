@@ -66,7 +66,7 @@ jobs:
           command: |
             echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_USER" --password-stdin
       - add_ssh_keys:
-          fingerprints:
+          fingerprints: # add SSH deploy key for nuodb/nuodb-control-plane repository
             - "SHA256:rXyFWvQb0aSIvZXMOSVqlNtRlLK4m81yak/ivRtfBDA"
       - run:
           name: "Checkout NuoDB Control Plane repo"
@@ -101,6 +101,9 @@ jobs:
       - run:
           name: Deploy Docker images
           command: ./build_utils.sh deployDockerImages
+      - add_ssh_keys:
+          fingerprints: # add SSH deploy key for nuodb/nuodbaas-webui repository
+            - "SHA256:7ta24cW0GEKNRufv+59EChoVzAAqZlJsT1gTAEo4Feg"
       - run:
           name: Deploy Helm Charts
           command: ./build_utils.sh createAndUploadHelmPackage
