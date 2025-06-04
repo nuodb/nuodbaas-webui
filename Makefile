@@ -89,7 +89,7 @@ uninstall-crds: $(HELM)
 .PHONY: build-cp
 build-cp:
 	@if [ -f $(NUODB_CP_REPO)/Makefile ] ; then \
-		make -C $(NUODB_CP_REPO) docker-build; \
+		docker images --format={{.Repository}}:{{.Tag}} | grep -q nuodb/nuodb-control-plane:latest || make -C $(NUODB_CP_REPO) docker-build; \
 	else \
 		docker pull ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION); \
 		docker tag ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION) nuodb/nuodb-control-plane; \
