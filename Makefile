@@ -182,7 +182,7 @@ setup-integration-tests: $(KUBECTL) build-image install-crds deploy-cp deploy-op
 		--data-binary \
             '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"integrationtest\", \"accessRule\":{\"allow\": \"all:integrationtest\"}}' \
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
-	$(KUBECTL) apply -f selenium-tests/files/cas-idp.yaml
+	$(KUBECTL) apply -n default -f selenium-tests/files/cas-idp.yaml
 	@docker ps
 	@$(KUBECTL) describe ingress -A
 	@$(KUBECTL) describe pods -A
