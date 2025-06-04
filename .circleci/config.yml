@@ -265,13 +265,17 @@ workflows:
   continuous:
     jobs:
       # run test jobs in parallel
+      - build_image:
+          name: "Build image"
       - build_and_deploy:
-          name: "Build and deploy"
+          requires:
+            - "Build image"
+          name: "Test and deploy"
       - promote_build:
           requires:
-            - "Build and deploy"
+            - "Test and deploy"
           name: "Optionally Promote to DBaaS DEV"
       - create_release:
           requires:
-            - "Build and deploy"
+            - "Test and deploy"
           name: "Optionally Create Release"
