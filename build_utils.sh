@@ -135,12 +135,16 @@ if [ "$1" == "deployDockerImages" ] ; then
         else
             docker tag "${REPOSITORY}:latest" "${AWS_DOCKER_IMAGE_SHA}" && \
             docker push "${AWS_DOCKER_IMAGE_SHA}" && \
-            docker tag "${REPOSITORY}:latest" "${GIT_DOCKER_IMAGE_SHA}" && \
-            docker push "${GIT_DOCKER_IMAGE_SHA}" && \
             docker tag "${REPOSITORY}:test" "${AWS_DOCKER_IMAGE_TEST}" && \
             docker push "${AWS_DOCKER_IMAGE_TEST}" && \
             docker tag "${REPOSITORY}:test" "${GIT_DOCKER_IMAGE_TEST}" && \
             docker push "${GIT_DOCKER_IMAGE_TEST}" && \
+
+            # use this last - the github docker image is used to determine a prior
+            # successful build succeeded (to avoid rebuilding and ensuring an identical
+            # image when creating a release or when promoting)
+            docker tag "${REPOSITORY}:latest" "${GIT_DOCKER_IMAGE_SHA}" && \
+            docker push "${GIT_DOCKER_IMAGE_SHA}" && \
             exit 0
         fi
     else
