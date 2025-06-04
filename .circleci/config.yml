@@ -42,8 +42,6 @@ jobs:
       NUODB_CP_COMMIT: e98e2b890cda772f07da6bd91991a75868d0f2b6
     steps:
       - checkout
-      - check_skip_job
-      - check_version
       - add_ssh_keys:
           fingerprints: # add SSH deploy key for nuodb/nuodb-control-plane repository
             - "SHA256:rXyFWvQb0aSIvZXMOSVqlNtRlLK4m81yak/ivRtfBDA"
