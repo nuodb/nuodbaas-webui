@@ -78,8 +78,7 @@ jobs:
           command: |
             ssh-add -l > /tmp/fingerprints
             ssh-add -L > /tmp/public-keys
-            paste /tmp/fingerprints /tmp/public-keys | sed -n 's|.*SHA256:rXyFWvQb0aSIvZXMOSVqlNtRlLK4m81yak/ivRtfBDA (RSA) ||p' | ssh-add -d -
-            ssh-add -L
+            paste /tmp/fingerprints /tmp/public-keys | sed -n 's|.*SHA256:rXyFWvQb0aSIvZXMOSVqlNtRlLK4m81yak/ivRtfBDA.* ||p' | ssh-add -d
       - run:
           name: "Test nuodbaas-webui repo access"
           command: |
