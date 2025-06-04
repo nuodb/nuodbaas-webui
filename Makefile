@@ -14,11 +14,11 @@ NUODB_CP_VERSION ?= 2.8.1
 
 NUODB_CP_REPO ?= ../nuodb-control-plane
 
-KIND=$(shell pwd)/bin/kind
-KIND_CONTROL_PLANE="kind-kind"
+KIND = $(shell pwd)/bin/kind
+KIND_CONTROL_PLANE = kind-kind
 KUBECTL := $(shell pwd)/bin/kubectl
 HELM := $(shell pwd)/bin/helm
-REMOVE_K8S_ON_STOP=/tmp/remove_k8s_on_stop
+PREVIOUS_CONTEXT := $(shell pwd)/tmp/previous-context
 
 IMG_REPO := nuodbaas-webui
 VERSION := $(shell grep -e "^appVersion:" charts/nuodbaas-webui/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
@@ -64,23 +64,23 @@ create-cluster: $(KIND) $(KUBECTL)
 		$(KIND) export kubeconfig; \
 		$(KIND) export kubeconfig --kubeconfig selenium-tests/files/kubeconfig; \
 	else \
+		$(KUBECTL) config current-context 2>/dev/null > $(PREVIOUS_CONTEXT) || true; \
 		$(KIND) create cluster --wait 120s --config selenium-tests/kind.yaml; \
 		$(KIND) export kubeconfig; \
 		$(KIND) export kubeconfig --kubeconfig selenium-tests/files/kubeconfig; \
 		$(KUBECTL) apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml; \
 		$(KUBECTL) wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=60s; \
-		touch $(REMOVE_K8S_ON_STOP); \
-	fi;
+	fi
+	@sed "s|server: https://127.0.0.1:.[0-9]\+|server: https://kind-control-plane:6443|g" selenium-tests/files/kubeconfig > selenium-tests/files/kubeconfig.tmp && \
+		mv selenium-tests/files/kubeconfig.tmp selenium-tests/files/kubeconfig
 
 .PHONY: install-crds
 install-crds: create-cluster $(HELM)
-	@sed -i "s/server: https:\/\/127.0.0.1:.[0-9]\+/server: https:\/\/kind-control-plane:6443/g" selenium-tests/files/kubeconfig
 	@if [ -d $(NUODB_CP_REPO)/charts/nuodb-cp-crd/templates ] ; then \
 		$(HELM) install -n default nuodb-cp-crd $(NUODB_CP_REPO)/charts/nuodb-cp-crd; \
 	else \
 		$(HELM) install -n default nuodb-cp-crd nuodb-cp-crd --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION); \
 	fi
-	@rm -rf nuodb-cp-crd
 
 .PHONY: uninstall-crds
 uninstall-crds: $(HELM)
@@ -98,7 +98,7 @@ build-cp:
 .PHONY: deploy-cp
 deploy-cp: build-cp $(HELM) $(KIND)
 	@if [ -d $(NUODB_CP_REPO)/charts/nuodb-cp-rest ] ; then \
-		$(KIND) load docker-image nuodb/nuodb-control-plane; \
+		$(KIND) load docker-image nuodb/nuodb-control-plane:latest; \
 		$(HELM) upgrade --install --wait -n default nuodb-cp $(NUODB_CP_REPO)/charts/nuodb-cp-rest --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
 	else \
 		$(HELM) upgrade --install --wait -n default nuodb-cp nuodb-cp-rest --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION) --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
@@ -111,7 +111,8 @@ undeploy-cp: $(HELM)
 .PHONY: deploy-operator
 deploy-operator: build-cp $(HELM) $(KIND)
 	@if [ -d $(NUODB_CP_REPO)/charts/nuodb-cp-operator ] ; then \
-		$(KIND) load docker-image nuodb/nuodb-control-plane; \
+		$(KIND) load docker-image nuodb/nuodb-control-plane:latest; \
+		$(HELM) dependency update $(NUODB_CP_REPO)/charts/nuodb-cp-operator; \
 		$(HELM) upgrade --install --wait -n default nuodb-operator $(NUODB_CP_REPO)/charts/nuodb-cp-operator --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest; \
 	else \
 		$(HELM) upgrade --install --wait -n default nuodb-operator nuodb-cp-operator --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION); \
@@ -130,7 +131,7 @@ build-sql:
 .PHONY: deploy-sql
 deploy-sql: build-sql $(HELM) $(KIND)
 	@if [ -d ../nuodbaas-sql/charts/nuodbaas-sql ] ; then \
-		$(KIND) load docker-image nuodbaas-sql; \
+		$(KIND) load docker-image nuodbaas-sql:latest; \
 		$(HELM) upgrade --install --wait -n default nuodbaas-sql ../nuodbaas-sql/charts/nuodbaas-sql --set image.repository=nuodbaas-sql --set image.tag=latest --set nuodbaasSql.ingress.enabled=true; \
 	fi
 
@@ -150,7 +151,7 @@ build-webui:
 .PHONY: deploy-webui
 deploy-webui: build-webui $(HELM) $(KIND)
 	@if [ -d charts/nuodbaas-webui ] ; then \
-		$(KIND) load docker-image nuodbaas-webui; \
+		$(KIND) load docker-image nuodbaas-webui:latest; \
 		$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=latest --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api; \
 	fi
 
@@ -181,6 +182,7 @@ setup-integration-tests: $(KUBECTL) build-image install-crds deploy-cp deploy-op
 		--data-binary \
             '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"integrationtest\", \"accessRule\":{\"allow\": \"all:integrationtest\"}}' \
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
+	$(KUBECTL) apply -f selenium-tests/files/cas-idp.yaml
 	@docker ps
 	@$(KUBECTL) describe ingress -A
 	@$(KUBECTL) describe pods -A
@@ -189,8 +191,9 @@ setup-integration-tests: $(KUBECTL) build-image install-crds deploy-cp deploy-op
 .PHONY: teardown-integration-tests
 teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-operator undeploy-cp uninstall-crds ## clean up containers used by integration tests
 	@docker compose -f selenium-tests/compose.yaml down
-	@if [ -f $(REMOVE_K8S_ON_STOP) ] ; then \
-		rm $(REMOVE_K8S_ON_STOP) ; \
+	@if [ -f $(PREVIOUS_CONTEXT) ] ; then \
+		cat $(PREVIOUS_CONTEXT) | xargs -r $(KUBECTL) config use-context; \
+		rm $(PREVIOUS_CONTEXT) ; \
 		$(KIND) delete cluster 2> /dev/null || true ; \
 	fi
 
@@ -208,11 +211,11 @@ run-smoke-tests-docker-only: build-integration-tests-docker
 
 .PHONY: run-smoke-tests-docker
 run-smoke-tests-docker: setup-integration-tests ## integration tests without setup/teardown (docker version)
-	@${MAKE} run-smoke-tests-docker-only teardown-integration-tests || (${MAKE} teardown-integration-tests && exit1)
+	@${MAKE} run-smoke-tests-docker-only teardown-integration-tests || (${MAKE} teardown-integration-tests && exit 1)
+
 .PHONY: run-integration-tests
 run-integration-tests: build-image setup-integration-tests ## run integration tests (+setup)
 	${MAKE} run-integration-tests-only teardown-integration-tests || (${MAKE} teardown-integration-tests && exit 1)
-
 
 
 ##@ Development Environment

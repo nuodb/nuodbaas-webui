@@ -11,4 +11,5 @@
 \./ui/public/logo192.png$
 \./ui/public/images/
 \./bin/
+\./tmp/
 \./ui\/build\/
