@@ -113,6 +113,15 @@ jobs:
           command: |
             docker load -i /tmp/workspace/nuodb-control-plane.tar
       - run:
+          name: Checking if Docker image exists already
+          command: |
+            if [ "$(./build_utils.sh doesImageExist)" == "yes" ] ; then
+                echo "Docker Image exists already - no need to build image."
+                circleci-agent step halt
+            else
+              echo "Docker Image needs to be built."
+            fi
+      - run:
           name: Build Image
           command: make build-image
       - run:
