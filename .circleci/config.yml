@@ -29,14 +29,58 @@ executors:
         type: string
     resource_class: small
 
-jobs:
-  build_and_deploy:
-    # Check https://circleci.com/developer/images/image/cimg/base for more details
+  ubuntu_vm:
     machine:
-      image: ubuntu-2204:2023.10.1
+      image: ubuntu-2004:2023.10.1
     resource_class: medium
+
+jobs:
+
+  build_image:
+    executor: ubuntu_vm
     environment:
-      NUODB_CP_REPO: ./nuodb-control-plane
+      NUODB_CP_COMMIT: e98e2b890cda772f07da6bd91991a75868d0f2b6
+    steps:
+      - checkout
+      - check_skip_job
+      - check_version
+      - add_ssh_keys:
+          fingerprints: # add SSH deploy key for nuodb/nuodb-control-plane repository
+            - "SHA256:rXyFWvQb0aSIvZXMOSVqlNtRlLK4m81yak/ivRtfBDA"
+      - run:
+          name: Prepare persistent workspace for Control Plane repository and image
+          command: |
+            mkdir -p /tmp/workspace
+      - run:
+          name: Checkout NuoDB Control Plane repository
+          command: |
+            git clone git@github.com:nuodb/nuodb-control-plane.git /tmp/workspace/nuodb-control-plane
+            cd /tmp/workspace/nuodb-control-plane
+            git checkout "$NUODB_CP_COMMIT"
+      - run:
+          name: Build Control Plane Image
+          command: |
+            cd /tmp/workspace/nuodb-control-plane
+            make docker-build
+          environment:
+            IMG_REPO: nuodb/nuodb-control-plane
+      - run:
+          name: Save Docker image to file
+          command: |
+            cd /tmp/workspace/nuodb-control-plane
+            ./docker/save.sh
+          environment:
+            IMG_REPO: nuodb/nuodb-control-plane
+            IMG_FILE: /tmp/workspace/nuodb-control-plane.tar
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - "*"
+
+  build_and_deploy:
+    executor: ubuntu_vm
+    environment:
+      NUODB_CP_REPO: /tmp/workspace/nuodb-control-plane
       NUODB_CP_COMMIT: e98e2b890cda772f07da6bd91991a75868d0f2b6
     steps:
       - checkout
@@ -65,23 +109,12 @@ jobs:
           name: Login to Github Container Registry
           command: |
             echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_USER" --password-stdin
-      - add_ssh_keys:
-          fingerprints: # add SSH deploy key for nuodb/nuodb-control-plane repository
-            - "SHA256:rXyFWvQb0aSIvZXMOSVqlNtRlLK4m81yak/ivRtfBDA"
+      - attach_workspace:
+          at: /tmp/workspace
       - run:
-          name: "Checkout NuoDB Control Plane repo"
+          name: Load Control Plane Image
           command: |
-            git clone git@github.com:nuodb/nuodb-control-plane.git
-            cd nuodb-control-plane && git checkout "$NUODB_CP_COMMIT"
-      - run:
-          name: Checking if Docker image exists already
-          command: |
-            if [ "$(./build_utils.sh doesImageExist)" == "yes" ] ; then
-                echo "Docker Image exists already - no need to build image."
-                circleci-agent step halt
-            else
-              echo "Docker Image needs to be built."
-            fi
+            docker load -i /tmp/workspace/nuodb-control-plane.tar
       - run:
           name: Build Image
           command: make build-image
@@ -101,9 +134,6 @@ jobs:
       - run:
           name: Deploy Docker images
           command: ./build_utils.sh deployDockerImages
-      - add_ssh_keys:
-          fingerprints: # add SSH deploy key for nuodb/nuodbaas-webui repository
-            - "SHA256:7ta24cW0GEKNRufv+59EChoVzAAqZlJsT1gTAEo4Feg"
       - run:
           name: Deploy Helm Charts
           command: ./build_utils.sh createAndUploadHelmPackage
