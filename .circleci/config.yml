@@ -74,9 +74,6 @@ jobs:
             git clone git@github.com:nuodb/nuodb-control-plane.git
             cd nuodb-control-plane && git checkout "$NUODB_CP_COMMIT"
       - run:
-          name: "List SSH keys"
-          command: |
-      - run:
           name: "Test nuodbaas-webui repo access"
           command: |
             ssh-add -l > /tmp/fingerprints
