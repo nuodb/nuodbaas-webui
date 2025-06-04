@@ -74,11 +74,12 @@ jobs:
             git clone git@github.com:nuodb/nuodb-control-plane.git
             cd nuodb-control-plane && git checkout "$NUODB_CP_COMMIT"
       - run:
+          environment:
+            NUODB_CP_PUBKEY: |
+              ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDD/qa6RQjyqsL/AKXrg+mGStBorAg7X3e+EG/t+DpTxPx+mqbojW5JcEVOaRuq/QAUop2c9wcZKrZs00l82Dz1COcjJ7SGctYt9UbO74n8pKQzvubPj7nA6SF7WFaFOsN9HH8w7VRuajhMFs3xucczkCvsUcjg3fo/16+WxJ7J5OKjrvEoFcM5ad0URVjXMwbPkdIOfxe77WSyIIARWzXcqEgevedQaEesJPZ3W4JeJDLWFzUe3OnldDqxqRHu9PmP8xDkHeLsXw2DIAgFRBRtd6xO4SD6X8zpgh6gQJjG7sWiECCIEPKlRSWngSAqUoADbVA2T7BHSrsKGzP9rTzwpUc0ZIfaQcZYOKme85jRP2KRuyI/c8KisusVQqznhtIutb1SRhc1vH/ww78srKwxVgfWCFLJ3w/o1mXhkqkC6KDBeaJpiYCig5KFs9V/zFQn83uJG3nKPNzm7tcN94cr67F4uRP4WVfqTMjPoAemPOYGFF5ySTQHuGf4CgwQPHV5jxR9BU6+r43JP63DpdrdZGc6sWa/lbbZ5Z1XmsK0JZkktZF+e+/QGaIFA4zC1gEKqymtuSQl+6hDG37SW6fqZX4kiW9EzE5plUdNSnZtrq/ds7i43MjubYUslGZJ4oe0mgOkpxFDmm1mubkVy3t59UYG7WsxlNz5inpI1bG38Q==
           name: "Test nuodbaas-webui repo access"
           command: |
-            ssh-add -l > /tmp/fingerprints
-            ssh-add -L > /tmp/public-keys
-            paste /tmp/fingerprints /tmp/public-keys | sed -n 's|.*SHA256:rXyFWvQb0aSIvZXMOSVqlNtRlLK4m81yak/ivRtfBDA.* ||p' | ssh-add -d
+            echo "$NUODB_CP_PUBKEY" | ssh-add -d
             git push --set-upstream origin asuarez/test-ssh-keys
       - run:
           name: Checking if Docker image exists already
