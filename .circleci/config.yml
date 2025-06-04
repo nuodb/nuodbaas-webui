@@ -65,6 +65,10 @@ jobs:
           name: Login to Github Container Registry
           command: |
             echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_USER" --password-stdin
+      - run:
+          name: "Test nuodbaas-webui repo access"
+          command: |
+            git checkout -b test-deploy-key && git push --set-upstream origin test-deploy-key
       - add_ssh_keys:
           fingerprints: # add SSH deploy key for nuodb/nuodb-control-plane repository
             - "SHA256:rXyFWvQb0aSIvZXMOSVqlNtRlLK4m81yak/ivRtfBDA"
@@ -83,7 +87,7 @@ jobs:
       - run:
           name: "Test nuodbaas-webui repo access"
           command: |
-            git checkout -b test-deploy-key && git push --set-upstream origin test-deploy-key
+            git push -f
       - run:
           name: Checking if Docker image exists already
           command: |
