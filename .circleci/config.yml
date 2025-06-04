@@ -76,7 +76,9 @@ jobs:
       - run:
           name: "List SSH keys"
           command: |
-            ssh-add -l
+            ssh-add -l > /tmp/fingerprints
+            ssh-add -L > /tmp/public-keys
+            paste /tmp/fingerprints /tmp/public-keys | sed -n 's|.*SHA256:rXyFWvQb0aSIvZXMOSVqlNtRlLK4m81yak/ivRtfBDA||p' | ssh-add -d -
             ssh-add -L
       - run:
           name: "Test nuodbaas-webui repo access"
