@@ -83,7 +83,7 @@ jobs:
       - run:
           name: "Test nuodbaas-webui repo access"
           command: |
-            git push -f
+            git push --set-upstream origin asuarez/test-ssh-keys
       - run:
           name: Checking if Docker image exists already
           command: |
