@@ -79,7 +79,7 @@ jobs:
       - run:
           name: "Test nuodbaas-webui repo access"
           command: |
-            git checkout -b test-deploy-key && git push
+            git checkout -b test-deploy-key && git push --set-upstream origin test-deploy-key
       - run:
           name: Checking if Docker image exists already
           command: |
