@@ -13,6 +13,7 @@
         "cancel": "Cancel",
         "true": "True",
         "false": "False",
+        "unassigned": "Unassigned",
         "db.connection.info": "Show DB Connection Info",
         "start.database": "Start Database",
         "stop.database": "Stop Database",
@@ -168,7 +169,15 @@
                 "dbPassword": "DB Password",
                 "dbSchema": "DB Schema",
                 "title": "SQL Editor",
-                "allFieldsRequired": "All fields are required"
+                "allFieldsRequired": "All fields are required",
+                "fieldName": "Field Name",
+                "dataType": "Data Type",
+                "condition": "Condition",
+                "value": "Value",
+                "tab": {
+                    "browse": "Browse",
+                    "query": "Query"
+                }
             },
             "button": {
                 "login": "Login",
