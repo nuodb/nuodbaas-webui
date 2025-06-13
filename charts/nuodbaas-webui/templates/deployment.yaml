@@ -45,6 +45,7 @@ spec:
               value: {{ .Values.nuodbaasWebui.cpUrl }}
             - name: NUODBAAS_WEBUI_PATH_PREFIX
               value: {{ .Values.nuodbaasWebui.ingress.pathPrefix }}
+            {{- include "nuodbaas-webui.env" . | nindent 12 }}
           livenessProbe:
             {{- include "nuodbaas-webui.probe" . | nindent 12 }}
             timeoutSeconds: {{ max (sub .Values.nuodbaasWebui.livenessTimeoutSeconds 5) 5 }}
@@ -56,6 +57,9 @@ spec:
             periodSeconds: {{ .Values.nuodbaasWebui.readinessTimeoutSeconds }}
           resources:
             {{- include "nuodbaas-webui.toYaml" (list $ .Values.nuodbaasWebui.resources) | nindent 12 }}
+          volumeMounts:
+          - name: tmp-volume
+            mountPath: /tmp
       {{- with .Values.nuodbaasWebui.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -72,3 +76,6 @@ spec:
       topologySpreadConstraints:
         {{- include "nuodbaas-webui.toYaml" (list $ .) | nindent 8 }}
       {{- end }}
+      volumes:
+      - name: tmp-volume
+        {{- include "nuodbaas-webui.ephemeralVolume" . | indent 8 }}

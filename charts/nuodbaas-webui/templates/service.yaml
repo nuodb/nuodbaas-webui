@@ -3,6 +3,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "nuodbaas-webui.fullname" . }}
+  {{- with .Values.nuodbaasWebui.service.annotations }}
+  annotations:
+    {{- include "nuodbaas-webui.toYaml" (list $ .) | nindent 4 }}
+  {{- end }}
   labels:
     {{- include "nuodbaas-webui.labels" . | nindent 4 }}
 spec:

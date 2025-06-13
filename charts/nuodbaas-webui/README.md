@@ -24,9 +24,14 @@ All configurable parameters for each top-level scope are detailed below, organiz
 | `nuodbaasWebui.resources.requests.cpu` | Specify cpu requests | `100m` |
 | `nuodbaasWebui.resources.requests.memory` | Specify memory requests | `128Mi` |
 | `nuodbaasWebui.service.type` | Specify service type | `ClusterIP` |
+| `nuodbaasWebui.service.port` | The service HTTP port for exposing Control Plane REST | `8080` |
+| `nuodbaasWebui.service.annotations` | Service annotations useful for integrating 3rd party products. Map value will pass through to the pod as supplied. String value will be templated and the result is passed. | `{}` |
 | `nuodbaasWebui.pathPrefix` | Specify NuoDBaaS WebUI prefix | `ui` |
 | `nuodbaasWebui.pathPrefixAlternate` | Specify alternate NuoDBaaS WebUI prefix | `webui` |
 | `nuodbaasWebui.cpUrl` | The URL used to send requests to the Control Plane REST service | `/nuodb-cp` |
+| `nuodbaasWebui.ephemeralVolume.enabled` |  Whether to create a generic ephemeral volume rather than emptyDir for any storage that does not outlive the pod | `false` |
+| `nuodbaasWebui.ephemeralVolume.size` |  The size of the generic ephemeral volume to create | `1Gi` |
+| `nuodbaasWebui.ephemeralVolume.storageClass` |  The storage class to use for the generic ephemeral volume | `""` |
 
 ## Uninstalling the Chart
 
