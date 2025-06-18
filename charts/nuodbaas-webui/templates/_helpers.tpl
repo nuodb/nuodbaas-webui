@@ -168,3 +168,38 @@ Return the target average utilization resource entries of the HorizontalPodAutos
     {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Renders an ephemeral volume configuration.
+*/}}
+{{- define "nuodbaas-webui.ephemeralVolume" -}}
+{{- if .Values.nuodbaasWebui.ephemeralVolume.enabled }}
+ephemeral:
+  volumeClaimTemplate:
+    metadata:
+    {{- with .Values.resourceLabels }}
+      labels:
+        {{- include "nuodbaas-webui.toYaml" (list $ .) | nindent 8 }}
+    {{- end }}
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      {{- if .Values.nuodbaasWebui.ephemeralVolume.storageClass }}
+      storageClassName: {{ .Values.nuodbaasWebui.ephemeralVolume.storageClass }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.nuodbaasWebui.ephemeralVolume.size }}
+{{- else }}
+emptyDir: {}
+{{- end }}
+{{- end -}}
+
+{{/*
+Import user defined ENV vars
+*/}}
+{{- define "nuodbaas-webui.env" }}
+{{- if not (empty .Values.nuodbaasWebui.env) }}
+{{ toYaml .Values.nuodbaasWebui.env | trim }}
+{{- end }}
+{{- end -}}

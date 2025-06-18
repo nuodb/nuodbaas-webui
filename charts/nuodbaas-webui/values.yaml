@@ -94,6 +94,11 @@ nuodbaasWebui:
     type: ClusterIP
     port: 8080
 
+    # Service annotations useful for integrating 3rd party products. Map value
+    # will pass through to the service as supplied. String value will be
+    # templated and the result is passed.
+    annotations: {}
+
   ingress:
     enabled: false
     className: ""
@@ -121,3 +126,15 @@ nuodbaasWebui:
     targetAverageUtilization:
       cpu: 80
       # memory: 80
+
+  ephemeralVolume:
+    # Whether to enable generic ephemeral volumes, rather than using emptyDir
+    # for data that does not have to outlive the pod.
+    # ref: https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/#generic-ephemeral-volumes
+    enabled: false
+
+    # The size of the generic ephemeral volume.
+    size: 1Gi
+
+    # The storage class to use for the generic ephemeral volume.
+    storageClass: ""
