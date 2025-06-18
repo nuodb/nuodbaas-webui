@@ -18,7 +18,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
     const dbName = data.name;
     const sqlEndpoint = data?.status?.sqlEndpoint;
     const caPem = data?.status?.caPem;
-    const port = window.location.port;
+    const port = window.location.protocol === 'https:' ? '443' : '80';
 
     const [copiedField, setCopiedField] = useState("");
 
@@ -26,7 +26,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
         "DB_USER=\"<db username, i.e. 'dba'>\"",
         "DB_PASSWORD=\"<db password>\"",
         "CA_PEM=\"" + caPem + "\"",
-        "echo \"select tables\" | bin/nuosql " + dbName + "@" + sqlEndpoint + ":" + (port ? ":" + port : "") + " \\",
+        "echo \"select tables\" | bin/nuosql " + dbName + "@" + sqlEndpoint + ":" + port + " \\",
         "--user \"$DB_USER\" \\",
         "--password \"$DB_PASSWORD\" \\",
         "--connection-property trustedCertificates=\"$CA_PEM\""
