@@ -18,7 +18,10 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
     const dbName = data.name;
     const sqlEndpoint = data?.status?.sqlEndpoint;
     const caPem = data?.status?.caPem;
-    const port = window.location.port;
+    let port = window.location.port
+    if (!port) {
+        port = window.location.protocol === 'https:' ? '443' : '80';
+    }
 
     const [copiedField, setCopiedField] = useState("");
 
