@@ -1,8 +1,7 @@
 # (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
-
 services:
   selenium:
-    image: "selenium/standalone-chrome:131.0"
+    image: "selenium-standalone"
     shm_size: '2gb'
     depends_on:
       - nginx
