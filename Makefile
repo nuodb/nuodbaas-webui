@@ -83,8 +83,10 @@ install-crds: create-cluster $(HELM)
 	fi
 
 .PHONY: uninstall-crds
-uninstall-crds: $(HELM)
-	$(HELM) uninstall --ignore-not-found -n default nuodb-cp-crd
+uninstall-crds: $(KIND) $(HELM)
+	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
+		$(HELM) uninstall --ignore-not-found -n default nuodb-cp-crd; \
+	fi
 
 .PHONY: build-cp
 build-cp:
@@ -105,8 +107,10 @@ deploy-cp: build-cp $(HELM) $(KIND)
 	fi
 
 .PHONY: undeploy-cp
-undeploy-cp: $(HELM)
-	@$(HELM) uninstall --ignore-not-found -n default nuodb-cp || true;
+undeploy-cp: $(KIND) $(HELM)
+	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
+		@$(HELM) uninstall --ignore-not-found -n default nuodb-cp || true; \
+	fi
 
 .PHONY: deploy-operator
 deploy-operator: build-cp $(HELM) $(KIND)
@@ -119,8 +123,10 @@ deploy-operator: build-cp $(HELM) $(KIND)
 	fi
 
 .PHONY: undeploy-operator
-undeploy-operator: $(HELM)
-	@$(HELM) uninstall --ignore-not-found -n default nuodb-operator || true;
+undeploy-operator: $(KIND) $(HELM)
+	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
+		$(HELM) uninstall --no-hooks --ignore-not-found -n default nuodb-operator || true; \
+	fi
 
 .PHONY: build-sql
 build-sql:
@@ -136,8 +142,10 @@ deploy-sql: build-sql $(HELM) $(KIND)
 	fi
 
 .PHONY: undeploy-sql
-undeploy-sql: build-sql $(HELM)
-	@$(HELM) uninstall --ignore-not-found -n default nuodbaas-sql; \
+undeploy-sql: $(KIND) $(HELM) build-sql
+	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
+		$(HELM) uninstall --ignore-not-found -n default nuodbaas-sql; \
+	fi
 
 .PHONY: build-webui
 build-webui:
@@ -156,8 +164,10 @@ deploy-webui: build-webui $(HELM) $(KIND)
 	fi
 
 .PHONY: undeploy-webui
-undeploy-webui: $(HELM)
-	@$(HELM) uninstall --ignore-not-found -n default nuodbaas-webui; \
+undeploy-webui: $(KIND) $(HELM)
+	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
+		$(HELM) uninstall --ignore-not-found -n default nuodbaas-webui; \
+	fi
 
 .PHONY: setup-integration-tests
 setup-integration-tests: $(KUBECTL) build-image install-crds deploy-cp deploy-operator deploy-sql deploy-webui ## setup containers before running integration tests
@@ -171,6 +181,14 @@ setup-integration-tests: $(KUBECTL) build-image install-crds deploy-cp deploy-op
 	else \
 		cat docker/development/default.conf.template | sed "s#%%%NUODB_SQL_URL_BASE%%%#$(NUODB_SQL_URL_BASE)#g" > docker/development/default.conf; \
 	fi
+	@if [ "$(ARCH)" = "arm64" ] ; then \
+		docker pull seleniarm/standalone-chromium && \
+		docker tag seleniarm/standalone-chromium selenium-standalone; \
+	else \
+		docker pull selenium/standalone-chrome:131.0 && \
+		docker tag selenium/standalone-chrome:131.0 selenium-standalone; \
+	fi
+
 	@docker compose -f selenium-tests/compose.yaml up --wait
 	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-nuodb-cp-rest" -o name) -- bash -c "curl \
 		http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true \
