@@ -50,7 +50,7 @@ function Organization({ schema, org, orgs, setOrg, onSelection, t }: Organizatio
                 }
             }
         })];
-    return <ComboBox className="NuoOrgSelector" items={orgMenuItems} selected={org}>
+    return <ComboBox loadItems={() => { return new Promise((resolve) => resolve(orgMenuItems)) }} selected={org}>
         <CorporateFareIcon /><label>{org === "" ? t("field.select.allOrgs") : org}</label>
     </ComboBox>;
 }

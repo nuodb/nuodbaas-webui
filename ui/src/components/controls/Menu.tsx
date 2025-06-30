@@ -1,6 +1,6 @@
 // (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
-import { Component, useEffect } from 'react';
+import React, { Component, JSX, useEffect } from 'react';
 import Button from './Button';
 
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -31,9 +31,18 @@ export default function Menu(props: MenuProps): JSX.Element {
     }
 
     if (children) {
-        return <div data-testid={dataTestid} onClick={(event) => {
-            PopupMenu.showMenu(props, event.currentTarget)
-            }}>
+        return <div
+            tabIndex={0}
+            data-testid={dataTestid}
+            onClick={(event) => {
+                PopupMenu.toggleMenu(props, event.currentTarget);
+            }}
+            onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                    PopupMenu.toggleMenu(props, event.currentTarget);
+                }
+            }}
+        >
             <>{children}</>
         </div>;
     }
@@ -51,8 +60,72 @@ interface PopupState extends MenuProps {
     anchor: Element | null;
 }
 
+type MenuItemsProps = {
+    items: MenuItemProps[];
+    draggable?: boolean;
+    selected?: string;
+    clearAnchor: () => void;
+    dndDrop: (event: React.DragEvent<HTMLDivElement>) => void;
+    dndOver: (event: React.DragEvent<HTMLDivElement>) => void;
+    dndStart: (e: any) => void;
+};
+
+function MenuItems({ items, draggable, selected, clearAnchor, dndDrop, dndOver, dndStart }: MenuItemsProps) {
+    let refs = items.map(item => React.createRef<HTMLDivElement | null>());
+
+    useEffect(() => {
+        if (items.length > 0) {
+            refs[0].current?.focus();
+        }
+    }, []);
+
+    return items.map((item: MenuItemProps, index: number) => <div style={{ zIndex: 102 }}
+        id={item.id}
+        data-testid={item["data-testid"]}
+        ref={refs[index]}
+        draggable={draggable}
+        onDrop={dndDrop}
+        onDragOver={dndOver}
+        onDragStart={dndStart}
+        key={item.id}
+        className={"NuoMenuPopupItem" + (item.id === selected ? " NuoMenuSelected" : "")}
+        tabIndex={0}
+        onClick={(e) => {
+            e.stopPropagation();
+            if (item.onClick) {
+                clearAnchor();
+                item.onClick();
+
+            }
+        }}
+        onKeyDown={(e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                e.stopPropagation();
+                if (item.onClick) {
+                    clearAnchor();
+                    item.onClick();
+                }
+            }
+            else if (e.key === "ArrowDown" && index + 1 < items.length) {
+                refs[index + 1].current?.focus();
+            }
+            else if (e.key === "ArrowUp" && index > 0) {
+                refs[index - 1].current?.focus();
+            }
+            else if (e.key === "Tab" && (index === 0 && e.shiftKey || index + 1 === items.length && !e.shiftKey)) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }}
+    >
+        {item.label}
+        {draggable === true && <DragHandleIcon />}
+    </div>);
+}
+
 export class PopupMenu extends Component<{}, PopupState> {
-    state = {
+    state: PopupState = {
         popupId: "",
         items: [],
         setItems: undefined,
@@ -60,7 +133,6 @@ export class PopupMenu extends Component<{}, PopupState> {
         anchor: null,
         align: "right" as AlignType,
         draggable: false,
-
         dndSelected: undefined
     }
 
@@ -148,6 +220,15 @@ export class PopupMenu extends Component<{}, PopupState> {
         });
     }
 
+    static toggleMenu(menu: MenuProps, anchor: Element): void {
+        if (s_popupInstance?.state.anchor) {
+            s_popupInstance.setState({ anchor: null });
+        }
+        else {
+            this.showMenu(menu, anchor);
+        }
+    }
+
     static updateMenu(menu: MenuProps): void {
         if (s_popupInstance) {
             if (s_popupInstance.state.popupId === menu.popupId) {
@@ -179,26 +260,7 @@ export class PopupMenu extends Component<{}, PopupState> {
             onClick={() => this.setState({ anchor: null })}>
             <div style={{ position: "fixed", right: x, left: x, top: rect?.bottom, bottom: rect?.bottom, zIndex: 102 }}>
                 <div id="NuoMenuPopup" data-testid="menu-popup" className={"NuoMenuPopup " + (this.state.align === "right" ? " NuoAlignRight" : " NuoAlignLeft")}>
-                    {this.state.items.map((item: MenuItemProps) => <div style={{ zIndex: 102 }}
-                        id={item.id}
-                        data-testid={item["data-testid"]}
-                        draggable={this.state.draggable}
-                        onDrop={this.dndDrop}
-                        onDragOver={this.dndOver}
-                        onDragStart={this.dndStart}
-                        key={item.id}
-                        className={"NuoMenuPopupItem" + (item.id === this.state.selected ? " NuoMenuSelected" : "")}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            if (item.onClick) {
-                                this.setState({ anchor: null });
-                                item.onClick();
-
-                            }
-                        }}>
-                        {item.label}
-                        {this.state.draggable === true && <DragHandleIcon />}
-                    </div>)}
+                    <MenuItems items={this.state.items} selected={this.state.selected} draggable={this.state.draggable} clearAnchor={() => this.setState({ anchor: null })} dndDrop={this.dndDrop} dndOver={this.dndOver} dndStart={this.dndStart} />
                 </div></div>
         </div>;
     }

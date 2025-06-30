@@ -109,7 +109,7 @@ deploy-cp: build-cp $(HELM) $(KIND)
 .PHONY: undeploy-cp
 undeploy-cp: $(KIND) $(HELM)
 	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
-		@$(HELM) uninstall --ignore-not-found -n default nuodb-cp || true; \
+		$(HELM) uninstall --ignore-not-found -n default nuodb-cp || true; \
 	fi
 
 .PHONY: deploy-operator

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useParams } from "react-router"
-import { PageProps } from "../../utils/types";
+import { MenuItemProps, PageProps } from "../../utils/types";
 import PageLayout from "./parts/PageLayout";
 import { withTranslation } from "react-i18next";
 import Select, { SelectOption } from '../controls/Select';
@@ -16,11 +16,11 @@ import SqlBrowseTab from './sql/SqlBrowseTab';
 import Toast from '../controls/Toast';
 import SqlQueryTab from './sql/SqlQueryTab';
 import { SqlType } from '../../utils/SqlSocket';
+import ComboBox from '../controls/ComboBox';
 
 function SqlPage(props: PageProps) {
     const params = useParams();
     const [dbTable, setDbTable] = useState("");
-    const [dbTables, setDbTables] = useState<string[]>([]);
     const [sqlConnection, setSqlConnection] = useState<SqlType | undefined | void | "">(undefined);
     const [tabIndex, setTabIndex] = useState<number>(0);
 
@@ -30,18 +30,28 @@ function SqlPage(props: PageProps) {
         }
     });
 
-    async function refreshTables(s: SqlType) {
-        const results = await s.runCommand("EXECUTE_QUERY", ["SELECT tablename FROM system.tables where type = 'TABLE' and schema = '" + s.getDefaultSchema() + "'"]);
+    async function loadTables(): Promise<MenuItemProps[]> {
+        if (!sqlConnection) {
+            return new Promise((resolve) => resolve([]));
+        }
+        let tables: string[] = [];
+        const results = await sqlConnection.runCommand("EXECUTE_QUERY", ["SELECT tablename FROM system.tables where type = 'TABLE' and schema = '" + sqlConnection.getDefaultSchema() + "'"]);
         if (results.error) {
             Toast.show(results.error, results);
-            setDbTables([]);
             setDbTable("");
         }
-        else {
-            const tables = results.rows?.map(row => row.values[0]) || [];
-            setDbTables(tables);
-            setDbTable(tables.length > 0 ? tables[0] : "");
+        else if (results.rows) {
+            tables = results.rows.map(row => row.values[0]);
         }
+        if (!tables.includes(dbTable)) {
+            if (tables.length > 0) {
+                setDbTable(tables[0]);
+            }
+            else {
+                setDbTable("");
+            }
+        }
+        return new Promise((resolve) => resolve(tables.map(table => { return { id: table, label: table, onClick: () => { setDbTable(table) } } })));
     }
 
     function renderTabs(dbTable: string) {
@@ -64,17 +74,15 @@ function SqlPage(props: PageProps) {
                     {[params.organization, params.project, params.database].map(name => {
                         return <Typography color="text.primary" style={{ fontSize: "1em", textWrap: "nowrap" }}>{name}</Typography>
                     })}
-                    {dbTables.length > 0 && <Select id="filter" label="" value={dbTable} onChange={({ target }) => {
-                        setDbTable(target.value);
-                    }}>
-                        {dbTables.map((table: string) => <SelectOption key={table} value={table}>{table}</SelectOption>)}
-                    </Select>}
+                    {sqlConnection && <ComboBox loadItems={loadTables}
+                        selected={dbTable}>
+                        <label>{dbTable}</label>
+                    </ComboBox> || <></>}
                 </StyledBreadcrumbs>
             </div>
         </div>
         {sqlConnection ? renderTabs(dbTable) : <SqlLogin setSqlConnection={(conn: SqlType) => {
             setSqlConnection(conn);
-            refreshTables(conn);
         }} />}
     </PageLayout>;
 }
