@@ -20,7 +20,14 @@ export default function FieldSelect(props: FieldProps): FieldBaseType {
             setValues(v);
         }} onBlur={() => FieldBase(props).validate()} disabled={readonly}>
             <SelectOption value="">{t("field.select.selectItem")}</SelectOption>
-            {parameter && parameter.enum && parameter.enum.map(e => <SelectOption key={e} value={e}>{t("field.enum." + prefix + "." + e, e)}</SelectOption>)}
+            {parameter && parameter.enum && parameter.enum.map(e => {
+                let description = undefined;
+                const enumDescriptions = parameter["x-enum-descriptions"];
+                if (enumDescriptions) {
+                    description = enumDescriptions[e]
+                }
+                return <SelectOption value={e}>{t("field.enum." + prefix + "." + e, e)} {description}</SelectOption>
+            })}
         </Select>;
     }
 
