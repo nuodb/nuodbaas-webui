@@ -26,7 +26,12 @@ export default function FieldSelect(props: FieldProps): FieldBaseType {
                 if (enumDescriptions) {
                     description = enumDescriptions[e]
                 }
-                return <SelectOption value={e}>{t("field.enum." + prefix + "." + e, e)} {description}</SelectOption>
+                return <SelectOption value={e}>
+                    <div className="NuoEnumItem">
+                        <div className="NuoEnumItemTitle">{t("field.enum." + prefix + "." + e, e)}</div>
+                        {description && <div className="NuoEnumItemDescription">{description}</div>}
+                    </div>
+                </SelectOption>
             })}
         </Select>;
     }
