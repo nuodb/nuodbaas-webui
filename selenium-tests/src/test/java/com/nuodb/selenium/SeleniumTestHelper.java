@@ -167,7 +167,8 @@ public class SeleniumTestHelper {
             List<WebElement> liElements = element.findElements(By.tagName("li"));
             boolean found = false;
             for(WebElement liElement : liElements) {
-                if(value.equals(liElement.getText())) {
+                String text = liElement.getText();
+                if(value.equals(text) || text.startsWith(value + " ")) {
                     liElement.click();
                     found = true;
                     break;
