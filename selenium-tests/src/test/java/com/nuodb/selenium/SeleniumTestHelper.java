@@ -167,7 +167,9 @@ public class SeleniumTestHelper {
             List<WebElement> liElements = element.findElements(By.tagName("li"));
             boolean found = false;
             for(WebElement liElement : liElements) {
-                if(value.equals(liElement.getText())) {
+                String text = liElement.getText();
+                List<WebElement> webTitles = liElement.findElements(By.className("NuoEnumItemTitle"));
+                if(value.equals(text) || webTitles.size() > 0 && value.equals(webTitles.get(0).getText())) {
                     liElement.click();
                     found = true;
                     break;

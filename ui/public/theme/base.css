@@ -926,3 +926,18 @@ button:focus {
     color: white;
     border-radius: 5px;
 }
+.NuoEnumItem {
+    display: inline;
+}
+
+.NuoEnumItemTitle {
+    display: inline;
+    padding: 0 10px 0 0;
+}
+
+.NuoEnumItemDescription {
+    display: inline;
+    color: lightgray;
+    text-wrap: wrap;
+    font-size: 0.9em;
+}

@@ -17,6 +17,7 @@ export type FieldParameterType = {
     required?: boolean,
     pattern?: string,
     "x-tf-sensitive"?: boolean,
+    "x-enum-descriptions"?: {[key:string]:string},
     expand?: boolean,
     in?: string,
     items?: FieldParameterType,

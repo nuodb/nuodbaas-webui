@@ -5,7 +5,7 @@ BIN_DIR ?= $(PROJECT_DIR)/bin
 export PATH := $(BIN_DIR):$(PATH)
 
 OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
-ARCH := $(shell uname -m | sed "s/x86_64/amd64/g")
+ARCH := $(shell uname -m | sed "s/x86_64/amd64/g" | sed "s/aarch64/arm64/g")
 
 KIND_VERSION ?= 0.27.0
 KUBECTL_VERSION ?= 1.28.3
