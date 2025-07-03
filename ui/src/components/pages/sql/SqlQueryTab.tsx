@@ -19,7 +19,12 @@ function SqlQueryTab({ sqlConnection, dbTable }: SqlQueryTabProps) {
     const [executing, setExecuting] = useState(false);
 
     useEffect(()=>{
-        setSqlQuery("select * from `" + dbTable + "` limit 100");
+        if (dbTable) {
+            setSqlQuery("SELECT * FROM `" + dbTable + "` LIMIT 100");
+        }
+        else {
+            setSqlQuery("CREATE TABLE `table1` (`name` VARCHAR(80))");
+        }
         setResults(undefined);
     }, [dbTable]);
 

@@ -12,7 +12,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 type SqlTableProps = {
     results?: SqlResponse;
     isFiltered?: boolean;
-    setShowFilterDialog: (showFilterDialog: boolean) => void;
+    setShowFilterDialog?: (showFilterDialog: boolean) => void;
     orderBy?: string;
     setOrderBy?: (orderBy: string) => void;
     isAscending?: boolean;
@@ -56,7 +56,7 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
                     </div>
                 </TableTh>)}
                 {isFiltered !== undefined && <TableTh className="NuoTableMenuCell">
-                    <div className={isFiltered ? "NuoFilterActive" : "NuoFilterInactive"} onClick={() => setShowFilterDialog(true)}>
+                    <div className={isFiltered ? "NuoFilterActive" : "NuoFilterInactive"} onClick={() => setShowFilterDialog && setShowFilterDialog(true)}>
                         <FilterListIcon />
                     </div>
                 </TableTh>}

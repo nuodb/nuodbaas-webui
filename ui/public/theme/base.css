@@ -638,7 +638,7 @@ code {
     color: rgba(200, 200, 200, 1);
 
 }
-.NuoOrgSelector {
+.NuoComboBox {
     display: flex;
     color: #cdd1d6;
     flex-direction: row;
@@ -650,14 +650,14 @@ code {
         overflow: hidden;
 }
 
-.NuoOrgSelector>div {
+.NuoComboBox>div {
     display: flex;
     flex-direction: row;
     align-items: center;
     text-wrap: nowrap;
 }
 
-.NuoOrgSelector>div>svg {
+.NuoComboBox>div>svg {
     margin: 5px 10px 5px 0px;
         color: #cdd1d6;
         border: 1px solid;
@@ -667,8 +667,8 @@ code {
         height: 30px;
 }
 
-.NuoLeftMenuCollapsed>.NuoOrgSelector,
-.NuoLeftMenuCollapsed *>.NuoOrgSelector {
+.NuoLeftMenuCollapsed>.NuoComboBox,
+.NuoLeftMenuCollapsed *>.NuoComboBox {
     padding: 0 5px;
     justify-content: left;
 }
