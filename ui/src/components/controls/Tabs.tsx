@@ -24,7 +24,7 @@ function badge(count: number) {
 }
 
 export function Tabs({ children, currentTab, setCurrentTab, badges }: TabsProps) {
-    children = children.filter(child => child.props.id && child.props.label && child.props.children);
+    children = children.filter(child => child.props.id && child.props.label);
 
     return <div className="NuoTabs">
         <ul>{children.map((child, index) => (

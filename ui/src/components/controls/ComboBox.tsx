@@ -5,7 +5,7 @@ import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 type ComboBoxProps = {
-    loadItems: () => Promise<MenuItemProps[]>;
+    loadItems: (useCache: boolean) => Promise<MenuItemProps[]>;
     children: ReactNode;
     selected?: string;
     align?: "left" | "right"; //defaults to "left"
@@ -109,7 +109,7 @@ export default function ComboBox({ loadItems, children, selected, align }: Combo
 
     useEffect(() => {
         window.addEventListener("scroll", handleScroll);
-        loadItems().then(items => setItems(items));
+        loadItems(true).then(items => setItems(items));
         return () => {
             window.removeEventListener('scroll', handleScroll);
         };
@@ -147,7 +147,7 @@ export default function ComboBox({ loadItems, children, selected, align }: Combo
 
     function showPopup(event: React.MouseEvent<HTMLDivElement, MouseEvent> | React.KeyboardEvent<HTMLDivElement>) {
         event.stopPropagation();
-        loadItems().then(items => {
+        loadItems(false).then(items => {
             setItems(items);
         });
         const rect = event.currentTarget.getBoundingClientRect();
