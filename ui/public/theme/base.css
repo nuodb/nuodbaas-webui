@@ -160,14 +160,14 @@ html {
 }
 .NuoTableContainer {
     display: flex;
-        flex-direction: column;
+    flex-direction: column;
     box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
     background-color: #fff;
     color: rgba(0, 0, 0, 0.87);
     transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
     border-radius: 10px;
-        margin: 15px;
-        padding: 10px 0;
+    margin: 15px;
+    padding: 10px 0;
 }
 
 .NuoTableTable {
@@ -178,6 +178,11 @@ html {
     text-indent: initial;
     unicode-bidi: isolate;
     border-color: gray;
+}
+
+.NuoTableScrollWrapper {
+    width: 100%;
+    overflow-x: auto;
 }
 
 .NuoTableThead {
