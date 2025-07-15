@@ -134,13 +134,15 @@ function ListResource(props: PageProps) {
                             setSearch(search);
                         }} />
                     </div>
-                <Table
-                    data-testid="list_resource__table"
-                    {...props}
-                    data={dataNotDeleted}
-                    path={itemsAndPath.path}
-                />
-                {renderPaging()}
+                    <div className="NuoTableScrollWrapper">
+                        <Table
+                            data-testid="list_resource__table"
+                            {...props}
+                            data={dataNotDeleted}
+                            path={itemsAndPath.path}
+                        />
+                        {renderPaging()}
+                    </div>
                 </div>
             </PageLayout>
         );
