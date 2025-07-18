@@ -17,6 +17,13 @@ interface Props {
   setIsLoggedIn: (isLoggedIn: boolean) => void;
   t: TempAny;
 }
+interface Provider {
+    name: string;
+    description: string;
+    type: string;
+    providerUrl?: string;
+    organization?: string;
+}
 
 /**
  * Provides Login form storing credentials (currently username/password) in "credentials" local storage
