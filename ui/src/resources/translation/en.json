@@ -156,6 +156,7 @@
             "management": "Management"
         }
     },
+
     "form": {
         "settings": {
             "label": {
@@ -183,6 +184,13 @@
                 "login": "Login",
                 "executing": "Executing...",
                 "submit": "Submit"
+            }
+        },
+        "login": {
+            "label": {
+                "loginWith": "Login With {{providerDesc}} ",
+                "goBack": "Go Back",
+                "loadingProvider": "Loading Provider...."
             }
         }
     },

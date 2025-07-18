@@ -21,6 +21,9 @@ public class LoginTest extends TestRoutines {
     @Test
     public void testInvalidLogin() throws MalformedURLException {
         get("/ui/");
+        if (getElement("local")!= null){
+            click("local");
+        }
         sendKeys("organization", "invalid_org");
         sendKeys("username", "invalid_user");
         sendKeys("password", "invalid_password");
