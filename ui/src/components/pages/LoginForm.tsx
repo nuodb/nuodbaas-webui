@@ -200,14 +200,14 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
             type="submit"
             onClick={handleLogin}
           >
-            Login
+           {t("form.login.label.login")} 
           </Button>
           <Button
             data-testid="back_button"
             variant="outlined"
             onClick={() => setShowLoginForm(false)}
-          >
-            Back
+            >
+            {t("form.login.label.goBack")} 
           </Button>
         </div>
       </>
@@ -223,7 +223,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
             variant="contained"
             onClick={() => setShowLoginForm(true)}
           >
-            Login with local login  
+            {t("form.login.label.localLogin")}
           </Button>
         )}
 
@@ -238,7 +238,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                 (window.location.href = `${provider.url}&redirectUrl=${redirectUrl}`)
               }
             >
-              Login with {provider.description}
+             {t("form.login.label.loginWith", {providerDesc: provider.description})}
             </Button>
           ))}
       </>
