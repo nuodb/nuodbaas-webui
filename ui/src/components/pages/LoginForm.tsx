@@ -20,8 +20,8 @@ interface Props {
 interface Provider {
     name: string;
     description: string;
-    type: string;
-    providerUrl?: string;
+    ref: string;
+    url?: string;
     organization?: string;
 }
 
@@ -80,6 +80,10 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     }
   }
 
+  /**
+   * The purpose of this function is to attempt to log in with invalid credentials and then capture the www-authenticate header from the response.
+   * Ensure that the auth Header contains the "Basic" authentication method to render local login form.
+   * */
   async function fetchAuthHeader() {
     try {
       await axios.post(
@@ -223,7 +227,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
             variant="contained"
             onClick={() => setShowLoginForm(true)}
           >
-            {t("form.login.label.localLogin")}
+            {t("form.login.label.login")}
           </Button>
         )}
 

@@ -156,7 +156,6 @@
             "management": "Management"
         }
     },
-
     "form": {
         "settings": {
             "label": {
@@ -190,8 +189,6 @@
             "label": {
                 "loginWith": "Login With {{providerDesc}} ",
                 "goBack": "Go Back",
-                "loadingProvider": "Loading Provider....",
-                "localLogin":"Local login",
                 "login": "Login" 
             }
         }
