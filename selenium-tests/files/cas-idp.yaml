@@ -9,7 +9,7 @@ metadata:
 spec:
   cas:
     serverUrl: https://127.0.0.1/cas
-  resolveUser:
+  provisionUser:
     accessRule:
       value: |
         {"allow": ["read:ds"]}
