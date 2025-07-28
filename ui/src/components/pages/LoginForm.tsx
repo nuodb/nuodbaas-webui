@@ -25,7 +25,7 @@ interface Provider {
     organization?: string;
 }
 interface ProvidersResponse {
-  items?: Provider[];
+    items?: Provider[];
 }
 /**
  * Provides Login form storing credentials (currently username/password) in "credentials" local storage
@@ -59,7 +59,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
       try {
         const data = await Rest.get(`/login/providers/${encodeURIComponent(provider)}/token${window.location.search}&redirectUrl=${redirectUrl}`);
         handleLoginSuccess(data);
-      } catch (error) {
+      } catch (error: any) {
         loginFailed(error);
       }
     } else {
@@ -74,7 +74,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
       if (data?.items) {
         setProviders(data.items);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to fetch providers", err);
     }
   }
@@ -94,7 +94,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
           headers: { "Content-Type": "application/json" },
         }
       )
-    } catch (error) {
+    } catch (error: any) {
       if (error.response?.headers["www-authenticate"]) {
         setAuthHeader(error.response.headers["www-authenticate"]);
       }
