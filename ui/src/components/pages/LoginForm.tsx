@@ -113,7 +113,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     window.location.href = "/ui";
   }
 
-  function loginFailed(err: Error) {
+  function loginFailed(err: any) {
     console.error("Login Failed", err);
     var detailMsg = err?.response?.data?.detail;
     if (!detailMsg) {
@@ -259,7 +259,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
           renderProgressUI()
         ) : (
           <div className="fields">
-            {showLoginForm ? renderLoginForm() : renderLoginButtons()}
+            {(!providers || providers.length === 0 || showLoginForm ) ? renderLoginForm() : renderLoginButtons() }
           </div>
         )}
       </div>
