@@ -24,7 +24,9 @@ interface Provider {
     url?: string;
     organization?: string;
 }
-
+interface ProvidersResponse {
+  items?: Provider[];
+}
 /**
  * Provides Login form storing credentials (currently username/password) in "credentials" local storage
  * @returns
@@ -37,7 +39,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [providers, setProviders] = useState([]);
+  const [providers, setProviders] = useState<Provider[]>([]);
   const [progressMessage, setProgressMessage] = useState("");
   const [authHeader, setAuthHeader] = useState("");
   const [showLoginForm, setShowLoginForm] = useState(false);
@@ -55,10 +57,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     if (provider) {
       setProgressMessage(`Logging in with ${provider}...`);
       try {
-        const data = await Rest.get(
-          `/login/providers/${encodeURIComponent(provider)}/token${window.location.search}&redirectUrl=${redirectUrl}`,
-          ""
-        );
+        const data = await Rest.get(`/login/providers/${encodeURIComponent(provider)}/token${window.location.search}&redirectUrl=${redirectUrl}`);
         handleLoginSuccess(data);
       } catch (error) {
         loginFailed(error);
@@ -71,7 +70,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
 
   async function fetchProviders() {
     try {
-      const data = await Rest.get(`/login/providers?redirectUrl=${redirectUrl}`);
+      const data = await Rest.get(`/login/providers?redirectUrl=${redirectUrl}`) as ProvidersResponse | undefined;
       if (data?.items) {
         setProviders(data.items);
       }
@@ -81,7 +80,8 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
   }
 
   /**
-   * The purpose of this function is to attempt to log in with invalid credentials and then capture the www-authenticate header from the response.
+   * The purpose of this function is to attempt to log in with invalid credentials 
+   * and then capture the www-authenticate header from the response.
    * Ensure that the auth Header contains the "Basic" authentication method to render local login form.
    * */
   async function fetchAuthHeader() {
@@ -187,6 +187,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
         <TextField
           required
           data-testid="password"
+          id="password"
           type="password"
           label="Password"
           value={password}
@@ -206,13 +207,14 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
           >
            {t("form.login.label.login")} 
           </Button>
+          {providers && providers.length > 0 && 
           <Button
             data-testid="back_button"
             variant="outlined"
             onClick={() => setShowLoginForm(false)}
             >
             {t("form.login.label.goBack")} 
-          </Button>
+          </Button>}
         </div>
       </>
     );
@@ -231,8 +233,8 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
           </Button>
         )}
 
-        {providers
-          .filter((provider) => provider.description)
+        {providers &&
+          providers.filter((provider) => provider.description)
           .map((provider) => (
             <Button
               key={provider.name}
