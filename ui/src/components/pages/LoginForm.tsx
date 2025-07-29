@@ -20,7 +20,6 @@ interface Props {
 interface Provider {
     name: string;
     description: string;
-    ref: string;
     url?: string;
     organization?: string;
 }
