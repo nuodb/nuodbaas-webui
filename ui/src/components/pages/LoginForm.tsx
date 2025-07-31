@@ -18,13 +18,13 @@ interface Props {
   t: TempAny;
 }
 interface Provider {
-    name: string;
-    description: string;
-    url?: string;
-    organization?: string;
+  name: string;
+  description: string;
+  url?: string;
+  organization?: string;
 }
 interface ProvidersResponse {
-    items?: Provider[];
+  items?: Provider[];
 }
 /**
  * Provides Login form storing credentials (currently username/password) in "credentials" local storage
@@ -38,7 +38,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [providers, setProviders] = useState<Provider[]>([]);
+  const [providers, setProviders] = useState<Provider[] | undefined>(undefined);
   const [progressMessage, setProgressMessage] = useState("");
   const [authHeader, setAuthHeader] = useState("");
   const [showLoginForm, setShowLoginForm] = useState(false);
@@ -204,16 +204,16 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
             type="submit"
             onClick={handleLogin}
           >
-           {t("form.login.label.login")} 
+            {t("form.login.label.login")}
           </Button>
-          {providers && providers.length > 0 && 
-          <Button
-            data-testid="back_button"
-            variant="outlined"
-            onClick={() => setShowLoginForm(false)}
+          {providers && providers.length > 0 &&
+            <Button
+              data-testid="back_button"
+              variant="outlined"
+              onClick={() => setShowLoginForm(false)}
             >
-            {t("form.login.label.goBack")} 
-          </Button>}
+              {t("form.login.label.goBack")}
+            </Button>}
         </div>
       </>
     );
@@ -234,18 +234,18 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
 
         {providers &&
           providers.filter((provider) => provider.description)
-          .map((provider) => (
-            <Button
-              key={provider.name}
-              data-testid={`login_${provider.name}`}
-              variant="contained"
-              onClick={() =>
-                (window.location.href = `${provider.url}&redirectUrl=${redirectUrl}`)
-              }
-            >
-             {t("form.login.label.loginWith", {providerDesc: provider.description})}
-            </Button>
-          ))}
+            .map((provider) => (
+              <Button
+                key={provider.name}
+                data-testid={`login_${provider.name}`}
+                variant="contained"
+                onClick={() =>
+                  (window.location.href = `${provider.url}&redirectUrl=${redirectUrl}`)
+                }
+              >
+                {t("form.login.label.loginWith", { providerDesc: provider.description })}
+              </Button>
+            ))}
       </>
     );
   }
@@ -258,7 +258,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
           renderProgressUI()
         ) : (
           <div className="fields">
-            {(!providers || providers.length === 0 || showLoginForm ) ? renderLoginForm() : renderLoginButtons() }
+            {providers === undefined ? "spin-icon" : (providers.length === 0 || showLoginForm) ? renderLoginForm() : renderLoginButtons()}
           </div>
         )}
       </div>
