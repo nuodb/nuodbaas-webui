@@ -63,6 +63,6 @@ public class LoginTest extends TestRoutines {
         get("/ui/login?provider=cas-idp&ticket=ST-123");
         // assertEquals("Logging in with cas-idp...", waitText("progress_message"));
         // request should fail with 500 Internal Server Error due to CAS address being unreachable by REST service
-        assertEquals("Login failed: ", waitText("error_message"));
+        assertEquals("Login failed: Unable to authenticate user with CAS provider cas-idp", waitText("error_message"));
     }
 }
