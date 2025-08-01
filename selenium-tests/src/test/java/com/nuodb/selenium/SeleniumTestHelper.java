@@ -269,16 +269,18 @@ public class SeleniumTestHelper {
     public void login(String organization, String username, String password) {
         get("/ui/");
         
-        retryStale(()->{
+        retry(()->{
             if (getElement("show_login_button")!= null){
                 click("show_login_button");
             }
-            
-            sendKeys("organization", organization);
-            sendKeys("username", username);
-            sendKeys("password", password);
-            click("login_button");
+            else if (getElement("organization") == null){
+                throw new RuntimeException("retry");
+            }
         });
+        sendKeys("organization", organization);
+        sendKeys("username", username);
+        sendKeys("password", password);
+        click("login_button");
         
         retryStale(()->{
             String expected = "management\n>\ndatabases\n>\n" + organization.toLowerCase();
