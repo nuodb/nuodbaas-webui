@@ -164,6 +164,13 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     );
   }
 
+  const handleGoBack = () => {
+    setOrganization('');
+    setUsername('');
+    setPassword('');
+    setShowLoginForm(false); // Assuming setShowLoginForm controls visibility of login form
+  };
+
   function renderLoginForm() {
     return (
       <>
@@ -210,7 +217,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
             <Button
               data-testid="back_button"
               variant="outlined"
-              onClick={() => setShowLoginForm(false)}
+              onClick={handleGoBack}
             >
               {t("form.login.label.goBack")}
             </Button>}
@@ -243,7 +250,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                   (window.location.href = `${provider.url}&redirectUrl=${redirectUrl}`)
                 }
               >
-                {t("form.login.label.loginWith", { providerDesc: provider.description })}
+                {t("form.login.label.loginWith", {providerDesc: provider.description})}
               </Button>
             ))}
       </>
@@ -258,7 +265,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
           renderProgressUI()
         ) : (
           <div className="fields">
-            {providers === undefined ? "spin-icon" : (providers.length === 0 || showLoginForm) ? renderLoginForm() : renderLoginButtons()}
+            {providers === undefined ? <CircularProgress className="RestSpinner" color="inherit" /> : (providers.length === 0 || showLoginForm) ? renderLoginForm() : renderLoginButtons()}
           </div>
         )}
       </div>
