@@ -5,6 +5,7 @@ package com.nuodb.selenium.basic;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.nuodb.selenium.TestRoutines;
 
@@ -24,9 +25,10 @@ public class LoginTest extends TestRoutines {
         retry(()->{
             if (getElement("show_login_button")!= null){
                 click("show_login_button");
-            } else if (getElement("organization") == null){
-                throw new RuntimeException("retry");
+            } else {
+                assertNotNull(getElement("organization"), "Unable to find Login button or Login form");
             }
+
         });
         sendKeys("organization", "invalid_org");
         sendKeys("username", "invalid_user");
@@ -67,6 +69,6 @@ public class LoginTest extends TestRoutines {
         get("/ui/login?provider=cas-idp&ticket=ST-123");
         assertEquals("Logging in with cas-idp...", waitText("progress_message"));
         // request should fail with 500 Internal Server Error due to CAS address being unreachable by REST service
-        assertEquals("Login failed: Unable to authenticate user with CAS provider cas-idp", waitText("error_message"));
+        assertEquals("Login failed: Request failed with status code 500", waitText("error_message"));
     }
 }

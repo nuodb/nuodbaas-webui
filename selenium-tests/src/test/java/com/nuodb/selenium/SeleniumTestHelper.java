@@ -2,6 +2,7 @@
 
 package com.nuodb.selenium;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -273,8 +274,8 @@ public class SeleniumTestHelper {
             if (getElement("show_login_button")!= null){
                 click("show_login_button");
             }
-            else if (getElement("organization") == null){
-                throw new RuntimeException("retry");
+            else {
+                assertNotNull(getElement("organization"), "Unable to find Login button or Login form");   
             }
         });
         sendKeys("organization", organization);
