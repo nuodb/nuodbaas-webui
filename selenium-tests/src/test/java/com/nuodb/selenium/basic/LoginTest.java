@@ -22,6 +22,10 @@ public class LoginTest extends TestRoutines {
     @Test
     public void testInvalidLogin() throws MalformedURLException {
         get("/ui/");
+        /**
+        * During page load, we retrieve the providers list, which determines the login choices.
+        * We wait for these options to appear before proceeding further.
+        **/
         retry(()->{
             if (getElement("show_login_button")!= null){
                 click("show_login_button");
