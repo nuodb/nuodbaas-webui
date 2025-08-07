@@ -140,7 +140,7 @@ export function getRecursiveValue(value: TempAny, t: any) {
     }
     if (typeof value === "object") {
         if (Array.isArray(value)) {
-            return <>{value.map(v => <div>{getRecursiveValue(v, t)}</div>)}</>;
+            return <>{value.map((v, index) => <div key={index}>{getRecursiveValue(v, t)}</div>)}</>;
         }
         else {
             return <dl className="map">{Object.keys(value).map(key => {
