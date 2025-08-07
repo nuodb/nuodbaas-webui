@@ -135,6 +135,12 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     }
 
     async function handleLogin() {
+
+        if (!organization.trim() || !username.trim() || !password.trim()) {
+            setError("All fields are required");
+            return;
+        }
+
         const err = await Auth.login(`${organization}/${username}`, password);
         if (!err) {
             setIsLoggedIn(true);
@@ -193,6 +199,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     function renderLoginForm() {
         return (
             <>
+            <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
                 <TextField
                     required
                     data-testid="organization"
@@ -244,6 +251,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                         </Button>
                     )}
                 </div>
+            </form>
             </>
         );
     }
