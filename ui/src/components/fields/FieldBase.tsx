@@ -144,6 +144,9 @@ export function getRecursiveValue(value: TempAny, t: any) {
         }
         else {
             return <dl className="map">{Object.keys(value).map(key => {
+                if (typeof value[key] === "object" && Object.keys(value[key]).length === 0) {
+                    return null;
+                }
                 return <div key={key}><dt>{String(key)}</dt><dd>{getRecursiveValue(value[key], t)}</dd></div>;
             })}</dl>
         }
