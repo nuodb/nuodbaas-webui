@@ -3,7 +3,7 @@
 import { ReactNode } from "react";
 import { setValue, getValue } from "./utils";
 import { Table, TableBody, TableCell, TableHead, TableRow } from "../controls/Table";
-import FieldBase, { FieldBaseType, FieldProps } from './FieldBase'
+import FieldBase, { FieldBaseType, FieldProps, getRecursiveValue } from './FieldBase'
 import FieldFactory from "./FieldFactory"
 import FieldMessage from "./FieldMessage";
 import InfoPopup from "../controls/InfoPopup";
@@ -76,10 +76,7 @@ export default function FieldArray(props: FieldProps): FieldBaseType {
 
     function getDisplayValue(): ReactNode {
         const { prefix, values } = props;
-        const value = getValue(values, prefix);
-        return value && value.map((v: string, index: number) => {
-            return <div key={index}>{String(v)}</div>;
-        });
+        return getRecursiveValue(getValue(values, prefix), props.t);
     }
 
     return { ...FieldBase(props), show, getDisplayValue };
