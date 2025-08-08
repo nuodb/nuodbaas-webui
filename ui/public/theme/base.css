@@ -946,3 +946,7 @@ button:focus {
     text-wrap: wrap;
     font-size: 0.9em;
 }
+
+.NuoLoginForm .MuiFormControl-root + .MuiFormControl-root {
+  margin-top: 1rem;
+}
