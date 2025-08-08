@@ -43,7 +43,7 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
             <TableRow>
                 {results.columns?.map((column, index: number) => <TableTh key={index}>
                     <div className="NuoRow">
-                        {column.name}
+                        {column.label || column.name}
                         {orderBy !== undefined && <div onClick={() => sort(column.name)}>
                             {orderBy === column.name ?
                                 (isAscending ?
@@ -64,7 +64,11 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
         </TableHead>
         <TableBody>
             {results.rows?.map((row, index) => <TableRow key={index}>
-                {row.values.map((col, cindex) => <TableCell key={cindex}>{String(col)}</TableCell>)}
+                {row.values.map((col, cindex) => <TableCell key={cindex}>
+                    <div style={{ whiteSpace: "pre" }}>
+                        {String(col).trim()}
+                    </div>
+                </TableCell>)}
                 {isFiltered !== undefined && <TableCell>&nbsp;</TableCell>}
             </TableRow>)}
         </TableBody>
