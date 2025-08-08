@@ -2,6 +2,7 @@
 
 package com.nuodb.selenium;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -268,10 +269,24 @@ public class SeleniumTestHelper {
 
     public void login(String organization, String username, String password) {
         get("/ui/");
+        
+        /**
+        * During page load, we retrieve the providers list, which determines the login choices.
+        * We wait for these options to appear before proceeding further.
+        **/ 
+        retry(()->{
+            if (getElement("show_login_button")!= null){
+                click("show_login_button");
+            }
+            else {
+                assertNotNull(getElement("organization"), "Unable to find Login button or Login form");   
+            }
+        });
         sendKeys("organization", organization);
         sendKeys("username", username);
         sendKeys("password", password);
         click("login_button");
+        
         retryStale(()->{
             String expected = "management\n>\ndatabases\n>\n" + organization.toLowerCase();
             String actual = waitText("path_component").toLowerCase();

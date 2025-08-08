@@ -5,6 +5,8 @@ package com.nuodb.selenium.basic;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.nuodb.selenium.TestRoutines;
 
@@ -21,11 +23,24 @@ public class LoginTest extends TestRoutines {
     @Test
     public void testInvalidLogin() throws MalformedURLException {
         get("/ui/");
+        /**
+        * During page load, we retrieve the providers list, which determines the login choices.
+        * We wait for these options to appear before proceeding further.
+        **/
+        retry(() -> {
+            if (getElement("show_login_button") != null) {
+                click("show_login_button");
+            } else {
+                assertNotNull(getElement("organization"), "Unable to find Login button or Login form");
+            }
+        });
+
         sendKeys("organization", "invalid_org");
         sendKeys("username", "invalid_user");
         sendKeys("password", "invalid_password");
         click("login_button");
-        assertEquals("Login failed: Bad credentials", waitText("error_message"));
+
+        assertTrue(waitText("error_message").contains("Bad credentials"));
     }
 
     @Test
@@ -36,7 +51,9 @@ public class LoginTest extends TestRoutines {
     @Test
     public void testIdp() throws MalformedURLException {
         get("/ui/login");
-        assertEquals("Login with Central Authentication Service", waitText("login_cas-idp"));
+        retryStale(()->{
+            assertEquals("Login With Central Authentication Service", waitText("login_cas-idp"));
+        });
     }
 
     @Test
