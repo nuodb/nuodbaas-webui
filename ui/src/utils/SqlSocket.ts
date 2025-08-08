@@ -26,6 +26,7 @@ export type SqlRequest = {
 
 export type ColumnMetaData = {
     name: string;
+    label?: string;
     type: string;
 }
 
@@ -55,7 +56,7 @@ export default function SqlSocket(organization: string, project: string, databas
         let request : SqlRequest = {operation: operation.toString(), args, requestId: String(nextTransactionId)};
         nextTransactionId++;
         const response = await axios.post(
-            "/api/sql/" + encodeURIComponent(organization) + "/" + encodeURIComponent(project) + "/" + encodeURIComponent(database) + "/" + encodeURIComponent(schema),
+            "/api/sql/query/" + encodeURIComponent(organization) + "/" + encodeURIComponent(project) + "/" + encodeURIComponent(database) + "/" + encodeURIComponent(schema),
             request,
             { headers:{
                 "Authorization": "Basic " + btoa(dbUsername + ":" + dbPassword)
