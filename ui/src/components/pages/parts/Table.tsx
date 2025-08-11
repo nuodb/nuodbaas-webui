@@ -309,24 +309,6 @@ function Table(props: TableProps) {
         }
     }
 
-    // replaces the Asterisk(*) column with all remaining columns in the view.
-    // This allows us to do pre-sorting of columns and append future fields automatically to the end of the view
-    // or keep certain fields always at the end (if the asterisk is in the middle)
-    function replaceAsteriskColumn(columns: MenuItemProps[]) {
-        const posAsterisk = columns.findIndex(c => c.id === "*");
-        if(posAsterisk === -1) {
-            return columns;
-        }
-
-        columns = [...columns];
-        const tableLabels = getTableLabels();
-        const visibleColumnIds = new Set(columns.map(v => v.id));
-        const additionalColumnIds = Object.keys(tableLabels).filter(key => !key.includes(".") && !visibleColumnIds.has(key) && !schemaPath?.includes("{" + key + "}"));
-        const additionalColumns = additionalColumnIds.map(ac => { return { id: ac, label: tableLabels[ac] }; });
-        columns.splice(posAsterisk, 1, ...additionalColumns);
-        return columns;
-    }
-
     function renderTableSelectedActions() {
         return <TableTh key="__all_selected__" colSpan={selected.size === 0 ? 1 : (visibleColumns.length + 2)}>
             <div className="NuoTableSelectedActions">
@@ -358,7 +340,6 @@ function Table(props: TableProps) {
 
     const tableLabels = getTableLabels();
     let visibleColumns = moveNameColumnToFront(columns.filter(col => col.selected && !schemaPath?.includes("{" + col.id + "}")));
-    visibleColumns = replaceAsteriskColumn(visibleColumns);
     return (
         <TableCustom data-testid={props["data-testid"]}>
             <TableHead>
