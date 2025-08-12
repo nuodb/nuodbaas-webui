@@ -24,6 +24,7 @@ import { NUODBAAS_WEBUI_ISRECORDING, Rest } from './components/pages/parts/Rest'
 import OrganizationOverview from './components/pages/OrganizationOverview';
 import { getOrgFromPath } from './utils/schema';
 import Toast from './components/controls/Toast';
+import { BackgroundTasks } from './utils/BackgroundTasks';
 
 /**
  * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
@@ -82,6 +83,7 @@ export default function App() {
   return (
     <div className="App" data-testid={orgs.length > 0 ? "banner-done" : ""}>
       <GlobalErrorBoundary>
+        <BackgroundTasks value={[]}>
         <Customizations>
           <CssBaseline />
           <PopupMenu />
@@ -117,6 +119,7 @@ export default function App() {
             }
           </BrowserRouter>
         </Customizations>
+        </BackgroundTasks>
       </GlobalErrorBoundary>
     </div>
   );

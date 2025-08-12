@@ -16,6 +16,7 @@ import Toast from '../controls/Toast';
 import SqlQueryTab from './sql/SqlQueryTab';
 import { SqlType } from '../../utils/SqlSocket';
 import ComboBox from '../controls/ComboBox';
+import SqlImportTab from './sql/SqlImportTab';
 
 type SqlTabsProps = {
     dbTable: string;
@@ -34,6 +35,7 @@ function SqlTabs({ dbTable, sqlConnection }: SqlTabsProps) {
         tabs.push(<Tab id="browse" label={t("form.sqleditor.label.tab.browse")}>{tabIndex === tabs.length && <SqlBrowseTab sqlConnection={sqlConnection} table={dbTable} />}</Tab>);
     }
     tabs.push(<Tab id="query" label={t("form.sqleditor.label.tab.query")}>{tabIndex === tabs.length && <SqlQueryTab sqlConnection={sqlConnection} dbTable={dbTable} />}</Tab>);
+    tabs.push(<Tab id="import" label={t("form.sqleditor.label.tab.import")}>{tabIndex === tabs.length && <SqlImportTab sqlConnection={sqlConnection} dbTable={dbTable} />}</Tab>);
     return <Tabs currentTab={tabIndex} setCurrentTab={(tabIndex) => setTabIndex(tabIndex)}>{tabs}</Tabs>
 }
 

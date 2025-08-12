@@ -42,21 +42,35 @@ export type SqlResponse = {
     rows?: Row[];
 };
 
+export type SqlImportResponseType = {
+    success?: number;
+    failed?: number;
+    updatedRows?: number;
+    failedQueries?: string[];
+    error?: string;
+}
+
+export type SqlExportParams = {
+    includeDdl: boolean;
+    includeData: boolean;
+    includeDrop: boolean;
+}
+
+
 export type SqlType = {
     runCommand: (operation: SqlOperationType, args: any[]) => Promise<SqlResponse>;
     getDefaultSchema: () => string;
+    sqlImport: (file: File) => Promise<SqlImportResponseType>;
 }
 
 export default function SqlSocket(organization: string, project: string, database: string, schema: string, dbUsername: string, dbPassword: string) : SqlType {
     let nextTransactionId = 0;
 
-    return { runCommand, getDefaultSchema };
-
     async function runCommand(operation: SqlOperationType, args: any[]) : Promise<SqlResponse> {
         let request : SqlRequest = {operation: operation.toString(), args, requestId: String(nextTransactionId)};
         nextTransactionId++;
         const response = await axios.post(
-            "/api/sql/query/" + encodeURIComponent(organization) + "/" + encodeURIComponent(project) + "/" + encodeURIComponent(database) + "/" + encodeURIComponent(schema),
+            "/api/sql/query" + getOrgProjDbSchemaUrl(),
             request,
             { headers:{
                 "Authorization": "Basic " + btoa(dbUsername + ":" + dbPassword)
@@ -67,4 +81,25 @@ export default function SqlSocket(organization: string, project: string, databas
     function getDefaultSchema() {
         return schema;
     }
+
+    function getOrgProjDbSchemaUrl() {
+        return "/" + encodeURIComponent(organization) + "/" + encodeURIComponent(project) + "/" + encodeURIComponent(database) + "/" + encodeURIComponent(schema);
+    }
+
+    async function sqlImport(file: File) : Promise<SqlImportResponseType> {
+        try {
+            const response = await axios.post('/api/sql/import/sql/' + getOrgProjDbSchemaUrl(), file, {
+                headers: {
+                    "Authorization": "Basic " + btoa(dbUsername + ":" + dbPassword),
+                    'Content-Type': file.type
+                }});
+            return response.data;
+        }
+        catch(error) {
+                console.error('Error uploading file:', error);
+                return { error: "Error uploading file"}
+        }
+    }
+
+    return { runCommand, getDefaultSchema, sqlImport };
 }
