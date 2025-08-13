@@ -797,7 +797,8 @@ code {
     background-color: lightgray;
     cursor: pointer;
 }
-button {
+button,
+#NuoButton {
     display: flex;
     flex: 1 1 auto;
     align-items: center;
@@ -980,8 +981,17 @@ label.NuoUpload > div {
     display: flex;
     align-items: center;
     justify-content: center;
+    text-align: center;
 }
 
 label.NuoUpload:hover {
     background-color: rgb(200, 200, 200);
+}
+.NuoBackgroundTasksStatus {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 500;
+    box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+    padding: 5px;
 }
