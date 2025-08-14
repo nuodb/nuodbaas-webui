@@ -1,6 +1,6 @@
 // (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
-import axios from "axios";
+import axios, { AxiosProgressEvent } from "axios";
 
 export type SqlOperationType =
     "SET_CREDENTIALS"|
@@ -60,7 +60,9 @@ export type SqlExportParams = {
 export type SqlType = {
     runCommand: (operation: SqlOperationType, args: any[]) => Promise<SqlResponse>;
     getDefaultSchema: () => string;
-    sqlImport: (file: File) => Promise<SqlImportResponseType>;
+    sqlImport: (file: File, progressKey: string) => Promise<SqlImportResponseType>;
+    getDbUsername: () => string;
+    getDbPassword: () => string;
 }
 
 export default function SqlSocket(organization: string, project: string, database: string, schema: string, dbUsername: string, dbPassword: string) : SqlType {
@@ -86,20 +88,29 @@ export default function SqlSocket(organization: string, project: string, databas
         return "/" + encodeURIComponent(organization) + "/" + encodeURIComponent(project) + "/" + encodeURIComponent(database) + "/" + encodeURIComponent(schema);
     }
 
-    async function sqlImport(file: File) : Promise<SqlImportResponseType> {
+    function getDbUsername() {
+        return dbUsername;
+    }
+
+    function getDbPassword() {
+        return dbPassword;
+    }
+
+    async function sqlImport(file: File, progressKey: string) : Promise<SqlImportResponseType> {
         try {
-            const response = await axios.post('/api/sql/import/sql/' + getOrgProjDbSchemaUrl(), file, {
+            const response = await axios.post('/api/sql/import/sql/' + getOrgProjDbSchemaUrl() + "?progressKey=" + progressKey, file, {
                 headers: {
                     "Authorization": "Basic " + btoa(dbUsername + ":" + dbPassword),
                     'Content-Type': file.type
-                }});
+                }
+            });
             return response.data;
         }
         catch(error) {
                 console.error('Error uploading file:', error);
-                return { error: "Error uploading file"}
+                return { error: "Error uploading file: " + error}
         }
     }
 
-    return { runCommand, getDefaultSchema, sqlImport };
+    return { runCommand, getDefaultSchema, sqlImport, getDbUsername, getDbPassword };
 }

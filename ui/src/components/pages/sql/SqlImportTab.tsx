@@ -8,6 +8,7 @@ import Button from '../../controls/Button';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableTh } from '../../controls/Table';
 import BackgroundTasks, { BackgroundTaskType } from '../../../utils/BackgroundTasks';
+import axios from 'axios';
 
 type SqlImportTabProps = {
     sqlConnection: SqlType;
@@ -66,17 +67,34 @@ function SqlImportTab({ sqlConnection, dbTable }: SqlImportTabProps) {
 
     function addToQueue(toQueue: File[]) {
         BackgroundTasks.addTasks(toQueue.map(file => {
+            const progressKey = crypto.randomUUID();
             return {
                 listenerId: "sqlImport",
                 label: file.name,
                 status: "not_started",
                 description: "Importing " + file.name,
-                data: { file: file },
+                data: { file: file, progressKey },
                 execute: async (data: SqlImportData) => {
-                    return { ...data, ... await sqlConnection.sqlImport(data.file) };
+                    return {
+                        ...data, ... await sqlConnection.sqlImport(data.file, progressKey)
+                    };
                 },
-                show: (data: SqlImportData) => {
-                    return <div key={data.file.name}>{data.file.name}</div>
+                progressUpdate: async (data: SqlImportData) => {
+                    return new Promise((resolve, reject) => {
+                        axios.get("/api/sql/progress/sqlimport?progressKey=" + progressKey, {
+                            headers: {
+                                "Authorization": "Basic " + btoa(sqlConnection.getDbUsername() + ":" + sqlConnection.getDbPassword()),
+                            }
+                        }).then(response => {
+                            resolve({ ...data, ...response.data });
+                        })
+                    });
+                },
+                showMinimal: (task: BackgroundTaskType) => {
+                    return <div key={task.data.file.name} className="NuoRow"><div>{task.data.file.name}</div><div>{BackgroundTasks.renderStatus(task)}</div></div>
+                },
+                show: (task: BackgroundTaskType) => {
+                    return <></>;
                 }
             }
         }));
@@ -89,36 +107,92 @@ function SqlImportTab({ sqlConnection, dbTable }: SqlImportTabProps) {
         setFiles(newFiles);
     }
 
-    function renderFileStatus() {
+    function shortenSize(size: number): string {
+        let suffix = " B";
+        if (size > 1024 * 1024 * 1024) {
+            size = size / 1024 / 1024 / 1024;
+            suffix = " GB";
+        }
+        else if (size > 1024 * 1024) {
+            size = size / 1024 / 1024;
+            suffix = " MB";
+        }
+        else if (size > 1024) {
+            size = size / 1024;
+            suffix = " KB";
+        }
+        if (size >= 100) {
+            size = Math.round(size);
+        }
+        else if (size >= 10) {
+            size = Math.round(size * 10) / 10;
+        }
+        else {
+            size = Math.round(size * 100) / 100;
+        }
+        return String(size) + suffix;
+    }
+
+    function renderFileStatus(files: File[], tasks: BackgroundTaskType[]) {
         return <Table>
             <TableHead>
                 <TableRow>
                     <TableTh>Filename</TableTh>
+                    <TableTh></TableTh>
                     <TableTh>Status</TableTh>
                     <TableTh>Success</TableTh>
                     <TableTh>Failures</TableTh>
                     <TableTh>Updates</TableTh>
                     <TableTh>Error</TableTh>
+                    <TableTh></TableTh>
                 </TableRow>
             </TableHead>
             <TableBody>
                 {files.map((file, index) => {
                     return <TableRow key={file.name}>
                         <TableCell>{file.name}</TableCell>
+                        <TableCell className="NuoColumn">
+                            <div className="NuoUploadLightLabel">{shortenSize(file.size)}</div>
+                            <div className="NuoUploadLightLabel">{(new Date(file.lastModified)).toLocaleDateString()}</div>
+                        </TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
                         <td><Button onClick={() => { addToQueue([file]); }}>Add to Queue</Button></td>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
                     </TableRow>
                 })}
-                {files.length === 0 ? null : <TableRow><TableCell></TableCell><td><Button className="NuoButton" onClick={() => { addToQueue(files); }}>Add all to Queue</Button></td></TableRow>}
+                {files.length === 0 ? null : <TableRow>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <td><Button className="NuoButton" onClick={() => { addToQueue(files); }}>Add all to Queue</Button></td>
+                </TableRow>}
                 {tasks.map((task) => {
                     return <TableRow key={task.data.file.name}>
                         <TableCell>{task.data.file.name}</TableCell>
-                        <TableCell>{task.status}</TableCell>
+                        <TableCell className="NuoColumn">
+                            <div className="NuoUploadLightLabel">{shortenSize(task.data.file.size)}</div>
+                            <div className="NuoUploadLightLabel">{(new Date(task.data.file.lastModified)).toLocaleDateString()}</div>
+                        </TableCell>
+                        <TableCell>{BackgroundTasks.renderStatus(task)}</TableCell>
                         <TableCell>{task.data.success}</TableCell>
                         <TableCell>{task.data.failed}</TableCell>
                         <TableCell>{task.data.updatedRows}</TableCell>
+                        <TableCell>{task.data.error || task.data.failedQueries && task.data.failedQueries.length &&
+                            <details>
+                                <summary>Failed Queries:</summary>
+                                {task.data.failedQueries.map((fq: string) => <div>{fq}</div>)}
+                            </details> || null}
+                        </TableCell>
+                        <TableCell>
+
+                        </TableCell>
                     </TableRow>})}
             </TableBody>
         </Table>;
@@ -128,7 +202,7 @@ function SqlImportTab({ sqlConnection, dbTable }: SqlImportTabProps) {
         <div className="NuoColumn NuoFieldContainer NuoCenter">
             <div className="NuoRow">
                 {renderFileSelector()}
-                {renderFileStatus()}
+                {renderFileStatus(files, tasks)}
             </div>
         </div>
     </form>

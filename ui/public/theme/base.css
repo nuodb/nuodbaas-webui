@@ -987,6 +987,10 @@ label.NuoUpload > div {
 label.NuoUpload:hover {
     background-color: rgb(200, 200, 200);
 }
+.NuoUploadLightLabel {
+    color: lightgray;
+    font-size: .8em;
+}
 .NuoBackgroundTasksStatus {
     position: absolute;
     bottom: 0;

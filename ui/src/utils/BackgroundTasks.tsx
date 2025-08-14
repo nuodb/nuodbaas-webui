@@ -1,9 +1,9 @@
 // (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
-import CircularProgress from "@mui/material/CircularProgress";
 import React, { Component, createContext, ReactNode, useContext } from "react";
 import CheckIcon from '@mui/icons-material/Check';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import CircularProgress from "@mui/material/CircularProgress";
 
 export type StatusType = "not_started" | "in_progress" | "complete";
 export type BackgroundTaskType = {
@@ -13,7 +13,9 @@ export type BackgroundTaskType = {
     data: any;
     status: StatusType;
     execute: (data: any) => Promise<any>;
-    show: (data: any) => ReactNode;
+    progressUpdate?: (data: any) => Promise<any>;
+    show: (task: BackgroundTaskType) => ReactNode;
+    showMinimal: (task: BackgroundTaskType) => ReactNode;
 };
 
 export type BackgroundTasksContextType = {
@@ -53,8 +55,33 @@ export default class BackgroundTasks extends Component<IProps, IState> {
         listeners: {}
     }
 
+    pollId: NodeJS.Timeout | undefined = undefined;
+
     componentDidMount() {
         s_instance = this;
+        this.pollId = setInterval(s_instance.pollTasks, 1000);
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.pollId);
+    }
+
+    pollTasks = () => {
+        if (!s_instance) {
+            return;
+        }
+        s_instance.state.tasks.forEach((task: BackgroundTaskType, index: number) => {
+            if (task.progressUpdate && task.status === "in_progress") {
+                task.progressUpdate(task.data).then(data => {
+                    if (!s_instance) {
+                        return;
+                    }
+                    let newTasks: BackgroundTaskType[] = [...s_instance.state.tasks];
+                    newTasks[index].data = { ...data };
+                    s_instance?.setState({ tasks: newTasks }, tasksUpdatedCallback);
+                })
+            }
+        })
     }
 
     static getTasks(): BackgroundTaskType[] {
@@ -97,10 +124,9 @@ export default class BackgroundTasks extends Component<IProps, IState> {
             if (tasks[i].status === "not_started") {
                 tasks[i].status = "in_progress";
                 s_instance.setState({ tasks }, tasksUpdatedCallback);
-                console.log("EXECUTE", i, tasks[i]);
+
                 tasks[i].execute(tasks[i].data).then(data => {
-                    console.log("finished", i, tasks[i]);
-                    tasks[i].data = data;
+                    tasks[i].data = { ...tasks[i].data, ...data };
                     tasks[i].status = "complete";
                     s_instance?.setState({ tasks }, tasksUpdatedCallback);
                 })
@@ -112,6 +138,14 @@ export default class BackgroundTasks extends Component<IProps, IState> {
         }
     }
 
+    static renderStatus(task: BackgroundTaskType) {
+        return <>
+            {task.status === "not_started" && <HourglassEmptyIcon />}
+            {task.status === "in_progress" && <CircularProgress variant="indeterminate" size="30px" />}
+            {task.status === "complete" && <CheckIcon />}
+        </>
+    }
+
     render() {
         let tasks: BackgroundTaskType[] = this.state.tasks;
         if (tasks.length === 0) {
@@ -119,12 +153,7 @@ export default class BackgroundTasks extends Component<IProps, IState> {
         }
         const summary = String(tasks.filter(task => task.status === "complete").length) + " of " + String(tasks.length) + " Tasks complete";
         return <details className="NuoBackgroundTasksStatus"><summary>{summary}</summary>
-            {tasks.map(task => <div>
-                {task.label}
-                {task.status === "not_started" && <HourglassEmptyIcon />}
-                {task.status === "in_progress" && <CircularProgress size="30px" />}
-                {task.status === "complete" && <CheckIcon />}
-            </div>)}
+            {tasks.map(task => <div>{task.showMinimal(task)}</div>)}
         </details>;
     }
 }
