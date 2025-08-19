@@ -154,9 +154,9 @@ export default function ComboBox({ loadItems, children, selected, align }: Combo
         setPosition({ scrollX: window.scrollX, scrollY: window.scrollY, x: rect.x, y: rect.y, width: rect.width, height: rect.height });
     }
 
-    return <>{renderDropdown()}<div className="NuoComboBox" tabIndex={0} onClick={showPopup} onKeyDown={(event) => {
+    return <div>{renderDropdown()}<div className="NuoComboBox" tabIndex={0} onClick={showPopup} onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === "ArrowDown") {
             showPopup(event);
         }
-    }}><div>{children}</div><UnfoldMoreIcon /></div></>
+    }}><div>{children}</div><UnfoldMoreIcon /></div></div>
 }

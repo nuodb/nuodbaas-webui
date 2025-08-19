@@ -1,16 +1,22 @@
 // (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { withTranslation } from "react-i18next";
 import { t } from 'i18next';
 import { SqlImportResponseType, SqlResponse, SqlType } from '../../../utils/SqlSocket';
 import Button from '../../controls/Button';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableTh } from '../../controls/Table';
-import BackgroundTasks, { BackgroundTaskType } from '../../../utils/BackgroundTasks';
-import axios from 'axios';
+import { BackgroundTaskType, generateRandom, launchNextBackgroundTask, updateOrAddTask } from '../../../utils/BackgroundTasks';
+import { Rest } from '../parts/Rest';
+import { concatChunks } from '../../../utils/schema';
+import { TempAny } from '../../../utils/types';
+import Toast from '../../controls/Toast';
+import BackgroundTasksStatus from '../../../utils/BackgroundTasksStatus';
 
 type SqlImportTabProps = {
+    tasks: BackgroundTaskType[];
+    setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>;
     sqlConnection: SqlType;
     dbTable: string;
 }
@@ -19,20 +25,11 @@ interface SqlImportData extends SqlImportResponseType {
     file: File;
 }
 
-function SqlImportTab({ sqlConnection, dbTable }: SqlImportTabProps) {
+function SqlImportTab({ sqlConnection, dbTable, tasks, setTasks }: SqlImportTabProps) {
     const [files, setFiles] = useState<File[]>([]); // files to be uploaded
-    const [tasks, setTasks] = useState<BackgroundTaskType[]>(BackgroundTasks.getTasks().filter(task => task.listenerId === "sqlImport"));
 
-    let listenerId = -1;
-
-    useEffect(() => {
-        listenerId = BackgroundTasks.addListener((tasks: BackgroundTaskType[]) => {
-            setTasks(tasks.filter(task => task.listenerId === "sqlImport"));
-        });
-        return () => {
-            BackgroundTasks.removeListener(listenerId);
-        };
-    }, [])
+    let progressAbortController: AbortController | undefined = undefined;
+    let progressTaskId: string | undefined = undefined;
 
     function renderFileSelector() {
         return <div className="NuoColumn NuoCenter">
@@ -54,6 +51,7 @@ function SqlImportTab({ sqlConnection, dbTable }: SqlImportTabProps) {
                         }
                     }
                     setFiles(updatedFiles);
+                    event.target.value = "";
                 }}
             />
             <label htmlFor="file-upload" className="NuoUpload">
@@ -65,39 +63,90 @@ function SqlImportTab({ sqlConnection, dbTable }: SqlImportTabProps) {
         </div>
     }
 
-    function addToQueue(toQueue: File[]) {
-        BackgroundTasks.addTasks(toQueue.map(file => {
-            const progressKey = crypto.randomUUID();
+    async function setProgress(task: BackgroundTaskType): Promise<string> {
+        return new Promise((resolve, reject) => {
+            progressAbortController = new AbortController();
+            let headers = { Authorization: "Basic " + btoa(sqlConnection.getDbUsername() + ":" + sqlConnection.getDbPassword()) }
+            Rest.getStream("/api/sql/progress/sqlimport", headers, progressAbortController)
+                .then(async (response: TempAny) => {
+                    let buffer = Uint8Array.of();
+                    let gotProgressKey = false;
+                    for await (let chunk of response) {
+                        buffer = concatChunks(buffer, chunk);
+                        while (buffer.length > 0) {
+                            let posNewline = buffer.indexOf("\n".charCodeAt(0));
+                            if (posNewline === -1) {
+                                break;
+                            }
+                            let line = new TextDecoder().decode(buffer.slice(0, posNewline));
+                            buffer = buffer.slice(posNewline + 1);
+                            const stats: SqlImportData = JSON.parse(line);
+                            if (stats.progressKey && !gotProgressKey) {
+                                gotProgressKey = true;
+                                resolve(stats.progressKey);
+                            }
+                            else {
+                                if (task) {
+                                    task = { ...task };
+                                    task.data = { ...task.data, ...stats };
+                                    if (task.data && task.data.file && stats.bytesProcessed) {
+                                        task.percent = stats.bytesProcessed * 100 / task.data.file.size;
+                                    }
+                                    updateOrAddTask(tasks, setTasks, task);
+                                }
+                            }
+                        }
+                    }
+                })
+                .catch((error) => {
+                    if (error.status) {
+                        Toast.show("Cannot get progress monitoring", error.status + " " + error.message);
+                    }
+                    else {
+                        //request was aborted. Ignore.
+                    }
+                })
+        });
+    }
+
+    function clearProgress() {
+        progressAbortController?.abort();
+        progressAbortController = undefined;
+        progressTaskId = undefined;
+    }
+
+    async function addToQueue(toQueue: File[]) {
+        let newTasks: BackgroundTaskType[] = (toQueue.map(file => {
             return {
+                id: generateRandom(),
                 listenerId: "sqlImport",
                 label: file.name,
                 status: "not_started",
                 description: "Importing " + file.name,
-                data: { file: file, progressKey },
-                execute: async (data: SqlImportData) => {
-                    return {
-                        ...data, ... await sqlConnection.sqlImport(data.file, progressKey)
-                    };
+                data: { file: file },
+                execute: async (task: BackgroundTaskType) => {
+                    console.log("execute", task);
+                    const progressKey = await setProgress(task);
+                    const stats = await sqlConnection.sqlImport(task.data.file, progressKey);
+                    clearProgress();
+                    task = { ...task };
+                    task.data = { ...task.data, ...stats };
+                    return task;
                 },
-                progressUpdate: async (data: SqlImportData) => {
-                    return new Promise((resolve, reject) => {
-                        axios.get("/api/sql/progress/sqlimport?progressKey=" + progressKey, {
-                            headers: {
-                                "Authorization": "Basic " + btoa(sqlConnection.getDbUsername() + ":" + sqlConnection.getDbPassword()),
-                            }
-                        }).then(response => {
-                            resolve({ ...data, ...response.data });
-                        })
-                    });
-                },
-                showMinimal: (task: BackgroundTaskType) => {
-                    return <div key={task.data.file.name} className="NuoRow"><div>{task.data.file.name}</div><div>{BackgroundTasks.renderStatus(task)}</div></div>
+                showMinimal: (task: BackgroundTaskType, tasks: BackgroundTaskType[], setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>) => {
+                    return <div key={task.data.file.name} className="NuoRow">
+                        <div>{task.data.file.name}</div>
+                        <div><BackgroundTasksStatus task={task} tasks={tasks} setTasks={setTasks} /></div>
+                    </div>;
                 },
                 show: (task: BackgroundTaskType) => {
                     return <></>;
                 }
-            }
+            };
         }));
+
+        setTasks(newTasks);
+        launchNextBackgroundTask(newTasks, setTasks);
 
         let newFiles = [...files];
         for (let i = 0; i < toQueue.length; i++) {
@@ -139,12 +188,11 @@ function SqlImportTab({ sqlConnection, dbTable }: SqlImportTabProps) {
                 <TableRow>
                     <TableTh>Filename</TableTh>
                     <TableTh></TableTh>
-                    <TableTh>Status</TableTh>
                     <TableTh>Success</TableTh>
                     <TableTh>Failures</TableTh>
                     <TableTh>Updates</TableTh>
                     <TableTh>Error</TableTh>
-                    <TableTh></TableTh>
+                    <TableTh>Status</TableTh>
                 </TableRow>
             </TableHead>
             <TableBody>
@@ -159,12 +207,10 @@ function SqlImportTab({ sqlConnection, dbTable }: SqlImportTabProps) {
                         <TableCell></TableCell>
                         <TableCell></TableCell>
                         <TableCell></TableCell>
-                        <TableCell></TableCell>
                         <td><Button onClick={() => { addToQueue([file]); }}>Add to Queue</Button></td>
                     </TableRow>
                 })}
                 {files.length === 0 ? null : <TableRow>
-                    <TableCell></TableCell>
                     <TableCell></TableCell>
                     <TableCell></TableCell>
                     <TableCell></TableCell>
@@ -180,19 +226,16 @@ function SqlImportTab({ sqlConnection, dbTable }: SqlImportTabProps) {
                             <div className="NuoUploadLightLabel">{shortenSize(task.data.file.size)}</div>
                             <div className="NuoUploadLightLabel">{(new Date(task.data.file.lastModified)).toLocaleDateString()}</div>
                         </TableCell>
-                        <TableCell>{BackgroundTasks.renderStatus(task)}</TableCell>
                         <TableCell>{task.data.success}</TableCell>
                         <TableCell>{task.data.failed}</TableCell>
                         <TableCell>{task.data.updatedRows}</TableCell>
                         <TableCell>{task.data.error || task.data.failedQueries && task.data.failedQueries.length &&
                             <details>
                                 <summary>Failed Queries:</summary>
-                                {task.data.failedQueries.map((fq: string) => <div>{fq}</div>)}
+                                {task.data.failedQueries.map((fq: string, index: number) => <div key={index}>{fq}</div>)}
                             </details> || null}
                         </TableCell>
-                        <TableCell>
-
-                        </TableCell>
+                        <TableCell><BackgroundTasksStatus task={task} tasks={tasks} setTasks={setTasks} /></TableCell>
                     </TableRow>})}
             </TableBody>
         </Table>;

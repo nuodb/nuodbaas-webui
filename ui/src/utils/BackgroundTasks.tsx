@@ -1,21 +1,18 @@
 // (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
-import React, { Component, createContext, ReactNode, useContext } from "react";
-import CheckIcon from '@mui/icons-material/Check';
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import CircularProgress from "@mui/material/CircularProgress";
+import React, { ReactNode } from "react";
 
 export type StatusType = "not_started" | "in_progress" | "complete";
 export type BackgroundTaskType = {
-    listenerId: string;
+    id: string;
     label: string;
     description: string;
     data: any;
     status: StatusType;
+    percent?: number;
     execute: (data: any) => Promise<any>;
-    progressUpdate?: (data: any) => Promise<any>;
     show: (task: BackgroundTaskType) => ReactNode;
-    showMinimal: (task: BackgroundTaskType) => ReactNode;
+    showMinimal: (task: BackgroundTaskType, tasks: BackgroundTaskType[], setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>) => ReactNode;
 };
 
 export type BackgroundTasksContextType = {
@@ -24,136 +21,69 @@ export type BackgroundTasksContextType = {
     execute: () => void;
 }
 
-interface IProps {
-}
-
-type ListenerCallback = (tasks: BackgroundTaskType[]) => void;
-
-interface IState {
+type BackgroundTasksProps = {
     tasks: BackgroundTaskType[];
-    listeners: { [key: number]: ListenerCallback };
+    setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>;
+};
+
+export function launchNextBackgroundTask(tasks: BackgroundTaskType[], setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>) {
+    for (let i = 0; i < tasks.length; i++) {
+        if (tasks[i].status === "not_started") {
+            tasks[i].status = "in_progress";
+            setTasks(tasks);
+            tasks[i].execute(tasks[i]).then(task => {
+                setTasks((previousTasks: BackgroundTaskType[]) => {
+                    task.status = "complete";
+                    let newTasks = [...previousTasks];
+                    const taskIndex = newTasks.findIndex(t => t.id === task.id);
+                    if (taskIndex != -1) {
+                        newTasks[taskIndex] = task;
+                    }
+                    else {
+                        console.log("ERROR: Task not found", newTasks, task);
+                    }
+                    launchNextBackgroundTask(newTasks, setTasks);
+                    return newTasks;
+                })
+            });
+            break;
+        }
+        else if (tasks[i].status === "in_progress") {
+            break;
+        }
+    }
 }
 
-let s_instance: BackgroundTasks | undefined = undefined;
-let listenerIndex = 0;
-
-function tasksUpdatedCallback() {
-    if (!s_instance) {
-        return;
+export function generateRandom() {
+    const bytes = new Uint8Array(32);
+    crypto.getRandomValues(bytes);
+    let hexString = '';
+    for (let i = 0; i < bytes.length; i++) {
+        hexString += bytes[i].toString(16).padStart(2, '0');
     }
-    BackgroundTasks.launch();
-    const listeners: ListenerCallback[] = Object.values(s_instance.state.listeners);
-    listeners.forEach(listener => {
-        if (s_instance) {
-            listener(s_instance.state.tasks);
+    return hexString;
+}
+
+export function updateOrAddTask(tasks: BackgroundTaskType[], setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>, task: BackgroundTaskType) {
+    setTasks((previousTasks) => {
+        let tasks = [...previousTasks];
+        for (let i = 0; i < tasks.length; i++) {
+            if (tasks[i].id === task.id) {
+                tasks[i] = task;
+                return tasks;
+            }
         }
+        tasks.push(task);
+        return tasks;
     });
 }
-export default class BackgroundTasks extends Component<IProps, IState> {
-    state = {
-        tasks: [],
-        listeners: {}
-    }
 
-    pollId: NodeJS.Timeout | undefined = undefined;
-
-    componentDidMount() {
-        s_instance = this;
-        this.pollId = setInterval(s_instance.pollTasks, 1000);
-    }
-
-    componentWillUnmount() {
-        clearInterval(this.pollId);
-    }
-
-    pollTasks = () => {
-        if (!s_instance) {
-            return;
-        }
-        s_instance.state.tasks.forEach((task: BackgroundTaskType, index: number) => {
-            if (task.progressUpdate && task.status === "in_progress") {
-                task.progressUpdate(task.data).then(data => {
-                    if (!s_instance) {
-                        return;
-                    }
-                    let newTasks: BackgroundTaskType[] = [...s_instance.state.tasks];
-                    newTasks[index].data = { ...data };
-                    s_instance?.setState({ tasks: newTasks }, tasksUpdatedCallback);
-                })
-            }
-        })
-    }
-
-    static getTasks(): BackgroundTaskType[] {
-        if (!s_instance) {
-            return [];
-        }
-        return s_instance.state.tasks;
-    }
-
-    static addTasks(newTasks: BackgroundTaskType[]) {
-        if (!s_instance) {
-            return;
-        }
-        const tasks = [...s_instance?.state.tasks, ...newTasks];
-        s_instance.setState({ tasks }, tasksUpdatedCallback);
-    }
-
-    static addListener(listener: ListenerCallback): number {
-        if (!s_instance) {
-            return -1;
-        }
-        s_instance.setState({ listeners: { ...s_instance.state.listeners, [listenerIndex++]: listener } });
-        return listenerIndex;
-    }
-
-    static removeListener(index: number) {
-        if (!s_instance) {
-            return;
-        }
-        let newListeners: { [key: number]: ListenerCallback } = { ...s_instance.state.listeners };
-        delete newListeners[index];
-    }
-
-    static launch() {
-        if (!s_instance) {
-            return;
-        }
-        const tasks: BackgroundTaskType[] = s_instance.state.tasks
-        for (let i = 0; i < tasks.length; i++) {
-            if (tasks[i].status === "not_started") {
-                tasks[i].status = "in_progress";
-                s_instance.setState({ tasks }, tasksUpdatedCallback);
-
-                tasks[i].execute(tasks[i].data).then(data => {
-                    tasks[i].data = { ...tasks[i].data, ...data };
-                    tasks[i].status = "complete";
-                    s_instance?.setState({ tasks }, tasksUpdatedCallback);
-                })
-                break;
-            }
-            else if (tasks[i].status === "in_progress") {
-                break;
-            }
-        }
-    }
-
-    static renderStatus(task: BackgroundTaskType) {
-        return <>
-            {task.status === "not_started" && <HourglassEmptyIcon />}
-            {task.status === "in_progress" && <CircularProgress variant="indeterminate" size="30px" />}
-            {task.status === "complete" && <CheckIcon />}
-        </>
-    }
-
-    render() {
-        let tasks: BackgroundTaskType[] = this.state.tasks;
+export default function BackgroundTasks({ tasks, setTasks }: BackgroundTasksProps) {
         if (tasks.length === 0) {
             return null;
         }
         const summary = String(tasks.filter(task => task.status === "complete").length) + " of " + String(tasks.length) + " Tasks complete";
         return <details className="NuoBackgroundTasksStatus"><summary>{summary}</summary>
-            {tasks.map(task => <div>{task.showMinimal(task)}</div>)}
+            {tasks.map(task => <div key={task.id}>{task.showMinimal(task, tasks, setTasks)}</div>)}
         </details>;
-    }
 }

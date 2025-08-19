@@ -48,6 +48,8 @@ export type SqlImportResponseType = {
     updatedRows?: number;
     failedQueries?: string[];
     error?: string;
+    progressKey?: string;
+    bytesProcessed?: number;
 }
 
 export type SqlExportParams = {

@@ -36,7 +36,10 @@ export default function App() {
   const [isRecording, setIsRecording] = useState(sessionStorage.getItem(NUODBAAS_WEBUI_ISRECORDING) === "true");
   const [org, setOrg] = useState("");
   const [orgs, setOrgs] = useState<string[]>([]);
-  const pageProps = { schema, isRecording, org, setOrg, orgs };
+  const [tasks, setTasks] = useState<BackgroundTaskType[]>([]);
+  const pageProps = {
+    schema, isRecording, org, setOrg, orgs, tasks, setTasks: setTasks
+  };
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -83,7 +86,7 @@ export default function App() {
   return (
     <div className="App" data-testid={orgs.length > 0 ? "banner-done" : ""}>
       <GlobalErrorBoundary>
-        <BackgroundTasks />
+        <BackgroundTasks tasks={tasks} setTasks={setTasks} />
         <Customizations>
           <CssBaseline />
           <PopupMenu />
