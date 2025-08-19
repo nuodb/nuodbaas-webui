@@ -2,6 +2,8 @@
 
 import { BackgroundTaskType } from "./BackgroundTasks";
 import CheckIcon from '@mui/icons-material/Check';
+import CancelIcon from '@mui/icons-material/Cancel';
+import ErrorIcon from '@mui/icons-material/Error';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import CircularProgress from "@mui/material/CircularProgress";
 import CircularProgressWithLabel from "../components/controls/CircularProgressWithLabel";
@@ -11,15 +13,22 @@ type BackgroundTasksStatusProps = {
     task: BackgroundTaskType;
     tasks: BackgroundTaskType[];
     setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>;
+    abortController?: AbortController;
 };
 
-export default function BackgroundTasksStatus({task, tasks, setTasks}:BackgroundTasksStatusProps) {
+export default function BackgroundTasksStatus({ task, tasks, setTasks, abortController }: BackgroundTasksStatusProps) {
     let statusIcon = null;
     if (task.status === "not_started") {
         statusIcon = <HourglassEmptyIcon />;
     }
     else if (task.status === "complete") {
         statusIcon = <CheckIcon />;
+    }
+    else if (task.status === "canceled") {
+        statusIcon = <CancelIcon />;
+    }
+    else if (task.status === "error") {
+        statusIcon = <ErrorIcon />
     }
     else if (task.status === "in_progress") {
         if (task.percent) {
@@ -30,16 +39,22 @@ export default function BackgroundTasksStatus({task, tasks, setTasks}:Background
         }
     }
 
+    if (!abortController && task.status === "in_progress") {
+        return <div className="NuoRow">{statusIcon}</div>
+    }
+
     return <div className="NuoRow">
         {statusIcon}
         <Button variant="text" onClick={() => {
-            if (task.status === "complete" || task.status === "not_started") {
+            if (task.status === "in_progress") {
+                abortController?.abort();
+            }
+            else {
                 const newTasks = tasks.filter((t: BackgroundTaskType) => t.id != task.id);
-                console.log("STATUS", newTasks, tasks);
                 setTasks(newTasks);
             }
         }}>
-            {task.status === "complete" && "Dismiss"}
+            {(task.status === "complete" || task.status === "canceled" || task.status === "error") && "Dismiss"}
             {task.status === "in_progress" && "Cancel"}
             {task.status === "not_started" && "Cancel"}
         </Button>

@@ -2,7 +2,7 @@
 
 import React, { ReactNode } from "react";
 
-export type StatusType = "not_started" | "in_progress" | "complete";
+export type StatusType = "not_started" | "in_progress" | "complete" | "canceled" | "error";
 export type BackgroundTaskType = {
     id: string;
     label: string;
@@ -11,7 +11,6 @@ export type BackgroundTaskType = {
     status: StatusType;
     percent?: number;
     execute: (data: any) => Promise<any>;
-    show: (task: BackgroundTaskType) => ReactNode;
     showMinimal: (task: BackgroundTaskType, tasks: BackgroundTaskType[], setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>) => ReactNode;
 };
 
@@ -33,7 +32,9 @@ export function launchNextBackgroundTask(tasks: BackgroundTaskType[], setTasks: 
             setTasks(tasks);
             tasks[i].execute(tasks[i]).then(task => {
                 setTasks((previousTasks: BackgroundTaskType[]) => {
-                    task.status = "complete";
+                    if (task.status === "in_progress") {
+                        task.status = "complete";
+                    }
                     let newTasks = [...previousTasks];
                     const taskIndex = newTasks.findIndex(t => t.id === task.id);
                     if (taskIndex != -1) {
@@ -82,8 +83,8 @@ export default function BackgroundTasks({ tasks, setTasks }: BackgroundTasksProp
         if (tasks.length === 0) {
             return null;
         }
-        const summary = String(tasks.filter(task => task.status === "complete").length) + " of " + String(tasks.length) + " Tasks complete";
+    const summary = String(tasks.filter(task => task.status !== "not_started" && task.status !== "in_progress").length) + " of " + String(tasks.length) + " Tasks complete";
         return <details className="NuoBackgroundTasksStatus"><summary>{summary}</summary>
-            {tasks.map(task => <div key={task.id}>{task.showMinimal(task, tasks, setTasks)}</div>)}
+            {tasks.map(task => <div className="NuoRow" key={task.id}>{task.showMinimal(task, tasks, setTasks)}</div>)}
         </details>;
 }

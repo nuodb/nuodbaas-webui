@@ -1,6 +1,6 @@
 // (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
-import axios, { AxiosProgressEvent } from "axios";
+import axios from "axios";
 
 export type SqlOperationType =
     "SET_CREDENTIALS"|
@@ -52,17 +52,11 @@ export type SqlImportResponseType = {
     bytesProcessed?: number;
 }
 
-export type SqlExportParams = {
-    includeDdl: boolean;
-    includeData: boolean;
-    includeDrop: boolean;
-}
-
 
 export type SqlType = {
     runCommand: (operation: SqlOperationType, args: any[]) => Promise<SqlResponse>;
     getDefaultSchema: () => string;
-    sqlImport: (file: File, progressKey: string) => Promise<SqlImportResponseType>;
+    sqlImport: (file: File, progressKey: string, abortController: AbortController | undefined) => Promise<SqlImportResponseType>;
     getDbUsername: () => string;
     getDbPassword: () => string;
 }
@@ -98,19 +92,25 @@ export default function SqlSocket(organization: string, project: string, databas
         return dbPassword;
     }
 
-    async function sqlImport(file: File, progressKey: string) : Promise<SqlImportResponseType> {
+    async function sqlImport(file: File, progressKey: string, abortController: AbortController | undefined) : Promise<SqlImportResponseType> {
         try {
             const response = await axios.post('/api/sql/import/sql/' + getOrgProjDbSchemaUrl() + "?progressKey=" + progressKey, file, {
                 headers: {
                     "Authorization": "Basic " + btoa(dbUsername + ":" + dbPassword),
                     'Content-Type': file.type
-                }
+                },
+                signal: abortController && abortController.signal || undefined
             });
             return response.data;
         }
         catch(error) {
+            if(String(error).includes("CanceledError")) {
+                return { error: "Canceled" };
+            }
+            else {
                 console.error('Error uploading file:', error);
                 return { error: "Error uploading file: " + error}
+            }
         }
     }
 

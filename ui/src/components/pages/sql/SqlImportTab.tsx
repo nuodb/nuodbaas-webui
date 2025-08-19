@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { withTranslation } from "react-i18next";
 import { t } from 'i18next';
-import { SqlImportResponseType, SqlResponse, SqlType } from '../../../utils/SqlSocket';
+import { SqlImportResponseType, SqlType } from '../../../utils/SqlSocket';
 import Button from '../../controls/Button';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableTh } from '../../controls/Table';
@@ -12,7 +12,7 @@ import { Rest } from '../parts/Rest';
 import { concatChunks } from '../../../utils/schema';
 import { TempAny } from '../../../utils/types';
 import Toast from '../../controls/Toast';
-import BackgroundTasksStatus from '../../../utils/BackgroundTasksStatus';
+import BackgroundTaskStatus from '../../../utils/BackgroundTaskStatus';
 
 type SqlImportTabProps = {
     tasks: BackgroundTaskType[];
@@ -25,11 +25,10 @@ interface SqlImportData extends SqlImportResponseType {
     file: File;
 }
 
+let progressAbortController = new AbortController();
+
 function SqlImportTab({ sqlConnection, dbTable, tasks, setTasks }: SqlImportTabProps) {
     const [files, setFiles] = useState<File[]>([]); // files to be uploaded
-
-    let progressAbortController: AbortController | undefined = undefined;
-    let progressTaskId: string | undefined = undefined;
 
     function renderFileSelector() {
         return <div className="NuoColumn NuoCenter">
@@ -65,7 +64,6 @@ function SqlImportTab({ sqlConnection, dbTable, tasks, setTasks }: SqlImportTabP
 
     async function setProgress(task: BackgroundTaskType): Promise<string> {
         return new Promise((resolve, reject) => {
-            progressAbortController = new AbortController();
             let headers = { Authorization: "Basic " + btoa(sqlConnection.getDbUsername() + ":" + sqlConnection.getDbPassword()) }
             Rest.getStream("/api/sql/progress/sqlimport", headers, progressAbortController)
                 .then(async (response: TempAny) => {
@@ -111,8 +109,7 @@ function SqlImportTab({ sqlConnection, dbTable, tasks, setTasks }: SqlImportTabP
 
     function clearProgress() {
         progressAbortController?.abort();
-        progressAbortController = undefined;
-        progressTaskId = undefined;
+        progressAbortController = new AbortController();
     }
 
     async function addToQueue(toQueue: File[]) {
@@ -125,23 +122,25 @@ function SqlImportTab({ sqlConnection, dbTable, tasks, setTasks }: SqlImportTabP
                 description: "Importing " + file.name,
                 data: { file: file },
                 execute: async (task: BackgroundTaskType) => {
-                    console.log("execute", task);
                     const progressKey = await setProgress(task);
-                    const stats = await sqlConnection.sqlImport(task.data.file, progressKey);
+                    const stats = await sqlConnection.sqlImport(task.data.file, progressKey, progressAbortController);
                     clearProgress();
                     task = { ...task };
                     task.data = { ...task.data, ...stats };
+                    if (stats.error === "Canceled") {
+                        task.status = "canceled";
+                    }
+                    else if (stats.error || stats.failed) {
+                        task.status = "error";
+                    }
                     return task;
                 },
                 showMinimal: (task: BackgroundTaskType, tasks: BackgroundTaskType[], setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>) => {
                     return <div key={task.data.file.name} className="NuoRow">
-                        <div>{task.data.file.name}</div>
-                        <div><BackgroundTasksStatus task={task} tasks={tasks} setTasks={setTasks} /></div>
+                        <div className="NuoRow">{task.data.file.name}</div>
+                        <div className="NuoRowFixed"><BackgroundTaskStatus task={task} tasks={tasks} setTasks={setTasks} abortController={progressAbortController} /></div>
                     </div>;
                 },
-                show: (task: BackgroundTaskType) => {
-                    return <></>;
-                }
             };
         }));
 
@@ -235,7 +234,7 @@ function SqlImportTab({ sqlConnection, dbTable, tasks, setTasks }: SqlImportTabP
                                 {task.data.failedQueries.map((fq: string, index: number) => <div key={index}>{fq}</div>)}
                             </details> || null}
                         </TableCell>
-                        <TableCell><BackgroundTasksStatus task={task} tasks={tasks} setTasks={setTasks} /></TableCell>
+                        <TableCell><BackgroundTaskStatus task={task} tasks={tasks} setTasks={setTasks} abortController={progressAbortController} /></TableCell>
                     </TableRow>})}
             </TableBody>
         </Table>;

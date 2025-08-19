@@ -10,7 +10,7 @@
                 "tier",
                 "properties",
                 "state",
-                "*"
+                "status"
             ],
             "fields": {
                 "state": {
