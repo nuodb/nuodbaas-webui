@@ -55,9 +55,20 @@ let s_popupInstance: PopupMenu | null = null;
 
 type AlignType = "right" | "left";
 
+interface PositionType {
+    scrollX: number;
+    scrollY: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+}
+
 interface PopupState extends MenuProps {
     dndSelected: any;
     anchor: Element | null;
+    position?: PositionType;
+
 }
 
 type MenuItemsProps = {
@@ -136,10 +147,40 @@ export class PopupMenu extends Component<{}, PopupState> {
         dndSelected: undefined
     }
 
+
+
+handleScroll = () => {
+    this.setState(prevState => {
+        const position = prevState.position;
+        if (!position) return null;
+
+        return {
+            position: {
+                scrollX: window.scrollX,
+                scrollY: window.scrollY,
+                x: position.x + (position.scrollX - window.scrollX),
+                y: position.y + (position.scrollY - window.scrollY),
+                width: position.width,
+                height: position.height
+            }
+        };
+    });
+}
+
+
+
+
     componentDidMount() {
         if (!s_popupInstance) {
             s_popupInstance = this;
         }
+
+        window.addEventListener("scroll", this.handleScroll);
+
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener("scroll", this.handleScroll);
     }
 
     dndIsBefore = (el1: any, el2: any) => {
@@ -206,6 +247,15 @@ export class PopupMenu extends Component<{}, PopupState> {
     }
 
     static showMenu(menu: MenuProps, anchor: Element): void {
+        const rect = anchor.getBoundingClientRect();
+        const position: PositionType = {
+        scrollX: window.scrollX,
+        scrollY: window.scrollY,
+        x: rect.left,
+        y: rect.top,
+        // width: 200,
+        height: rect.height
+    };
         s_popupInstance?.setState({
             "data-testid": undefined,
             align: undefined,
@@ -215,6 +265,7 @@ export class PopupMenu extends Component<{}, PopupState> {
             setItems: undefined,
             selected: undefined,
             className: undefined,
+            position,
             ...menu,
             anchor
         });
@@ -245,6 +296,10 @@ export class PopupMenu extends Component<{}, PopupState> {
         const anchor: Element = this.state.anchor;
         const rect = anchor.getBoundingClientRect();
         const x = this.state.align === "right" ? rect?.right : rect?.left;
+        const maxHeight = this.state.position
+    ? `${window.innerHeight - this.state.position.y - this.state.position.height - 5}px`
+    : "auto";
+        const width = this.state.position ? `${this.state.position.width}px` : "auto";
         return <div
             style={{
                 justifyContent: this.state.align === "left" ? "start" : "end",
@@ -259,7 +314,13 @@ export class PopupMenu extends Component<{}, PopupState> {
             className="NuoMenuToggle"
             onClick={() => this.setState({ anchor: null })}>
             <div style={{ position: "fixed", right: x, left: x, top: rect?.bottom, bottom: rect?.bottom, zIndex: 102 }}>
-                <div id="NuoMenuPopup" data-testid="menu-popup" className={"NuoMenuPopup " + (this.state.align === "right" ? " NuoAlignRight" : " NuoAlignLeft")}>
+                <div id="NuoMenuPopup" data-testid="menu-popup" className={"NuoMenuPopup " + (this.state.align === "right" ? " NuoAlignRight" : " NuoAlignLeft")} style={{
+                    maxHeight: maxHeight,
+                    overflowY: "auto",
+                    padding: "0",
+                    margin: "0",
+                    width
+                }}>
                     <MenuItems items={this.state.items} selected={this.state.selected} draggable={this.state.draggable} clearAnchor={() => this.setState({ anchor: null })} dndDrop={this.dndDrop} dndOver={this.dndOver} dndStart={this.dndStart} />
                 </div></div>
         </div>;
