@@ -167,6 +167,22 @@ handleScroll = () => {
     });
 }
 
+handleResize = () => {
+    if (!this.state.anchor) return;
+
+    const rect = this.state.anchor.getBoundingClientRect();
+    this.setState(prevState => ({
+        position: {
+            scrollX: window.scrollX,
+            scrollY: window.scrollY,
+            x: rect.left,
+            y: rect.top,
+            width: rect.width,
+            height: rect.height
+        }
+    }));
+};
+
 
 
 
@@ -176,11 +192,13 @@ handleScroll = () => {
         }
 
         window.addEventListener("scroll", this.handleScroll);
+        window.addEventListener("resize", this.handleResize);
 
     }
 
     componentWillUnmount() {
         window.removeEventListener("scroll", this.handleScroll);
+        window.removeEventListener("resize", this.handleResize);
     }
 
     dndIsBefore = (el1: any, el2: any) => {
@@ -253,7 +271,7 @@ handleScroll = () => {
         scrollY: window.scrollY,
         x: rect.left,
         y: rect.top,
-        // width: 200,
+        width: rect.width,
         height: rect.height
     };
         s_popupInstance?.setState({
@@ -300,29 +318,57 @@ handleScroll = () => {
     ? `${window.innerHeight - this.state.position.y - this.state.position.height - 5}px`
     : "auto";
         const width = this.state.position ? `${this.state.position.width}px` : "auto";
-        return <div
-            style={{
-                justifyContent: this.state.align === "left" ? "start" : "end",
-                position: "fixed",
-                right: 0,
-                left: 0,
-                top: 0,
-                bottom: 0,
-                backgroundColor: "transparent",
-                zIndex: 101
-            }}
-            className="NuoMenuToggle"
-            onClick={() => this.setState({ anchor: null })}>
-            <div style={{ position: "fixed", right: x, left: x, top: rect?.bottom, bottom: rect?.bottom, zIndex: 102 }}>
-                <div id="NuoMenuPopup" data-testid="menu-popup" className={"NuoMenuPopup " + (this.state.align === "right" ? " NuoAlignRight" : " NuoAlignLeft")} style={{
-                    maxHeight: maxHeight,
-                    overflowY: "auto",
-                    padding: "0",
-                    margin: "0",
-                    width
-                }}>
-                    <MenuItems items={this.state.items} selected={this.state.selected} draggable={this.state.draggable} clearAnchor={() => this.setState({ anchor: null })} dndDrop={this.dndDrop} dndOver={this.dndOver} dndStart={this.dndStart} />
-                </div></div>
-        </div>;
+        return (
+            <div
+                style={{
+                    justifyContent: this.state.align === "left" ? "start" : "end",
+                    position: "fixed",
+                    right: 0,
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    backgroundColor: "transparent",
+                    zIndex: 101
+                }}
+                className="NuoMenuToggle"
+                onClick={() => this.setState({ anchor: null })}
+            >
+                <div
+                    style={{
+                        position: "fixed",
+                        top: rect.bottom,
+                        left: this.state.align === "left" ? x : undefined,
+                        right: this.state.align === "right" ? window.innerWidth - x : undefined,
+                        zIndex: 102
+                    }}
+                >
+                    <div
+                        id="NuoMenuPopup"
+                        data-testid="menu-popup"
+                        className={
+                            "NuoMenuPopup " +
+                            (this.state.align === "right" ? " NuoAlignRight" : " NuoAlignLeft")
+                        }
+                        style={{
+                            maxHeight: maxHeight,
+                            overflowY: "auto",
+                            padding: "0",
+                            margin: "0",
+                            width
+                        }}
+                    >
+                        <MenuItems
+                            items={this.state.items}
+                            selected={this.state.selected}
+                            draggable={this.state.draggable}
+                            clearAnchor={() => this.setState({ anchor: null })}
+                            dndDrop={this.dndDrop}
+                            dndOver={this.dndOver}
+                            dndStart={this.dndStart}
+                        />
+                    </div>
+                </div>
+            </div>
+        );
     }
 }
