@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import FieldFactory from "../../fields/FieldFactory";
 import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultValue, submitForm, getSchemaPath } from "../../../utils/schema";
-import { RestSpinner } from "./Rest";
+import { Rest } from "./Rest";
 import Auth from "../../../utils/auth";
 import { setValue } from "../../fields/utils";
 import { matchesPath } from "../../../utils/schema";
@@ -17,6 +17,29 @@ import { Tab, Tabs } from "../../controls/Tabs";
 type SectionFormParameterType = {
     params: FieldParametersType;
 };
+
+// returns the last portion of the items list
+function getItemsLastPart(listResponse: any): string[] {
+    let values: string[] = [];
+    if (listResponse && listResponse.items && Array.isArray(listResponse.items)) {
+        listResponse.items.forEach((item: string) => {
+            const parts = item.split("/");
+            values.push(parts[parts.length - 1]);
+        });
+    }
+    return values;
+}
+
+// returns the first portion of the items list
+function getItemsFirstPart(listResponse: any): string[] {
+    let values: string[] = [];
+    if (listResponse && listResponse.items && Array.isArray(listResponse.items)) {
+        listResponse.items.forEach((item: string) => {
+            values.push(item.split("/")[0]);
+        });
+    }
+    return values;
+}
 
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
@@ -31,6 +54,7 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
     const [errors, setErrors] = useState<StringMapType>({});
     const [focusField, setFocusField] = useState<string | null>(null);
     const [currentTab, setCurrentTab] = useState<number>(0);
+    const [restCache, setRestCache] = useState<Map<string, any>>(new Map<string, any>());
 
     function updateErrors(key: string, value: string | null): void {
         setErrors((errs: StringMapType) => {
@@ -43,6 +67,54 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
             }
             return errs;
         })
+    }
+
+    async function cachedGet(url: string): Promise<any> {
+        let data = restCache.get(url);
+        if (data) {
+        }
+        else {
+            data = await Rest.get(url);
+            let newRestCache = new Map(restCache);
+            newRestCache.set(url, data);
+            setRestCache(newRestCache);
+        }
+        return data;
+    }
+
+    function uniqueArray(array: any[]): any[] {
+        return [...new Set(array)];
+    }
+
+    async function updateOrgProjDbEnums(data: TempAny, sections: SectionFormParameterType[]): Promise<SectionFormParameterType[]> {
+        let ret: SectionFormParameterType[] = JSON.parse(JSON.stringify(sections));
+
+        for (let i = 0; i < ret.length; i++) {
+            if (ret[i].params["organization"]) {
+                const users = await cachedGet("/users?listAccessible=true");
+                const projects = await cachedGet("/projects?listAccessible=true");
+                ret[i].params["organization"].enum = uniqueArray(
+                    [...getItemsFirstPart(users), ...getItemsFirstPart(projects)]
+                );
+            }
+            if (ret[i].params["project"]) {
+                let enums: string[] = [];
+                if (data.organization) {
+                    const projects = await cachedGet("/projects/" + encodeURIComponent(data.organization) + "?listAccessible=true");
+                    enums = uniqueArray(getItemsLastPart(projects));
+                }
+                ret[i].params["project"].enum = enums;
+            }
+            if (ret[i].params["database"]) {
+                let enums: string[] = [];
+                if (data.organization && data.project) {
+                    const databases = await cachedGet("/databases/" + encodeURIComponent(data.organization) + "/" + encodeURIComponent(data.project) + "?listAccessible=true");
+                    enums = uniqueArray(getItemsLastPart(databases));
+                }
+                ret[i].params["database"].enum = enums;
+            }
+        }
+        return ret;
     }
 
     useEffect(() => {
@@ -259,8 +331,19 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
                 sectionFormParams = [{ id: "section-0", params: params }];
             }
         }
-        setSectionFormParameters(sectionFormParams);
+
+        updateOrgProjDbEnums(v, sectionFormParams)
+            .then((sectionFormParams: SectionFormParameterType[]) => {
+                setSectionFormParameters(sectionFormParams);
+            });
     }, [schema, path, data, t]);
+
+    useEffect(() => {
+        updateOrgProjDbEnums(values, sectionFormParameters)
+            .then((sectionFormParams: SectionFormParameterType[]) => {
+                setSectionFormParameters(sectionFormParams);
+            });
+    }, [values]);
 
     function getParentPath(path: string) {
         let lastSlash = path.lastIndexOf("/");
@@ -399,7 +482,17 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
                 values,
                 errors,
                 updateErrors,
-                setValues,
+                setValues: (newValues => {
+                    newValues = { ...newValues };
+                    if (newValues["organization"] !== values["organization"]) {
+                        delete newValues["project"];
+                        delete newValues["database"];
+                    }
+                    else if (newValues["project"] !== values["project"]) {
+                        delete newValues["database"];
+                    }
+                    setValues(newValues);
+                }),
                 expand: !section.title,
                 autoFocus: key === focusField,
                 hideTitle: ret.length === 1,
@@ -422,7 +515,6 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
     }
 
     return <>
-        <RestSpinner />
         <ResourceHeader schema={schema} path={path} type={readonly ? "view" : data ? "edit" : "create"} onAction={() => {
             if (readonly) {
                 navigate("/ui/resource/edit" + path);

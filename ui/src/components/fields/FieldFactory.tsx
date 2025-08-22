@@ -61,7 +61,7 @@ const FieldFactory = {
             else if (props.parameter["x-tf-sensitive"] === true) {
                 return FieldPassword(props);
             }
-            else if (props.parameter.enum) {
+            else if (props.parameter.enum && !props.readonly) {
                 return FieldSelect(props);
             }
             else if (props.prefix === "frequency" && (props.path === "/backuppolicies" || props.path.startsWith("/backuppolicies/"))) {
