@@ -149,42 +149,23 @@ export class PopupMenu extends Component<{}, PopupState> {
 
 
 
-handleScroll = () => {
-    this.setState(prevState => {
-        const position = prevState.position;
-        if (!position) return null;
+    handleScroll = () => {
+        this.setState(prevState => {
+            const position = prevState.position;
+            if (!position) return null;
 
-        return {
-            position: {
-                scrollX: window.scrollX,
-                scrollY: window.scrollY,
-                x: position.x + (position.scrollX - window.scrollX),
-                y: position.y + (position.scrollY - window.scrollY),
-                width: position.width,
-                height: position.height
-            }
-        };
-    });
-}
-
-handleResize = () => {
-    if (!this.state.anchor) return;
-
-    const rect = this.state.anchor.getBoundingClientRect();
-    this.setState(prevState => ({
-        position: {
-            scrollX: window.scrollX,
-            scrollY: window.scrollY,
-            x: rect.left,
-            y: rect.top,
-            width: rect.width,
-            height: rect.height
-        }
-    }));
-};
-
-
-
+            return {
+                position: {
+                    scrollX: window.scrollX,
+                    scrollY: window.scrollY,
+                    x: position.x + (position.scrollX - window.scrollX),
+                    y: position.y + (position.scrollY - window.scrollY),
+                    width: position.width,
+                    height: position.height
+                }
+            };
+        });
+    }
 
     componentDidMount() {
         if (!s_popupInstance) {
@@ -192,13 +173,11 @@ handleResize = () => {
         }
 
         window.addEventListener("scroll", this.handleScroll);
-        window.addEventListener("resize", this.handleResize);
 
     }
 
     componentWillUnmount() {
         window.removeEventListener("scroll", this.handleScroll);
-        window.removeEventListener("resize", this.handleResize);
     }
 
     dndIsBefore = (el1: any, el2: any) => {
