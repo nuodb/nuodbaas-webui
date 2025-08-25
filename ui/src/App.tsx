@@ -24,18 +24,23 @@ import { NUODBAAS_WEBUI_ISRECORDING, Rest } from './components/pages/parts/Rest'
 import OrganizationOverview from './components/pages/OrganizationOverview';
 import { getOrgFromPath } from './utils/schema';
 import Toast from './components/controls/Toast';
+import BackgroundTasks, { BackgroundTaskType } from './utils/BackgroundTasks';
+import { withTranslation } from 'react-i18next';
 
 /**
  * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
  * @returns
  */
-export default function App() {
+function App({ t }: { t: any }) {
   const [schema, setSchema] = useState();
   const [isLoggedIn, setIsLoggedIn] = useState(Auth.isLoggedIn());
   const [isRecording, setIsRecording] = useState(sessionStorage.getItem(NUODBAAS_WEBUI_ISRECORDING) === "true");
   const [org, setOrg] = useState("");
   const [orgs, setOrgs] = useState<string[]>([]);
-  const pageProps = { schema, isRecording, org, setOrg, orgs };
+  const [tasks, setTasks] = useState<BackgroundTaskType[]>([]);
+  const pageProps = {
+    schema, isRecording, org, setOrg, orgs, tasks, setTasks: setTasks
+  };
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -69,6 +74,31 @@ export default function App() {
     });
   }, [schema, isLoggedIn]);
 
+  useEffect(() => {
+    const onUnload = (event: BeforeUnloadEvent) => {
+      const ABORT_MESSAGE = "Background tasks are still in progress.";
+      const pendingTasks = tasks.filter(t => t.status === "in_progress" || t.status === "not_started");
+      if (pendingTasks.length > 0) {
+        Dialog.ok(ABORT_MESSAGE,
+          <div className="NuoColumn">
+            {pendingTasks.map(task => <div>{task.label}</div>)}
+          </div>,
+          t);
+        event.preventDefault();
+        return ABORT_MESSAGE;
+      }
+      else {
+        return null;
+      }
+    };
+
+    window.addEventListener('beforeunload', onUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', onUnload); // Clean up the event listener
+    };
+  }, [tasks]);
+
   function getHomeUrl() {
     const credentials = Auth.getCredentials();
     if (credentials) {
@@ -82,6 +112,7 @@ export default function App() {
   return (
     <div className="App" data-testid={orgs.length > 0 ? "banner-done" : ""}>
       <GlobalErrorBoundary>
+        <BackgroundTasks tasks={tasks} setTasks={setTasks} />
         <Customizations>
           <CssBaseline />
           <PopupMenu />
@@ -121,3 +152,5 @@ export default function App() {
     </div>
   );
 }
+
+export default withTranslation()(App);
