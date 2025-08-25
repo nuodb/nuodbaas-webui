@@ -1,6 +1,6 @@
 // (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
-import React, { JSX } from 'react';
+import React from 'react';
 import { isMaterial } from '../../utils/Customizations';
 import { IconButton, InputAdornment, TextField as MuiTextField } from '@mui/material';
 import InfoPopup from './InfoPopup';
@@ -12,7 +12,7 @@ export type TextFieldProps = {
     id: string,
     label: string,
     description?: string,
-    type?: "password" | "datetime-local" | "text" | "file",
+    type?: "password" | "datetime-local" | "text",
     value?: string,
     defaultValue?: string,
     autoFocus?: boolean,

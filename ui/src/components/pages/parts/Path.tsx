@@ -7,7 +7,6 @@ import Select, { SelectOption } from "../../controls/Select"
 import Link from '@mui/material/Link'
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material';
-import { RestSpinner } from './Rest';
 import { getFilterField, getSchemaPath } from "../../../utils/schema";
 import { SchemaType } from "../../../utils/types"
 
@@ -84,7 +83,6 @@ function Path({ schema, path, prefixLabel, postfixLabel, filterValues, org, t }:
             {postfixLabel && <Typography key="management" color="text.primary" style={{ fontSize: "1em", textWrap: "nowrap" }}>{postfixLabel}</Typography>}
             {renderFilter()}
         </StyledBreadcrumbs>
-        <RestSpinner />
     </div>;
 }
 

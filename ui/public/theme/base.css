@@ -229,13 +229,6 @@ html {
     flex-direction: column;
     flex: 0 0 auto;
 }
-
-.NuoCenter {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .NuoTableSettingsItem>label {
     display: flex;
     flex: 1 1 auto;
@@ -797,8 +790,7 @@ code {
     background-color: lightgray;
     cursor: pointer;
 }
-button,
-#NuoButton {
+button {
     display: flex;
     flex: 1 1 auto;
     align-items: center;
@@ -957,45 +949,4 @@ button:focus {
 
 .NuoLoginForm .MuiFormControl-root + .MuiFormControl-root {
   margin-top: 1rem;
-}
-
-input[type="file"].NuoUpload {
-    display: none;
-}
-
-label.NuoUpload {
-    width: 100px;
-    height: 100px;
-    border-radius: 50px;
-    background-color: inherit;
-    border-style: dotted;
-    border-color: lightgray;
-    color: lightgray;
-    border-width: 3px;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-}
-
-label.NuoUpload > div {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
-label.NuoUpload:hover {
-    background-color: rgb(200, 200, 200);
-}
-.NuoUploadLightLabel {
-    color: lightgray;
-    font-size: .8em;
-}
-.NuoBackgroundTasksStatus {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    z-index: 500;
-    box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
-    padding: 5px;
 }

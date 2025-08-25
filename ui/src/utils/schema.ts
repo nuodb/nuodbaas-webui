@@ -261,7 +261,7 @@ export function getFilterField(rootSchema: TempAny, path: string): string|null|s
     }
 }
 
-export function concatChunks(chunk1: Uint8Array, chunk2: Uint8Array) : Uint8Array {
+function concatChunks(chunk1: Uint8Array, chunk2: Uint8Array) : Uint8Array {
     let ret = new Uint8Array(chunk1.length + chunk2.length);
     ret.set(chunk1, 0);
     ret.set(chunk2, chunk1.length);
@@ -285,7 +285,7 @@ export function getResourceEvents(path: string, multiResolve: TempAny, multiReje
     //only one event stream is supported - close prior one if it exists.
     let eventsAbortController = new AbortController();
 
-    Rest.getStream(Auth.getNuodbCpRestUrl("events" + path), Auth.getHeaders(), eventsAbortController)
+    Rest.getStream("events" + path, eventsAbortController)
       .then(async (response: TempAny) => {
         monitoredPaths.add(path.split("?")[0]);
         let event = null;

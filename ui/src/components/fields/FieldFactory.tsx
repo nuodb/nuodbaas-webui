@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import FieldString from "./FieldString";
 import FieldHidden from "./FieldHidden";
@@ -61,7 +61,7 @@ const FieldFactory = {
             else if (props.parameter["x-tf-sensitive"] === true) {
                 return FieldPassword(props);
             }
-            else if (props.parameter.enum) {
+            else if (props.parameter.enum && !props.readonly) {
                 return FieldSelect(props);
             }
             else if (props.prefix === "frequency" && (props.path === "/backuppolicies" || props.path.startsWith("/backuppolicies/"))) {
