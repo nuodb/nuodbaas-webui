@@ -472,6 +472,24 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
             const ro = readonly
                 || (data && (key in urlParameters || key === "name" || formParameter["x-immutable"] === true))
                 || (key === "organization" && getSchemaPath(schema, path)?.includes("{organization}"));
+
+            //hide other fields if organization/project/database fields are not filled out
+            if ("organization" in formParameters) {
+                if (key !== "organization" && !values["organization"]) {
+                    return null;
+                }
+                if ("project" in formParameters) {
+                    if (key !== "organization" && key !== "project" && !values["project"]) {
+                        return null;
+                    }
+                    if ("database" in formParameters) {
+                        if (key !== "organization" && key !== "project" && key !== "database" && !values["database"]) {
+                            return null;
+                        }
+                    }
+                }
+            }
+
             return <div className="NuoFieldContainer" key={key}>{(FieldFactory.create({
                 path,
                 prefix: key,
@@ -502,7 +520,13 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
 
         const label = section.title || t("section.title.general");
         const id = section.id || "section-" + label.toLowerCase();
-        return <Tab key={id} id={id} label={label}>{ret}</Tab>;
+        ret = ret.filter((r: any) => r !== null);
+        if (ret.length === 0) {
+            return <></>;
+        }
+        else {
+            return <Tab key={id} id={id} label={label}>{ret}</Tab>;
+        }
     }
 
     let badges: { [key: number]: number } = {};
