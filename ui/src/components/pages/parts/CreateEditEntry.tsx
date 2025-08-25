@@ -71,9 +71,7 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
 
     async function cachedGet(url: string): Promise<any> {
         let data = restCache.get(url);
-        if (data) {
-        }
-        else {
+        if (!data) {
             data = await Rest.get(url);
             let newRestCache = new Map(restCache);
             newRestCache.set(url, data);
