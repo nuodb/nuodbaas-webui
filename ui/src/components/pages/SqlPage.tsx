@@ -16,13 +16,17 @@ import Toast from '../controls/Toast';
 import SqlQueryTab from './sql/SqlQueryTab';
 import { SqlType } from '../../utils/SqlSocket';
 import ComboBox from '../controls/ComboBox';
+import SqlImportTab from './sql/SqlImportTab';
+import { BackgroundTaskType } from '../../utils/BackgroundTasks';
 
-type SqlTabsProps = {
+interface SqlTabsProps {
+    tasks: BackgroundTaskType[];
+    setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>;
     dbTable: string;
     sqlConnection: SqlType | undefined;
 };
 
-function SqlTabs({ dbTable, sqlConnection }: SqlTabsProps) {
+function SqlTabs({ dbTable, sqlConnection, tasks, setTasks }: SqlTabsProps) {
     const [tabIndex, setTabIndex] = useState<number>(0);
 
     if (!sqlConnection) {
@@ -34,6 +38,7 @@ function SqlTabs({ dbTable, sqlConnection }: SqlTabsProps) {
         tabs.push(<Tab id="browse" label={t("form.sqleditor.label.tab.browse")}>{tabIndex === tabs.length && <SqlBrowseTab sqlConnection={sqlConnection} table={dbTable} />}</Tab>);
     }
     tabs.push(<Tab id="query" label={t("form.sqleditor.label.tab.query")}>{tabIndex === tabs.length && <SqlQueryTab sqlConnection={sqlConnection} dbTable={dbTable} />}</Tab>);
+    tabs.push(<Tab id="import" label={t("form.sqleditor.label.tab.import")}>{tabIndex === tabs.length && <SqlImportTab tasks={tasks} setTasks={setTasks} sqlConnection={sqlConnection} dbTable={dbTable} />}</Tab>);
     return <Tabs currentTab={tabIndex} setCurrentTab={(tabIndex) => setTabIndex(tabIndex)}>{tabs}</Tabs>
 }
 
@@ -87,11 +92,11 @@ function SqlPage(props: PageProps) {
                     {sqlConnection && <ComboBox loadItems={loadTables}
                         selected={dbTable}>
                         <label>{dbTable}</label>
-                    </ComboBox> || <></>}
+                    </ComboBox> || <div></div>}
                 </StyledBreadcrumbs>
             </div>
         </div>
-        {sqlConnection ? <SqlTabs dbTable={dbTable} sqlConnection={sqlConnection} /> : <SqlLogin setSqlConnection={(conn: SqlType) => {
+        {sqlConnection ? <SqlTabs tasks={props.tasks} setTasks={props.setTasks} dbTable={dbTable} sqlConnection={sqlConnection} /> : <SqlLogin setSqlConnection={(conn: SqlType) => {
             setSqlConnection(conn);
         }} />}
     </PageLayout>;

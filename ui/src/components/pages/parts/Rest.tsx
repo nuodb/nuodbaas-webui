@@ -117,12 +117,11 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
         })
     }
 
-    static async getStream(path: string, eventsAbortController: AbortController) {
+    static async getStream(url: string, headers: { [key: string]: string }, eventsAbortController: AbortController) {
         return new Promise((resolve, reject) => {
             Rest.incrementPending();
-            const url = Auth.getNuodbCpRestUrl(path);
             axios({
-                headers: { ...Auth.getHeaders(), 'Accept': 'text/event-stream' },
+                headers: { ...headers, 'Accept': 'text/event-stream' },
                 method: 'get',
                 url: url,
                 responseType: 'stream',
