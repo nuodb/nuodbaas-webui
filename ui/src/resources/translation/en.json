@@ -182,8 +182,7 @@
                 "value": "Value",
                 "tab": {
                     "browse": "Browse",
-                    "query": "Query",
-                    "import": "Import"
+                    "query": "Query"
                 }
             },
             "button": {
@@ -196,7 +195,7 @@
             "label": {
                 "loginWith": "Login With {{providerDesc}} ",
                 "goBack": "Go Back",
-                "login": "Login"
+                "login": "Login" 
             }
         }
     },

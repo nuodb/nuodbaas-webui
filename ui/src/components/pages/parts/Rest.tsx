@@ -94,7 +94,10 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
     }
 
     render(): ReactNode {
-        return null;
+        return this.state.pendingRequests > 0 ?
+            <CircularProgress className="RestSpinner" color="inherit" />
+            :
+            <div data-testid="rest_spinner__complete" className="RestSpinner">&nbsp;</div>;
     }
 
     static async get(path: string) {
@@ -114,11 +117,12 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
         })
     }
 
-    static async getStream(url: string, headers: { [key: string]: string }, eventsAbortController: AbortController) {
+    static async getStream(path: string, eventsAbortController: AbortController) {
         return new Promise((resolve, reject) => {
             Rest.incrementPending();
+            const url = Auth.getNuodbCpRestUrl(path);
             axios({
-                headers: { ...headers, 'Accept': 'text/event-stream' },
+                headers: { ...Auth.getHeaders(), 'Accept': 'text/event-stream' },
                 method: 'get',
                 url: url,
                 responseType: 'stream',
@@ -204,16 +208,4 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
                 })
         });
     }
-}
-
-export function RestSpinner() {
-    if (!instance) return null;
-
-    return <React.Fragment>
-        {instance.state.pendingRequests > 0 ?
-            <CircularProgress className="RestSpinner" color="inherit" />
-            :
-            <div data-testid="rest_spinner__complete" className="RestSpinner">&nbsp;</div>
-        }
-    </React.Fragment>;
 }

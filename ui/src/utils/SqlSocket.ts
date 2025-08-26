@@ -42,33 +42,21 @@ export type SqlResponse = {
     rows?: Row[];
 };
 
-export type SqlImportResponseType = {
-    success?: number;
-    failed?: number;
-    updatedRows?: number;
-    failedQueries?: string[];
-    error?: string;
-    progressKey?: string;
-    bytesProcessed?: number;
-}
-
-
 export type SqlType = {
     runCommand: (operation: SqlOperationType, args: any[]) => Promise<SqlResponse>;
     getDefaultSchema: () => string;
-    sqlImport: (file: File, progressKey: string, abortController: AbortController | undefined) => Promise<SqlImportResponseType>;
-    getDbUsername: () => string;
-    getDbPassword: () => string;
 }
 
 export default function SqlSocket(organization: string, project: string, database: string, schema: string, dbUsername: string, dbPassword: string) : SqlType {
     let nextTransactionId = 0;
 
+    return { runCommand, getDefaultSchema };
+
     async function runCommand(operation: SqlOperationType, args: any[]) : Promise<SqlResponse> {
         let request : SqlRequest = {operation: operation.toString(), args, requestId: String(nextTransactionId)};
         nextTransactionId++;
         const response = await axios.post(
-            "/api/sql/query" + getOrgProjDbSchemaUrl(),
+            "/api/sql/query/" + encodeURIComponent(organization) + "/" + encodeURIComponent(project) + "/" + encodeURIComponent(database) + "/" + encodeURIComponent(schema),
             request,
             { headers:{
                 "Authorization": "Basic " + btoa(dbUsername + ":" + dbPassword)
@@ -79,40 +67,4 @@ export default function SqlSocket(organization: string, project: string, databas
     function getDefaultSchema() {
         return schema;
     }
-
-    function getOrgProjDbSchemaUrl() {
-        return "/" + encodeURIComponent(organization) + "/" + encodeURIComponent(project) + "/" + encodeURIComponent(database) + "/" + encodeURIComponent(schema);
-    }
-
-    function getDbUsername() {
-        return dbUsername;
-    }
-
-    function getDbPassword() {
-        return dbPassword;
-    }
-
-    async function sqlImport(file: File, progressKey: string, abortController: AbortController | undefined) : Promise<SqlImportResponseType> {
-        try {
-            const response = await axios.post('/api/sql/import/sql/' + getOrgProjDbSchemaUrl() + "?progressKey=" + progressKey, file, {
-                headers: {
-                    "Authorization": "Basic " + btoa(dbUsername + ":" + dbPassword),
-                    'Content-Type': file.type
-                },
-                signal: abortController && abortController.signal || undefined
-            });
-            return response.data;
-        }
-        catch(error) {
-            if(String(error).includes("CanceledError")) {
-                return { error: "Canceled" };
-            }
-            else {
-                console.error('Error uploading file:', error);
-                return { error: "Error uploading file: " + error}
-            }
-        }
-    }
-
-    return { runCommand, getDefaultSchema, sqlImport, getDbUsername, getDbPassword };
 }

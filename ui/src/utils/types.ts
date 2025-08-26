@@ -1,7 +1,6 @@
 // (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import { ReactNode } from "react";
-import { BackgroundTaskType } from "./BackgroundTasks";
 
 // the TempAny type allows us to temporarily declare variables as "any" type,
 // so we can easily find them in source control and fix in future PR's
@@ -77,7 +76,5 @@ export interface PageProps {
     org: string,
     setOrg: (org: string) => void;
     orgs: string[];
-    tasks: BackgroundTaskType[];
-    setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>;
     t: any
 };
