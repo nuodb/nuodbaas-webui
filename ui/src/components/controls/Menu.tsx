@@ -55,7 +55,7 @@ export default function Menu(props: MenuProps): JSX.Element {
 type AlignType = "right" | "left";
 
 interface PopupMenuProps extends MenuProps {
-    anchor: Element | undefined;
+    anchor: Element;
     clearAnchor: () => void;
 }
 
@@ -125,6 +125,26 @@ function MenuItems({ items, draggable, selected, clearAnchor, dndDrop, dndOver, 
 
 export function PopupMenu(props: PopupMenuProps) {
     const [dndSelected, setDndSelected] = useState<any>(undefined);
+    const [anchorRect, setAnchorRect] = useState(props.anchor.getBoundingClientRect());
+
+    useEffect(() => {
+        if (props.anchor) {
+            setAnchorRect(props.anchor.getBoundingClientRect());
+        }
+    }, [props.anchor]);
+
+    useEffect(() => {
+        window.addEventListener("resize", handleResize);
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        }
+    }, []);
+
+    function handleResize() {
+        if (props.anchor) {
+            setAnchorRect(props.anchor.getBoundingClientRect());
+        }
+    }
 
     function dndIsBefore(el1: any, el2: any) {
         if (el2.parentNode === el1.parentNode) {
@@ -192,14 +212,12 @@ export function PopupMenu(props: PopupMenuProps) {
         return null;
     }
 
-    const anchor: Element = props.anchor;
-    const rect = anchor.getBoundingClientRect();
     return <div style={{ position: "absolute" }}>
         <div id="NuoMenuPopup" data-testid="menu-popup" className={"NuoMenuPopup " + (props.align === "right" ? " NuoAlignRight" : " NuoAlignLeft")}
             style={{
-                maxHeight: String(window.innerHeight - rect.y - rect.height - 5) + "px",
-                top: rect.height,
-                right: -rect.width,
+                maxHeight: String(window.innerHeight - anchorRect.y - anchorRect.height - 5) + "px",
+                top: anchorRect.height,
+                right: -anchorRect.width,
                 overflowY: "auto",
                 padding: "0",
                 margin: "0",
