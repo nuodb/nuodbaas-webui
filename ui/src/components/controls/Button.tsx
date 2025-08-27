@@ -1,6 +1,6 @@
 // (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
-import React, { ReactNode } from 'react';
+import React, { JSX, ReactNode } from 'react';
 
 export type ButtonProps = {
     "data-testid"?: string,
