@@ -294,7 +294,6 @@ html {
 }
 
 .NuoTableMenuCell {
-    position: sticky;
     right: 0;
     text-align: right;
 }

@@ -94,25 +94,8 @@ export default function ComboBox({ loadItems, children, selected, align }: Combo
         children = <MoreVertIcon />
     }
 
-    function handleScroll() {
-        setPosition((position: PositionType | undefined) => {
-            return position === undefined ? undefined : {
-                scrollX: window.scrollX,
-                scrollY: window.scrollY,
-                x: position.x + (position.scrollX - window.scrollX),
-                y: position.y + (position.scrollY - window.scrollY),
-                width: position.width,
-                height: position.height
-            }
-        })
-    }
-
     useEffect(() => {
-        window.addEventListener("scroll", handleScroll);
         loadItems(true).then(items => setItems(items));
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-        };
     }, []);
 
     function renderDropdown() {
@@ -120,28 +103,34 @@ export default function ComboBox({ loadItems, children, selected, align }: Combo
             return null;
         }
         const x = (align === "right" ? position.x + position.width : position.x);
-        return <div
-            style={{
-                justifyContent: align === "right" ? "end" : "start",
-                position: "fixed",
-                right: 0,
-                left: 0,
-                top: 0,
-                bottom: 0,
-                backgroundColor: "transparent",
-                zIndex: 101
-            }}
-            className="NuoMenuToggle"
-            onClick={(event) => {
-                event.stopPropagation();
-                setPosition(undefined);
-            }}>
-            <div style={{ position: "fixed", right: x, left: x, top: position.y, bottom: position.y, zIndex: 102 }}>
-                <div id="NuoMenuPopup" data-testid="menu-popup" className={"NuoMenuPopup " + (align === "right" ? " NuoAlignRight" : " NuoAlignLeft")}
-                    style={{ maxHeight: String(window.innerHeight - position.y - position.height - 5) + "px", overflowY: "auto", padding: "0", margin: "0" }}>
-                    <div className="NuoComboBox"><div>{children}</div><UnfoldMoreIcon /></div>
-                    <ComboBoxItems items={items} position={position} setPosition={setPosition} selected={selected} />
-                </div></div>
+        return <div>
+            <div id="NuoMenuPopup" data-testid="menu-popup" className={"NuoMenuPopup " + (align === "right" ? " NuoAlignRight" : " NuoAlignLeft")}
+                style={{ maxHeight: String(window.innerHeight - position.y - position.height - 5) + "px", overflowY: "auto", padding: "0", margin: "0", zIndex: 102 }}>
+                <div className="NuoComboBox" onClick={(event) => {
+                    event.preventDefault();
+                    setPosition(undefined);
+                }}>
+                    <div>{children}</div><UnfoldMoreIcon />
+                </div>
+                <ComboBoxItems items={items} position={position} setPosition={setPosition} selected={selected} />
+            </div>
+            <div
+                style={{
+                    justifyContent: align === "right" ? "end" : "start",
+                    position: "fixed",
+                    right: 0,
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    backgroundColor: "transparent",
+                    zIndex: 101
+                }}
+                className="NuoMenuToggle"
+                onClick={(event) => {
+                    event.stopPropagation();
+                    setPosition(undefined);
+                }}>
+            </div>
         </div>;
     }
 

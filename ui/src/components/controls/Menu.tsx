@@ -1,6 +1,6 @@
 // (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
-import React, { Component, JSX, useEffect } from 'react';
+import React, { JSX, useEffect, useState } from 'react';
 import Button from './Button';
 
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -10,10 +10,7 @@ import { MenuItemProps, MenuProps } from '../../utils/types';
 export default function Menu(props: MenuProps): JSX.Element {
     const { popupId, items, className } = props;
     const dataTestid = props["data-testid"];
-
-    useEffect(() => {
-        PopupMenu.updateMenu(props)
-    }, [props]);
+    const [popupAnchor, setPopupAnchor] = useState<Element | undefined>(undefined);
 
     function listMenu(items: MenuItemProps[]) {
         return items.map((item, index) => <Button
@@ -35,15 +32,19 @@ export default function Menu(props: MenuProps): JSX.Element {
             tabIndex={0}
             data-testid={dataTestid}
             onClick={(event) => {
-                PopupMenu.toggleMenu(props, event.currentTarget);
+                setPopupAnchor(event.currentTarget);
             }}
             onKeyDown={(event) => {
                 if (event.key === "Enter") {
-                    PopupMenu.toggleMenu(props, event.currentTarget);
+                    setPopupAnchor(event.currentTarget);
                 }
             }}
         >
-            <>{children}</>
+
+            <div >
+                {popupAnchor && <PopupMenu {...props} anchor={popupAnchor} clearAnchor={() => { setPopupAnchor(undefined) }} />}
+                {children}
+            </div>
         </div>;
     }
     else {
@@ -51,13 +52,11 @@ export default function Menu(props: MenuProps): JSX.Element {
     }
 }
 
-let s_popupInstance: PopupMenu | null = null;
-
 type AlignType = "right" | "left";
 
-interface PopupState extends MenuProps {
-    dndSelected: any;
-    anchor: Element | null;
+interface PopupMenuProps extends MenuProps {
+    anchor: Element;
+    clearAnchor: () => void;
 }
 
 type MenuItemsProps = {
@@ -124,28 +123,32 @@ function MenuItems({ items, draggable, selected, clearAnchor, dndDrop, dndOver, 
     </div>);
 }
 
-export class PopupMenu extends Component<{}, PopupState> {
-    state: PopupState = {
-        popupId: "",
-        items: [],
-        setItems: undefined,
-        selected: undefined,
-        anchor: null,
-        align: "right" as AlignType,
-        draggable: false,
-        dndSelected: undefined
-    }
+export function PopupMenu(props: PopupMenuProps) {
+    const [dndSelected, setDndSelected] = useState<any>(undefined);
+    const [anchorRect, setAnchorRect] = useState(props.anchor.getBoundingClientRect());
 
-    componentDidMount() {
-        if (!s_popupInstance) {
-            s_popupInstance = this;
+    useEffect(() => {
+        if (props.anchor) {
+            setAnchorRect(props.anchor.getBoundingClientRect());
+        }
+    }, [props.anchor]);
+
+    useEffect(() => {
+        window.addEventListener("resize", handleResize);
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        }
+    }, []);
+
+    function handleResize() {
+        if (props.anchor) {
+            setAnchorRect(props.anchor.getBoundingClientRect());
         }
     }
 
-    dndIsBefore = (el1: any, el2: any) => {
+    function dndIsBefore(el1: any, el2: any) {
         if (el2.parentNode === el1.parentNode) {
-            let cur
-            for (cur = el1.previousSibling; cur; cur = cur.previousSibling) {
+            for (let cur = el1.previousSibling; cur; cur = cur.previousSibling) {
                 if (cur === el2) return true
             }
         }
@@ -153,7 +156,7 @@ export class PopupMenu extends Component<{}, PopupState> {
     }
 
     /* find given element target (or parent) which is draggable */
-    dndGetDraggableTarget = (target: any) => {
+    function dndGetDraggableTarget(target: any) {
         while (target.getAttribute("draggable") !== "true") {
             if (!target.parentElement) {
                 return undefined;
@@ -163,91 +166,75 @@ export class PopupMenu extends Component<{}, PopupState> {
         return target;
     }
 
-    dndOver = (e: React.DragEvent<HTMLDivElement>) => {
+    function dndOver(e: React.DragEvent<HTMLDivElement>) {
         e.preventDefault();
-        const draggableTarget = this.dndGetDraggableTarget(e.target);
+        const draggableTarget = dndGetDraggableTarget(e.target);
         if (!draggableTarget || !draggableTarget.parentNode) {
             return;
         }
 
-        if (this.dndIsBefore(this.state.dndSelected, draggableTarget)) {
-            draggableTarget.parentNode.insertBefore(this.state.dndSelected, draggableTarget)
+        if (dndIsBefore(dndSelected, draggableTarget)) {
+            draggableTarget.parentNode.insertBefore(dndSelected, draggableTarget)
         } else {
-            draggableTarget.parentNode.insertBefore(this.state.dndSelected, draggableTarget.nextSibling)
+            draggableTarget.parentNode.insertBefore(dndSelected, draggableTarget.nextSibling)
         }
     }
 
-    dndDrop = (e: React.DragEvent<HTMLDivElement>) => {
-        this.setState({ dndSelected: undefined });
-        const target = this.dndGetDraggableTarget(e.target);
+    function dndDrop(e: React.DragEvent<HTMLDivElement>) {
+        setDndSelected(undefined);
+        const target = dndGetDraggableTarget(e.target);
         if (!target?.parentNode?.children) {
             return;
         }
         let newItems: MenuItemProps[] = [];
         Array.from(target.parentNode.children).forEach((child: any) => {
-            const newItem = this.state.items.find((item: MenuItemProps) => item.id === child.getAttribute("id"));
+            const newItem = props.items.find((item: MenuItemProps) => item.id === child.getAttribute("id"));
             newItem && newItems.push(newItem);
         })
-        if (this.state.setItems) {
-            const setItems: ((items: MenuItemProps[]) => void) = this.state.setItems;
+        if (props.setItems) {
+            const setItems: ((items: MenuItemProps[]) => void) = props.setItems;
             setItems(newItems);
         }
     }
 
-    dndStart = (e: any) => {
-        const draggableTarget = this.dndGetDraggableTarget(e.target);
+    function dndStart(e: any) {
+        const draggableTarget = dndGetDraggableTarget(e.target);
         if (!draggableTarget) {
             return;
         }
 
         e.dataTransfer.effectAllowed = 'move'
         e.dataTransfer.setData('text', draggableTarget.getAttribute("id"))
-        this.setState({ dndSelected: e.target });
+        setDndSelected(e.target);
     }
 
-    static showMenu(menu: MenuProps, anchor: Element): void {
-        s_popupInstance?.setState({
-            "data-testid": undefined,
-            align: undefined,
-            popupId: undefined,
-            draggable: undefined,
-            children: undefined,
-            setItems: undefined,
-            selected: undefined,
-            className: undefined,
-            ...menu,
-            anchor
-        });
+    if (!props.anchor) {
+        return null;
     }
 
-    static toggleMenu(menu: MenuProps, anchor: Element): void {
-        if (s_popupInstance?.state.anchor) {
-            s_popupInstance.setState({ anchor: null });
-        }
-        else {
-            this.showMenu(menu, anchor);
-        }
-    }
-
-    static updateMenu(menu: MenuProps): void {
-        if (s_popupInstance) {
-            if (s_popupInstance.state.popupId === menu.popupId) {
-                s_popupInstance.setState(menu);
-            }
-        }
-    }
-
-    render() {
-        if (!this.state.anchor) {
-            return null;
-        }
-
-        const anchor: Element = this.state.anchor;
-        const rect = anchor.getBoundingClientRect();
-        const x = this.state.align === "right" ? rect?.right : rect?.left;
-        return <div
+    return <div style={{ position: "absolute" }}>
+        <div id="NuoMenuPopup" data-testid="menu-popup" className={"NuoMenuPopup " + (props.align === "right" ? " NuoAlignRight" : " NuoAlignLeft")}
             style={{
-                justifyContent: this.state.align === "left" ? "start" : "end",
+                maxHeight: String(window.innerHeight - anchorRect.y - anchorRect.height - 5) + "px",
+                top: anchorRect.height,
+                right: -anchorRect.width,
+                overflowY: "auto",
+                padding: "0",
+                margin: "0",
+                zIndex: 102
+            }}>
+            <MenuItems
+                items={props.items}
+                selected={props.selected}
+                draggable={props.draggable}
+                clearAnchor={props.clearAnchor}
+                dndDrop={dndDrop}
+                dndOver={dndOver}
+                dndStart={dndStart} />
+        </div>
+        <div
+            style={{
+                justifyContent: props.align === "left" ? "start" : "end",
                 position: "fixed",
                 right: 0,
                 left: 0,
@@ -257,11 +244,7 @@ export class PopupMenu extends Component<{}, PopupState> {
                 zIndex: 101
             }}
             className="NuoMenuToggle"
-            onClick={() => this.setState({ anchor: null })}>
-            <div style={{ position: "fixed", right: x, left: x, top: rect?.bottom, bottom: rect?.bottom, zIndex: 102 }}>
-                <div id="NuoMenuPopup" data-testid="menu-popup" className={"NuoMenuPopup " + (this.state.align === "right" ? " NuoAlignRight" : " NuoAlignLeft")}>
-                    <MenuItems items={this.state.items} selected={this.state.selected} draggable={this.state.draggable} clearAnchor={() => this.setState({ anchor: null })} dndDrop={this.dndDrop} dndOver={this.dndOver} dndStart={this.dndStart} />
-                </div></div>
-        </div>;
-    }
+            onClick={(event) => { event.stopPropagation(); props.clearAnchor(); }}>
+        </div>
+    </div>;
 }
