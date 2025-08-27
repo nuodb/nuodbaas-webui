@@ -19,7 +19,6 @@ import Auth from "./utils/auth";
 import Settings from './components/pages/Settings';
 import Automation from './components/pages/Automation';
 import Customizations from './utils/Customizations';
-import { PopupMenu } from './components/controls/Menu';
 import { NUODBAAS_WEBUI_ISRECORDING, Rest } from './components/pages/parts/Rest';
 import OrganizationOverview from './components/pages/OrganizationOverview';
 import { getOrgFromPath } from './utils/schema';
@@ -115,7 +114,6 @@ function App({ t }: { t: any }) {
         <BackgroundTasks tasks={tasks} setTasks={setTasks} />
         <Customizations>
           <CssBaseline />
-          <PopupMenu />
           <Dialog />
           <Toast />
           <Rest isRecording={isRecording} setIsRecording={setIsRecording} />
