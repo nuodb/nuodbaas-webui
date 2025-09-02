@@ -113,13 +113,23 @@ undeploy-cp: $(KIND) $(HELM)
 	fi
 
 .PHONY: deploy-operator
-deploy-operator: build-cp $(HELM) $(KIND)
+deploy-operator: build-cp nuodb.lic $(HELM) $(KIND)
 	@if [ -d $(NUODB_CP_REPO)/charts/nuodb-cp-operator ] ; then \
 		$(KIND) load docker-image nuodb/nuodb-control-plane:latest; \
 		$(HELM) dependency update $(NUODB_CP_REPO)/charts/nuodb-cp-operator; \
-		$(HELM) upgrade --install --wait -n default nuodb-operator $(NUODB_CP_REPO)/charts/nuodb-cp-operator --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest; \
+		$(HELM) upgrade --install --wait -n default nuodb-operator $(NUODB_CP_REPO)/charts/nuodb-cp-operator \
+		--set image.repository=nuodb/nuodb-control-plane \
+		--set image.tag=latest \
+        --set nuodb-cp-config.nuodb.license.enabled=true \
+        --set nuodb-cp-config.nuodb.license.secret.create=true \
+        --set nuodb-cp-config.nuodb.license.secret.name=nuodb-license \
+        --set nuodb-cp-config.nuodb.license.content="$(shell cat nuodb.lic)"; \
 	else \
-		$(HELM) upgrade --install --wait -n default nuodb-operator nuodb-cp-operator --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION); \
+		$(HELM) upgrade --install --wait -n default nuodb-operator nuodb-cp-operator --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION) \
+        --set nuodb-cp-config.nuodb.license.enabled=true \
+        --set nuodb-cp-config.nuodb.license.secret.create=true \
+        --set nuodb-cp-config.nuodb.license.secret.name=nuodb-license \
+        --set nuodb-cp-config.nuodb.license.content="$(shell cat nuodb.lic)"; \
 	fi
 
 .PHONY: undeploy-operator
@@ -268,3 +278,15 @@ $(HELM):
 	mkdir -p $(shell dirname ${HELM})
 	curl -L -s https://get.helm.sh/helm-v$(HELM_VERSION)-$(OS)-$(ARCH).tar.gz | tar -xzf - -O $(OS)-$(ARCH)/helm > $(HELM)
 	chmod +x $(HELM)
+
+nuodb.lic:
+	@if [ "$(NUODB_LICENSE_CONTENT)" != "" ]; then \
+		echo "$(NUODB_LICENSE_CONTENT)" | base64 -d > nuodb.lic; \
+		echo "Found nuodb.lic in NUODB_LICENSE_CONTENT environment variable"; \
+	elif [ -f ../nuodb/build/test/admin2/enterprise.lic ]; then \
+		cp ../nuodb/build/test/admin2/enterprise.lic ./nuodb.lic; \
+		echo "Copied enterprise.lic from nuodb repo"; \
+	else \
+		echo "Either copy an \"nuodb.lic\" to the project directory or set a base64 encoded NUODB_LICENSE_CONTENT environment variable"; \
+		exit 1; \
+	fi
