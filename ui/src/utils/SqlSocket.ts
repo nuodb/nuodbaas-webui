@@ -59,6 +59,7 @@ export type SqlType = {
     sqlImport: (file: File, progressKey: string, abortController: AbortController | undefined) => Promise<SqlImportResponseType>;
     getDbUsername: () => string;
     getDbPassword: () => string;
+    getOrgProjDbSchemaUrl: () => string;
 }
 
 export default function SqlSocket(organization: string, project: string, database: string, schema: string, dbUsername: string, dbPassword: string) : SqlType {
@@ -114,5 +115,5 @@ export default function SqlSocket(organization: string, project: string, databas
         }
     }
 
-    return { runCommand, getDefaultSchema, sqlImport, getDbUsername, getDbPassword };
+    return { runCommand, getDefaultSchema, sqlImport, getDbUsername, getDbPassword, getOrgProjDbSchemaUrl };
 }
