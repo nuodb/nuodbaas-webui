@@ -278,6 +278,8 @@ workflows:
           requires:
             - "Build image"
           name: "Test and deploy"
+          context:
+            - common-config
       - promote_build:
           requires:
             - "Test and deploy"
