@@ -7,7 +7,7 @@ import { SqlImportResponseType, SqlType } from '../../../utils/SqlSocket';
 import Button from '../../controls/Button';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableTh } from '../../controls/Table';
-import { BackgroundTaskType, generateRandom, launchNextBackgroundTask, updateOrAddTask } from '../../../utils/BackgroundTasks';
+import { BackgroundTaskType, generateRandom, launchNextBackgroundTask, shortenSize, updateOrAddTask } from '../../../utils/BackgroundTasks';
 import { Rest } from '../parts/Rest';
 import { concatChunks } from '../../../utils/schema';
 import { TempAny } from '../../../utils/types';
@@ -154,32 +154,6 @@ function SqlImportTab({ sqlConnection, dbTable, tasks, setTasks }: SqlImportTabP
         }
 
         setFiles(newFiles);
-    }
-
-    function shortenSize(size: number): string {
-        let suffix = " B";
-        if (size > 1024 * 1024 * 1024) {
-            size = size / 1024 / 1024 / 1024;
-            suffix = " GB";
-        }
-        else if (size > 1024 * 1024) {
-            size = size / 1024 / 1024;
-            suffix = " MB";
-        }
-        else if (size > 1024) {
-            size = size / 1024;
-            suffix = " KB";
-        }
-        if (size >= 100) {
-            size = Math.round(size);
-        }
-        else if (size >= 10) {
-            size = Math.round(size * 10) / 10;
-        }
-        else {
-            size = Math.round(size * 100) / 100;
-        }
-        return String(size) + suffix;
     }
 
     function renderFileStatus(files: File[], tasks: BackgroundTaskType[]) {
