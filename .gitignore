@@ -12,3 +12,4 @@ selenium-tests/target
 build
 docker/development/default.conf
 nuodb-control-plane/
+nuodb.lic
