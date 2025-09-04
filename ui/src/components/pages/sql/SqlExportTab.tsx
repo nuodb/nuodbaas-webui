@@ -98,7 +98,7 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
                 </div>
             </DialogContent>
             <DialogActions>
-                <Button variant="text" onClick={() => {
+                <Button data-testid="export.status.button" variant="text" onClick={() => {
                     if (task.status === "in_progress") {
                         task.data.progressAbortController?.abort();
                     }
@@ -115,6 +115,21 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
                 }
             </DialogActions>
         </DialogMaterial>
+    }
+
+    function fakeShowSaveFilePicker() {
+        localStorage.setItem("downloadedFile", "");
+        return Promise.resolve({
+            createWritable: () => {
+                return Promise.resolve({
+                    write: (value: Uint8Array<ArrayBufferLike>): Promise<void> => {
+                        localStorage.setItem("downloadedFile", (localStorage.getItem("downloadedFile") || "") + (new TextDecoder('utf-8')).decode(value));
+                        return Promise.resolve();
+                    },
+                    close: () => { }
+                });
+            }
+        });
     }
 
     async function exportFile(sqlConnection: SqlType, exportOptions: ExportOptionsType): Promise<string> {
@@ -144,14 +159,14 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
             url.searchParams.append("outputTable", exportOptions.outputTable);
         }
 
-        const showSaveFilePicker = (window as any).showSaveFilePicker;
+        const showSaveFilePicker = localStorage.getItem("selenium") === "true" ? fakeShowSaveFilePicker : (window as any).showSaveFilePicker;
         if (!showSaveFilePicker) {
             return Promise.reject("Streamed download not supported");
         }
-        const fileHandle: FileSystemFileHandle = (await (window as any).showSaveFilePicker({
+        const fileHandle: FileSystemFileHandle = await showSaveFilePicker({
             startIn: "downloads",
             suggestedName: sqlConnection.getOrgProjDbSchemaUrl().substring("/".length).replaceAll("/", "_") + "_" + nowYYYYMMDD_HHMMSS() + ".sql"
-        })) as FileSystemFileHandle;
+        });
 
         let progressAbortController = new AbortController();
         let newTask: BackgroundTaskType = {
@@ -300,7 +315,7 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
             </div>
 
             <div className="NuoRow">
-                {(window as any).showOpenFilePicker && <button onClick={async (event)=>{
+                {(window as any).showOpenFilePicker && <button data-testid="perform.export" onClick={async (event) => {
                     event.preventDefault();
                     await exportFile(sqlConnection, exportOptions);
                 }}>Export</button>}

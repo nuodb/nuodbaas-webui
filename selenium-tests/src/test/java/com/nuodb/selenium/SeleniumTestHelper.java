@@ -69,6 +69,7 @@ public class SeleniumTestHelper {
         this.testInfo = testInfo;
         get("/ui/");
         clearLocalStorage();
+        setSelenium();
         driver.manage().window().maximize();
     }
 
@@ -78,6 +79,24 @@ public class SeleniumTestHelper {
         }
         else {
             throw new RuntimeException("unable to clear local storage");
+        }
+    }
+
+    public void setSelenium() {
+        if(driver instanceof JavascriptExecutor jsDriver) {
+            jsDriver.executeScript("localStorage.setItem('selenium','true')");
+        }
+        else {
+            throw new RuntimeException("unable to set selenium");
+        }
+    }
+
+    public String getLocalStorage(String key) {
+        if(driver instanceof JavascriptExecutor jsDriver) {
+            return jsDriver.executeScript("return localStorage.getItem('" + key + "')").toString();
+        }
+        else {
+            throw new RuntimeException("unable to set selenium");
         }
     }
 
@@ -269,24 +288,24 @@ public class SeleniumTestHelper {
 
     public void login(String organization, String username, String password) {
         get("/ui/");
-        
+
         /**
         * During page load, we retrieve the providers list, which determines the login choices.
         * We wait for these options to appear before proceeding further.
-        **/ 
+        **/
         retry(()->{
             if (getElement("show_login_button")!= null){
                 click("show_login_button");
             }
             else {
-                assertNotNull(getElement("organization"), "Unable to find Login button or Login form");   
+                assertNotNull(getElement("organization"), "Unable to find Login button or Login form");
             }
         });
         sendKeys("organization", organization);
         sendKeys("username", username);
         sendKeys("password", password);
         click("login_button");
-        
+
         retryStale(()->{
             String expected = "management\n>\ndatabases\n>\n" + organization.toLowerCase();
             String actual = waitText("path_component").toLowerCase();

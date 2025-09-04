@@ -8,6 +8,7 @@ import TextField from '../../controls/TextField';
 import Button from '../../controls/Button';
 import SqlResultsRender from './SqlResultsRender';
 import Toast from '../../controls/Toast';
+import { Rest } from '../parts/Rest';
 
 type SqlQueryTabProps = {
     sqlConnection: SqlType;
@@ -32,17 +33,23 @@ function SqlQueryTab({ sqlConnection, dbTable }: SqlQueryTabProps) {
         <div className="NuoRow NuoFieldContainer">
             <TextField disabled={!sqlConnection || executing} required data-testid="sqlQuery" id="sqlQuery" label="SQL Query" value={sqlQuery} onChange={(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSqlQuery(event.target.value)} />
             <Button data-testid="submitSql" disabled={!sqlConnection || executing} variant="contained" type="submit" onClick={async () => {
-                setExecuting(true);
-                const response: SqlResponse = await sqlConnection.runCommand("EXECUTE", [sqlQuery]);
-                if (response.status === "SUCCESS") {
-                    let shortQuery = sqlQuery.replaceAll("\n", " ");
-                    if (shortQuery.length > 80) {
-                        shortQuery = shortQuery.substring(0, 80) + "...";
+                try {
+                    Rest.incrementPending();
+                    setExecuting(true);
+                    const response: SqlResponse = await sqlConnection.runCommand("EXECUTE", [sqlQuery]);
+                    if (response.status === "SUCCESS") {
+                        let shortQuery = sqlQuery.replaceAll("\n", " ");
+                        if (shortQuery.length > 80) {
+                            shortQuery = shortQuery.substring(0, 80) + "...";
+                        }
+                        Toast.show("SUCCESS: " + shortQuery, null);
                     }
-                    Toast.show("SUCCESS: " + shortQuery, null);
+                    setResults(response);
+                    setExecuting(false);
                 }
-                setResults(response);
-                setExecuting(false);
+                finally {
+                    Rest.decrementPending();
+                }
             }}>{executing ? t("form.sqleditor.button.executing") : t("form.sqleditor.button.submit")}</Button>
         </div>
     </form>
