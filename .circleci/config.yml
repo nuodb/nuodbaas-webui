@@ -35,7 +35,6 @@ executors:
     resource_class: medium
 
 jobs:
-
   build_image:
     executor: ubuntu_vm
     environment:
@@ -79,6 +78,9 @@ jobs:
     executor: ubuntu_vm
     environment:
       NUODB_CP_REPO: /tmp/workspace/nuodb-control-plane
+    machine:
+      image: ubuntu-2204:2023.10.1
+    resource_class: large
     steps:
       - checkout
       - aws-cli/setup
