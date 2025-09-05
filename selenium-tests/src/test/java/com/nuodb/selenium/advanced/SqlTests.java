@@ -10,9 +10,32 @@ import com.nuodb.selenium.TestRoutines;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class SqlTests extends TestRoutines {
+    public static void run(String[] args) {
+        try {
+            Process process = Runtime.getRuntime().exec(args);
+            BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String s = null;
+            System.out.println("Standard output:");
+            while ((s = stdInput.readLine()) != null) {
+                System.out.println(s);
+            }
+            BufferedReader stdError = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+            System.out.println("Standard error:");
+            while ((s = stdError.readLine()) != null) {
+                System.out.println(s);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Test
     public void testSqlPage() {
         login();
@@ -20,7 +43,13 @@ public class SqlTests extends TestRoutines {
         String databaseName = createDatabase(projectName);
 
         // Wait for Database to become available
+        final AtomicInteger count = new AtomicInteger(0);
         retry(180, 1000, ()->{
+            if(count.incrementAndGet() == 179) {
+                run(new String[]{"bash","-c","pwd"});
+                run(new String[]{"../bin/kubectl","describe","all","-A"});
+                run(new String[]{"../bin/kubectl","get","all","-A"});
+            }
             List<WebElement> statusColumn = waitTableElements("list_resource__table", "name", databaseName, "state");
             assertEquals(1, statusColumn.size());
             assertEquals("Available", statusColumn.get(0).getText());
