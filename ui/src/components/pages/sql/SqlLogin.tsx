@@ -54,6 +54,10 @@ function SqlLogin({setSqlConnection}: SqlLoginProps) {
                     setError(response.error);
                     if (!response.error) {
                         setSqlConnection(conn);
+                        setError("DEBUG connected");
+                    }
+                    else {
+                        setError("DEBUG not connected");
                     }
                 }
                 else {
