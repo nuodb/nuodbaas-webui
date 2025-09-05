@@ -74,6 +74,8 @@ public class SqlTests extends TestRoutines {
         sleep(500);
 
         // create table with row and show output
+        waitElement("query").click();
+        sleep(500);
         replaceInputElementByName("sqlQuery", "create table table1 (name VARCHAR(80))");
         sleep(500);
         waitElement("submitSql").click();
