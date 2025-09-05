@@ -68,15 +68,21 @@ public class SqlTests extends TestRoutines {
         waitRestComplete();
 
         // create table with row and show output
-        replaceInputElementByName("sqlQuery", "create table table1 (name VARCHAR(80))");
-        waitElement("submitSql").click();
-        waitRestComplete();
-        replaceInputElementByName("sqlQuery", "insert into table1 (name) values ('abc')");
-        waitElement("submitSql").click();
-        waitRestComplete();
-        replaceInputElementByName("sqlQuery", "select * from table1");
-        waitElement("submitSql").click();
-        waitRestComplete();
+        retry(()->{
+            replaceInputElementByName("sqlQuery", "create table table1 (name VARCHAR(80))");
+            waitElement("submitSql").click();
+            waitRestComplete();
+        });
+        retry(()->{
+            replaceInputElementByName("sqlQuery", "insert into table1 (name) values ('abc')");
+            waitElement("submitSql").click();
+            waitRestComplete();
+        });
+        retry(()->{
+            replaceInputElementByName("sqlQuery", "select * from table1");
+            waitElement("submitSql").click();
+            waitRestComplete();
+        });
 
         // export all tables
         waitElement("export").click();
