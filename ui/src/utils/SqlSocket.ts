@@ -1,6 +1,7 @@
 // (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
 import axios from "axios";
+import { Rest } from "../components/pages/parts/Rest";
 
 export type SqlOperationType =
     "SET_CREDENTIALS"|
@@ -68,13 +69,19 @@ export default function SqlSocket(organization: string, project: string, databas
     async function runCommand(operation: SqlOperationType, args: any[]) : Promise<SqlResponse> {
         let request : SqlRequest = {operation: operation.toString(), args, requestId: String(nextTransactionId)};
         nextTransactionId++;
-        const response = await axios.post(
-            "/api/sql/query" + getOrgProjDbSchemaUrl(),
-            request,
-            { headers:{
-                "Authorization": "Basic " + btoa(dbUsername + ":" + dbPassword)
-            }});
-        return response.data;
+        try {
+            Rest.incrementPending();
+            const response = await axios.post(
+                "/api/sql/query" + getOrgProjDbSchemaUrl(),
+                request,
+                { headers:{
+                    "Authorization": "Basic " + btoa(dbUsername + ":" + dbPassword)
+                }});
+            return response.data;
+        }
+        finally {
+            Rest.decrementPending();
+        }
     }
 
     function getDefaultSchema() {

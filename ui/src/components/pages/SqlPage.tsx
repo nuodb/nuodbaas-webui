@@ -1,6 +1,6 @@
 // (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from "react-router"
 import { MenuItemProps, PageProps } from "../../utils/types";
 import PageLayout from "./parts/PageLayout";
@@ -56,6 +56,11 @@ function SqlPage(props: PageProps) {
             flexWrap: 'nowrap'
         }
     });
+
+
+    useEffect(() => {
+        loadTables(true);
+    }, []);
 
     async function loadTables(useCache: boolean): Promise<MenuItemProps[]> {
         if (!sqlConnection) {

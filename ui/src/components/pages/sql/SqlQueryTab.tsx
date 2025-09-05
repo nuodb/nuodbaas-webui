@@ -33,24 +33,17 @@ function SqlQueryTab({ sqlConnection, dbTable }: SqlQueryTabProps) {
         <div className="NuoRow NuoFieldContainer">
             <TextField disabled={!sqlConnection || executing} required data-testid="sqlQuery" id="sqlQuery" label="SQL Query" value={sqlQuery} onChange={(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSqlQuery(event.target.value)} />
             <Button data-testid="submitSql" disabled={!sqlConnection || executing} variant="contained" type="submit" onClick={async () => {
-                try {
-                    Rest.incrementPending();
-                    setExecuting(true);
-                    const response: SqlResponse = await sqlConnection.runCommand("EXECUTE", [sqlQuery]);
-                    if (response.status === "SUCCESS") {
-                        let shortQuery = sqlQuery.replaceAll("\n", " ");
-                        if (shortQuery.length > 80) {
-                            shortQuery = shortQuery.substring(0, 80) + "...";
-                        }
-                        Toast.show("SUCCESS: " + shortQuery, null);
+                setExecuting(true);
+                const response: SqlResponse = await sqlConnection.runCommand("EXECUTE", [sqlQuery]);
+                if (response.status === "SUCCESS") {
+                    let shortQuery = sqlQuery.replaceAll("\n", " ");
+                    if (shortQuery.length > 80) {
+                        shortQuery = shortQuery.substring(0, 80) + "...";
                     }
-                    setResults(response);
-                    setExecuting(false);
+                    Toast.show("SUCCESS: " + shortQuery, null);
                 }
-                finally {
-                    Rest.decrementPending();
-                    console.log("decrementPrending");
-                }
+                setResults(response);
+                setExecuting(false);
             }}>{executing ? t("form.sqleditor.button.executing") : t("form.sqleditor.button.submit")}</Button>
         </div>
     </form>
