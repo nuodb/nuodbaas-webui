@@ -60,29 +60,27 @@ public class SqlTests extends TestRoutines {
         assertEquals(1, menuCells.size());
         clickPopupMenu(menuCells.get(0), "button.sql.editor");
 
-        // login to SQL database
-        replaceInputElementByName("dbUsername", "dba");
-        replaceInputElementByName("dbPassword", "passw0rd");
-        replaceInputElementByName("dbSchema", "schema");
-        waitElement("sql.login.button").click();
-        waitRestComplete();
-
-        // create table with row and show output
         retry(()->{
+            // login to SQL database
+            replaceInputElementByName("dbUsername", "dba");
+            replaceInputElementByName("dbPassword", "passw0rd");
+            replaceInputElementByName("dbSchema", "schema");
+            waitElement("sql.login.button").click();
+            waitRestComplete();
+
+            // create table with row and show output
             replaceInputElementByName("sqlQuery", "create table table1 (name VARCHAR(80))");
             waitElement("submitSql").click();
             waitRestComplete();
         });
-        retry(()->{
-            replaceInputElementByName("sqlQuery", "insert into table1 (name) values ('abc')");
-            waitElement("submitSql").click();
-            waitRestComplete();
-        });
-        retry(()->{
-            replaceInputElementByName("sqlQuery", "select * from table1");
-            waitElement("submitSql").click();
-            waitRestComplete();
-        });
+
+        replaceInputElementByName("sqlQuery", "insert into table1 (name) values ('abc')");
+        waitElement("submitSql").click();
+        waitRestComplete();
+
+        replaceInputElementByName("sqlQuery", "select * from table1");
+        waitElement("submitSql").click();
+        waitRestComplete();
 
         // export all tables
         waitElement("export").click();
