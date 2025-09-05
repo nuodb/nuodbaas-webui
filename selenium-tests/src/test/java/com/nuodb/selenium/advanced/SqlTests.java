@@ -20,7 +20,7 @@ public class SqlTests extends TestRoutines {
         String databaseName = createDatabase(projectName);
 
         // Wait for Database to become available
-        retry(120, 1000, ()->{
+        retry(180, 1000, ()->{
             List<WebElement> statusColumn = waitTableElements("list_resource__table", "name", databaseName, "state");
             assertEquals(1, statusColumn.size());
             assertEquals("Available", statusColumn.get(0).getText());

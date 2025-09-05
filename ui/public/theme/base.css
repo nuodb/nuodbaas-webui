@@ -824,6 +824,7 @@ button:focus {
     bottom: 70%;
     left: 50%;
     right: 50%;
+    z-index: 600;
 }
 
 .NuoTabs>ul {

@@ -49,6 +49,7 @@ function SqlQueryTab({ sqlConnection, dbTable }: SqlQueryTabProps) {
                 }
                 finally {
                     Rest.decrementPending();
+                    console.log("decrementPrending");
                 }
             }}>{executing ? t("form.sqleditor.button.executing") : t("form.sqleditor.button.submit")}</Button>
         </div>
