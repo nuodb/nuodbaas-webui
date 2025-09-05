@@ -25,6 +25,36 @@ type BackgroundTasksProps = {
     setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>;
 };
 
+export function isTaskFinished(task: BackgroundTaskType) {
+    return task.status === "complete" || task.status === "canceled" || task.status === "error";
+}
+
+export function shortenSize(size: number): string {
+    let suffix = " B";
+    if (size > 1024 * 1024 * 1024) {
+        size = size / 1024 / 1024 / 1024;
+        suffix = " GB";
+    }
+    else if (size > 1024 * 1024) {
+        size = size / 1024 / 1024;
+        suffix = " MB";
+    }
+    else if (size > 1024) {
+        size = size / 1024;
+        suffix = " KB";
+    }
+    if (size >= 100) {
+        size = Math.round(size);
+    }
+    else if (size >= 10) {
+        size = Math.round(size * 10) / 10;
+    }
+    else {
+        size = Math.round(size * 100) / 100;
+    }
+    return String(size) + suffix;
+}
+
 export function launchNextBackgroundTask(tasks: BackgroundTaskType[], setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>) {
     for (let i = 0; i < tasks.length; i++) {
         if (tasks[i].status === "not_started") {

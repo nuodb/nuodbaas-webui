@@ -105,7 +105,14 @@ export default function ComboBox({ loadItems, children, selected, align }: Combo
         const x = (align === "right" ? position.x + position.width : position.x);
         return <div>
             <div id="NuoMenuPopup" data-testid="menu-popup" className={"NuoMenuPopup " + (align === "right" ? " NuoAlignRight" : " NuoAlignLeft")}
-                style={{ maxHeight: String(window.innerHeight - position.y - position.height - 5) + "px", overflowY: "auto", padding: "0", margin: "0", zIndex: 102 }}>
+                style={{
+                    maxHeight: String(window.innerHeight - position.y - position.height - 5) + "px",
+                    overflowY: "auto",
+                    padding: "0",
+                    margin: "0",
+                    left: x,
+                    zIndex: 102
+                }}>
                 <div className="NuoComboBox" onClick={(event) => {
                     event.preventDefault();
                     setPosition(undefined);

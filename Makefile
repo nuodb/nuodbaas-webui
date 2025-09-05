@@ -211,6 +211,7 @@ setup-integration-tests: $(KUBECTL) build-image install-crds deploy-cp deploy-op
             '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"integrationtest\", \"accessRule\":{\"allow\": \"all:integrationtest\"}}' \
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
 	$(KUBECTL) apply -n default -f selenium-tests/files/cas-idp.yaml
+	$(KUBECTL) apply -n default -f selenium-tests/files/nuodb-cp-image-versions.yaml
 	@docker ps
 	@$(KUBECTL) describe ingress -A
 	@$(KUBECTL) describe pods -A

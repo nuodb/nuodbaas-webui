@@ -183,7 +183,8 @@
                 "tab": {
                     "browse": "Browse",
                     "query": "Query",
-                    "import": "Import"
+                    "import": "Import",
+                    "export": "Export"
                 }
             },
             "button": {

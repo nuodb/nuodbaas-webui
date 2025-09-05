@@ -7,7 +7,7 @@ import { SqlImportResponseType, SqlType } from '../../../utils/SqlSocket';
 import Button from '../../controls/Button';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableTh } from '../../controls/Table';
-import { BackgroundTaskType, generateRandom, launchNextBackgroundTask, updateOrAddTask } from '../../../utils/BackgroundTasks';
+import { BackgroundTaskType, generateRandom, launchNextBackgroundTask, shortenSize, updateOrAddTask } from '../../../utils/BackgroundTasks';
 import { Rest } from '../parts/Rest';
 import { concatChunks } from '../../../utils/schema';
 import { TempAny } from '../../../utils/types';
@@ -26,6 +26,7 @@ interface SqlImportData extends SqlImportResponseType {
 }
 
 let progressAbortController = new AbortController();
+const TASK_ID_PREFIX = "sqlimport_";
 
 function SqlImportTab({ sqlConnection, dbTable, tasks, setTasks }: SqlImportTabProps) {
     const [files, setFiles] = useState<File[]>([]); // files to be uploaded
@@ -115,7 +116,7 @@ function SqlImportTab({ sqlConnection, dbTable, tasks, setTasks }: SqlImportTabP
     async function addToQueue(toQueue: File[]) {
         let newTasks: BackgroundTaskType[] = (toQueue.map(file => {
             return {
-                id: generateRandom(),
+                id: TASK_ID_PREFIX + generateRandom(),
                 listenerId: "sqlImport",
                 label: file.name,
                 status: "not_started",
@@ -155,32 +156,6 @@ function SqlImportTab({ sqlConnection, dbTable, tasks, setTasks }: SqlImportTabP
         setFiles(newFiles);
     }
 
-    function shortenSize(size: number): string {
-        let suffix = " B";
-        if (size > 1024 * 1024 * 1024) {
-            size = size / 1024 / 1024 / 1024;
-            suffix = " GB";
-        }
-        else if (size > 1024 * 1024) {
-            size = size / 1024 / 1024;
-            suffix = " MB";
-        }
-        else if (size > 1024) {
-            size = size / 1024;
-            suffix = " KB";
-        }
-        if (size >= 100) {
-            size = Math.round(size);
-        }
-        else if (size >= 10) {
-            size = Math.round(size * 10) / 10;
-        }
-        else {
-            size = Math.round(size * 100) / 100;
-        }
-        return String(size) + suffix;
-    }
-
     function renderFileStatus(files: File[], tasks: BackgroundTaskType[]) {
         return <Table>
             <TableHead>
@@ -218,7 +193,7 @@ function SqlImportTab({ sqlConnection, dbTable, tasks, setTasks }: SqlImportTabP
                     <TableCell></TableCell>
                     <td><Button className="NuoButton" onClick={() => { addToQueue(files); }}>Add all to Queue</Button></td>
                 </TableRow>}
-                {tasks.map((task) => {
+                {tasks.filter(t => t.id.startsWith(TASK_ID_PREFIX)).map((task) => {
                     return <TableRow key={task.data.file.name}>
                         <TableCell>{task.data.file.name}</TableCell>
                         <TableCell className="NuoColumn">
