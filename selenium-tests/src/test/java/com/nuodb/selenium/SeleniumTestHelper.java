@@ -145,6 +145,17 @@ public class SeleniumTestHelper {
         }
     }
 
+    public boolean hasElement(String id) {
+        try {
+            By testId = By.xpath("//*[@data-testid='" + id + "']");
+            List<WebElement> elements = driver.findElements(testId);
+            return elements.size() > 0;
+        }
+        catch(NoSuchElementException e) {
+            return false;
+        }
+    }
+
     public WebElement waitElement(String id) {
         By testId = By.xpath("//*[@data-testid='" + id + "']");
         WebDriverWait wait = new WebDriverWait(driver, waitTimeout);

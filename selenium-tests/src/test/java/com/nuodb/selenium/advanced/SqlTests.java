@@ -60,16 +60,20 @@ public class SqlTests extends TestRoutines {
         assertEquals(1, menuCells.size());
         clickPopupMenu(menuCells.get(0), "button.sql.editor");
 
-        sleep(5000);
-
         // login to SQL database
         replaceInputElementByName("dbUsername", "dba");
         replaceInputElementByName("dbPassword", "passw0rd");
         replaceInputElementByName("dbSchema", "schema");
         waitElement("sql.login.button").click();
-        waitRestComplete();
+        for(int i=0; i<10; i++) {
+            if(!hasElement("sql.login.button")) {
+                break;
+            }
+            waitElement("sql.login.button").click();
+            sleep(500);
+        }
 
-        sleep(5000);
+        waitRestComplete();
 
         // create table with row and show output
         replaceInputElementByName("sqlQuery", "create table table1 (name VARCHAR(80))");
