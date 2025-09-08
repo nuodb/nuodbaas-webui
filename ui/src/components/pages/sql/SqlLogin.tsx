@@ -50,15 +50,23 @@ function SqlLogin({setSqlConnection}: SqlLoginProps) {
             <Button data-testid="sql.login.button" type="submit" onClick={async () => {
                 setError("DEBUG click");
                 if (params.organization && params.project && params.database && dbUsername && dbPassword && dbSchema) {
+                    setError("DEBUG click2");
                     const conn = SqlSocket(params.organization, params.project, params.database, dbSchema, dbUsername, dbPassword);
-                    const response: SqlResponse = await conn.runCommand("EXECUTE_QUERY", ["SELECT 1 FROM DUAL"]);
-                    setError(response.error);
-                    if (!response.error) {
-                        setSqlConnection(conn);
-                        setError("DEBUG connected");
+                    setError("DEBUG click3");
+                    try {
+                        const response: SqlResponse = await conn.runCommand("EXECUTE_QUERY", ["SELECT 1 FROM DUAL"]);
+                        setError("DEBUG click4");
+                        setError(response.error);
+                        if (!response.error) {
+                            setSqlConnection(conn);
+                            setError("DEBUG connected");
+                        }
+                        else {
+                            setError("DEBUG not connected");
+                        }
                     }
-                    else {
-                        setError("DEBUG not connected");
+                    catch (err) {
+                        setError("catch " + JSON.stringify(err));
                     }
                 }
                 else {
