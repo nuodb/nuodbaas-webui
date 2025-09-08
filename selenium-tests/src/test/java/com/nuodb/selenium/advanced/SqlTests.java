@@ -77,6 +77,11 @@ public class SqlTests extends TestRoutines {
         sleep(500);
         waitRestComplete();
         for(int i=0; i<10; i++) {
+            if(i == 9) {
+                run(new String[]{"bash","-c","pwd"});
+                run(new String[]{"../bin/kubectl","describe","all","-A"});
+                run(new String[]{"../bin/kubectl","get","all","-A"});
+            }
             if(hasElement("sql.login.button")) {
                 waitElement("sql.login.button").click();
                 waitRestComplete();
