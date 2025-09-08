@@ -226,7 +226,7 @@ function Table(props: TableProps) {
                                 promiseConfirm = Dialog.confirm(label, confirm, t);
                             }
                             else {
-                                promiseConfirm = Promise.resolve("no");
+                                promiseConfirm = Promise.resolve("yes");
                             }
                             promiseConfirm.then(result => {
                                 if (result === "yes") {
