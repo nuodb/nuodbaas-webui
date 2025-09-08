@@ -21,8 +21,11 @@ export function parseSearch(search: string) {
             else if (key in ret) {
                 ret["error"] = "Key \"" + key + "\" can only be specified once.";
             }
+            else if (key === "name"){
+                ret[key] = value.toLowerCase();
+            }
             else {
-                ret[key] = value.toUpperCase();
+                ret[key] = value; //TODO agr22 Control plane does case sensitive search for labels - keeping this for now.
             }
         }
         else if (parts.indexOf(" ") !== -1) {
@@ -32,7 +35,7 @@ export function parseSearch(search: string) {
             ret["error"] = "Cannot search for \"name\" attribute multiple times";
         }
         else {
-            ret["name"] = parts.toUpperCase();
+            ret["name"] = parts.toLowerCase();
         }
     });
     return ret;
