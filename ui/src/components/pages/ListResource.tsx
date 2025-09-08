@@ -40,12 +40,12 @@ function ListResource(props: PageProps) {
             return;
         }
 
-        function lastPartLower(value: string) {
+        function lastPartUpper(value: string) {
             const lastSlash = value.lastIndexOf("/");
             if (lastSlash !== -1) {
                 value = value.substring(lastSlash + 1);
             }
-            return value.toLowerCase();
+            return value.toUpperCase();
         }
 
         const parsedSearch = parseSearch(search);
@@ -63,10 +63,10 @@ function ListResource(props: PageProps) {
             Rest.get(path + "?listAccessible=true" + labelFilter).then((data: TempAny) => {
                 let start = 0;
                 let end = data.items.length;
-                while (data.items.length > start && !lastPartLower(data.items[start]).startsWith(name)) {
+                while (data.items.length > start && !lastPartUpper(data.items[start]).startsWith(name)) {
                     start++;
                 }
-                while (end - 1 >= start && !lastPartLower(data.items[end - 1]).startsWith(name)) {
+                while (end - 1 >= start && !lastPartUpper(data.items[end - 1]).startsWith(name)) {
                     end--;
                 }
                 setAllItems(data.items.slice(start, end));

@@ -22,7 +22,7 @@ export function parseSearch(search: string) {
                 ret["error"] = "Key \"" + key + "\" can only be specified once.";
             }
             else {
-                ret[key] = value;
+                ret[key] = value.toUpperCase();
             }
         }
         else if (parts.indexOf(" ") !== -1) {
@@ -32,7 +32,7 @@ export function parseSearch(search: string) {
             ret["error"] = "Cannot search for \"name\" attribute multiple times";
         }
         else {
-            ret["name"] = parts;
+            ret["name"] = parts.toUpperCase();
         }
     });
     return ret;
