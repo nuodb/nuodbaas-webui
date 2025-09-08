@@ -56,6 +56,10 @@ public class SqlTests extends TestRoutines {
         });
         sleep(5000);
 
+        clickMenu(Resource.projects.name());
+        sleep(500);
+        clickMenu(Resource.databases.name());
+
         // Open SQL Editor
         List<WebElement> menuCells = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
         assertEquals(1, menuCells.size());
