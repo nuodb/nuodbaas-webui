@@ -184,6 +184,7 @@ function Table(props: TableProps) {
                 label: t("button.edit"),
                 onClick: () => {
                     navigate("/ui/resource/edit" + editDeletePath);
+                    return true;
                 }
             });
         }
@@ -191,7 +192,10 @@ function Table(props: TableProps) {
             buttons.push({
                 "data-testid": "delete_button",
                 id: "delete",
-                onClick: () => handleDelete(row, editDeletePath),
+                onClick: () => {
+                    handleDelete(row, editDeletePath);
+                    return true;
+                },
                 label: t("button.delete")
             });
         }
@@ -214,35 +218,41 @@ function Table(props: TableProps) {
                         "data-testid": menu.label,
                         id: menu.label,
                         label: t(menu.label),
-                        onClick: async () => {
+                        onClick: () => {
                             let label = t(menu.label, row);
+                            let promiseConfirm: Promise<any>;
                             if (menu.confirm) {
                                 let confirm = t(menu.confirm, row);
-                                if ("yes" !== await Dialog.confirm(label, confirm, t)) {
-                                    return;
+                                promiseConfirm = Dialog.confirm(label, confirm, t);
+                            }
+                            else {
+                                promiseConfirm = Promise.resolve("no");
+                            }
+                            promiseConfirm.then(result => {
+                                if (result === "yes") {
+                                    if (menu.patch) {
+                                        Rest.patch(path + "/" + row["$ref"], menu.patch)
+                                            .catch((error) => {
+                                                Toast.show("Unable to update " + path + "/" + row["$ref"], error);
+                                            })
+                                    }
+                                    else if (menu.link) {
+                                        const link = replaceVariables(menu.link, row);
+                                        if (!link.startsWith("//") && link.indexOf("://") === -1) {
+                                            navigate(link);
+                                        }
+                                    }
+                                    else if (menu.dialog) {
+                                        CustomDialog({ dialog: menu.dialog, data: row, t });
+                                    }
                                 }
-                            }
-                            if (menu.patch) {
-                                Rest.patch(path + "/" + row["$ref"], menu.patch)
-                                    .catch((error) => {
-                                        Toast.show("Unable to update " + path + "/" + row["$ref"], error);
-                                    })
-                            }
-                            else if (menu.link) {
-                                const link = replaceVariables(menu.link, row);
-                                if (!link.startsWith("//") && link.indexOf("://") === -1) {
-                                    navigate(link);
-                                }
-                            }
-                            else if (menu.dialog) {
-                                CustomDialog({ dialog: menu.dialog, data: row, t });
-                            }
+                            });
+                            return true;
                         }
                     });
                 }
             })
         }
-
         return <TableCell key={row["$ref"]} className="NuoTableMenuCell">
             <Menu popupId={"row_menu_" + row["$ref"]} items={buttons} align="right" />
         </TableCell>;
