@@ -48,6 +48,7 @@ function SqlLogin({setSqlConnection}: SqlLoginProps) {
         </div>
         <div className="NuoFieldContainer">
             <Button data-testid="sql.login.button" type="submit" onClick={async () => {
+                setError("DEBUG click");
                 if (params.organization && params.project && params.database && dbUsername && dbPassword && dbSchema) {
                     const conn = SqlSocket(params.organization, params.project, params.database, dbSchema, dbUsername, dbPassword);
                     const response: SqlResponse = await conn.runCommand("EXECUTE_QUERY", ["SELECT 1 FROM DUAL"]);
