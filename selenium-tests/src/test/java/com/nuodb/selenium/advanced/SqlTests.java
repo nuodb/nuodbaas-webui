@@ -54,11 +54,6 @@ public class SqlTests extends TestRoutines {
             assertEquals(1, statusColumn.size());
             assertEquals("Available", statusColumn.get(0).getText());
         });
-        sleep(5000);
-
-        clickMenu(Resource.projects.name());
-        sleep(500);
-        clickMenu(Resource.databases.name());
 
         // Open SQL Editor
         List<WebElement> menuCells = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
@@ -66,41 +61,17 @@ public class SqlTests extends TestRoutines {
         clickPopupMenu(menuCells.get(0), "button.sql.editor");
 
         // login to SQL database
-        sleep(500);
         replaceInputElementByName("dbUsername", "dba");
-        sleep(500);
         replaceInputElementByName("dbPassword", "passw0rd");
-        sleep(500);
         replaceInputElementByName("dbSchema", "schema");
-        sleep(500);
         waitElement("sql.login.button").click();
-        sleep(500);
         waitRestComplete();
-        for(int i=0; i<10; i++) {
-            if(i == 9) {
-                run(new String[]{"bash","-c","pwd"});
-                run(new String[]{"../bin/kubectl","describe","all","-A"});
-                run(new String[]{"../bin/kubectl","get","all","-A"});
-            }
-            if(hasElement("sql.login.button")) {
-                waitElement("sql.login.button").click();
-                waitRestComplete();
-            }
-            else {
-                break;
-            }
-        }
-        sleep(500);
 
         // create table with row and show output
         waitElement("query").click();
-        sleep(500);
         replaceInputElementByName("sqlQuery", "create table table1 (name VARCHAR(80))");
-        sleep(500);
         waitElement("submitSql").click();
-        sleep(500);
         waitRestComplete();
-        sleep(500);
 
         replaceInputElementByName("sqlQuery", "insert into table1 (name) values ('abc')");
         waitElement("submitSql").click();
