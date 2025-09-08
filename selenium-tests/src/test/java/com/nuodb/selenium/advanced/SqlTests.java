@@ -54,6 +54,7 @@ public class SqlTests extends TestRoutines {
             assertEquals(1, statusColumn.size());
             assertEquals("Available", statusColumn.get(0).getText());
         });
+        sleep(5000);
 
         // Open SQL Editor
         List<WebElement> menuCells = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
@@ -71,6 +72,15 @@ public class SqlTests extends TestRoutines {
         waitElement("sql.login.button").click();
         sleep(500);
         waitRestComplete();
+        for(int i=0; i<10; i++) {
+            if(hasElement("sql.login.button")) {
+                waitElement("sql.login.button").click();
+                waitRestComplete();
+            }
+            else {
+                break;
+            }
+        }
         sleep(500);
 
         // create table with row and show output
