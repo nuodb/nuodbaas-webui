@@ -94,6 +94,10 @@ function ListResource(props: PageProps) {
     }, [path, schema, search]);
 
     useEffect(() => {
+        setSearch("");
+    }, [path, schema]);
+
+    useEffect(() => {
         return () => {
             if (abortController) {
                 abortController.abort();

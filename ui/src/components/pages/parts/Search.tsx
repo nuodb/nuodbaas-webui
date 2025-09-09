@@ -1,6 +1,6 @@
 // (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { withTranslation } from "react-i18next";
 import TextField from "../../controls/TextField"
 import { TempAny } from "../../../utils/types"
@@ -50,6 +50,10 @@ type SearchProps = {
 function Search({ search, setSearch, t }: SearchProps) {
     const [searchField, setSearchField] = useState(search);
     const [error, setError] = useState(undefined);
+
+    useEffect(() => {
+        setSearchField(search);
+    }, [search]);
 
     function handleSearch() {
         const parsed: TempAny = parseSearch(searchField);
