@@ -547,7 +547,11 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
         }} />
         <form>
             <div className="fields">
-                <Tabs currentTab={currentTab} setCurrentTab={setCurrentTab} badges={badges}>
+                <Tabs currentTab={currentTab} setCurrentTab={(tab: number) => {
+                    setCurrentTab(tab);
+                    setFocusField(null);
+                }}
+                    badges={badges}>
                     {sectionFormParameters.map(section => {
                         return showSectionFields(section);
                     })}

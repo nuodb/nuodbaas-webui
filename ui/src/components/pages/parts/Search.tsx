@@ -1,6 +1,6 @@
 // (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { withTranslation } from "react-i18next";
 import TextField from "../../controls/TextField"
 import { TempAny } from "../../../utils/types"
@@ -21,8 +21,11 @@ export function parseSearch(search: string) {
             else if (key in ret) {
                 ret["error"] = "Key \"" + key + "\" can only be specified once.";
             }
+            else if (key === "name"){
+                ret[key] = value.toLowerCase();
+            }
             else {
-                ret[key] = value;
+                ret[key] = value; //TODO agr22 Control plane does case sensitive search for labels - keeping this for now.
             }
         }
         else if (parts.indexOf(" ") !== -1) {
@@ -32,7 +35,7 @@ export function parseSearch(search: string) {
             ret["error"] = "Cannot search for \"name\" attribute multiple times";
         }
         else {
-            ret["name"] = parts;
+            ret["name"] = parts.toLowerCase();
         }
     });
     return ret;
@@ -47,6 +50,10 @@ type SearchProps = {
 function Search({ search, setSearch, t }: SearchProps) {
     const [searchField, setSearchField] = useState(search);
     const [error, setError] = useState(undefined);
+
+    useEffect(() => {
+        setSearchField(search);
+    }, [search]);
 
     function handleSearch() {
         const parsed: TempAny = parseSearch(searchField);
