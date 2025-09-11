@@ -61,6 +61,7 @@ interface PopupMenuProps extends MenuProps {
 
 type MenuItemsProps = {
     items: MenuItemProps[];
+    setItems?: (items: MenuItemProps[]) => void;
     draggable?: boolean;
     selected?: string;
     clearAnchor: () => void;
@@ -69,12 +70,17 @@ type MenuItemsProps = {
     dndStart: (e: any) => void;
 };
 
-function MenuItems({ items, draggable, selected, clearAnchor, dndDrop, dndOver, dndStart }: MenuItemsProps) {
+function MenuItems({ items, setItems, draggable, selected, clearAnchor, dndDrop, dndOver, dndStart }: MenuItemsProps) {
     let refs = items.map(item => React.createRef<HTMLDivElement | null>());
 
     useEffect(() => {
         if (items.length > 0) {
-            refs[0].current?.focus();
+            if (items[0].id !== "name") {
+                refs[0].current?.focus();
+            }
+            else if (items.length > 1) {
+                refs[1].current?.focus();
+            }
         }
     }, []);
 
@@ -82,44 +88,71 @@ function MenuItems({ items, draggable, selected, clearAnchor, dndDrop, dndOver, 
         id={item.id}
         data-testid={item["data-testid"]}
         ref={refs[index]}
-        draggable={draggable}
-        onDrop={dndDrop}
+        draggable={draggable && item.id !== "name"}
+        onDrop={item.id === "name" ? undefined : dndDrop}
         onDragOver={dndOver}
         onDragStart={dndStart}
         key={item.id}
         className={"NuoMenuPopupItem" + (item.id === selected ? " NuoMenuSelected" : "")}
-        tabIndex={0}
+        tabIndex={item.id === "name" ? -1 : 0}
         onClick={(e) => {
             e.stopPropagation();
             if (item.onClick) {
-                clearAnchor();
-                item.onClick();
+                if (item.onClick()) {
+                    clearAnchor();
+                }
 
             }
         }}
         onKeyDown={(e) => {
             if (e.key === "Enter") {
-                e.preventDefault();
-                e.stopPropagation();
                 if (item.onClick) {
-                    clearAnchor();
-                    item.onClick();
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (item.onClick()) {
+                        clearAnchor();
+                    }
                 }
             }
             else if (e.key === "ArrowDown" && index + 1 < items.length) {
+                if (index === 0 && items[0].id === "name") {
+                    return;
+                }
+                if (e.metaKey && setItems) {
+                    let newItems = [...items];
+                    newItems[index] = items[index + 1];
+                    newItems[index + 1] = items[index];
+                    setItems(newItems);
+                }
+                else {
                 refs[index + 1].current?.focus();
             }
+            }
             else if (e.key === "ArrowUp" && index > 0) {
-                refs[index - 1].current?.focus();
+                if (index === 1 && items[0].id === "name") {
+                    return;
+                }
+                if (e.metaKey && setItems) {
+                    let newItems = [...items];
+                    newItems[index] = items[index - 1];
+                    newItems[index - 1] = items[index];
+                    setItems(newItems);
+                }
+                else {
+                    refs[index - 1].current?.focus();
+                }
             }
             else if (e.key === "Tab" && (index === 0 && e.shiftKey || index + 1 === items.length && !e.shiftKey)) {
                 e.preventDefault();
                 e.stopPropagation();
             }
+            else if (item.onKeyDown) {
+                item.onKeyDown(e);
+            }
         }}
     >
         {item.label}
-        {draggable === true && <DragHandleIcon />}
+        {draggable === true && (index !== 0 || items[0].id !== "name") && <DragHandleIcon />}
     </div>);
 }
 
@@ -213,7 +246,16 @@ export function PopupMenu(props: PopupMenuProps) {
     }
 
     return <div style={{ position: "absolute" }}>
-        <div id="NuoMenuPopup" data-testid="menu-popup" className={"NuoMenuPopup " + (props.align === "right" ? " NuoAlignRight" : " NuoAlignLeft")}
+        <div
+            id="NuoMenuPopup"
+            data-testid="menu-popup"
+            className={"NuoMenuPopup " + (props.align === "right" ? " NuoAlignRight" : " NuoAlignLeft")}
+            onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                    event.preventDefault();
+                    props.clearAnchor();
+                }
+            }}
             style={{
                 maxHeight: String(window.innerHeight - anchorRect.y - anchorRect.height - 5) + "px",
                 top: anchorRect.height,
@@ -225,6 +267,7 @@ export function PopupMenu(props: PopupMenuProps) {
             }}>
             <MenuItems
                 items={props.items}
+                setItems={props.setItems}
                 selected={props.selected}
                 draggable={props.draggable}
                 clearAnchor={props.clearAnchor}

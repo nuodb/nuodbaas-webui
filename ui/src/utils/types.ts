@@ -47,7 +47,8 @@ export type MenuItemProps = {
     id: string,
     label: ReactNode,
     selected?: boolean,
-    onClick?: () => void
+    onClick?: () => boolean
+    onKeyDown?: (event: React.KeyboardEvent<HTMLDivElement>) => void
 }
 
 export type MenuProps = {
