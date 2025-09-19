@@ -8,7 +8,6 @@ import TextField from '../../controls/TextField';
 import Button from '../../controls/Button';
 import SqlResultsRender from './SqlResultsRender';
 import Toast from '../../controls/Toast';
-import { Rest } from '../parts/Rest';
 
 type SqlQueryTabProps = {
     sqlConnection: SqlType;

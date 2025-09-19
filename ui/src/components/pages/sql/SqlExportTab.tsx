@@ -240,31 +240,25 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
 
     return <><form>
         <div className="NuoColumn">
-            <div className="NuoRow">
-                <div className="NuoColumnFixed NuoFieldContainer NuoPadding10">
-                    <label>
-                        <input type="checkbox" checked={exportOptions.includeDdl} onChange={() => {
-                            setExportOptions({ ...exportOptions, includeDdl: !exportOptions.includeDdl });
-                        }} />
-                        Include DDL
-                    </label>
-                </div>
-                <div className="NuoColumnFixed NuoFieldContainer NuoPadding10">
-                    <label>
-                        <input type="checkbox" checked={exportOptions.includeData} onChange={() => {
-                            setExportOptions({ ...exportOptions, includeData: !exportOptions.includeData });
-                        }} />
-                        Include Data
-                    </label>
-                </div>
-                <div className="NuoColumnFixed NuoFieldContainer NuoPadding10">
-                    <label>
-                        <input type="checkbox" checked={exportOptions.includeDrop} onChange={() => {
-                            setExportOptions({ ...exportOptions, includeDrop: !exportOptions.includeDrop });
-                        }} />
-                        Include Drop Statements
-                    </label>
-                </div>
+            <div className="NuoHorizontalCheckboxes">
+                <label>
+                    <input type="checkbox" checked={exportOptions.includeDdl} onChange={() => {
+                        setExportOptions({ ...exportOptions, includeDdl: !exportOptions.includeDdl });
+                    }} />
+                    Include DDL
+                </label>
+                <label>
+                    <input type="checkbox" checked={exportOptions.includeData} onChange={() => {
+                        setExportOptions({ ...exportOptions, includeData: !exportOptions.includeData });
+                    }} />
+                    Include Data
+                </label>
+                <label>
+                    <input type="checkbox" checked={exportOptions.includeDrop} onChange={() => {
+                        setExportOptions({ ...exportOptions, includeDrop: !exportOptions.includeDrop });
+                    }} />
+                    Include Drop Statements
+                </label>
                 <div className="NuoColumn">
                 </div>
             </div>
