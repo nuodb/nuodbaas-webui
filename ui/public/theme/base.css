@@ -1002,3 +1002,7 @@ label.NuoUpload:hover {
 .NuoPadding10 {
     padding: 10px;
 }
+label>input[type="checkbox"] {
+    margin-left: 10px;
+    margin-right: 10px;
+}

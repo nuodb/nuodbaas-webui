@@ -246,7 +246,7 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
                         <input type="checkbox" checked={exportOptions.includeDdl} onChange={() => {
                             setExportOptions({ ...exportOptions, includeDdl: !exportOptions.includeDdl });
                         }} />
-                        includeDdl
+                        Include DDL
                     </label>
                 </div>
                 <div className="NuoColumnFixed NuoFieldContainer NuoPadding10">
@@ -254,7 +254,7 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
                         <input type="checkbox" checked={exportOptions.includeData} onChange={() => {
                             setExportOptions({ ...exportOptions, includeData: !exportOptions.includeData });
                         }} />
-                        includeData
+                        Include Data
                     </label>
                 </div>
                 <div className="NuoColumnFixed NuoFieldContainer NuoPadding10">
@@ -262,7 +262,7 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
                         <input type="checkbox" checked={exportOptions.includeDrop} onChange={() => {
                             setExportOptions({ ...exportOptions, includeDrop: !exportOptions.includeDrop });
                         }} />
-                        includeDrop
+                        Include Drop Statements
                     </label>
                 </div>
                 <div className="NuoColumn">
@@ -288,7 +288,7 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
             }}/>
             </div>
             <div className="NuoFieldContainer">
-                <TextField id="batchSize" label="batch size" value={String(exportOptions.batchSize || "")} onChange={(event) => {
+                <TextField id="batchSize" label="batch size" value={String(exportOptions.batchSize || "500")} onChange={(event) => {
                 if(event.currentTarget.value === "") {
                     setExportOptions({...exportOptions, batchSize: undefined});
                 }
@@ -301,7 +301,7 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
             }}/>
             </div>
             <div className="NuoFieldContainer">
-                <TextField id="exportLimit" label="export limit per table" value={String(exportOptions.exportLimit || "")} onChange={(event) => {
+                <TextField id="exportLimit" label="export limit per table" value={String(exportOptions.exportLimit || "0")} onChange={(event) => {
                 if(event.currentTarget.value === "") {
                     setExportOptions({...exportOptions, exportLimit: undefined});
                 }
