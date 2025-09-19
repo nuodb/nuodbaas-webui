@@ -18,7 +18,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SqlTests extends TestRoutines {
-    public static void run(String[] args) {
+    public static final String KUBECTL_BIN = "../bin/kubectl";
+    public static final String DB_USERNAME = "dba";
+    public static final String DB_PASSWORD = "passw0rd";
+    public static final String DB_SCHEMA = "schema";
+
+    public static void run(String ...args) {
         try {
             Process process = Runtime.getRuntime().exec(args);
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -48,9 +53,9 @@ public class SqlTests extends TestRoutines {
         final AtomicInteger count = new AtomicInteger(0);
         retry(180, 1000, ()->{
             if(count.incrementAndGet() == 179) {
-                run(new String[]{"bash","-c","pwd"});
-                run(new String[]{"../bin/kubectl","describe","all","-A"});
-                run(new String[]{"../bin/kubectl","get","all","-A"});
+                run("bash", "-c", "pwd");
+                run(KUBECTL_BIN, "describe", "all", "-A");
+                run(KUBECTL_BIN, "get", "all", "-A");
             }
             List<WebElement> statusColumn = waitTableElements("list_resource__table", "name", databaseName, "state");
             assertEquals(1, statusColumn.size());
@@ -63,9 +68,9 @@ public class SqlTests extends TestRoutines {
         clickPopupMenu(menuCells.get(0), "button.sql.editor");
 
         // login to SQL database
-        replaceInputElementByName("dbUsername", "dba");
-        replaceInputElementByName("dbPassword", "passw0rd");
-        replaceInputElementByName("dbSchema", "schema");
+        replaceInputElementByName("dbUsername", DB_USERNAME);
+        replaceInputElementByName("dbPassword", DB_PASSWORD);
+        replaceInputElementByName("dbSchema", DB_SCHEMA);
         waitElement("sql.login.button").click();
         waitRestComplete();
 
