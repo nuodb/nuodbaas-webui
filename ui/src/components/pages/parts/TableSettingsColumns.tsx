@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import { withTranslation } from "react-i18next";
 import { MenuItemProps, TempAny } from "../../../utils/types";
@@ -60,9 +60,26 @@ function TableSettingsColumns(props: TempAny) {
         return {
             id: column.id,
             selected: column.selected,
-            label: <div key={column.id} className="NuoTableSettingsItem">
-                <input type="checkbox" id={column.id} checked={column.selected} onChange={() => handleSelection(index)} />
-                <label htmlFor={column.id} onClick={() => handleSelection(index)}>{t("field.label." + column.id, column.id)}</label>
+            onClick: () => {
+                handleSelection(index);
+                return false;
+            },
+            onKeyDown: (event: KeyboardEvent) => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    handleSelection(index);
+                }
+            },
+            label: <div
+                key={column.id}
+                className="NuoTableSettingsItem"
+                onClick={() => {
+                    handleSelection(index);
+                    return false;
+                }}
+            >
+                <input tabIndex={-1} type="checkbox" id={column.id} checked={column.selected} readOnly={true} disabled={column.id === "name"} />
+                <label htmlFor={column.id}>{t("field.label." + column.id, column.id)}</label>
             </div >
         }
     });

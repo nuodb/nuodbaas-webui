@@ -13,3 +13,4 @@
 \./bin/
 \./tmp/
 \./ui\/build\/
+\./nuodb.lic
