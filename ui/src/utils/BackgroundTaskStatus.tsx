@@ -9,14 +9,14 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CircularProgressWithLabel from "../components/controls/CircularProgressWithLabel";
 import Button from "../components/controls/Button";
 
-type BackgroundTasksStatusProps = {
+type BackgroundTaskStatusProps = {
     task: BackgroundTaskType;
     tasks: BackgroundTaskType[];
     setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>;
     abortController?: AbortController;
 };
 
-export default function BackgroundTasksStatus({ task, tasks, setTasks, abortController }: BackgroundTasksStatusProps) {
+export function BackgroundTaskStatusIcon({ task }: { task: BackgroundTaskType }) {
     let statusIcon = null;
     if (task.status === "not_started") {
         statusIcon = <HourglassEmptyIcon />;
@@ -38,25 +38,34 @@ export default function BackgroundTasksStatus({ task, tasks, setTasks, abortCont
             statusIcon = <CircularProgress variant="indeterminate" size="30px" />;
         }
     }
+    return statusIcon;
+}
+
+export function BackgroundTaskStatusButton({ task, tasks, setTasks, abortController }: BackgroundTaskStatusProps) {
+    return <Button variant="text" onClick={() => {
+        if (task.status === "in_progress") {
+            abortController?.abort();
+        }
+        else {
+            const newTasks = tasks.filter((t: BackgroundTaskType) => t.id != task.id);
+            setTasks(newTasks);
+        }
+    }}>
+        {(task.status === "complete" || task.status === "canceled" || task.status === "error") && "Dismiss"}
+        {task.status === "in_progress" && "Cancel"}
+        {task.status === "not_started" && "Cancel"}
+    </Button>
+
+}
+
+export default function BackgroundTaskStatus({ task, tasks, setTasks, abortController }: BackgroundTaskStatusProps) {
 
     if (!abortController && task.status === "in_progress") {
-        return <div className="NuoRow">{statusIcon}</div>
+        return <div className="NuoRow"><BackgroundTaskStatusIcon task={task} /></div>
     }
 
     return <div className="NuoRow">
-        {statusIcon}
-        <Button variant="text" onClick={() => {
-            if (task.status === "in_progress") {
-                abortController?.abort();
-            }
-            else {
-                const newTasks = tasks.filter((t: BackgroundTaskType) => t.id != task.id);
-                setTasks(newTasks);
-            }
-        }}>
-            {(task.status === "complete" || task.status === "canceled" || task.status === "error") && "Dismiss"}
-            {task.status === "in_progress" && "Cancel"}
-            {task.status === "not_started" && "Cancel"}
-        </Button>
+        <BackgroundTaskStatusIcon task={task} />
+        <BackgroundTaskStatusButton task={task} tasks={tasks} setTasks={setTasks} abortController={abortController} />
     </div>;
 }

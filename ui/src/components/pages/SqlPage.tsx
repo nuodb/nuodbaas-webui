@@ -1,6 +1,6 @@
 // (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from "react-router"
 import { MenuItemProps, PageProps } from "../../utils/types";
 import PageLayout from "./parts/PageLayout";
@@ -17,6 +17,7 @@ import SqlQueryTab from './sql/SqlQueryTab';
 import { SqlType } from '../../utils/SqlSocket';
 import ComboBox from '../controls/ComboBox';
 import SqlImportTab from './sql/SqlImportTab';
+import SqlExportTab from './sql/SqlExportTab';
 import { BackgroundTaskType } from '../../utils/BackgroundTasks';
 
 interface SqlTabsProps {
@@ -39,6 +40,7 @@ function SqlTabs({ dbTable, sqlConnection, tasks, setTasks }: SqlTabsProps) {
     }
     tabs.push(<Tab id="query" label={t("form.sqleditor.label.tab.query")}>{tabIndex === tabs.length && <SqlQueryTab sqlConnection={sqlConnection} dbTable={dbTable} />}</Tab>);
     tabs.push(<Tab id="import" label={t("form.sqleditor.label.tab.import")}>{tabIndex === tabs.length && <SqlImportTab tasks={tasks} setTasks={setTasks} sqlConnection={sqlConnection} dbTable={dbTable} />}</Tab>);
+    tabs.push(<Tab id="export" label={t("form.sqleditor.label.tab.export")}>{tabIndex === tabs.length && <SqlExportTab tasks={tasks} setTasks={setTasks} sqlConnection={sqlConnection} dbTable={dbTable} />}</Tab>);
     return <Tabs currentTab={tabIndex} setCurrentTab={(tabIndex) => setTabIndex(tabIndex)}>{tabs}</Tabs>
 }
 
@@ -54,6 +56,11 @@ function SqlPage(props: PageProps) {
             flexWrap: 'nowrap'
         }
     });
+
+
+    useEffect(() => {
+        loadTables(true);
+    }, []);
 
     async function loadTables(useCache: boolean): Promise<MenuItemProps[]> {
         if (!sqlConnection) {

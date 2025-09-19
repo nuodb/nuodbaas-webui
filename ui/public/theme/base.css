@@ -824,6 +824,7 @@ button:focus {
     bottom: 70%;
     left: 50%;
     right: 50%;
+    z-index: 600;
 }
 
 .NuoTabs>ul {
@@ -997,4 +998,23 @@ label.NuoUpload:hover {
     z-index: 500;
     box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
     padding: 5px;
+    background-color: white;
+}
+.NuoPadding10 {
+    padding: 10px;
+}
+.NuoHorizontalCheckboxes {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+    padding: 10px 0;
+}
+
+.NuoHorizontalCheckboxes>label {
+    padding-right: 10px;
+}
+
+.NuoHorizontalCheckboxes>label>input[type="checkbox"] {
+    margin: 0 10px;
 }

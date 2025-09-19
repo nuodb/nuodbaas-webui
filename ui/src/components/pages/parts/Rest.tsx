@@ -44,7 +44,7 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
         }
 
         instance.setState((prevState: State) => {
-            return { pendingRequests: prevState.pendingRequests - 1 };
+            return { pendingRequests: prevState.pendingRequests > 0 ? prevState.pendingRequests - 1 : 0 };
         });
     }
 
