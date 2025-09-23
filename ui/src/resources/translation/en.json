@@ -25,7 +25,13 @@
         "logout": "Logout",
         "add": "Add",
         "copy": "Copy",
-        "copied": "Copied!"
+        "copied": "Copied!",
+        "dismiss": "Dismiss",
+        "sql": {
+            "addToQueue": "Add to Queue",
+            "addAllToQueue": "Add all to Queue",
+            "export": "Export"
+        }
     },
     "hint": {
         "open.settings": "Open Settings"
@@ -118,7 +124,16 @@
             "importSource.backupHandle": "Backup handle",
             "importSource.backupPlugin": "Backup plugin",
             "suspended": "Suspended",
-            "roles": "Roles"
+            "roles": "Roles",
+            "sql": {
+                "select.files": "Select SQL Files",
+                "filename": "Filename",
+                "success": "Success",
+                "failures": "Failures",
+                "updates": "Updates",
+                "error": "Error",
+                "status": "Status"
+            }
         },
         "required": "Required",
         "crontab": {
@@ -205,7 +220,18 @@
                     "query": "Query",
                     "import": "Import",
                     "export": "Export"
-                }
+                },
+                "tasksComplete": "{{completed}} of {{total}} Tasks complete",
+                "exporting": "Exporting {{dbSchema}}",
+                "tableToExport": "Table to export",
+                "renameTable": "optionally rename exported Table",
+                "renameSchema": "optionally rename Schema",
+                "batchSize": "batch size",
+                "exportLimit": "export limit per table",
+                "includeDdl": "Include DDL",
+                "includeData": "Include Data",
+                "includeDrop": "Include Drop Statements",
+                "allTables": "All Tables"
             },
             "button": {
                 "login": "Login",

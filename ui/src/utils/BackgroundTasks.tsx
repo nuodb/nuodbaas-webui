@@ -1,6 +1,7 @@
 // (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { ReactNode } from "react";
+import { withTranslation } from "react-i18next";
 
 export type StatusType = "not_started" | "in_progress" | "complete" | "canceled" | "error";
 export type BackgroundTaskType = {
@@ -23,6 +24,7 @@ export type BackgroundTasksContextType = {
 type BackgroundTasksProps = {
     tasks: BackgroundTaskType[];
     setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>;
+    t: any;
 };
 
 export function isTaskFinished(task: BackgroundTaskType) {
@@ -109,12 +111,16 @@ export function updateOrAddTask(tasks: BackgroundTaskType[], setTasks: React.Dis
     });
 }
 
-export default function BackgroundTasks({ tasks, setTasks }: BackgroundTasksProps) {
+function BackgroundTasks({ tasks, setTasks, t }: BackgroundTasksProps) {
         if (tasks.length === 0) {
             return null;
         }
-    const summary = String(tasks.filter(task => task.status !== "not_started" && task.status !== "in_progress").length) + " of " + String(tasks.length) + " Tasks complete";
+    const completed = String(tasks.filter(task => task.status !== "not_started" && task.status !== "in_progress").length);
+    const total = String(tasks.length);
+    const summary = t("form.sqleditor.label.tasksComplete", { completed, total });
         return <details className="NuoBackgroundTasksStatus"><summary>{summary}</summary>
             {tasks.map(task => <div className="NuoRow" key={task.id}>{task.showMinimal(task, tasks, setTasks)}</div>)}
         </details>;
 }
+
+export default withTranslation()(BackgroundTasks);

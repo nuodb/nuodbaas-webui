@@ -8,6 +8,7 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import CircularProgress from "@mui/material/CircularProgress";
 import CircularProgressWithLabel from "../components/controls/CircularProgressWithLabel";
 import Button from "../components/controls/Button";
+import { t } from "i18next";
 
 type BackgroundTaskStatusProps = {
     task: BackgroundTaskType;
@@ -51,9 +52,9 @@ export function BackgroundTaskStatusButton({ task, tasks, setTasks, abortControl
             setTasks(newTasks);
         }
     }}>
-        {(task.status === "complete" || task.status === "canceled" || task.status === "error") && "Dismiss"}
-        {task.status === "in_progress" && "Cancel"}
-        {task.status === "not_started" && "Cancel"}
+        {(task.status === "complete" || task.status === "canceled" || task.status === "error") && t("button.dismiss")}
+        {task.status === "in_progress" && t("button.cancel")}
+        {task.status === "not_started" && t("button.cancel")}
     </Button>
 
 }

@@ -24,7 +24,13 @@
         "logout": "Ausloggen",
         "add": "Hinzufügen",
         "copy": "Kopieren",
-        "copied": "Kopiert!"
+        "copied": "Kopiert!",
+        "dismiss": "Schließen",
+        "sql": {
+            "addToQueue": "Zur Warteschlange hinzufügen",
+            "addAllToQueue": "Alle zur Warteschlange hinzufügen",
+            "export": "Exportieren"
+        }
     },
     "hint": {
         "open.settings": "Einstellungen öffnen"
@@ -117,7 +123,16 @@
             "importSource.backupHandle": "Sicherung handle",
             "importSource.backupPlugin": "Sicherung plugin",
             "suspended": "Ausgesetzt",
-            "roles": "Rollen"
+            "roles": "Rollen",
+            "sql": {
+                "select.files": "SQL Dateien auswählen",
+                "filename": "Datei",
+                "success": "Erfolgreich",
+                "failures": "Fehlgeschlagen",
+                "updates": "Aktuallisierungen",
+                "error": "Fehler",
+                "status": "Status"
+            }
         },
         "required": "Erforderlich",
         "crontab": {
@@ -204,7 +219,18 @@
                     "query": "Abfrage",
                     "import": "Importieren",
                     "export": "Exportieren"
-                }
+                },
+                "tasksComplete": "{{completed}} von {{total}} Aufträgen abgeschlossen",
+                "exporting": "{{dbSchema}} exportieren",
+                "tableToExport": "Tabelle zu exportieren",
+                "renameTable": "optional die exportierte Tabelle umbenennen",
+                "renameSchema": "optional das Schema umbenennen",
+                "batchSize": "batch Größe",
+                "exportLimit": "maximale exportierte Reihen pro Tabelle",
+                "includeDdl": "DDL exportieren",
+                "includeData": "Daten exportieren",
+                "includeDrop": "'Drop' Anweisungen beinhalten",
+                "allTables": "Alle Tabellen"
             },
             "button": {
                 "login": "Login",

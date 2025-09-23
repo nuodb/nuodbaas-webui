@@ -4,6 +4,7 @@ import React, { ErrorInfo, ReactNode } from "react";
 import Button from "./controls/Button";
 import Stacktrace from 'stacktrace-js';
 import BuildNumber from "./pages/parts/BuildNumber";
+import { t } from "i18next";
 
 interface IProps {
     children?: ReactNode
@@ -47,7 +48,7 @@ export default class GlobalErrorBoundary extends React.Component<IProps, IState>
                     <br />
                     <Button onClick={() => {
                         window.location.href = "/ui";
-                    }}>Dismiss</Button>
+                    }}>{t("button.dismiss")}</Button>
                 </div>
             );
         }

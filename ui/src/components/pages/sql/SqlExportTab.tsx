@@ -105,7 +105,7 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
                     const newTasks = tasks.filter((t: BackgroundTaskType) => t.id != task.id);
                     setTasks(newTasks);
                 }}>
-                    {isTaskFinished(task) && "Dismiss" || "Cancel"}
+                    {isTaskFinished(task) && t("button.dismiss") || t("button.cancel")}
                 </Button>
                 {!isTaskFinished(task) && <Button onClick={() => {
                     setForegroundTaskId(undefined);
@@ -171,9 +171,9 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
         let progressAbortController = new AbortController();
         let newTask: BackgroundTaskType = {
             id: TASK_ID_PREFIX + generateRandom(),
-            label: "Exporting " + sqlConnection.getOrgProjDbSchemaUrl(),
+            label: t("form.sqleditor.label.exporting", { dbSchema: sqlConnection.getOrgProjDbSchemaUrl() }),
             status: "not_started",
-            description: "Exporting " + sqlConnection.getOrgProjDbSchemaUrl(),
+            description: t("form.sqleditor.label.exporting", { dbSchema: sqlConnection.getOrgProjDbSchemaUrl() }),
             data: { downloaded: 0, progressAbortController: progressAbortController },
             execute: async (task: BackgroundTaskType) => {
                 const response = await fetch(url, {
@@ -245,44 +245,44 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
                     <input type="checkbox" checked={exportOptions.includeDdl} onChange={() => {
                         setExportOptions({ ...exportOptions, includeDdl: !exportOptions.includeDdl });
                     }} />
-                    Include DDL
+                    {t("form.sqleditor.label.includeDdl")}
                 </label>
                 <label>
                     <input type="checkbox" checked={exportOptions.includeData} onChange={() => {
                         setExportOptions({ ...exportOptions, includeData: !exportOptions.includeData });
                     }} />
-                    Include Data
+                    {t("form.sqleditor.label.includeData")}
                 </label>
                 <label>
                     <input type="checkbox" checked={exportOptions.includeDrop} onChange={() => {
                         setExportOptions({ ...exportOptions, includeDrop: !exportOptions.includeDrop });
                     }} />
-                    Include Drop Statements
+                    {t("form.sqleditor.label.includeDrop")}
                 </label>
                 <div className="NuoColumn">
                 </div>
             </div>
             <div className="NuoFieldContainer">
-                <Select id="table" label="Table to export" value={exportOptions.table || ALL_TABLES} onChange={(event) => {
+                <Select id="table" label={t("form.sqleditor.label.tableToExport")} value={exportOptions.table || ALL_TABLES} onChange={(event) => {
                     const value = event.target.value === ALL_TABLES ? undefined : event.target.value;
                     setExportOptions({ ...exportOptions, table: value, outputTable: value ? "" : undefined });
                 }}>
-                    <SelectOption value="___all_tables___">All Tables</SelectOption>
+                    <SelectOption value="___all_tables___">{t("form.sqleditor.label.allTables")}</SelectOption>
                     {tables.map(table => <SelectOption value={table} key={table}>{table}</SelectOption>)}
                 </Select>
             </div>
             {exportOptions.table && <div className="NuoFieldContainer">
-                <TextField id="outputTable" label="optionally rename exported Table" value={exportOptions.outputTable || ""} onChange={(event) => {
+                <TextField id="outputTable" label={t("form.sqleditor.label.renameTable")} value={exportOptions.outputTable || ""} onChange={(event) => {
                     setExportOptions({ ...exportOptions, outputTable: event.currentTarget.value });
                 }} />
             </div>}
             <div className="NuoFieldContainer">
-                <TextField id="outputSchema" label="optionally rename Schema" value={exportOptions.outputSchema || ""} onChange={(event) => {
+                <TextField id="outputSchema" label={t("form.sqleditor.label.renameSchema")} value={exportOptions.outputSchema || ""} onChange={(event) => {
                 setExportOptions({...exportOptions, outputSchema: event.currentTarget.value});
             }}/>
             </div>
             <div className="NuoFieldContainer">
-                <TextField id="batchSize" label="batch size" value={String(exportOptions.batchSize || "500")} onChange={(event) => {
+                <TextField id="batchSize" label={t("form.sqleditor.label.batchSize")} value={String(exportOptions.batchSize || "500")} onChange={(event) => {
                 if(event.currentTarget.value === "") {
                     setExportOptions({...exportOptions, batchSize: undefined});
                 }
@@ -295,7 +295,7 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
             }}/>
             </div>
             <div className="NuoFieldContainer">
-                <TextField id="exportLimit" label="export limit per table" value={String(exportOptions.exportLimit || "0")} onChange={(event) => {
+                <TextField id="exportLimit" label={t("form.sqleditor.label.exportLimit")} value={String(exportOptions.exportLimit || "0")} onChange={(event) => {
                 if(event.currentTarget.value === "") {
                     setExportOptions({...exportOptions, exportLimit: undefined});
                 }
@@ -312,7 +312,7 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
                 {(window as any).showOpenFilePicker && <button data-testid="perform.export" onClick={async (event) => {
                     event.preventDefault();
                     await exportFile(sqlConnection, exportOptions);
-                }}>Export</button>}
+                }}>{t("button.sql.export")}</button>}
             </div>
         </div>
         {renderForegroundTask()}
