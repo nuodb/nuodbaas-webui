@@ -62,7 +62,9 @@
         "label": {
             "allowCrossOrganizationAccess": "Allow Cross-Organization Access",
             "password": "Password",
+            "dbaPassword": "DBA Password",
             "organization": "Organization",
+            "username": "Username",
             "accessRule": "Access Rule",
             "accessRule.allow": "Allow",
             "accessRule.deny": "Deny",
@@ -88,6 +90,7 @@
             "status.shutdown": "Shutdown",
             "status.message": "Message",
             "status.state": "State",
+            "maintenance": "Maintenance",
             "maintenance.expiresAtTime": "Expires at time",
             "maintenance.expiresIn": "Expires in",
             "properties.propagatePolicyLabels": "Propagate policy labels",
@@ -108,8 +111,16 @@
             "retention.settings.relativeToLast": "Relative to last",
             "retention.settings.promoteLatestToHourly": "Promote latest to hourly",
             "retention.settings.promoteLatestToDaily": "Promote latest to daily",
-            "retention.settings.promoteLatestToMonthly": "Promote latest to monthly"
+            "retention.settings.promoteLatestToMonthly": "Promote latest to monthly",
+            "restoreFrom": "Restore from",
+            "restoreFrom.backup": "Backup",
+            "importSource": "Import source",
+            "importSource.backupHandle": "Backup handle",
+            "importSource.backupPlugin": "Backup plugin",
+            "suspended": "Suspended",
+            "roles": "Roles"
         },
+        "required": "Required",
         "crontab": {
             "minute": "Minute",
             "hour": "Hour",
@@ -144,6 +155,14 @@
                     "November": "November",
                     "December": "December"
                 }
+            },
+            "frequency": {
+                "@hourly": "Hourly",
+                "@daily": "Daily",
+                "@weekly": "Weekly",
+                "@monthly": "Monthly",
+                "@yearly": "Yearly",
+                "other": "Custom"
             }
         },
         "map": {
@@ -173,6 +192,7 @@
             "label": {
                 "dbUsername": "DB Username",
                 "dbPassword": "DB Password",
+                "dbaPassword": "DBA Password",
                 "dbSchema": "DB Schema",
                 "title": "SQL Editor",
                 "allFieldsRequired": "All fields are required",

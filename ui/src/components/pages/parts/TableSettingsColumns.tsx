@@ -75,10 +75,17 @@ function TableSettingsColumns(props: TempAny) {
                 className="NuoTableSettingsItem"
                 onClick={() => {
                     handleSelection(index);
-                    return false;
                 }}
             >
-                <input tabIndex={-1} type="checkbox" id={column.id} checked={column.selected} readOnly={true} disabled={column.id === "name"} />
+                <input
+                    tabIndex={-1}
+                    type="checkbox"
+                    id={column.id}
+                    checked={column.selected}
+                    readOnly={true}
+                    disabled={column.id === "name"}
+                    onChange={() => { handleSelection(index) }}
+                />
                 <label htmlFor={column.id}>{t("field.label." + column.id, column.id)}</label>
             </div >
         }
