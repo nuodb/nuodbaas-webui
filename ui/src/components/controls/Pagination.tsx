@@ -1,5 +1,6 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
+import { JSX } from 'react';
 import { isMaterial } from '../../utils/Customizations';
 import { Pagination as MuiPagination, Stack as MuiStack } from '@mui/material';
 
@@ -45,4 +46,8 @@ export default function Pagination(props: PaginationProps): JSX.Element | null {
             <div className="NuoPaginationItem NuoPaginationItemLast" onClick={() => setPage(count)}>&gt;</div>
         </div>;
     }
+}
+
+export function pageFilter<type>(data: type[], page: number, pageSize: number): type[] {
+    return data?.filter((_, index) => index >= (page - 1) * pageSize && index < page * pageSize);
 }
