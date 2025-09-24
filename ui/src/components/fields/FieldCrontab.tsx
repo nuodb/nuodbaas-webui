@@ -51,12 +51,12 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
                 setValues(v);
             }} onBlur={handleBlur} disabled={readonly}>
                 <SelectOption value="">{t("field.select.selectItem")}</SelectOption>
-                <SelectOption value="@hourly">@hourly</SelectOption>
-                <SelectOption value="@daily">@daily</SelectOption>
-                <SelectOption value="@weekly">@weekly</SelectOption>
-                <SelectOption value="@monthly">@monthly</SelectOption>
-                <SelectOption value="@yearly">@yearly</SelectOption>
-                <SelectOption value="other">Other</SelectOption>
+                <SelectOption value="@hourly">{t("field.enum.frequency.@hourly")}</SelectOption>
+                <SelectOption value="@daily">{t("field.enum.frequency.@daily")}</SelectOption>
+                <SelectOption value="@weekly">{t("field.enum.frequency.@weekly")}</SelectOption>
+                <SelectOption value="@monthly">{t("field.enum.frequency.@monthly")}</SelectOption>
+                <SelectOption value="@yearly">{t("field.enum.frequency.@yearly")}</SelectOption>
+                <SelectOption value="other">{t("field.enum.frequency.other")}</SelectOption>
             </Select>
             {isOther && <div className="NuoCrontabContainer">
                 {["minute", "hour", "dayOfMonth", "month", "weekday"].map((fieldname, index) => (

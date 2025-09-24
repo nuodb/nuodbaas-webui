@@ -1,6 +1,7 @@
 {
     "copyright": "(C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.",
     "button": {
+        "advanced": "Weitere Einstellungen",
         "create": "Erstellen",
         "create.resource": "{{resource}} erstellen",
         "delete": "Löschen",
@@ -17,12 +18,19 @@
         "stop.database": "Datenbank stoppen",
         "show.databases": "Datenbanken anzeigen",
         "show.backups": "Sicherungen anzeigen",
+        "sql.editor": "SQL Editor",
         "settings": "Einstellungen",
         "automation": "Automatisierung",
         "logout": "Ausloggen",
         "add": "Hinzufügen",
         "copy": "Kopieren",
-        "copied": "Kopiert!"
+        "copied": "Kopiert!",
+        "dismiss": "Schließen",
+        "sql": {
+            "addToQueue": "Zur Warteschlange hinzufügen",
+            "addAllToQueue": "Alle zur Warteschlange hinzufügen",
+            "export": "Exportieren"
+        }
     },
     "hint": {
         "open.settings": "Einstellungen öffnen"
@@ -59,12 +67,15 @@
         "label": {
             "allowCrossOrganizationAccess": "Zugriff über Organisationen erlauben",
             "password": "Kennwort",
+            "dbaPassword": "DBA Password",
             "organization": "Organisation",
+            "username": "Username",
             "accessRule": "Zugriffsregeln",
             "accessRule.allow": "Erlauben",
             "accessRule.deny": "Ablehnen",
             "name": "Name",
             "labels": "Etiketten",
+            "search": "suchen, z.B. \"einname\" or \"label=schlüssel=wert,!andererschlüssel name=anderername\"",
             "sla": "SLA",
             "tier": "Tier",
             "properties": "Eigenschaften",
@@ -78,6 +89,13 @@
             "selector.slas": "SLAs",
             "selector.tiers": "Tiers",
             "selector.labels": "Labels",
+            "status.sqlEndpoint": "SQL Endpoint",
+            "status.caPem": "Certificate",
+            "status.ready": "Ready",
+            "status.shutdown": "Shutdown",
+            "status.message": "Message",
+            "status.state": "State",
+            "maintenance": "Maintenance",
             "maintenance.expiresAtTime": "Läuft ab am",
             "maintenance.expiresIn": "Läuft ab in",
             "properties.propagatePolicyLabels": "Richtlinien labels verbreiten",
@@ -98,8 +116,25 @@
             "retention.settings.relativeToLast": "Abhängig von letzter Sicherung",
             "retention.settings.promoteLatestToHourly": "Übernehme letzes zu stündlich",
             "retention.settings.promoteLatestToDaily": "Übernehme letzes zu täglich",
-            "retention.settings.promoteLatestToMonthly": "Übernehme letzes zu monatlich"
+            "retention.settings.promoteLatestToMonthly": "Übernehme letzes zu monatlich",
+            "restoreFrom": "Wiederherstellen von",
+            "restoreFrom.backup": "Sicherung",
+            "importSource": "Importquelle",
+            "importSource.backupHandle": "Sicherung handle",
+            "importSource.backupPlugin": "Sicherung plugin",
+            "suspended": "Ausgesetzt",
+            "roles": "Rollen",
+            "sql": {
+                "select.files": "SQL Dateien auswählen",
+                "filename": "Datei",
+                "success": "Erfolgreich",
+                "failures": "Fehlgeschlagen",
+                "updates": "Aktuallisierungen",
+                "error": "Fehler",
+                "status": "Status"
+            }
         },
+        "required": "Erforderlich",
         "crontab": {
             "minute": "Minute",
             "hour": "Stunde",
@@ -134,6 +169,14 @@
                     "November": "November",
                     "December": "Dezember"
                 }
+            },
+            "frequency": {
+                "@hourly": "Stündlich",
+                "@daily": "Täglich",
+                "@weekly": "Wöchentlich",
+                "@monthly": "Monatlich",
+                "@yearly": "Jährlich",
+                "other": "Benutzer definiert"
             }
         },
         "map": {
@@ -155,7 +198,51 @@
     "form": {
         "settings": {
             "label": {
-                "theme": "Thema"
+                "theme": "Thema",
+                "title": "Einstellungen"
+            }
+        },
+        "sqleditor": {
+            "label": {
+                "dbUsername": "DB Benutzername",
+                "dbPassword": "DB Passwort",
+                "dbaPassword": "DBA Password",
+                "dbSchema": "DB Schema",
+                "title": "SQL Editor",
+                "allFieldsRequired": "Alle felder sind erforderlich",
+                "fieldName": "Feldname",
+                "dataType": "Datentyp",
+                "condition": "Bedingung",
+                "value": "Wert",
+                "tab": {
+                    "browse": "Durchsuchen",
+                    "query": "Abfrage",
+                    "import": "Importieren",
+                    "export": "Exportieren"
+                },
+                "tasksComplete": "{{completed}} von {{total}} Aufträgen abgeschlossen",
+                "exporting": "{{dbSchema}} exportieren",
+                "tableToExport": "Tabelle zu exportieren",
+                "renameTable": "optional die exportierte Tabelle umbenennen",
+                "renameSchema": "optional das Schema umbenennen",
+                "batchSize": "batch Größe",
+                "exportLimit": "maximale exportierte Reihen pro Tabelle",
+                "includeDdl": "DDL exportieren",
+                "includeData": "Daten exportieren",
+                "includeDrop": "'Drop' Anweisungen beinhalten",
+                "allTables": "Alle Tabellen"
+            },
+            "button": {
+                "login": "Login",
+                "executing": "Ausführen...",
+                "submit": "Übermitteln"
+            }
+        },
+        "login": {
+            "label": {
+                "loginWith": "Login mit {{providerDesc}} ",
+                "goBack": "Zurück",
+                "login": "Login"
             }
         }
     },
@@ -190,10 +277,12 @@
         "viewForResource": "{{resources_one}}",
         "editForResource": "{{resources_one}} bearbeiten",
         "newResource": "{{resources_one}} erstellen",
-        "noData": "Keine Daten"
+        "noData": "Keine Daten",
+        "more": "Mehr"
     },
     "section": {
         "title": {
+            "general": "Allgemain",
             "advanced": "Erweiterte Einstellungen",
             "access.deny.rules": "Zugriffsregeln",
             "labels": "Etiketten",

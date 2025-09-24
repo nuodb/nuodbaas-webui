@@ -57,7 +57,7 @@ function SqlImportTab({ sqlConnection, dbTable, tasks, setTasks }: SqlImportTabP
             <label htmlFor="file-upload" className="NuoUpload">
                 <div className="NuoColumn">
                     <CloudUploadIcon/>
-                    Select SQL Files
+                    {t("field.label.sql.select.files")}
                 </div>
             </label>
         </div>
@@ -160,13 +160,13 @@ function SqlImportTab({ sqlConnection, dbTable, tasks, setTasks }: SqlImportTabP
         return <Table>
             <TableHead>
                 <TableRow>
-                    <TableTh>Filename</TableTh>
+                    <TableTh>{t("field.label.sql.filename")}</TableTh>
                     <TableTh></TableTh>
-                    <TableTh>Success</TableTh>
-                    <TableTh>Failures</TableTh>
-                    <TableTh>Updates</TableTh>
-                    <TableTh>Error</TableTh>
-                    <TableTh>Status</TableTh>
+                    <TableTh>{t("field.label.sql.success")}</TableTh>
+                    <TableTh>{t("field.label.sql.failures")}</TableTh>
+                    <TableTh>{t("field.label.sql.updates")}</TableTh>
+                    <TableTh>{t("field.label.sql.error")}</TableTh>
+                    <TableTh>{t("field.label.sql.status")}</TableTh>
                 </TableRow>
             </TableHead>
             <TableBody>
@@ -181,7 +181,7 @@ function SqlImportTab({ sqlConnection, dbTable, tasks, setTasks }: SqlImportTabP
                         <TableCell></TableCell>
                         <TableCell></TableCell>
                         <TableCell></TableCell>
-                        <td><Button onClick={() => { addToQueue([file]); }}>Add to Queue</Button></td>
+                        <td><Button onClick={() => { addToQueue([file]); }}>{t("button.sql.addToQueue")}</Button></td>
                     </TableRow>
                 })}
                 {files.length === 0 ? null : <TableRow>
@@ -191,7 +191,7 @@ function SqlImportTab({ sqlConnection, dbTable, tasks, setTasks }: SqlImportTabP
                     <TableCell></TableCell>
                     <TableCell></TableCell>
                     <TableCell></TableCell>
-                    <td><Button className="NuoButton" onClick={() => { addToQueue(files); }}>Add all to Queue</Button></td>
+                    <td><Button className="NuoButton" onClick={() => { addToQueue(files); }}>{t("button.sql.addAllToQueue")}</Button></td>
                 </TableRow>}
                 {tasks.filter(t => t.id.startsWith(TASK_ID_PREFIX)).map((task) => {
                     return <TableRow key={task.data.file.name}>

@@ -204,7 +204,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                     required
                     data-testid="organization"
                     id="organization"
-                    label="Organization"
+                        label={t("field.label.organization")}
                     value={organization}
                     onChange={(e) => setOrganization(e.target.value)}
                 />
@@ -212,7 +212,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                     required
                     data-testid="username"
                     id="username"
-                    label="Username"
+                        label={t("field.label.username")}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                 />
@@ -221,7 +221,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                     data-testid="password"
                     id="password"
                     type="password"
-                    label="Password"
+                        label={t("field.label.password")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />

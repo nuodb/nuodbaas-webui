@@ -15,7 +15,7 @@ function ErrorPage(props: PageProps) {
             <div>{searchParams.get("msg") || "Unknown Error occurred"}</div>
             <Button onClick={() => {
                 navigate("/ui");
-            }}>Dismiss</Button>
+            }}>{props.t("button.dismiss")}</Button>
         </PageLayout>
     );
 }

@@ -25,7 +25,13 @@
         "logout": "Logout",
         "add": "Add",
         "copy": "Copy",
-        "copied": "Copied!"
+        "copied": "Copied!",
+        "dismiss": "Dismiss",
+        "sql": {
+            "addToQueue": "Add to Queue",
+            "addAllToQueue": "Add all to Queue",
+            "export": "Export"
+        }
     },
     "hint": {
         "open.settings": "Open Settings"
@@ -62,7 +68,9 @@
         "label": {
             "allowCrossOrganizationAccess": "Allow Cross-Organization Access",
             "password": "Password",
+            "dbaPassword": "DBA Password",
             "organization": "Organization",
+            "username": "Username",
             "accessRule": "Access Rule",
             "accessRule.allow": "Allow",
             "accessRule.deny": "Deny",
@@ -88,6 +96,7 @@
             "status.shutdown": "Shutdown",
             "status.message": "Message",
             "status.state": "State",
+            "maintenance": "Maintenance",
             "maintenance.expiresAtTime": "Expires at time",
             "maintenance.expiresIn": "Expires in",
             "properties.propagatePolicyLabels": "Propagate policy labels",
@@ -108,8 +117,25 @@
             "retention.settings.relativeToLast": "Relative to last",
             "retention.settings.promoteLatestToHourly": "Promote latest to hourly",
             "retention.settings.promoteLatestToDaily": "Promote latest to daily",
-            "retention.settings.promoteLatestToMonthly": "Promote latest to monthly"
+            "retention.settings.promoteLatestToMonthly": "Promote latest to monthly",
+            "restoreFrom": "Restore from",
+            "restoreFrom.backup": "Backup",
+            "importSource": "Import source",
+            "importSource.backupHandle": "Backup handle",
+            "importSource.backupPlugin": "Backup plugin",
+            "suspended": "Suspended",
+            "roles": "Roles",
+            "sql": {
+                "select.files": "Select SQL Files",
+                "filename": "Filename",
+                "success": "Success",
+                "failures": "Failures",
+                "updates": "Updates",
+                "error": "Error",
+                "status": "Status"
+            }
         },
+        "required": "Required",
         "crontab": {
             "minute": "Minute",
             "hour": "Hour",
@@ -144,6 +170,14 @@
                     "November": "November",
                     "December": "December"
                 }
+            },
+            "frequency": {
+                "@hourly": "Hourly",
+                "@daily": "Daily",
+                "@weekly": "Weekly",
+                "@monthly": "Monthly",
+                "@yearly": "Yearly",
+                "other": "Custom"
             }
         },
         "map": {
@@ -173,6 +207,7 @@
             "label": {
                 "dbUsername": "DB Username",
                 "dbPassword": "DB Password",
+                "dbaPassword": "DBA Password",
                 "dbSchema": "DB Schema",
                 "title": "SQL Editor",
                 "allFieldsRequired": "All fields are required",
@@ -185,7 +220,18 @@
                     "query": "Query",
                     "import": "Import",
                     "export": "Export"
-                }
+                },
+                "tasksComplete": "{{completed}} of {{total}} Tasks complete",
+                "exporting": "Exporting {{dbSchema}}",
+                "tableToExport": "Table to export",
+                "renameTable": "optionally rename exported Table",
+                "renameSchema": "optionally rename Schema",
+                "batchSize": "batch size",
+                "exportLimit": "export limit per table",
+                "includeDdl": "Include DDL",
+                "includeData": "Include Data",
+                "includeDrop": "Include Drop Statements",
+                "allTables": "All Tables"
             },
             "button": {
                 "login": "Login",
