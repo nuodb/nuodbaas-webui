@@ -19,7 +19,6 @@
         "stop.database": "Stop Database",
         "show.databases": "Show Databases",
         "show.backups": "Show Backups",
-        "sql.editor": "SQL Editor",
         "settings": "Settings",
         "automation": "Automation",
         "logout": "Logout",
@@ -30,7 +29,8 @@
         "sql": {
             "addToQueue": "Add to Queue",
             "addAllToQueue": "Add all to Queue",
-            "export": "Export"
+            "export": "Export",
+            "editor": "SQL Editor"
         }
     },
     "hint": {

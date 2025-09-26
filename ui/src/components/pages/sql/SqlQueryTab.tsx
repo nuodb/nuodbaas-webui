@@ -8,6 +8,7 @@ import TextField from '../../controls/TextField';
 import Button from '../../controls/Button';
 import SqlResultsRender from './SqlResultsRender';
 import Toast from '../../controls/Toast';
+import Pagination, { pageFilter } from '../../controls/Pagination';
 
 type SqlQueryTabProps = {
     sqlConnection: SqlType;
@@ -17,6 +18,8 @@ function SqlQueryTab({ sqlConnection, dbTable }: SqlQueryTabProps) {
     const [results, setResults] = useState<SqlResponse|undefined>(undefined);
     const [sqlQuery, setSqlQuery] = useState("");
     const [executing, setExecuting] = useState(false);
+    const [page, setPage] = useState<number>(1);
+    const pageSize = 100;
 
     useEffect(()=>{
         if (dbTable) {
@@ -27,6 +30,11 @@ function SqlQueryTab({ sqlConnection, dbTable }: SqlQueryTabProps) {
         }
         setResults(undefined);
     }, [dbTable]);
+
+    let pagedResults = results ? { ...results } : undefined;
+    if (pagedResults && pagedResults.rows) {
+        pagedResults.rows = [...pageFilter(pagedResults.rows, page, pageSize)];
+    }
 
     return <><form>
         <div className="NuoRow NuoFieldContainer">
@@ -43,10 +51,16 @@ function SqlQueryTab({ sqlConnection, dbTable }: SqlQueryTabProps) {
                 }
                 setResults(response);
                 setExecuting(false);
+                setPage(1);
             }}>{executing ? t("form.sqleditor.button.executing") : t("form.sqleditor.button.submit")}</Button>
         </div>
     </form>
-    <SqlResultsRender results={results} />
+        <SqlResultsRender results={pagedResults} />
+        {results?.rows && <Pagination
+            count={Math.ceil(results.rows.length / pageSize)}
+            page={page}
+            setPage={setPage}
+        />}
     </>;
 }
 
