@@ -1012,9 +1012,19 @@ label.NuoUpload:hover {
     margin: 0 10px;
 }
 .NuoTableCheckbox {
+    display: flex;
+        flex: 1 1 auto;
+        flex-direction: row;
+    }
+    
+    .NuoTableCheckbox>input,
+    .NuoTableSelectedActions>input {
     margin: 0 16px 0 0;
 }
 
+.NuoTableCheckbox>button {
+    justify-content: left;
+}
 .NuoStickyLeft,
 .NuoStickyRight {
     position: sticky;

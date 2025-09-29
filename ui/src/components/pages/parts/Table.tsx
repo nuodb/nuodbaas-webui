@@ -318,7 +318,8 @@ function Table(props: TableProps) {
     }
 
     function renderTableSelectedActions() {
-        return <TableTh className="NuoStickyLeft" key="__all_selected__" colSpan={selected.size === 0 ? 1 : (visibleColumns.length + 2)}>
+        const firstHeader = visibleColumns.length > 0 ? visibleColumns[0] : undefined;
+        return <TableTh data-testid={firstHeader?.id} className="NuoStickyLeft" key="__all_selected__" colSpan={selected.size === 0 ? 1 : (visibleColumns.length + 2)}>
             <div className="NuoTableSelectedActions">
                 {data.length > 0 && <input className="NuoTableCheckbox"
                     type="checkbox"
@@ -340,7 +341,7 @@ function Table(props: TableProps) {
                         event?.preventDefault();
                         handleDeleteMultiple();
                     }}><DeleteIcon />Delete</button>
-                </> : visibleColumns.filter((_, index) => index === 0).map(column => data.length > 0 && tableLabels[column.id])
+                </> : firstHeader && data.length > 0 ? tableLabels[firstHeader.id] : undefined
                 }
             </div>
         </TableTh>
@@ -360,7 +361,7 @@ function Table(props: TableProps) {
                                     {data.length > 0 && tableLabels[column.id]}
                                 </TableTh>
                             ))}
-                        <TableTh key="$ref" data-testid="$ref" className="NuoTableMenuCell NuoStickyRight" zIndex={data.length}>
+                        <TableTh key="$ref" data-testid="$ref" className="NuoTableMenuCell NuoStickyRight" zIndex={1000 + data.length}>
                             {data.length > 0 && <TableSettingsColumns data={data} path={path} columns={columns} setColumns={setColumns} />}
                         </TableTh>
                         </>
@@ -371,8 +372,8 @@ function Table(props: TableProps) {
                 {data.map((row: TempAny, index: number) => (
                     <TableRow key={row["$ref"] || index}>
                         <TableCell key="__selected__" className="NuoStickyLeft">
-                            <div className="NuoRow">
-                                <input className="NuoTableCheckbox" type="checkbox" data-testid={"check_" + index} checked={selected.has(row["$ref"])} onChange={(event) => {
+                            <div className="NuoTableCheckbox">
+                                <input type="checkbox" data-testid={"check_" + index} checked={selected.has(row["$ref"])} onChange={(event) => {
                                     let tmpSelected = new Set(selected);
                                     if (tmpSelected.has(row["$ref"])) {
                                         tmpSelected.delete(row["$ref"]);
@@ -386,7 +387,7 @@ function Table(props: TableProps) {
                             </div>
                         </TableCell>
                         {visibleColumns.filter((_, index) => index > 0).map(column => <TableCell key={column.id}>{renderDataCell(column.id, row)}</TableCell>)}
-                        {renderMenuCell(row, data.length - 1 - index)}
+                        {renderMenuCell(row, 1000 + data.length - 1 - index)}
                     </TableRow>
                 ))}
                 {data.length === 0 && <tr><td><div data-testid="table_nodata" className="NuoTableNoData">{t("text.noData")}</div></td></tr>}

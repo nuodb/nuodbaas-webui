@@ -1,5 +1,6 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
+import { JSX } from 'react';
 import { isMaterial } from '../../utils/Customizations';
 import { Pagination as MuiPagination, Stack as MuiStack } from '@mui/material';
 

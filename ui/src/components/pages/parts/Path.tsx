@@ -56,7 +56,7 @@ function Path({ schema, path, prefixLabel, postfixLabel, filterValues, org, t }:
 
     let pathParts = (path.startsWith("/") ? path.substring(1) : path).split("/");
     const schemaPath = getSchemaPath(schema, path) || "";
-    return <div style={{ display: "flex", flexDirection: "row", alignItems: "center", overflow: "scroll" }}>
+    return <div style={{ display: "flex", flexDirection: "row", alignItems: "center", overflow: "auto" }}>
         <StyledBreadcrumbs data-testid="path_component" separator=">" aria-label="resources" style={{ color: "#b5b9bc", fontSize: "1em", display: "flex", flexWrap: "nowrap" }}>
             {prefixLabel && <Typography key="management" color="text.primary" style={{ fontSize: "1em", textWrap: "nowrap" }}>{prefixLabel}</Typography>}
             {pathParts && pathParts.map((p: string, index: number) => {
