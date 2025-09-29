@@ -46,7 +46,9 @@ function SqlQueryTab({ sqlConnection, dbTable }: SqlQueryTabProps) {
             }}>{executing ? t("form.sqleditor.button.executing") : t("form.sqleditor.button.submit")}</Button>
         </div>
     </form>
-    <SqlResultsRender results={results} />
+        <div className="NuoTableScrollWrapper">
+            <SqlResultsRender results={results} />
+        </div>
     </>;
 }
 

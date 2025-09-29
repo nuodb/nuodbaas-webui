@@ -9,6 +9,11 @@ body,
     flex: 1 1 auto;
 }
 
+html,
+body {
+    width: 100vw;
+    height: 100vh;
+}
 html {
     min-height: 100vh;
 }
@@ -17,20 +22,13 @@ html {
     margin-left: auto;
     margin-right: auto;
 }
-@media (max-width: 600px) {
-    .NuoContainerLG {
-        max-width: 100%;
-        margin-left: 15px;
-        margin-right: 15px;
-    }
-}
 
 .NuoListResourceHeader {
     display: flex;
     flex-direction: column;
+    margin: 0 15px;
 }
 .NuoListResourceHeader>h3 {
-    padding: 0 20px;
     font-size: 1.5em;
     margin: 0;
     text-transform: capitalize;
@@ -41,17 +39,9 @@ html {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-right: 15px;
 }
 .MuiBreadcrumbs-li {
     text-transform: capitalize;
-}
-@media (min-width: 601px) {
-    .NuoContainerLG {
-            max-width: 100%;
-            margin-left: 24px;
-            margin-right: 24px;
-        }
 }
 .NuoLoginForm {
     display: flex;
@@ -75,17 +65,7 @@ html {
         flex-direction: row;
         justify-content: space-between;
     width: 100%;
-}
-@media (max-width: 600px) {
-    .NuoBanner {
-        padding: 15px 0;
-    }
-}
-
-@media (min-width: 601px) {
-    .NuoBanner {
-        padding: 15px 0;
-    }
+    padding: 15px;
 }
 
 .NuoBannerItems {
@@ -161,6 +141,7 @@ html {
 .NuoTableContainer {
     display: flex;
     flex-direction: column;
+    flex: 1 1 auto;
     box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
     background-color: #fff;
     color: rgba(0, 0, 0, 0.87);
@@ -173,11 +154,10 @@ html {
 .NuoTableTable {
     display: table;
     width: 100%;
-    border-collapse: collapse;
     border-spacing: 0;
     text-indent: initial;
     unicode-bidi: isolate;
-    border-color: gray;
+    border-bottom: solid 1px lightgray;
 }
 
 .NuoTableScrollWrapper {
@@ -188,7 +168,6 @@ html {
 .NuoTableThead {
     vertical-align: middle;
     unicode-bidi: isolate;
-    border-color: inherit;
 }
 
 .NuoTableTr {
@@ -256,27 +235,27 @@ html {
 
 .NuoTableTh {
     background-color: #f5f6f8;
+    line-height: 1.5rem;
+        font-weight: 500;
+        border-top: solid 1px lightgray;
+        border-bottom: solid 1px lightgray;
 }
 
 .NuoTableTd {
     background-color: white;
 }
-.NuoTableTd>button {
+.NuoTableTd>div>button {
     border: none;
     background-color: transparent;
     color: black;
     cursor: pointer;
     text-decoration: underline;
     padding: 0;
-    }
+}
 
-    .NuoTableTd>button:hover {
+.NuoTableTd>div>button:hover {
         background-color: transparent;
         box-shadow: none;
-}
-.NuoTableTh {
-    line-height: 1.5rem;
-    font-weight: 500;
 }
 
 .NuoTableTd {
@@ -496,6 +475,21 @@ code {
     width: 45px;
 }
 
+.NuoContainerLG {
+    width: calc(100% - 200px);
+}
+
+.NuoContainerLGCollapsed {
+    width: calc(100% - 45px);
+}
+
+@media (max-width: 600px) {
+
+    .NuoContainerLG,
+    .NuoContainerLGCollapsed {
+        width: 100%;
+    }
+}
 .NuoLeftMenuPopup {
     position: absolute;
     z-index: 1001;
@@ -753,7 +747,7 @@ code {
 .NuoTableOptions {
     display: flex;
         flex-direction: row;
-        flex: 1 1 auto;
+        flex: 0 0 auto;
     padding: 15px;
     align-items: center;
     }
@@ -786,10 +780,9 @@ code {
     justify-content: center;
     display: flex;
     border-radius: 50%;
-    width: 24px;
-    height: 24px;
+    width: 40px;
+        height: 40px;
     padding: 15px;
-    margin: auto 5px;
 }
 
 .NuoMenuIcon:hover {
@@ -869,11 +862,11 @@ button:focus {
     color: rgba(0, 0, 0, 0.87);
     border-radius: 0 0 10px 10px;
     margin: 0 20px 20px 20px;
-    padding: 10px;
+    padding: 0;
     z-index: 2 !important;
 }
 .NuoFieldContainer {
-    margin: .5em 0;
+    margin: .5em;
 }
 .NuoBadge {
     min-width: 10px;
@@ -1017,4 +1010,23 @@ label.NuoUpload:hover {
 
 .NuoHorizontalCheckboxes>label>input[type="checkbox"] {
     margin: 0 10px;
+}
+.NuoTableCheckbox {
+    margin: 0 16px 0 0;
+}
+
+.NuoStickyLeft,
+.NuoStickyRight {
+    position: sticky;
+    z-index: 1;
+}
+
+.NuoStickyLeft {
+    border-right: solid 1px lightgray;
+    left: 0;
+}
+
+.NuoStickyRight {
+    border-left: solid 1px lightgray;
+    right: 0;
 }

@@ -17,7 +17,7 @@ export default function Pagination(props: PaginationProps): JSX.Element | null {
     }
 
     if (isMaterial()) {
-        return <MuiStack spacing={2} style={{ alignItems: "center" }}>
+        return <MuiStack spacing={2} style={{ alignItems: "center", marginTop: "15px", position: "sticky", left: "0" }}>
             <MuiPagination count={count} page={page} onChange={(event, page) => {
                 props.setPage(page);
             }} />

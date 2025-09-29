@@ -166,7 +166,7 @@ function Table(props: TableProps) {
         }
     }
 
-    function renderMenuCell(row: any) {
+    function renderMenuCell(row: any, zIndex: number) {
         let editDeletePath: string;
         if (lastSchemaPathElement.startsWith("{")) {
             editDeletePath = path + "/" + row["$ref"];
@@ -253,7 +253,7 @@ function Table(props: TableProps) {
                 }
             })
         }
-        return <TableCell key={row["$ref"]} className="NuoTableMenuCell">
+        return <TableCell key={row["$ref"]} className="NuoTableMenuCell NuoStickyRight" zIndex={zIndex}>
             <Menu popupId={"row_menu_" + row["$ref"]} items={buttons} align="right" />
         </TableCell>;
 
@@ -300,12 +300,10 @@ function Table(props: TableProps) {
             });
         }
 
-        return <TableCell key={fieldName}>
-            {fieldName === "name" ? <button onClick={(event) => {
+        return fieldName === "name" ? <button onClick={(event) => {
                 event.preventDefault();
                 navigate("/ui/resource/view" + path + "/" + row["$ref"]);
-            }}>{value}</button> : value}
-        </TableCell>;
+        }}>{value}</button> : value;
 
     }
 
@@ -320,9 +318,9 @@ function Table(props: TableProps) {
     }
 
     function renderTableSelectedActions() {
-        return <TableTh key="__all_selected__" colSpan={selected.size === 0 ? 1 : (visibleColumns.length + 2)}>
+        return <TableTh className="NuoStickyLeft" key="__all_selected__" colSpan={selected.size === 0 ? 1 : (visibleColumns.length + 2)}>
             <div className="NuoTableSelectedActions">
-                {data.length > 0 && <input
+                {data.length > 0 && <input className="NuoTableCheckbox"
                     type="checkbox"
                     data-testid="check_all"
                     checked={selected.size === data.length}
@@ -336,13 +334,13 @@ function Table(props: TableProps) {
                         }
                     }}
                 />}
-                {selected.size > 0 && <>
+                {selected.size > 0 ? <>
                     <label>{selected.size} selected</label>
                     <button className="deleteButton" data-testid="list_resources_multiple_delete_button" onClick={(event) => {
                         event?.preventDefault();
                         handleDeleteMultiple();
                     }}><DeleteIcon />Delete</button>
-                </>
+                </> : visibleColumns.filter((_, index) => index === 0).map(column => data.length > 0 && tableLabels[column.id])
                 }
             </div>
         </TableTh>
@@ -355,30 +353,40 @@ function Table(props: TableProps) {
             <TableHead>
                 {data.length > 0 && <TableRow>
                     {renderTableSelectedActions()}
-                    {selected.size === 0 && <>{visibleColumns.map((column, index) => <TableTh key={column.id} data-testid={column.id}>
-                        {data.length > 0 && tableLabels[column.id]}
-                    </TableTh>)}
-                    <TableTh key="$ref" data-testid="$ref" className="NuoTableMenuCell">
-                        {data.length > 0 && <TableSettingsColumns data={data} path={path} columns={columns} setColumns={setColumns} />}
-                    </TableTh>
-                    </>}
+                    {selected.size === 0 &&
+                        <>
+                            {visibleColumns.filter((_, index) => index > 0).map((column) => (
+                                <TableTh key={column.id} data-testid={column.id}>
+                                    {data.length > 0 && tableLabels[column.id]}
+                                </TableTh>
+                            ))}
+                        <TableTh key="$ref" data-testid="$ref" className="NuoTableMenuCell NuoStickyRight" zIndex={data.length}>
+                            {data.length > 0 && <TableSettingsColumns data={data} path={path} columns={columns} setColumns={setColumns} />}
+                        </TableTh>
+                        </>
+                    }
                 </TableRow>}
             </TableHead>
             <TableBody>
                 {data.map((row: TempAny, index: number) => (
                     <TableRow key={row["$ref"] || index}>
-                        <TableCell key="__selected__"><input type="checkbox" data-testid={"check_" + index} checked={selected.has(row["$ref"])} onChange={(event) => {
-                            let tmpSelected = new Set(selected);
-                            if (tmpSelected.has(row["$ref"])) {
-                                tmpSelected.delete(row["$ref"]);
-                            }
-                            else {
-                                tmpSelected.add(row["$ref"]);
-                            }
-                            setSelected(tmpSelected);
-                        }} /></TableCell>
-                        {visibleColumns.map(column => renderDataCell(column.id, row))}
-                        {renderMenuCell(row)}
+                        <TableCell key="__selected__" className="NuoStickyLeft">
+                            <div className="NuoRow">
+                                <input className="NuoTableCheckbox" type="checkbox" data-testid={"check_" + index} checked={selected.has(row["$ref"])} onChange={(event) => {
+                                    let tmpSelected = new Set(selected);
+                                    if (tmpSelected.has(row["$ref"])) {
+                                        tmpSelected.delete(row["$ref"]);
+                                    }
+                                    else {
+                                        tmpSelected.add(row["$ref"]);
+                                    }
+                                    setSelected(tmpSelected);
+                                }} />
+                                {visibleColumns.filter((_, index) => index === 0).map(column => renderDataCell(column.id, row))}
+                            </div>
+                        </TableCell>
+                        {visibleColumns.filter((_, index) => index > 0).map(column => <TableCell key={column.id}>{renderDataCell(column.id, row)}</TableCell>)}
+                        {renderMenuCell(row, data.length - 1 - index)}
                     </TableRow>
                 ))}
                 {data.length === 0 && <tr><td><div data-testid="table_nodata" className="NuoTableNoData">{t("text.noData")}</div></td></tr>}
