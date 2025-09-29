@@ -47,3 +47,7 @@ export default function Pagination(props: PaginationProps): JSX.Element | null {
         </div>;
     }
 }
+
+export function pageFilter<type>(data: type[], page: number, pageSize: number): type[] {
+    return data?.filter((_, index) => index >= (page - 1) * pageSize && index < page * pageSize);
+}

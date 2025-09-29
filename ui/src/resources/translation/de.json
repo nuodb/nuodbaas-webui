@@ -18,7 +18,6 @@
         "stop.database": "Datenbank stoppen",
         "show.databases": "Datenbanken anzeigen",
         "show.backups": "Sicherungen anzeigen",
-        "sql.editor": "SQL Editor",
         "settings": "Einstellungen",
         "automation": "Automatisierung",
         "logout": "Ausloggen",
@@ -29,7 +28,8 @@
         "sql": {
             "addToQueue": "Zur Warteschlange hinzufügen",
             "addAllToQueue": "Alle zur Warteschlange hinzufügen",
-            "export": "Exportieren"
+            "export": "Exportieren",
+            "editor": "SQL Editor"
         }
     },
     "hint": {
