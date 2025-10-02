@@ -28,7 +28,7 @@ export default function PageLayout(props: PageLayoutProps) {
                 </button>
             </div>
         </div>
-        <div className="NuoColumn NuoContainerLG">
+        <div className={showMenu ? "NuoColumn NuoContainerLG" : "NuoColumn NuoContainerLGCollapsed"}>
             <div>{schema && <Banner {...props} isRecording={isRecording} />}</div>
             <div className="NuoColumn">{children}</div>
         </div>

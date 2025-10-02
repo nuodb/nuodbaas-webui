@@ -77,7 +77,7 @@ function SqlBrowseTab({ sqlConnection, table, t }: SqlBrowseTabProps) {
         return <SqlResultsRender results={state.sqlResponse} setShowFilterDialog={setShowFilterDialog} />
     }
     const isFiltered = state.filter && !!Object.keys(state.filter).find(key => !!(state.filter && state.filter[key].value));
-    return <>
+    return <div className="NuoTableScrollWrapper">
         {showFilterDialog && state.filter && <SqlFilter columns={state?.sqlResponse?.columns || []} filter={state.filter} setFilter={(newFilter) => {
             if (newFilter) {
                 const newState = { ...state, filter: newFilter, page: 1, lastPage: 1 };
@@ -110,7 +110,7 @@ function SqlBrowseTab({ sqlConnection, table, t }: SqlBrowseTabProps) {
                 refreshResults({ ...state, page });
             }}
         />
-    </>
+    </div>
 }
 
 export default withTranslation()(SqlBrowseTab);

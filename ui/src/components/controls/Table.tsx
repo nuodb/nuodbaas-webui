@@ -1,5 +1,5 @@
 // (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
-import { ReactNode } from "react";
+import { JSX, ReactNode } from "react";
 
 type TableProps = {
     children: JSX.Element[],
@@ -11,10 +11,11 @@ interface ChildProps {
     children?: ReactNode,
     className?: string,
     "data-testid"?: string,
+    zIndex?: number;
 }
 
 interface CellProps extends ChildProps {
-    colSpan?: number
+    colSpan?: number;
 }
 
 export function Table(props: TableProps): JSX.Element {
@@ -30,11 +31,11 @@ export function TableRow(props: ChildProps): JSX.Element {
 }
 
 export function TableCell(props: CellProps): JSX.Element {
-    return <td data-testid={props["data-testid"]} className={["NuoTableTd", props.className].join(" ")}>{props.children}</td>
+    return <td data-testid={props["data-testid"]} className={["NuoTableTd", props.className].join(" ")} style={{ zIndex: props.zIndex }}>{props.children}</td>
 }
 
 export function TableTh(props: CellProps): JSX.Element {
-    return <th data-testid={props["data-testid"]} className={["NuoTableTh", props.className].join(" ")} colSpan={props.colSpan}>{props.children}</th>
+    return <th data-testid={props["data-testid"]} className={["NuoTableTh", props.className].join(" ")} colSpan={props.colSpan} style={{ zIndex: props.zIndex }}>{props.children}</th>
 }
 
 export function TableBody(props: ChildProps): JSX.Element {

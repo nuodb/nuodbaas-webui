@@ -167,7 +167,7 @@ build-webui:
 	fi
 
 .PHONY: deploy-webui
-deploy-webui: build-webui $(HELM) $(KIND)
+deploy-webui: build-webui $(HELM) $(KIND)  ## deploy WebUI
 	@if [ -d charts/nuodbaas-webui ] ; then \
 		$(KIND) load docker-image nuodbaas-webui:latest; \
 		$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=latest --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api; \

@@ -138,7 +138,7 @@ function ListResource(props: PageProps) {
                             setSearch(search);
                         }} />
                     </div>
-                    <div className="NuoTableScrollWrapper">
+                    <div className="NuoColumn NuoTableScrollWrapper">
                         <Table
                             data-testid="list_resource__table"
                             {...props}

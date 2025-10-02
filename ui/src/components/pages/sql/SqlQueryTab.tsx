@@ -55,7 +55,9 @@ function SqlQueryTab({ sqlConnection, dbTable }: SqlQueryTabProps) {
             }}>{executing ? t("form.sqleditor.button.executing") : t("form.sqleditor.button.submit")}</Button>
         </div>
     </form>
-        <SqlResultsRender results={pagedResults} />
+        <div className="NuoTableScrollWrapper">
+            <SqlResultsRender results={pagedResults} />
+        </div>
         {results?.rows && <Pagination
             count={Math.ceil(results.rows.length / pageSize)}
             page={page}

@@ -147,7 +147,7 @@
                 }
             ]
         },
-        "/databases?/{organization}?/{project}": {
+        "/databases?/{organization}?/{project}?/{database}": {
             "sections": [
                 {
                     "fields": {

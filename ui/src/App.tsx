@@ -20,7 +20,6 @@ import Settings from './components/pages/Settings';
 import Automation from './components/pages/Automation';
 import Customizations from './utils/Customizations';
 import { NUODBAAS_WEBUI_ISRECORDING, Rest } from './components/pages/parts/Rest';
-import OrganizationOverview from './components/pages/OrganizationOverview';
 import { getOrgFromPath } from './utils/schema';
 import Toast from './components/controls/Toast';
 import BackgroundTasks, { BackgroundTaskType } from './utils/BackgroundTasks';
@@ -131,7 +130,6 @@ function App({ t }: { t: any }) {
                   <Route path="/ui/resource/view/*" element={<ViewResource {...pageProps} />} />
                   <Route path="/ui/settings" element={<Settings {...pageProps} />} />
                   <Route path="/ui/automation" element={<Automation {...pageProps} />} />
-                  <Route path="/ui/page/organization" element={<OrganizationOverview {...pageProps} />} />
                   <Route path="/ui/page/sql/:organization/:project/:database" element={<SqlPage {...pageProps} />} />
                   <Route path="/ui" element={<Navigate to={getHomeUrl()} />} />
                   <Route path="/*" element={<NotFound {...pageProps} />} />
