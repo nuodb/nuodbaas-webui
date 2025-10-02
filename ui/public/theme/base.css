@@ -13,6 +13,7 @@ html,
 body {
     width: 100vw;
     height: 100vh;
+    overflow-x: clip;
 }
 html {
     min-height: 100vh;
@@ -1016,7 +1017,7 @@ label.NuoUpload:hover {
         flex: 1 1 auto;
         flex-direction: row;
     }
-    
+
     .NuoTableCheckbox>input,
     .NuoTableSelectedActions>input {
     margin: 0 16px 0 0;
