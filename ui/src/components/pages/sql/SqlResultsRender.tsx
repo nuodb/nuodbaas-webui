@@ -55,7 +55,7 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
                         </div>}
                     </div>
                 </TableTh>)}
-                {isFiltered !== undefined && <TableTh className="NuoTableMenuCell">
+                {isFiltered !== undefined && <TableTh className="NuoTableMenuCell NuoStickyRight">
                     <div className={isFiltered ? "NuoFilterActive" : "NuoFilterInactive"} onClick={() => setShowFilterDialog && setShowFilterDialog(true)}>
                         <FilterListIcon />
                     </div>

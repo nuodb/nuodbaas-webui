@@ -24,7 +24,7 @@ public class ListResourceTest extends TestRoutines {
         // check off users
         for(String userName : userNames) {
             retry(()->{
-                List<WebElement> checkCell = waitTableElements("list_resource__table", "1", userName, "0");
+                List<WebElement> checkCell = waitTableElements("list_resource__table", "0", userName, "0");
                 assertEquals(1, checkCell.size());
                 checkCell.get(0).findElement(By.tagName("input")).click();
             });
@@ -40,7 +40,7 @@ public class ListResourceTest extends TestRoutines {
         waitRestComplete();
         retry(()-> {
             for(String userName : userNames) {
-                List<WebElement> buttonsCell = waitTableElements("list_resource__table", "1", userName, "0");
+                List<WebElement> buttonsCell = waitTableElements("list_resource__table", "0", userName, "0");
                 assertEquals(1, buttonsCell.size());
             }
         });
@@ -55,7 +55,7 @@ public class ListResourceTest extends TestRoutines {
         waitRestComplete();
         retry(()-> {
             for(String userName : userNames) {
-                List<WebElement> buttonsCell = waitTableElements("list_resource__table", "1", userName, "0");
+                List<WebElement> buttonsCell = waitTableElements("list_resource__table", "0", userName, "0");
                 assertEquals(0, buttonsCell.size());
             }
         });

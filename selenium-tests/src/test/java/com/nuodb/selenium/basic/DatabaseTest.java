@@ -58,6 +58,7 @@ public class DatabaseTest extends TestRoutines {
         clickPopupMenu(buttonsCell.get(0), "edit_button");
 
         // edit database and save
+        waitElement("section-title-advanced").click();
         waitInputElementByName("labels.key").sendKeys(projectName);
         waitInputElementByName("labels.value").sendKeys(databaseName);
         waitElement("add_button_labels").click();
