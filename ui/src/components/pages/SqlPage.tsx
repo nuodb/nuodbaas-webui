@@ -40,7 +40,7 @@ function SqlTabs({ dbTable, sqlConnection, tasks, setTasks }: SqlTabsProps) {
     }
     tabs.push(<Tab id="query" label={t("form.sqleditor.label.tab.query")}>{tabIndex === tabs.length && <SqlQueryTab sqlConnection={sqlConnection} dbTable={dbTable} />}</Tab>);
     tabs.push(<Tab id="import" label={t("form.sqleditor.label.tab.import")}>{tabIndex === tabs.length && <SqlImportTab tasks={tasks} setTasks={setTasks} sqlConnection={sqlConnection} dbTable={dbTable} />}</Tab>);
-    tabs.push(<Tab id="export" label={t("form.sqleditor.label.tab.export")}>{tabIndex === tabs.length && <SqlExportTab tasks={tasks} setTasks={setTasks} sqlConnection={sqlConnection} dbTable={dbTable} />}</Tab>);
+    tabs.push(<Tab id="export" label={t("form.sqleditor.label.tab.export")}>{tabIndex === tabs.length && <SqlExportTab tasks={tasks} setTasks={setTasks} sqlConnection={sqlConnection} />}</Tab>);
     return <Tabs currentTab={tabIndex} setCurrentTab={(tabIndex) => setTabIndex(tabIndex)}>{tabs}</Tabs>
 }
 
