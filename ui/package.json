@@ -26,7 +26,8 @@
   "scripts": {
     "start": "vite",
     "build": "vite build --base=/ui",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "analyze-bundle": "npx vite-bundle-visualizer --open --config ./vite.config.mjs"
   },
   "eslintConfig": {
     "extends": [
@@ -49,6 +50,7 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.4.1",
     "ts-node": "^10.9.2",
-    "vite-plugin-eslint": "^1.8.1"
+    "vite-plugin-eslint": "^1.8.1",
+    "vite-bundle-visualizer": "1.2.1"
   }
 }
