@@ -9,18 +9,37 @@ import { FieldValuesType, TempAny } from "../../utils/types";
  * @returns null if value is not found
  */
 export function getValue(values: FieldValuesType, prefix: string): TempAny {
-    let value = values;
-    const parts = prefix.split(".");
-    for(let i=0; i<parts.length; i++) {
-        value = value[parts[i]];
-        if(value === undefined || value === null) {
-            return null;
+    let start = 0;
+    while(true) {
+        let posPeriod = prefix.indexOf(".", start);
+        if(posPeriod === -1) {
+            posPeriod = prefix.length;
         }
+        const childValue = values[prefix.substring(0, posPeriod)];
+        if(posPeriod === prefix.length) {
+            if(childValue === undefined) {
+                return null;
+            }
+            return childValue;
+        }
+        else if(childValue !== undefined) {
+            return getValue(childValue, prefix.substring(posPeriod+1));
+        }
+
+        start = posPeriod + 1;
     }
-    if(value === undefined) {
-        return null;
+}
+
+function deletePrefix(values:FieldValuesType, prefix:string) {
+    const index = parseInt(prefix);
+    if(isNaN(index)) {
+        // remove object property
+        delete values[prefix];
     }
-    return value;
+    else {
+        // remove array element
+        values.splice(index, 1);
+    }
 }
 
 /**
@@ -30,31 +49,39 @@ export function getValue(values: FieldValuesType, prefix: string): TempAny {
  * @param {*} value value to assign. Deletes field if value is undefined or null.
  */
 export function setValue(values:FieldValuesType, prefix:string, value?:TempAny) {
-    const parts = prefix.split(".");
-    let values_ = values;
-    for(let i=0; i<parts.length-1; i++) {
-        if(!values_[parts[i]]) {
-            if(value === null || value === undefined) {
-                return;
+    const keys = Object.keys(values);
+    for(let i=0; i<keys.length; i++) {
+        if(keys[i] === prefix) {
+            if(value === undefined || value === null) {
+                deletePrefix(values, keys[i]);
             }
-            values_[parts[i]] = {};
+            else {
+                values[keys[i]] = value;
+            }
+            return;
         }
-        values_ = values_[parts[i]];
+        if(prefix.startsWith(keys[i] + ".")) {
+            setValue(values[keys[i]], prefix.substring(keys[i].length+1), value);
+            return;
+        }
     }
-
-    const lastPart = parts[parts.length-1];
-    if(value === null || value === undefined) {
-        const index = parseInt(lastPart);
-        if(lastPart === "" || isNaN(index)) {
-            // remove object property
-            delete values_[parts[parts.length-1]];
+    let posPeriod = prefix.indexOf(".");
+    if(posPeriod === -1) {
+        if(value === null || value === undefined) {
+            deletePrefix(values, prefix);
         }
         else {
-            // remove array element
-            values_.splice(index, 1);
+            values[prefix] = value;
         }
     }
     else {
-        values_[lastPart] = value;
+        const parts = prefix.split(".");
+        if(isNaN(Number(parts[1]))) {
+            values[parts[0]] = {};
+        }
+        else {
+            values[parts[0]] = [];
+        }
+        setValue(values[parts[0]], prefix.substring(prefix.indexOf(".")+1), value);
     }
 }

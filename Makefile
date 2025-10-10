@@ -101,9 +101,22 @@ build-cp:
 deploy-cp: build-cp $(HELM) $(KIND)
 	@if [ -d $(NUODB_CP_REPO)/charts/nuodb-cp-rest ] ; then \
 		$(KIND) load docker-image nuodb/nuodb-control-plane:latest; \
-		$(HELM) upgrade --install --wait -n default nuodb-cp $(NUODB_CP_REPO)/charts/nuodb-cp-rest --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
+		$(HELM) upgrade --install --wait -n default nuodb-cp $(NUODB_CP_REPO)/charts/nuodb-cp-rest \
+			--set image.repository=nuodb/nuodb-control-plane \
+			--set image.tag=latest \
+			--set cpRest.ingress.enabled=true \
+			--set cpRest.ingress.pathPrefix=api \
+			--set cpRest.extraArgs[0]=-p \
+			--set cpRest.extraArgs[1]='com.nuodb.controlplane.server.passthroughLabelKeyPrefixes=ds.com/\,*.ds.com/' \
+			; \
 	else \
-		$(HELM) upgrade --install --wait -n default nuodb-cp nuodb-cp-rest --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION) --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
+		$(HELM) upgrade --install --wait -n default nuodb-cp nuodb-cp-rest \
+			--repo https://nuodb.github.io/nuodb-cp-releases/charts \
+			--version $(NUODB_CP_VERSION) \
+			--set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
+			--set cpRest.extraArgs[0]=-p \
+			--set cpRest.extraArgs[1]='com.nuodb.controlplane.server.passthroughLabelKeyPrefixes=ds.com/\,*.ds.com/' \
+			; \
 	fi
 
 .PHONY: undeploy-cp

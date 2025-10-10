@@ -174,12 +174,46 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
         return success;
     }
 
+    function uniqueArray(array: any[]): any[] {
+        return [...new Set(array)];
+    }
+
     function getDisplayValue(): ReactNode {
         const { prefix, values } = props;
         const value = getValue(values, prefix);
-        return Object.keys(value).map(key => {
-            return <div className={"NuoTableField_" + prefix.replaceAll(".", "_")} key={key}>{String(key)}: {getValue(values, prefix + "." + key)}</div>;
-        })
+
+        // If a key has a forward slash (/), we'll group the key (the group name is the text before the slash).
+        // Show the non-group items first, followed by the group items.
+        let ret: ReactNode[] = [
+            Object.keys(value)
+                .filter(key => !key.includes("/"))
+                .map(key => {
+                    return <div key={key} className={"NuoTableField_" + prefix.replaceAll(".", "_")}>
+                        {String(key)}: {getValue(values, prefix + "." + key)}
+                    </div>;
+                })
+        ]
+
+        let groups = uniqueArray(
+            Object.keys(value)
+                .filter(key => key.includes("/"))
+                .map(key => key.split("/")[0])
+            );
+        groups.forEach(group => (
+            ret.push(<div className={"NuoTableField_" + prefix.replaceAll(".", "_")} key={group}>
+                <details>
+                    <summary>{group}/</summary>
+                    {Object.keys(value)
+                        .filter(key => key.startsWith(group + "/"))
+                        .map(key => <div>
+                            {key.substring(group.length + 1)}: {getValue(values, prefix + "." + key)}
+                        </div>)
+                    }
+                </details>
+            </div>)
+        ));
+
+        return ret;
     }
 
     return { ...FieldBase(props), show, validate, getDisplayValue }
