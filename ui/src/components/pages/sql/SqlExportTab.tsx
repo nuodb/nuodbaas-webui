@@ -5,21 +5,20 @@ import { withTranslation } from "react-i18next";
 import { t } from 'i18next';
 import TextField from '../../controls/TextField';
 import { BackgroundTaskType, generateRandom, isTaskFinished, launchNextBackgroundTask, shortenSize, updateOrAddTask } from '../../../utils/BackgroundTasks';
-import BackgroundTaskStatus, { BackgroundTaskStatusButton, BackgroundTaskStatusIcon } from '../../../utils/BackgroundTaskStatus';
+import BackgroundTaskStatus, { BackgroundTaskStatusIcon } from '../../../utils/BackgroundTaskStatus';
 import Toast from '../../controls/Toast';
-import Select, { SelectOption } from '../../controls/Select';
 import DialogMaterial from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '../../controls/Button';
 import { SqlType } from '../../../utils/SqlSocket';
+import { Checkbox } from '../../controls/Checkboxes';
 
 type SqlExportTabProps = {
     tasks: BackgroundTaskType[];
     setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>;
     sqlConnection: SqlType;
-    dbTable: string;
 }
 
 function nowYYYYMMDD_HHMMSS() {
@@ -42,25 +41,16 @@ function nowYYYYMMDD_HHMMSS() {
 }
 
 const TASK_ID_PREFIX = "sqlexport_";
-const ALL_TABLES = "___all_tables___";
 
-type ExportOptionsType = {
-    includeDdl?: boolean;
-    includeData?: boolean;
-    includeDrop?: boolean;
-    table?: string;
-    outputTable?: string;
-    outputSchema?: string;
-    batchSize?: number; /* default 500 */
-    exportLimit?: number; /* default 0 */
-};
-
-function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabProps) {
-
-    const [exportOptions, setExportOptions] = useState<ExportOptionsType>({
-        includeDdl: true,
-        includeData: true,
-    });
+function SqlExportTab({ tasks, setTasks, sqlConnection }: SqlExportTabProps) {
+    const [includeDdl, setIncludeDdl] = useState<boolean>(true);
+    const [includeData, setIncludeData] = useState<boolean>(true);
+    const [includeDrop, setIncludeDrop] = useState<boolean>(false);
+    const [exportTables, setExportTables] = useState<string[] | undefined>(undefined);
+    const [outputTables, setOutputTables] = useState<{ [table: string]: string }>({});
+    const [outputSchema, setOutputSchema] = useState<string>("");
+    const [batchSize, setBatchSize] = useState<string | undefined>("500");
+    const [exportLimit, setExportLimit] = useState<string | undefined>("0");
     const [tables, setTables] = useState<string[]>([]);
     const [foregroundTaskId, setForegroundTaskId] = useState<string | undefined>(undefined);
 
@@ -73,9 +63,6 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
                 else if (results.rows) {
                     const tables = results.rows.map(row => row.values[0]);
                     setTables(tables);
-                    if (tables.includes(dbTable)) {
-                        setExportOptions({ ...exportOptions, table: dbTable });
-                    }
                 }
             });
     }, []);
@@ -132,33 +119,7 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
         });
     }
 
-    async function exportFile(sqlConnection: SqlType, exportOptions: ExportOptionsType): Promise<string> {
-        const url = new URL(location.protocol + location.host + "/api/sql/export/sql" + sqlConnection.getOrgProjDbSchemaUrl());
-        if (exportOptions.includeDdl) {
-            url.searchParams.append("includeDdl", "true");
-        }
-        if (exportOptions.includeData) {
-            url.searchParams.append("includeData", "true");
-        }
-        if (exportOptions.includeDrop) {
-            url.searchParams.append("includeDrop", "true");
-        }
-        if (exportOptions.table) {
-            url.searchParams.append("table", exportOptions.table);
-        }
-        if (exportOptions.batchSize) {
-            url.searchParams.append("batchSize", String(exportOptions.batchSize));
-        }
-        if (exportOptions.exportLimit) {
-            url.searchParams.append("exportLimit", String(exportOptions.exportLimit));
-        }
-        if (exportOptions.outputSchema) {
-            url.searchParams.append("outputSchema", exportOptions.outputSchema);
-        }
-        if (exportOptions.outputTable) {
-            url.searchParams.append("outputTable", exportOptions.outputTable);
-        }
-
+    async function exportFile(sqlConnection: SqlType): Promise<string> {
         const showSaveFilePicker = localStorage.getItem("selenium") === "true" ? fakeShowSaveFilePicker : (window as any).showSaveFilePicker;
         if (!showSaveFilePicker) {
             return Promise.reject("Streamed download not supported");
@@ -167,6 +128,18 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
             startIn: "downloads",
             suggestedName: sqlConnection.getOrgProjDbSchemaUrl().substring("/".length).replaceAll("/", "_") + "_" + nowYYYYMMDD_HHMMSS() + ".sql"
         });
+
+        const url = new URL(location.protocol + location.host + "/api/sql/export/sql" + sqlConnection.getOrgProjDbSchemaUrl());
+        const body = {
+            includeDdl,
+            includeData,
+            includeDrop,
+            table: exportTables || undefined,
+            outputTable: exportTables && exportTables.map(et => outputTables[et] || et) || undefined,
+            batchSize: batchSize ? Number(batchSize) : undefined,
+            exportLimit: exportLimit ? Number(exportLimit) : undefined,
+            outputSchema: outputSchema || undefined,
+        };
 
         let progressAbortController = new AbortController();
         let newTask: BackgroundTaskType = {
@@ -177,10 +150,12 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
             data: { downloaded: 0, progressAbortController: progressAbortController },
             execute: async (task: BackgroundTaskType) => {
                 const response = await fetch(url, {
-                    method: "GET",
+                    method: "POST",
                     headers: {
-                        "Authorization": "Basic " + btoa(sqlConnection.getDbUsername() + ":" + sqlConnection.getDbPassword())
+                        "Authorization": "Basic " + btoa(sqlConnection.getDbUsername() + ":" + sqlConnection.getDbPassword()),
+                        'Content-Type': 'application/json',
                     },
+                    body: JSON.stringify(body),
                     signal: progressAbortController.signal
                 });
                 const writableStream = await fileHandle.createWritable();
@@ -242,20 +217,20 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
         <div className="NuoColumn">
             <div className="NuoHorizontalCheckboxes">
                 <label>
-                    <input type="checkbox" checked={exportOptions.includeDdl} onChange={() => {
-                        setExportOptions({ ...exportOptions, includeDdl: !exportOptions.includeDdl });
+                    <input type="checkbox" checked={includeDdl} onChange={() => {
+                        setIncludeDdl(!includeDdl);
                     }} />
                     {t("form.sqleditor.label.includeDdl")}
                 </label>
                 <label>
-                    <input type="checkbox" checked={exportOptions.includeData} onChange={() => {
-                        setExportOptions({ ...exportOptions, includeData: !exportOptions.includeData });
+                    <input type="checkbox" checked={includeData} onChange={() => {
+                        setIncludeData(!includeData);
                     }} />
                     {t("form.sqleditor.label.includeData")}
                 </label>
                 <label>
-                    <input type="checkbox" checked={exportOptions.includeDrop} onChange={() => {
-                        setExportOptions({ ...exportOptions, includeDrop: !exportOptions.includeDrop });
+                    <input type="checkbox" checked={includeDrop} onChange={() => {
+                        setIncludeDrop(!includeDrop);
                     }} />
                     {t("form.sqleditor.label.includeDrop")}
                 </label>
@@ -263,46 +238,86 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
                 </div>
             </div>
             <div className="NuoFieldContainer">
-                <Select id="table" label={t("form.sqleditor.label.tableToExport")} value={exportOptions.table || ALL_TABLES} onChange={(event) => {
-                    const value = event.target.value === ALL_TABLES ? undefined : event.target.value;
-                    setExportOptions({ ...exportOptions, table: value, outputTable: value ? "" : undefined });
-                }}>
-                    <SelectOption value="___all_tables___">{t("form.sqleditor.label.allTables")}</SelectOption>
-                    {tables.map(table => <SelectOption value={table} key={table}>{table}</SelectOption>)}
-                </Select>
+                <Checkbox
+                    id="___all_tables___"
+                    label={t("form.sqleditor.label.allTables")}
+                    checked={!exportTables || exportTables.length === tables.length}
+                    onChange={event => {
+                        if (event.currentTarget.checked) {
+                            setExportTables(undefined);
+                        }
+                        else {
+                            setExportTables([]);
+                        }
+                    }}
+                />
+                <div className="NuoRow">
+                    <div className="NuoColumnFixed">
+                        {tables.map((table, index) => (
+                            <Checkbox
+                                id={table}
+                                checked={exportTables === undefined || exportTables.includes(table)}
+                                label={table}
+                                onChange={(event) => {
+                                    let newTables = exportTables === undefined ? [...tables] : [...exportTables];
+                                    if (newTables.includes(table)) {
+                                        newTables = newTables.filter(t => t !== table);
+                                        let newOutputTables = { ...outputTables };
+                                        delete newOutputTables[table];
+                                        setOutputTables(newOutputTables);
+                                    }
+                                    else {
+                                        newTables.push(table);
+                                    }
+                                    setExportTables(newTables);
+                                }}
+                            />
+                        ))}
+                    </div>
+                    <div className="NuoColumn">
+                        {tables.map((table, index) => <div className="NuoFieldContainer">
+                            <TextField
+                                id={"outputTable_" + table}
+                                label={t("form.sqleditor.label.renameTable")}
+                                value={outputTables[table] || ""}
+                                disabled={exportTables !== undefined && !exportTables.includes(table)}
+                                size="small"
+                                onChange={(event) => {
+                                    setOutputTables({ ...outputTables, [table]: event.currentTarget.value });
+                                }}
+                            />
+                        </div>
+                        )}
+                    </div>
+                </div>
             </div>
-            {exportOptions.table && <div className="NuoFieldContainer">
-                <TextField id="outputTable" label={t("form.sqleditor.label.renameTable")} value={exportOptions.outputTable || ""} onChange={(event) => {
-                    setExportOptions({ ...exportOptions, outputTable: event.currentTarget.value });
-                }} />
-            </div>}
             <div className="NuoFieldContainer">
-                <TextField id="outputSchema" label={t("form.sqleditor.label.renameSchema")} value={exportOptions.outputSchema || ""} onChange={(event) => {
-                setExportOptions({...exportOptions, outputSchema: event.currentTarget.value});
+                <TextField id="outputSchema" label={t("form.sqleditor.label.renameSchema")} value={outputSchema || ""} onChange={(event) => {
+                    setOutputSchema(event.currentTarget.value);
             }}/>
             </div>
             <div className="NuoFieldContainer">
-                <TextField id="batchSize" label={t("form.sqleditor.label.batchSize")} value={String(exportOptions.batchSize || "500")} onChange={(event) => {
+                <TextField id="batchSize" label={t("form.sqleditor.label.batchSize")} value={String(batchSize || "")} onChange={(event) => {
                 if(event.currentTarget.value === "") {
-                    setExportOptions({...exportOptions, batchSize: undefined});
+                    setBatchSize(undefined);
                 }
                 else {
                     const num = Number(event.currentTarget.value);
                     if(!isNaN(num)) {
-                        setExportOptions({...exportOptions, batchSize: num});
+                        setBatchSize(event.currentTarget.value);
                     }
                 }
             }}/>
             </div>
             <div className="NuoFieldContainer">
-                <TextField id="exportLimit" label={t("form.sqleditor.label.exportLimit")} value={String(exportOptions.exportLimit || "0")} onChange={(event) => {
+                <TextField id="exportLimit" label={t("form.sqleditor.label.exportLimit")} value={String(exportLimit || "")} onChange={(event) => {
                 if(event.currentTarget.value === "") {
-                    setExportOptions({...exportOptions, exportLimit: undefined});
+                    setExportLimit(undefined);
                 }
                 else {
                     const num = Number(event.currentTarget.value);
                     if(!isNaN(num)) {
-                        setExportOptions({...exportOptions, exportLimit: num});
+                        setExportLimit(event.currentTarget.value);
                     }
                 }
             }}/>
@@ -311,7 +326,7 @@ function SqlExportTab({ tasks, setTasks, sqlConnection, dbTable }: SqlExportTabP
             <div className="NuoRow">
                 {(window as any).showOpenFilePicker && <button data-testid="perform.export" onClick={async (event) => {
                     event.preventDefault();
-                    await exportFile(sqlConnection, exportOptions);
+                    await exportFile(sqlConnection);
                 }}>{t("button.sql.export")}</button>}
             </div>
         </div>

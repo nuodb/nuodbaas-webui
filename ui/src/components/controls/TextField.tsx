@@ -23,6 +23,7 @@ export type TextFieldProps = {
     onChange?: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void,
     onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void,
     onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void,
+    size?: "small" | "medium";
 }
 
 export default function TextField(props: TextFieldProps): JSX.Element {
@@ -38,6 +39,7 @@ export default function TextField(props: TextFieldProps): JSX.Element {
             aria-details={props.description}
             error={!!props.error}
             helperText={props.error}
+            size={props.size}
             slotProps={((props.icon || props.leftIcon || fieldProps.description) && {
                 input: {
                     endAdornment: (props.icon || props.description) &&
