@@ -202,12 +202,15 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
         groups.forEach(group => (
             ret.push(<div className={"NuoTableField_" + prefix.replaceAll(".", "_")} key={group}>
                 <details>
-                    <summary>{group}/</summary>
+                    <summary><div className="NuoSummaryContent">{group}<div className="NuoBadgeLight">{Object.keys(value).length}</div></div></summary>
                     {Object.keys(value)
                         .filter(key => key.startsWith(group + "/"))
-                        .map(key => <div>
-                            {key.substring(group.length + 1)}: {getValue(values, prefix + "." + key)}
-                        </div>)
+                        .map(key => {
+                            const label = key.substring(group.length + 1) + ": " + getValue(values, prefix + "." + key);
+                            return <div className="NuoEllipsis" style={{ width: "200px" }} title={label}>
+                                {label}
+                            </div>;
+                        })
                     }
                 </details>
             </div>)
