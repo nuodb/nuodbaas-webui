@@ -736,7 +736,7 @@ code {
 .NuoTableField_labels {
     display: inline-block;
     border: 1px solid lightgray;
-    border-radius: 99999px;
+    border-radius: 10px;
     padding: 2px 8px;
     margin: 2px;
 }
@@ -869,17 +869,66 @@ button:focus {
 .NuoFieldContainer {
     margin: .5em;
 }
-.NuoBadge {
+.NuoBadge,
+.NuoBadgeLight {
     min-width: 10px;
     min-height: 10px;
-    background-color: red;
     margin: 0 0 0 5px;
     border-radius: 99999px;
     padding: 3px;
     font-size: 13px;
+}
+
+.NuoBadge {
+    background-color: red;
     color: white;
 }
 
+.NuoBadgeLight {
+    background-color: lightgray;
+    color: black;
+}
+
+details summary {
+    list-style: none;
+    /* Hide the default arrow marker */
+    position: relative;
+    /* Needed for positioning the pseudo-element */
+    padding-left: 20px;
+    /* Create space for the custom arrow */
+    cursor: pointer;
+}
+
+details summary::-webkit-details-marker {
+    display: none;
+}
+
+details summary::before {
+    content: '►';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+details[open] summary::before {
+    content: '▼';
+}
+
+.NuoSummaryContent {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.NuoEllipsis {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 200px;
+    position: relative;
+    cursor: default;
+}
 .NuoToast {
     left: 50%;
     right: auto;

@@ -101,9 +101,22 @@ build-cp:
 deploy-cp: build-cp $(HELM) $(KIND)
 	@if [ -d $(NUODB_CP_REPO)/charts/nuodb-cp-rest ] ; then \
 		$(KIND) load docker-image nuodb/nuodb-control-plane:latest; \
-		$(HELM) upgrade --install --wait -n default nuodb-cp $(NUODB_CP_REPO)/charts/nuodb-cp-rest --set image.repository=nuodb/nuodb-control-plane --set image.tag=latest --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
+		$(HELM) upgrade --install --wait -n default nuodb-cp $(NUODB_CP_REPO)/charts/nuodb-cp-rest \
+			--set image.repository=nuodb/nuodb-control-plane \
+			--set image.tag=latest \
+			--set cpRest.ingress.enabled=true \
+			--set cpRest.ingress.pathPrefix=api \
+			--set cpRest.extraArgs[0]=-p \
+			--set cpRest.extraArgs[1]='com.nuodb.controlplane.server.passthroughLabelKeyPrefixes=ds.com/\,*.ds.com/' \
+			; \
 	else \
-		$(HELM) upgrade --install --wait -n default nuodb-cp nuodb-cp-rest --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION) --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
+		$(HELM) upgrade --install --wait -n default nuodb-cp nuodb-cp-rest \
+			--repo https://nuodb.github.io/nuodb-cp-releases/charts \
+			--version $(NUODB_CP_VERSION) \
+			--set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
+			--set cpRest.extraArgs[0]=-p \
+			--set cpRest.extraArgs[1]='com.nuodb.controlplane.server.passthroughLabelKeyPrefixes=ds.com/\,*.ds.com/' \
+			; \
 	fi
 
 .PHONY: undeploy-cp
@@ -179,18 +192,21 @@ undeploy-webui: $(KIND) $(HELM)
 		$(HELM) uninstall --ignore-not-found -n default nuodbaas-webui; \
 	fi
 
-.PHONY: setup-integration-tests
-setup-integration-tests: $(KUBECTL) build-image install-crds deploy-cp deploy-operator deploy-sql deploy-webui ## setup containers before running integration tests
+.PHONY: setup-nginx-default-conf
+setup-nginx-default-conf:
 	@if [ "$(NUODB_CP_URL_BASE)" = "" ] ; then \
 		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_URL_BASE%%%#http://localhost:8081#g" > docker/development/default.conf; \
 	else \
 		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_URL_BASE%%%#$(NUODB_CP_URL_BASE)#g" > docker/development/default.conf; \
 	fi
 	@if [ "$(NUODB_SQL_URL_BASE)" = "" ] ; then \
-		cat docker/development/default.conf.template | sed "s#%%%NUODB_SQL_URL_BASE%%%#http://localhost#g" > docker/development/default.conf; \
+		sed -i "s#%%%NUODB_SQL_URL_BASE%%%#http://localhost#g" docker/development/default.conf; \
 	else \
-		cat docker/development/default.conf.template | sed "s#%%%NUODB_SQL_URL_BASE%%%#$(NUODB_SQL_URL_BASE)#g" > docker/development/default.conf; \
+		sed -i "s#%%%NUODB_SQL_URL_BASE%%%#$(NUODB_SQL_URL_BASE)#g" docker/development/default.conf; \
 	fi
+
+.PHONY: setup-integration-tests
+setup-integration-tests: $(KUBECTL) build-image setup-nginx-default-conf install-crds deploy-cp deploy-operator deploy-sql deploy-webui ## setup containers before running integration tests
 	@if [ "$(ARCH)" = "arm64" ] ; then \
 		docker pull seleniarm/standalone-chromium && \
 		docker tag seleniarm/standalone-chromium selenium-standalone; \
@@ -253,6 +269,23 @@ run-integration-tests: build-image setup-integration-tests ## run integration te
 start-dev: stop-dev setup-integration-tests ## launch WebUI/ControlPlane/Proxy for development environment
 	(cd ui && npm install && npm start &)
 	docker run --rm -d --name nuodb-webui-dev -v `pwd`/docker/development/default.conf:/etc/nginx/conf.d/default.conf --network=host -it nginx:stable-alpine
+
+.PHONY: start-dev-remote
+start-dev-remote: setup-nginx-default-conf ## launch WebUI to remote Control Plane. Set environment variables NUODB_CP_URL_BASE and NUODB_SQL_URL_BASE
+	@if [ "$(NUODB_CP_URL_BASE)" = "" ] || [ "$(NUODB_SQL_URL_BASE)" = "" ]; then \
+		echo "ERROR: Environment variables NUODB_CP_URL_BASE and NUODB_SQL_URL_BASE need to be set."; \
+		exit 1 \
+		; \
+	fi
+	(cd ui && npm install && npm start &)
+	docker run --rm -d --name nuodb-webui-dev -v `pwd`/docker/development/default.conf:/etc/nginx/conf.d/default.conf --network=host -it nginx:stable-alpine
+
+.PHONY: stop-dev-remote ## stop WebUI to remote Controll Plane
+stop-dev-remote:
+	@PID=$(shell netstat -a -n -p 2> /dev/null | sed -n -E "s/.* 0\.0\.0\.0:3000 .* LISTEN .* ([0-9]+)\/node/\1/p"); \
+	if [ "$$PID" != "" ] ; then kill -9 $$PID; fi
+	@PID=$(shell docker ps -aq --filter "name=nuodb-webui-dev"); \
+	if [ "$$PID" != "" ] ; then docker stop $$PID; fi
 
 .PHONY: stop-dev
 stop-dev: teardown-integration-tests ## stop development environment processes (WebUI/ControlPlane/Proxy)
