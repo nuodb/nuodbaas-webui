@@ -15,7 +15,7 @@ public class AutomationTest extends TestRoutines {
     @Test
     public void testRecordingCreateAndDeleteUsers() throws JsonProcessingException {
         // Start Recording
-        login();
+        loginRest();
         clickUserMenu("automation");
         clearSessionStorage("nuodbaas-webui-recorded");
         clearSessionStorage("nuodbaas-webui-isRecording");

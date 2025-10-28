@@ -37,7 +37,7 @@ public class SearchTest extends TestRoutines {
         }
 
         // verify we have full page of users
-        login();
+        loginRest();
         clickMenu("users");
         waitRestComplete();
         retry(()->{

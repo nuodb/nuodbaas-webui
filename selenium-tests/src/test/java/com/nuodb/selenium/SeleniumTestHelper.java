@@ -83,8 +83,12 @@ public class SeleniumTestHelper {
     }
 
     public void setSelenium() {
+        setLocalStorage("selenium", "true");
+    }
+
+    public void setLocalStorage(String key, String value) {
         if(driver instanceof JavascriptExecutor jsDriver) {
-            jsDriver.executeScript("localStorage.setItem('selenium','true')");
+            jsDriver.executeScript("localStorage.setItem('" + key.replace("'", "\\'") + "','" + value.replace("'", "\\'") + "')");
         }
         else {
             throw new RuntimeException("unable to set selenium");

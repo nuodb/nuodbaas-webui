@@ -17,14 +17,14 @@ import java.util.List;
 public class ProjectTest extends TestRoutines {
     @Test
     public void testCreateProject() throws MalformedURLException {
-        login();
+        loginRest();
         createProject();
     }
 
     @Test
     public void testListCreateAndDeleteProjects() {
         // Setup and list projects
-        login();
+        loginRest();
         String projectName = createProject();
         clickMenu("projects");
 
@@ -43,8 +43,8 @@ public class ProjectTest extends TestRoutines {
     @Test
     public void testEditProject() {
         // Setup and list projects
-        login();
-        String projectName = createProject();
+        loginRest();
+        String projectName = createProjectRest();
 
         // resource versions are getting updated in the background a few times by the control plane / operator preventing an update later.
         retry(10, 1000, ()->{

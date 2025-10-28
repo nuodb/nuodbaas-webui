@@ -15,7 +15,7 @@ public class BannerTest extends TestRoutines {
 
     @Test
     public void testMenuBanner() throws MalformedURLException {
-        login();
+        loginRest();
 
         // make sure all menu items are present
         for(String menuItem : expectedMenuItems) {

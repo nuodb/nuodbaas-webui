@@ -18,8 +18,8 @@ import java.util.List;
 public class DatabaseTest extends TestRoutines {
     @Test
     public void testCreateDatabase() throws MalformedURLException {
-        login();
-        String projectName = createProject();
+        loginRest();
+        String projectName = createProjectRest();
         String databaseName = createDatabase(projectName);
 
         // verify database was created
@@ -30,8 +30,8 @@ public class DatabaseTest extends TestRoutines {
     @Test
     public void testListCreateAndDeleteDatabases() {
         // Setup and list databases
-        login();
-        String projectName = createProject();
+        loginRest();
+        String projectName = createProjectRest();
         String databaseName = createDatabase(projectName);
 
         // find database and delete
@@ -48,9 +48,9 @@ public class DatabaseTest extends TestRoutines {
     @Test
     public void testEditDatabase() {
         // Setup and list databases
-        login();
-        String projectName = createProject();
-        String databaseName = createDatabase(projectName);
+        loginRest();
+        String projectName = createProjectRest();
+        String databaseName = createDatabaseRest(projectName);
 
         // find database and start edit mode
         List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
@@ -77,9 +77,9 @@ public class DatabaseTest extends TestRoutines {
    @Test
    public void testStartStopDatabase() {
        // Setup and list databases
-       login();
-       String projectName = createProject();
-       String databaseName = createDatabase(projectName);
+       loginRest();
+       String projectName = createProjectRest();
+       String databaseName = createDatabaseRest(projectName);
 
        // perform "Stop Database" action
        List<WebElement> menuCells = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);

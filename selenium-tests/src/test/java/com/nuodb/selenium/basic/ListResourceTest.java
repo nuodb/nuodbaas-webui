@@ -17,7 +17,7 @@ public class ListResourceTest extends TestRoutines {
     @Test
     public void testDeleteMultipleUsers() {
         // Setup and list users
-        login();
+        loginRest();
         String userNames[] = { createUser(), createUser() };
         clickMenu("users");
 
