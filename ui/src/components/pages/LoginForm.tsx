@@ -33,6 +33,7 @@ interface ProvidersResponse {
 function LoginForm({ setIsLoggedIn, t }: Props) {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const queryParams = new URLSearchParams(window.location.search);
 
     const [organization, setOrganization] = useState("");
     const [username, setUsername] = useState("");
@@ -49,7 +50,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
         window.location.protocol +
             "//" +
             window.location.host +
-            "/ui/login?provider={name}"
+        "/ui/login?provider={name}&redirectUrl=https://" + window.location.host + queryParams.get("redirect")
     );
 
     useEffect(() => {
@@ -66,7 +67,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                 const data = await Rest.get(
                     `/login/providers/${encodeURIComponent(provider)}/token${
                         window.location.search
-                    }&redirectUrl=${redirectUrl}`
+                    }`
                 );
                 handleLoginSuccess(data);
             } catch (error: any) {
@@ -122,7 +123,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                 username: data.username,
             })
         );
-        window.location.href = "/ui";
+        window.location.href = queryParams.get("redirectUrl") || "/ui";
     }
 
     function loginFailed(err: any) {
