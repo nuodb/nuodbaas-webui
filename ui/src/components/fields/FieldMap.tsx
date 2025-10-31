@@ -199,22 +199,21 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
                 .filter(key => key.includes("/"))
                 .map(key => key.split("/")[0])
             );
-        groups.forEach(group => (
+        groups.forEach(group => {
+            const groupKeys = Object.keys(value).filter(key => key.startsWith(group + "/"));
             ret.push(<div className={"NuoTableField_" + prefix.replaceAll(".", "_")} key={group}>
                 <details>
-                    <summary><div className="NuoSummaryContent">{group}<div className="NuoBadgeLight">{Object.keys(value).length}</div></div></summary>
-                    {Object.keys(value)
-                        .filter(key => key.startsWith(group + "/"))
-                        .map(key => {
-                            const label = key.substring(group.length + 1) + ": " + getValue(values, prefix + "." + key);
-                            return <div className="NuoEllipsis" style={{ width: "200px" }} title={label}>
-                                {label}
-                            </div>;
-                        })
+                    <summary><div className="NuoSummaryContent">{group}<div className="NuoBadgeLight">{groupKeys.length}</div></div></summary>
+                    {groupKeys.map(key => {
+                        const label = key.substring(group.length + 1) + ": " + getValue(values, prefix + "." + key);
+                        return <div className="NuoEllipsis" style={{ width: "200px" }} title={label}>
+                            {label}
+                        </div>;
+                    })
                     }
                 </details>
             </div>)
-        ));
+        });
 
         return ret;
     }
