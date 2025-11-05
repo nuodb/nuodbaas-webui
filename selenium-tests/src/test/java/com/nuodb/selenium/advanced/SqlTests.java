@@ -45,9 +45,9 @@ public class SqlTests extends TestRoutines {
     @Disabled("TODO: this fails because the NuoDBaaS-SQL service is not loaded on CircleCI")
     @Test
     public void testSqlPage() {
-        login();
-        String projectName = createProject();
-        String databaseName = createDatabase(projectName);
+        loginRest();
+        String projectName = createProjectRest();
+        String databaseName = createDatabaseRest(projectName);
 
         // Wait for Database to become available
         final AtomicInteger count = new AtomicInteger(0);

@@ -18,14 +18,14 @@ import java.util.List;
 public class UserTest extends TestRoutines {
     @Test
     public void testCreateUser() throws MalformedURLException {
-        login();
+        loginRest();
         createUser();
     }
 
     @Test
     public void testListCreateAndDeleteUsers() {
         // Setup and list users
-        login();
+        loginRest();
         String userName = createUser();
         clickMenu("users");
 
@@ -43,7 +43,7 @@ public class UserTest extends TestRoutines {
     @Test
     public void testEditUser() {
         // Setup and list users
-        login();
+        loginRest();
         String userName = createUser();
         clickMenu("users");
 

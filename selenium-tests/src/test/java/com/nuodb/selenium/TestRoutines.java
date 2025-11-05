@@ -5,6 +5,7 @@ package com.nuodb.selenium;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -14,11 +15,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.hc.client5.http.ClientProtocolException;
 import org.apache.hc.client5.http.HttpHostConnectException;
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -31,13 +34,16 @@ import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 
 public class TestRoutines extends SeleniumTestHelper {
@@ -50,6 +56,7 @@ public class TestRoutines extends SeleniumTestHelper {
     private static final int MAX_RETRIES = 10;
     private static final Duration RETRY_WAIT_TIME = Duration.ofMillis(500);
 
+    ObjectMapper mapper = new ObjectMapper();
     Map<Resource, Set<String>> createdResources = new HashMap<>();
 
     private static String getenv(String key, String default_) {
@@ -89,6 +96,31 @@ public class TestRoutines extends SeleniumTestHelper {
 
     public void login() {
         login(TEST_ORGANIZATION, TEST_ADMIN_USER, TEST_ADMIN_PASSWORD);
+    }
+
+    public void loginRest() {
+        loginRest(TEST_ORGANIZATION, TEST_ADMIN_USER, TEST_ADMIN_PASSWORD);
+    }
+
+    public void loginRest(String organization, String username, String password) {
+        try {
+            HttpPost request = new HttpPost(CP_URL + "/login");
+            request.setEntity(new StringEntity("{\"expiresIn\":\"24h\"}", ContentType.APPLICATION_JSON));
+            String response = rest(request);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode node = mapper.readTree(response);
+            if(node.has("token") && node.has("expiresAtTime")) {
+                ((ObjectNode)node).put("username", organization + "/" + username);
+                setLocalStorage("credentials", mapper.writeValueAsString(node));
+            }
+            else {
+                Assertions.fail("Invalid login response: " + response);
+            }
+        }
+        catch(IOException e) {
+            throw new RuntimeException(e);
+        }
+        get("/ui/");
     }
 
     /* keep in right order - it deletes the resources from the bottom up */
@@ -169,6 +201,57 @@ public class TestRoutines extends SeleniumTestHelper {
         waitElement("create_resource__create_button").click();
         createdResources.computeIfAbsent(resource, n -> new HashSet<String>()).add(name);
         waitRestComplete();
+    }
+
+    private void createResourceRest(Resource resource, String name, String ...fieldValueList) {
+        String organization = null;
+        String project = null;
+        String database = null;
+        try {
+            ObjectNode root = mapper.createObjectNode();
+            for (int i=0; i<fieldValueList.length; i += 2) {
+                if(fieldValueList[i].equals("organization")) {
+                    organization = fieldValueList[i+1];
+                }
+                else if(fieldValueList[i].equals("project")) {
+                    project = fieldValueList[i+1];
+                }
+                else if(fieldValueList[i].equals("database")) {
+                    database = fieldValueList[i+1];
+                }
+                ObjectNode obj = root;
+                String parts[] = fieldValueList[i].split(Pattern.quote("."));
+                for(int j=0; j<parts.length-1; j++) {
+                    if(!obj.has(parts[j])) {
+                        obj = obj.putObject(parts[j]);
+                    }
+                    else {
+                        obj = (ObjectNode)obj.get(parts[j]);
+                    }
+                }
+                obj.put(parts[parts.length-1], fieldValueList[i+1]);
+            }
+            String path = "";
+            if(organization != null) {
+                if(project != null) {
+                    if(database != null) {
+                        path = "/" + organization + "/" + project + "/" + database;
+                    }
+                    else {
+                        path = "/" + organization + "/" + project;
+                    }
+                }
+                else {
+                    path = "/" + organization;
+                }
+            }
+            path += "/" + name;
+            createResourceRest(resource, path, mapper.writeValueAsString(root));
+        }
+        catch(IOException e) {
+            throw new RuntimeException(e);
+        }
+        get("/ui/resource/list/" + encodeURIComponent(resource.name()));
     }
 
     public void deleteResource(Resource resource, String name) {
@@ -332,6 +415,17 @@ public class TestRoutines extends SeleniumTestHelper {
         return name;
     }
 
+    public String createProjectRest() {
+        String name = shortUnique("p");
+        createResourceRest(Resource.projects, name,
+            "organization", TEST_ORGANIZATION,
+            "name", name,
+            "sla", "dev",
+            "tier", "n0.nano"
+        );
+        return name;
+    }
+
     public void deleteProject(String projectName) {
         deleteResource(Resource.projects, projectName);
     }
@@ -339,6 +433,17 @@ public class TestRoutines extends SeleniumTestHelper {
     public String createDatabase(String projectName) {
         String name = shortUnique("d");
         createResource(Resource.databases, name,
+            "organization", TEST_ORGANIZATION,
+            "project", projectName,
+            "name", name,
+            "dbaPassword", "passw0rd"
+        );
+        return name;
+    }
+
+    public String createDatabaseRest(String projectName) {
+        String name = shortUnique("d");
+        createResourceRest(Resource.databases, name,
             "organization", TEST_ORGANIZATION,
             "project", projectName,
             "name", name,
@@ -362,7 +467,22 @@ public class TestRoutines extends SeleniumTestHelper {
         return name;
     }
 
+    public String createBackupRest(String projectName, String databaseName) {
+        String name = shortUnique("b");
+        createResourceRest(Resource.backups, name,
+            "organization", TEST_ORGANIZATION,
+            "project", projectName,
+            "database", databaseName,
+            "name", name
+        );
+        return name;
+    }
+
     public void deleteBackup(String backupName) {
         deleteResource(Resource.backups, backupName);
+    }
+
+    private String encodeURIComponent(String uri) {
+        return URLEncoder.encode(uri, StandardCharsets.UTF_8);
     }
 }

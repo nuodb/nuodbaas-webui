@@ -16,9 +16,9 @@ import java.util.List;
 public class BackupTest extends TestRoutines {
     @Test
     public void testCreateBackup() throws MalformedURLException {
-        login();
-        String projectName = createProject();
-        String databaseName = createDatabase(projectName);
+        loginRest();
+        String projectName = createProjectRest();
+        String databaseName = createDatabaseRest(projectName);
         String backupName = createBackup(projectName, databaseName);
 
         // verify that backup was created
@@ -29,9 +29,9 @@ public class BackupTest extends TestRoutines {
     @Test
     public void testListCreateAndDeleteBackups() {
         // Setup and list Backups
-        login();
-        String projectName = createProject();
-        String databaseName = createDatabase(projectName);
+        loginRest();
+        String projectName = createProjectRest();
+        String databaseName = createDatabaseRest(projectName);
         String backupName = createBackup(projectName, databaseName);
 
         // find backup and delete
@@ -48,9 +48,9 @@ public class BackupTest extends TestRoutines {
     @Test
     public void testEditBackup() {
         // Setup and list backups
-        login();
-        String projectName = createProject();
-        String databaseName = createDatabase(projectName);
+        loginRest();
+        String projectName = createProjectRest();
+        String databaseName = createDatabaseRest(projectName);
         String backupName = createBackup(projectName, databaseName);
 
         // find backup and start edit mode

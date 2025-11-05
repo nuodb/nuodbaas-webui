@@ -10,8 +10,8 @@ import java.net.MalformedURLException;
 
 public class ResourcesTest extends TestRoutines {
     @Test
-    public void testCreateUser() throws MalformedURLException {
-        login();
+    public void testCreateDeleteResources() throws MalformedURLException {
+        loginRest();
         String user = createUser();
         String project = createProject();
         String db = createDatabase(project);

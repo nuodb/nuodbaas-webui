@@ -83,8 +83,16 @@ public class SeleniumTestHelper {
     }
 
     public void setSelenium() {
+        setLocalStorage("selenium", "true");
+    }
+
+    public void setLocalStorage(String key, String value) {
         if(driver instanceof JavascriptExecutor jsDriver) {
-            jsDriver.executeScript("localStorage.setItem('selenium','true')");
+            jsDriver.executeScript(String.format(
+                "localStorage.setItem('%s', '%s')",
+                key.replace("'", "\\'"),
+                value.replace("'", "\\'"))
+            );
         }
         else {
             throw new RuntimeException("unable to set selenium");
@@ -93,7 +101,7 @@ public class SeleniumTestHelper {
 
     public String getLocalStorage(String key) {
         if(driver instanceof JavascriptExecutor jsDriver) {
-            return jsDriver.executeScript("return localStorage.getItem('" + key + "')").toString();
+            return jsDriver.executeScript(String.format("return localStorage.getItem('%s')", key)).toString();
         }
         else {
             throw new RuntimeException("unable to set selenium");

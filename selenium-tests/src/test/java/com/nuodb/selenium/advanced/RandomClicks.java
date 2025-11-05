@@ -10,11 +10,11 @@ public class RandomClicks extends TestRoutines {
 
     @Test
     public void testRandomClicks() {
-        login();
+        loginRest();
         for(int i=0; i<3; i++) {
-            String projectName = createProject();
-            String databaseName = createDatabase(projectName);
-            createBackup(projectName, databaseName);
+            String projectName = createProjectRest();
+            String databaseName = createDatabaseRest(projectName);
+            createBackupRest(projectName, databaseName);
         }
 
         // Verify client doesn't produce a call stack by quickly clicking around (async reload issues)
