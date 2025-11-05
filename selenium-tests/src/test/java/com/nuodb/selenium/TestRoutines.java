@@ -34,6 +34,7 @@ import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
@@ -113,7 +114,7 @@ public class TestRoutines extends SeleniumTestHelper {
                 setLocalStorage("credentials", mapper.writeValueAsString(node));
             }
             else {
-                assert false : "Invalid login response: " + response;
+                Assertions.fail("Invalid login response: " + response);
             }
         }
         catch(IOException e) {
@@ -223,6 +224,9 @@ public class TestRoutines extends SeleniumTestHelper {
                 for(int j=0; j<parts.length-1; j++) {
                     if(!obj.has(parts[j])) {
                         obj = obj.putObject(parts[j]);
+                    }
+                    else {
+                        obj = (ObjectNode)obj.get(parts[j]);
                     }
                 }
                 obj.put(parts[parts.length-1], fieldValueList[i+1]);
