@@ -1,5 +1,5 @@
 #!/bin/sh
-# (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+# (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 if [ "$1" == "tgz_static" ] ; then
     echo "Extract static files from image" 1>&2
@@ -16,18 +16,19 @@ fi
 
 if [ "${NUODBAAS_WEBUI_PATH_PREFIX}" != "" ] ; then
     find /usr/share/nginx/html -type f | while read line; do
-        sed -i "s:\"/ui/:\"/${NUODBAAS_WEBUI_PATH_PREFIX}/:g" ${line}
-        sed -i "s:\"/ui\":\"/${NUODBAAS_WEBUI_PATH_PREFIX}\":g" ${line}
+        sed "s:\"/ui/:\"/${NUODBAAS_WEBUI_PATH_PREFIX}/:g" "${line}" \
+            | sed "s:\"/ui\":\"/${NUODBAAS_WEBUI_PATH_PREFIX}\":g" > "${line}.tmp" \
+            && mv "${line}.tmp" "${line}"
     done
     mv /usr/share/nginx/html/ui "/usr/share/nginx/html/${NUODBAAS_WEBUI_PATH_PREFIX}"
 fi
 
 if [ "${NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE}" != "" ] ; then
     find /usr/share/nginx/html -type f | while read line; do
-        sed -i "s:\"/webui/:\"/${NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE}/:g" ${line}
-        sed -i "s:\"/webui\":\"/${NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE}\":g" ${line}
+        sed "s:\"/webui/:\"/${NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE}/:g" "${line}" \
+            | sed -i "s:\"/webui\":\"/${NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE}\":g" > "${line}.tmp" \
+            && mv "${line}.tmp" "${line}"
     done
-    mv /usr/share/nginx/html/ui "/usr/share/nginx/html/${NUODBAAS_WEBUI_PATH_PREFIX}"
 fi
 
 exec nginx -g "daemon off;"
