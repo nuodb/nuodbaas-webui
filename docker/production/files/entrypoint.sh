@@ -22,4 +22,12 @@ if [ "${NUODBAAS_WEBUI_PATH_PREFIX}" != "" ] ; then
     mv /usr/share/nginx/html/ui "/usr/share/nginx/html/${NUODBAAS_WEBUI_PATH_PREFIX}"
 fi
 
+if [ "${NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE}" != "" ] ; then
+    find /usr/share/nginx/html -type f | while read line; do
+        sed -i "s:\"/webui/:\"/${NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE}/:g" ${line}
+        sed -i "s:\"/webui\":\"/${NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE}\":g" ${line}
+    done
+    mv /usr/share/nginx/html/ui "/usr/share/nginx/html/${NUODBAAS_WEBUI_PATH_PREFIX}"
+fi
+
 exec nginx -g "daemon off;"
