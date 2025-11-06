@@ -24,6 +24,7 @@ import { getOrgFromPath } from './utils/schema';
 import Toast from './components/controls/Toast';
 import BackgroundTasks, { BackgroundTaskType } from './utils/BackgroundTasks';
 import { withTranslation } from 'react-i18next';
+import Redirect from './components/pages/Redirect';
 
 /**
  * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
@@ -132,6 +133,8 @@ function App({ t }: { t: any }) {
                   <Route path="/ui/automation" element={<Automation {...pageProps} />} />
                   <Route path="/ui/page/sql/:organization/:project/:database" element={<SqlPage {...pageProps} />} />
                   <Route path="/ui" element={<Navigate to={getHomeUrl()} />} />
+                  <Route path="/webui" element={<Navigate to="/ui" />} />
+                  <Route path="/webui/*" element={<Redirect baseUrl="/ui" />} />
                   <Route path="/*" element={<NotFound {...pageProps} />} />
                 </Routes>
               </React.Fragment>

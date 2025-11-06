@@ -45,6 +45,8 @@ spec:
               value: {{ .Values.nuodbaasWebui.cpUrl }}
             - name: NUODBAAS_WEBUI_PATH_PREFIX
               value: {{ .Values.nuodbaasWebui.ingress.pathPrefix }}
+            - name: NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE
+              value: {{ .Values.nuodbaasWebui.ingress.pathPrefixAlternate }}
             {{- include "nuodbaas-webui.env" . | nindent 12 }}
           livenessProbe:
             {{- include "nuodbaas-webui.probe" . | nindent 12 }}
