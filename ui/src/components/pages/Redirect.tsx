@@ -9,7 +9,7 @@ type RedirectProps = {
 export default function Redirect({baseUrl} : RedirectProps) {
     const params = useParams()["*"];
     if (params) {
-        const path = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + useParams()["*"];
+        const path = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + params;
         return <Navigate to={path} />;
     }
     else {
