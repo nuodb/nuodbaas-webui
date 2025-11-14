@@ -10,7 +10,7 @@ ARCH := $(shell uname -m | sed "s/x86_64/amd64/g" | sed "s/aarch64/arm64/g")
 KIND_VERSION ?= 0.27.0
 KUBECTL_VERSION ?= 1.28.3
 HELM_VERSION ?= 3.16.2
-NUODB_CP_VERSION ?= 2.8.1
+NUODB_CP_VERSION ?= 2.10.0
 
 NUODB_CP_REPO ?= ../nuodb-control-plane
 
@@ -88,13 +88,30 @@ uninstall-crds: $(KIND) $(HELM)
 		$(HELM) uninstall --ignore-not-found -n default nuodb-cp-crd; \
 	fi
 
+.PHONY: pull-aws-docker-image
+pull-aws-docker-image:
+	@if [ "${AWS_REGION}" = "" ] || [ "${AWS_ACCESS_KEY_ID}" = "" ] || [ "${AWS_SECRET_ACCESS_KEY}" = "" ] ; then \
+		echo "Must specify AWS_REGION, AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables"; \
+		exit 1; \
+	fi
+	@AWS_ACCOUNT_ID="$(shell aws sts get-caller-identity --query Account | sed 's/^"\(.*\)"$$/\1/g')" \
+	ECR_ACCOUNT_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com" \
+	aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${ECR_ACCOUNT_URL}" \
+	&& docker pull ${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane:$(NUODB_CP_VERSION)-main-latest \
+	&& docker tag ${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane:$(NUODB_CP_VERSION)-main-latest nuodb/nuodb-control-plane
+
 .PHONY: build-cp
 build-cp:
+	# Build / Pull nuodb-control-plane image
+	# 1. Attempt to build from adjacent directory (i.e. in the development environment)
+	# 2. If (1) fails, attempt to pull a release image from github (typically for patch builds)
+	# 3. If (2) fails, pull image from AWS (for the latest build in the "main" branch)
 	@if [ -f $(NUODB_CP_REPO)/Makefile ] ; then \
-		docker images --format={{.Repository}}:{{.Tag}} | grep -q nuodb/nuodb-control-plane:latest || make -C $(NUODB_CP_REPO) docker-build; \
+		make -C $(NUODB_CP_REPO) docker-build; \
 	else \
-		docker pull ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION); \
-		docker tag ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION) nuodb/nuodb-control-plane; \
+		docker pull ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION) 2> /dev/null \
+		&& docker tag ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION) nuodb/nuodb-control-plane \
+		|| make pull-aws-docker-image; \
 	fi
 
 .PHONY: deploy-cp
