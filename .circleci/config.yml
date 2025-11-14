@@ -228,8 +228,6 @@ workflows:
     jobs:
       # run test jobs in parallel
       - build_and_deploy:
-          requires:
-            - "Build image"
           name: "Test and deploy"
           context:
             - common-config
