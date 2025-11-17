@@ -84,7 +84,7 @@ install-crds: create-cluster $(HELM)
 		$(HELM) upgrade --install -n default nuodb-cp-crd $(NUODB_CP_REPO)/charts/nuodb-cp-crd; \
 	else \
 		$(HELM) upgrade --install -n default nuodb-cp-crd nuodb-cp-crd --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION) \
-		|| make install-crds-from-aws
+		|| make install-crds-from-aws; \
 	fi
 
 .PHONY: uninstall-crds
