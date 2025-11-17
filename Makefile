@@ -131,7 +131,8 @@ deploy-cp-from-aws: aws-login $(HELM) $(KIND)
 		--version $(NUODB_CP_VERSION)-main-latest \
 		--set image.repository=${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane \
 		--set image.tag=$(NUODB_CP_VERSION)-main-latest \
-		--set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
+		--set cpRest.ingress.enabled=true \
+		--set cpRest.ingress.pathPrefix=api \
 		--set cpRest.extraArgs[0]=-p \
 		--set cpRest.extraArgs[1]='com.nuodb.controlplane.server.passthroughLabelKeyPrefixes=ds.com/\,*.ds.com/'
 
