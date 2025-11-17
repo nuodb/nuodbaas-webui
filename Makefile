@@ -74,12 +74,17 @@ create-cluster: $(KIND) $(KUBECTL)
 	@sed "s|server: https://127.0.0.1:.[0-9]\+|server: https://kind-control-plane:6443|g" selenium-tests/files/kubeconfig > selenium-tests/files/kubeconfig.tmp && \
 		mv selenium-tests/files/kubeconfig.tmp selenium-tests/files/kubeconfig
 
+.PHONY: install-crds-from-aws
+install-crds-from-aws: create-cluster $(HELM) aws-login
+		$(HELM) upgrade --install -n default nuodb-cp-crd oci://${ECR_ACCOUNT_URL}/nuodb-cp-crd --version $(NUODB_CP_VERSION)-main-latest
+
 .PHONY: install-crds
 install-crds: create-cluster $(HELM)
 	@if [ -d $(NUODB_CP_REPO)/charts/nuodb-cp-crd/templates ] ; then \
-		$(HELM) install -n default nuodb-cp-crd $(NUODB_CP_REPO)/charts/nuodb-cp-crd; \
+		$(HELM) upgrade --install -n default nuodb-cp-crd $(NUODB_CP_REPO)/charts/nuodb-cp-crd; \
 	else \
-		$(HELM) install -n default nuodb-cp-crd nuodb-cp-crd --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION); \
+		$(HELM) upgrade --install -n default nuodb-cp-crd nuodb-cp-crd --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION) \
+		|| make install-crds-from-aws
 	fi
 
 .PHONY: uninstall-crds
