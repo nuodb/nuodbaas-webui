@@ -88,16 +88,19 @@ uninstall-crds: $(KIND) $(HELM)
 		$(HELM) uninstall --ignore-not-found -n default nuodb-cp-crd; \
 	fi
 
-.PHONY: pull-aws-docker-image
-pull-aws-docker-image:
+.PHONY: aws-login
+aws-login:
 	@if [ "${AWS_REGION}" = "" ] || [ "${AWS_ACCESS_KEY_ID}" = "" ] || [ "${AWS_SECRET_ACCESS_KEY}" = "" ] ; then \
 		echo "Must specify AWS_REGION, AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables"; \
 		exit 1; \
 	fi
 	@AWS_ACCOUNT_ID="$(shell aws sts get-caller-identity --query Account | sed 's/^"\(.*\)"$$/\1/g')" \
 	ECR_ACCOUNT_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com" \
-	aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${ECR_ACCOUNT_URL}" \
-	&& docker pull ${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane:$(NUODB_CP_VERSION)-main-latest \
+	aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${ECR_ACCOUNT_URL}"
+
+.PHONY: build-cp-from-aws
+build-cp-from-aws: aws-login
+	docker pull ${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane:$(NUODB_CP_VERSION)-main-latest \
 	&& docker tag ${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane:$(NUODB_CP_VERSION)-main-latest nuodb/nuodb-control-plane
 
 .PHONY: build-cp
@@ -111,8 +114,21 @@ build-cp:
 	else \
 		docker pull ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION) 2> /dev/null \
 		&& docker tag ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION) nuodb/nuodb-control-plane \
-		|| make pull-aws-docker-image; \
+		|| make build-cp-from-aws; \
 	fi
+
+.PHONY: deploy-cp-from-aws
+deploy-cp-from-aws: aws-login $(HELM) $(KIND)
+	@docker pull ${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane:$(NUODB_CP_VERSION)-main-latest \
+	&& $(KIND) load docker-image ${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane:$(NUODB_CP_VERSION)-main-latest \
+	&& $(HELM) upgrade --install --wait -n default nuodb-cp \
+		oci://${ECR_ACCOUNT_URL}/nuodb-cp-rest \
+		--version $(NUODB_CP_VERSION)-main-latest \
+		--set image.repository=${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane \
+		--set image.tag=$(NUODB_CP_VERSION)-main-latest \
+		--set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
+		--set cpRest.extraArgs[0]=-p \
+		--set cpRest.extraArgs[1]='com.nuodb.controlplane.server.passthroughLabelKeyPrefixes=ds.com/\,*.ds.com/'
 
 .PHONY: deploy-cp
 deploy-cp: build-cp $(HELM) $(KIND)
@@ -133,7 +149,7 @@ deploy-cp: build-cp $(HELM) $(KIND)
 			--set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
 			--set cpRest.extraArgs[0]=-p \
 			--set cpRest.extraArgs[1]='com.nuodb.controlplane.server.passthroughLabelKeyPrefixes=ds.com/\,*.ds.com/' \
-			; \
+		|| make deploy-cp-from-aws; \
 	fi
 
 .PHONY: undeploy-cp
@@ -141,6 +157,19 @@ undeploy-cp: $(KIND) $(HELM)
 	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
 		$(HELM) uninstall --ignore-not-found -n default nuodb-cp || true; \
 	fi
+
+.PHONY: deploy-operator-from-aws
+deploy-operator-from-aws: aws-login $(KIND) $(HELM)
+	@docker pull ${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane:$(NUODB_CP_VERSION)-main-latest \
+	&& $(KIND) load docker-image ${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane:$(NUODB_CP_VERSION)-main-latest \
+	&& $(HELM) upgrade --install --wait -n default nuodb-operator \
+	oci://${ECR_ACCOUNT_URL}/nuodb-cp-operator --version $(NUODB_CP_VERSION)-main-latest \
+	--set image.repository=${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane \
+	--set image.tag=$(NUODB_CP_VERSION)-main-latest \
+	--set nuodb-cp-config.nuodb.license.enabled=true \
+	--set nuodb-cp-config.nuodb.license.secret.create=true \
+	--set nuodb-cp-config.nuodb.license.secret.name=nuodb-license \
+	--set nuodb-cp-config.nuodb.license.content="$(shell cat nuodb.lic)"
 
 .PHONY: deploy-operator
 deploy-operator: build-cp nuodb.lic $(HELM) $(KIND)
@@ -159,7 +188,8 @@ deploy-operator: build-cp nuodb.lic $(HELM) $(KIND)
         --set nuodb-cp-config.nuodb.license.enabled=true \
         --set nuodb-cp-config.nuodb.license.secret.create=true \
         --set nuodb-cp-config.nuodb.license.secret.name=nuodb-license \
-        --set nuodb-cp-config.nuodb.license.content="$(shell cat nuodb.lic)"; \
+        --set nuodb-cp-config.nuodb.license.content="$(shell cat nuodb.lic)" \
+		|| make deploy-operator-from-aws; \
 	fi
 
 .PHONY: undeploy-operator
