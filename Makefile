@@ -28,6 +28,9 @@ UNCOMMITTED := $(shell git status --porcelain)
 
 MVN_TEST ?= ResourcesTest
 
+HELM_CP_SETTINGS := --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api --set cpRest.extraArgs[0]=-p --set cpRest.extraArgs[1]='com.nuodb.controlplane.server.passthroughLabelKeyPrefixes=ds.com/\,*.ds.com/'
+HELM_OPERATOR_SETTINGS := --set nuodb-cp-config.nuodb.license.enabled=true --set nuodb-cp-config.nuodb.license.secret.create=true --set nuodb-cp-config.nuodb.license.secret.name=nuodb-license --set nuodb-cp-config.nuodb.license.content="$(shell cat nuodb.lic)"
+
 # The help target prints out all targets with their descriptions organized
 # beneath their categories. The categories are represented by '##@' and the
 # target descriptions by '##'. The awk commands is responsible for reading the
@@ -84,7 +87,7 @@ install-crds: create-cluster $(HELM)
 		$(HELM) upgrade --install -n default nuodb-cp-crd $(NUODB_CP_REPO)/charts/nuodb-cp-crd; \
 	else \
 		$(HELM) upgrade --install -n default nuodb-cp-crd nuodb-cp-crd --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION) \
-		|| make install-crds-from-aws; \
+		|| ${MAKE} install-crds-from-aws; \
 	fi
 
 .PHONY: uninstall-crds
@@ -103,8 +106,8 @@ aws-login:
 	ECR_ACCOUNT_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com" \
 	aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${ECR_ACCOUNT_URL}"
 
-.PHONY: build-cp-from-aws
-build-cp-from-aws: aws-login
+.PHONY: pull-cp-from-ecr
+pull-cp-from-ecr: aws-login
 	docker pull ${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane:$(NUODB_CP_VERSION)-main-latest \
 	&& docker tag ${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane:$(NUODB_CP_VERSION)-main-latest nuodb/nuodb-control-plane
 
@@ -115,15 +118,15 @@ build-cp:
 	# 2. If (1) fails, attempt to pull a release image from github (typically for patch builds)
 	# 3. If (2) fails, pull image from AWS (for the latest build in the "main" branch)
 	@if [ -f $(NUODB_CP_REPO)/Makefile ] ; then \
-		make -C $(NUODB_CP_REPO) docker-build; \
+		${MAKE} -C $(NUODB_CP_REPO) docker-build; \
 	else \
 		docker pull ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION) 2> /dev/null \
 		&& docker tag ghcr.io/nuodb/nuodb-cp-images:$(NUODB_CP_VERSION) nuodb/nuodb-control-plane \
-		|| make build-cp-from-aws; \
+		|| ${MAKE} pull-cp-from-ecr; \
 	fi
 
-.PHONY: deploy-cp-from-aws
-deploy-cp-from-aws: aws-login $(HELM) $(KIND)
+.PHONY: deploy-rest-from-aws
+deploy-rest-from-aws: aws-login $(HELM) $(KIND)
 	@docker pull ${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane:$(NUODB_CP_VERSION)-main-latest \
 	&& $(KIND) load docker-image ${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane:$(NUODB_CP_VERSION)-main-latest \
 	&& $(HELM) upgrade --install --wait -n default nuodb-cp \
@@ -131,10 +134,7 @@ deploy-cp-from-aws: aws-login $(HELM) $(KIND)
 		--version $(NUODB_CP_VERSION)-main-latest \
 		--set image.repository=${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane \
 		--set image.tag=$(NUODB_CP_VERSION)-main-latest \
-		--set cpRest.ingress.enabled=true \
-		--set cpRest.ingress.pathPrefix=api \
-		--set cpRest.extraArgs[0]=-p \
-		--set cpRest.extraArgs[1]='com.nuodb.controlplane.server.passthroughLabelKeyPrefixes=ds.com/\,*.ds.com/'
+		$(HELM_CP_SETTINGS)
 
 .PHONY: deploy-cp
 deploy-cp: build-cp $(HELM) $(KIND)
@@ -143,19 +143,14 @@ deploy-cp: build-cp $(HELM) $(KIND)
 		$(HELM) upgrade --install --wait -n default nuodb-cp $(NUODB_CP_REPO)/charts/nuodb-cp-rest \
 			--set image.repository=nuodb/nuodb-control-plane \
 			--set image.tag=latest \
-			--set cpRest.ingress.enabled=true \
-			--set cpRest.ingress.pathPrefix=api \
-			--set cpRest.extraArgs[0]=-p \
-			--set cpRest.extraArgs[1]='com.nuodb.controlplane.server.passthroughLabelKeyPrefixes=ds.com/\,*.ds.com/' \
+			$(HELM_CP_SETTINGS) \
 			; \
 	else \
 		$(HELM) upgrade --install --wait -n default nuodb-cp nuodb-cp-rest \
 			--repo https://nuodb.github.io/nuodb-cp-releases/charts \
 			--version $(NUODB_CP_VERSION) \
-			--set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api; \
-			--set cpRest.extraArgs[0]=-p \
-			--set cpRest.extraArgs[1]='com.nuodb.controlplane.server.passthroughLabelKeyPrefixes=ds.com/\,*.ds.com/' \
-		|| make deploy-cp-from-aws; \
+			$(HELM_CP_SETTINGS) \
+		|| ${MAKE} deploy-rest-from-aws; \
 	fi
 
 .PHONY: undeploy-cp
@@ -172,10 +167,7 @@ deploy-operator-from-aws: aws-login $(KIND) $(HELM)
 	oci://${ECR_ACCOUNT_URL}/nuodb-cp-operator --version $(NUODB_CP_VERSION)-main-latest \
 	--set image.repository=${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane \
 	--set image.tag=$(NUODB_CP_VERSION)-main-latest \
-	--set nuodb-cp-config.nuodb.license.enabled=true \
-	--set nuodb-cp-config.nuodb.license.secret.create=true \
-	--set nuodb-cp-config.nuodb.license.secret.name=nuodb-license \
-	--set nuodb-cp-config.nuodb.license.content="$(shell cat nuodb.lic)"
+	$(HELM_OPERATOR_SETTINGS)
 
 .PHONY: deploy-operator
 deploy-operator: build-cp nuodb.lic $(HELM) $(KIND)
@@ -185,17 +177,12 @@ deploy-operator: build-cp nuodb.lic $(HELM) $(KIND)
 		$(HELM) upgrade --install --wait -n default nuodb-operator $(NUODB_CP_REPO)/charts/nuodb-cp-operator \
 		--set image.repository=nuodb/nuodb-control-plane \
 		--set image.tag=latest \
-        --set nuodb-cp-config.nuodb.license.enabled=true \
-        --set nuodb-cp-config.nuodb.license.secret.create=true \
-        --set nuodb-cp-config.nuodb.license.secret.name=nuodb-license \
-        --set nuodb-cp-config.nuodb.license.content="$(shell cat nuodb.lic)"; \
+        $(HELM_OPERATOR_SETTINGS); \
+	elif [ "`curl "https://nuodb.github.io/nuodb-cp-releases/charts/index.yaml" | grep -e "appVersion: $(NUODB_CP_VERSION)$$"`" = "" ] ; then \
+		${MAKE} deploy-operator-from-aws; \
 	else \
 		$(HELM) upgrade --install --wait -n default nuodb-operator nuodb-cp-operator --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION) \
-        --set nuodb-cp-config.nuodb.license.enabled=true \
-        --set nuodb-cp-config.nuodb.license.secret.create=true \
-        --set nuodb-cp-config.nuodb.license.secret.name=nuodb-license \
-        --set nuodb-cp-config.nuodb.license.content="$(shell cat nuodb.lic)" \
-		|| make deploy-operator-from-aws; \
+        $(HELM_OPERATOR_SETTINGS); \
 	fi
 
 .PHONY: undeploy-operator
@@ -207,7 +194,7 @@ undeploy-operator: $(KIND) $(HELM)
 .PHONY: build-sql
 build-sql:
 	@if [ -f ../nuodbaas-sql/Makefile ] ; then \
-		cd ../nuodbaas-sql; make build-image; \
+		cd ../nuodbaas-sql; ${MAKE} build-image; \
 	fi
 
 .PHONY: deploy-sql
@@ -226,7 +213,7 @@ undeploy-sql: $(KIND) $(HELM) build-sql
 .PHONY: build-webui
 build-webui:
 	@if [ -f Makefile ] ; then \
-		make build-image; \
+		${MAKE} build-image; \
 	else \
 		docker pull ghcr.io/nuodb/nuodbaas-webui; \
 		docker tag ghcr.io/nuodb/nuodbaas-webui nuodbaas-webui; \
