@@ -35,49 +35,8 @@ executors:
     resource_class: medium
 
 jobs:
-  build_image:
-    executor: ubuntu_vm
-    environment:
-      NUODB_CP_COMMIT: d84cb0d9f4116ef6391cfd7533712f22f8e62a2e
-    steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints: # add SSH deploy key for nuodb/nuodb-control-plane repository
-            - "SHA256:rXyFWvQb0aSIvZXMOSVqlNtRlLK4m81yak/ivRtfBDA"
-      - run:
-          name: Prepare persistent workspace for Control Plane repository and image
-          command: |
-            mkdir -p /tmp/workspace
-      - run:
-          name: Checkout NuoDB Control Plane repository
-          command: |
-            git clone git@github.com:nuodb/nuodb-control-plane.git /tmp/workspace/nuodb-control-plane
-            cd /tmp/workspace/nuodb-control-plane
-            git checkout "$NUODB_CP_COMMIT"
-      - run:
-          name: Build Control Plane Image
-          command: |
-            cd /tmp/workspace/nuodb-control-plane
-            make docker-build
-          environment:
-            IMG_REPO: nuodb/nuodb-control-plane
-      - run:
-          name: Save Docker image to file
-          command: |
-            cd /tmp/workspace/nuodb-control-plane
-            ./docker/save.sh
-          environment:
-            IMG_REPO: nuodb/nuodb-control-plane
-            IMG_FILE: /tmp/workspace/nuodb-control-plane.tar
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - "*"
-
   build_and_deploy:
     executor: ubuntu_vm
-    environment:
-      NUODB_CP_REPO: /tmp/workspace/nuodb-control-plane
     machine:
       image: ubuntu-2204:2023.10.1
     resource_class: large
@@ -108,12 +67,6 @@ jobs:
           name: Login to Github Container Registry
           command: |
             echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_USER" --password-stdin
-      - attach_workspace:
-          at: /tmp/workspace
-      - run:
-          name: Load Control Plane Image
-          command: |
-            docker load -i /tmp/workspace/nuodb-control-plane.tar
       - run:
           name: Checking if Docker image exists already
           command: |
@@ -274,11 +227,7 @@ workflows:
   continuous:
     jobs:
       # run test jobs in parallel
-      - build_image:
-          name: "Build image"
       - build_and_deploy:
-          requires:
-            - "Build image"
           name: "Test and deploy"
           context:
             - common-config
