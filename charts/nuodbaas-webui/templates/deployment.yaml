@@ -48,6 +48,7 @@ spec:
             - name: NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE
               value: {{ .Values.nuodbaasWebui.ingress.pathPrefixAlternate }}
             {{- include "nuodbaas-webui.env" . | nindent 12 }}
+          envFrom: []
           livenessProbe:
             {{- include "nuodbaas-webui.probe" . | nindent 12 }}
             timeoutSeconds: {{ max (sub .Values.nuodbaasWebui.livenessTimeoutSeconds 5) 5 }}
