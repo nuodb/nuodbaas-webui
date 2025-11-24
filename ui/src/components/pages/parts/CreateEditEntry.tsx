@@ -536,8 +536,19 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
         })
     }
 
+    let sectionsWithStatus = sectionFormParameters.map(section => {
+        return showSectionFields(section);
+    });
+    if (values.status && readonly) {
+        sectionsWithStatus.push(<Tab key="section-status" id="section-status" label="Status">
+            {FieldFactory.create({
+                path, prefix: "status", label: "Status", parameter: formParameters["status"], values, t: t,
+                errors: {}, required: false, autoFocus: false, expand: false, hideTitle: true, readonly: true, updateErrors: () => { }, setValues: () => { }
+            }).show()}</Tab>);
+    }
+
     return <>
-        <ResourceHeader schema={schema} path={path} type={readonly ? "view" : data ? "edit" : "create"} onAction={() => {
+        <ResourceHeader schema={schema} path={path} data={data} type={readonly ? "view" : data ? "edit" : "create"} onAction={() => {
             if (readonly) {
                 navigate("/ui/resource/edit" + path);
             }
@@ -552,9 +563,7 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
                     setFocusField(null);
                 }}
                     badges={badges}>
-                    {sectionFormParameters.map(section => {
-                        return showSectionFields(section);
-                    })}
+                    {sectionsWithStatus}
                 </Tabs>
 
                 {("_error" in errors) && <h3 style={{ color: "red" }}>{errors["_error"]}</h3>}

@@ -191,7 +191,7 @@ function SqlImportTab({ sqlConnection, dbTable, tasks, setTasks }: SqlImportTabP
                     <TableCell></TableCell>
                     <TableCell></TableCell>
                     <TableCell></TableCell>
-                    <td><Button className="NuoButton" onClick={() => { addToQueue(files); }}>{t("button.sql.addAllToQueue")}</Button></td>
+                    <td><Button onClick={() => { addToQueue(files); }}>{t("button.sql.addAllToQueue")}</Button></td>
                 </TableRow>}
                 {tasks.filter(t => t.id.startsWith(TASK_ID_PREFIX)).map((task) => {
                     return <TableRow key={task.data.file.name}>

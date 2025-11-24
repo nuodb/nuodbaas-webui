@@ -261,7 +261,7 @@ export function getFilterField(rootSchema: TempAny, path: string): string|null|s
     }
 }
 
-export function concatChunks(chunk1: Uint8Array, chunk2: Uint8Array) : Uint8Array {
+export function concatChunks(chunk1: Uint8Array<ArrayBuffer>, chunk2: Uint8Array<ArrayBuffer>) : Uint8Array<ArrayBuffer> {
     let ret = new Uint8Array(chunk1.length + chunk2.length);
     ret.set(chunk1, 0);
     ret.set(chunk2, chunk1.length);
@@ -319,7 +319,7 @@ export function getResourceEvents(path: string, multiResolve: TempAny, multiReje
                         mergedData = JSON.parse(data);
                         multiResolve(mergedData);
                     }
-                    else if(event === "UPDATED" && id !== null && data !== null) {
+                    else if(event === "UPDATED" && id !== null && mergedData.items && data !== null) {
                         let newData: TempAny = {...mergedData};
                         newData.items = [...newData.items];
                         let modified = false;
@@ -339,7 +339,11 @@ export function getResourceEvents(path: string, multiResolve: TempAny, multiReje
                             console.error("item with id " + id + " not found for merging");
                         }
                     }
-                    else if(event === "DELETED" && id !== null) {
+                    else if(event === "UPDATED" && data !== null && !mergedData.items) {
+                        mergedData = JSON.parse(data);
+                        multiResolve(mergedData);
+                    }
+                    else if(event === "DELETED" && id !== null && mergedData.items) {
                         let newData: TempAny = {...mergedData};
                         newData.items = [...newData.items];
                         let modified = false;
@@ -354,6 +358,10 @@ export function getResourceEvents(path: string, multiResolve: TempAny, multiReje
                             mergedData = newData;
                             multiResolve(mergedData);
                         }
+                    }
+                    else if(event === "DELETED" && !mergedData.items) {
+                        mergedData = {};
+                        multiResolve(mergedData);
                     }
                     else if(event === "CREATED" && id !== null && data !== null) {
                         data = JSON.parse(data);

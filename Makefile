@@ -11,6 +11,7 @@ KIND_VERSION ?= 0.27.0
 KUBECTL_VERSION ?= 1.28.3
 HELM_VERSION ?= 3.16.2
 NUODB_CP_VERSION ?= 2.10.0
+PROMETHEUS_VERSION ?= 79.6.1
 
 NUODB_CP_REPO ?= ../nuodb-control-plane
 
@@ -191,6 +192,17 @@ undeploy-operator: $(KIND) $(HELM)
 		$(HELM) uninstall --no-hooks --ignore-not-found -n default nuodb-operator || true; \
 	fi
 
+.PHONY: deploy-monitoring
+deploy-monitoring:
+	helm repo add prometheus-community "https://prometheus-community.github.io/helm-charts"
+	helm upgrade --install -n default kube-prometheus-stack prometheus-community/kube-prometheus-stack --wait
+
+.PHONY: undeploy-monitoring
+undeploy-monitoring:
+	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
+		$(HELM) uninstall prometheus-community; \
+	fi
+
 .PHONY: build-sql
 build-sql:
 	@if [ -f ../nuodbaas-sql/Makefile ] ; then \
@@ -246,7 +258,7 @@ setup-nginx-default-conf:
 	fi
 
 .PHONY: setup-integration-tests
-setup-integration-tests: $(KUBECTL) build-image setup-nginx-default-conf install-crds deploy-cp deploy-operator deploy-sql deploy-webui ## setup containers before running integration tests
+setup-integration-tests: $(KUBECTL) build-image setup-nginx-default-conf install-crds deploy-monitoring deploy-cp deploy-operator deploy-sql deploy-webui ## setup containers before running integration tests
 	@if [ "$(ARCH)" = "arm64" ] ; then \
 		docker pull seleniarm/standalone-chromium && \
 		docker tag seleniarm/standalone-chromium selenium-standalone; \
@@ -274,7 +286,7 @@ setup-integration-tests: $(KUBECTL) build-image setup-nginx-default-conf install
 	@$(KUBECTL) get pods -A
 
 .PHONY: teardown-integration-tests
-teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-operator undeploy-cp uninstall-crds ## clean up containers used by integration tests
+teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-operator undeploy-cp undeploy-monitoring uninstall-crds ## clean up containers used by integration tests
 	@docker compose -f selenium-tests/compose.yaml down
 	@if [ -f $(PREVIOUS_CONTEXT) ] ; then \
 		cat $(PREVIOUS_CONTEXT) | xargs -r $(KUBECTL) config use-context; \

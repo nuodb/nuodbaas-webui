@@ -13,8 +13,13 @@ export type ButtonProps = {
     onClick: () => void
 }
 export default function Button(props: ButtonProps): JSX.Element {
-    return <button {...props} onClick={(event) => {
-        event.preventDefault();
-        props.onClick();
-    }}>{props.children}</button>
+    return <button
+        {...props}
+        className={props.variant === "outlined" ? "NuoButtonOutlined" : props.variant === "text" ? "NuoButtonText" : ""}
+        onClick={(event) => {
+            event.preventDefault();
+            props.onClick();
+        }}>
+        {props.children}
+    </button>
 }
