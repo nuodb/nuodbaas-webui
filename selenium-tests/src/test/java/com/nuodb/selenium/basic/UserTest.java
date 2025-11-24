@@ -67,7 +67,7 @@ public class UserTest extends TestRoutines {
         waitElement("add_button_labels").click();
 
         // save user
-        waitElement("create_resource__create_button").click();
+        waitElement("create_resource__save_button").click();
         waitRestComplete();
 
         // verify user was modified

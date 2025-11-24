@@ -59,7 +59,7 @@ public class ProjectTest extends TestRoutines {
             waitElement("section-title-advanced").click();
             waitElement("section-maintenance").click();
             replaceInputElementByName("maintenance.expiresIn", "30d");
-            waitElement("create_resource__create_button").click();
+            waitElement("create_resource__save_button").click();
             waitRestComplete();
 
             // verify project was modified

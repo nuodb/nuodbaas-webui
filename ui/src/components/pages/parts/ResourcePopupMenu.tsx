@@ -170,6 +170,6 @@ export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:Re
             }
         })
     }
-    return <Menu popupId={"row_menu_" + row["$ref"]} items={buttons} defaultItem={defaultItem} align="right" />;
+    return <Menu data-testid="resource-popup-menu" popupId={"row_menu_" + row["$ref"]} items={buttons} defaultItem={defaultItem} align="right" />;
 
 }

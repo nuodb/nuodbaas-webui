@@ -37,7 +37,7 @@ export default function Menu(props: MenuProps): JSX.Element {
 
     if (children) {
         return <div className={mainItem && "NuoButtonDown"}>
-            {mainItem && <button onClick={mainItem.onClick}>
+            {mainItem && <button data-testid={mainItem["data-testid"]} onClick={mainItem.onClick}>
                 <div className="NuoIcon">{mainItem.icon}</div>{mainItem.label}</button>}
             <div className="NuoRowFixed"
             tabIndex={0}
@@ -65,8 +65,6 @@ export default function Menu(props: MenuProps): JSX.Element {
     }
 }
 
-type AlignType = "right" | "left";
-
 interface PopupMenuProps extends MenuProps {
     anchor: Element;
     clearAnchor: () => void;
@@ -74,6 +72,7 @@ interface PopupMenuProps extends MenuProps {
 
 type MenuItemsProps = {
     items: MenuItemProps[];
+    defaultItem?: string;
     setItems?: (items: MenuItemProps[]) => void;
     draggable?: boolean;
     selected?: string;
@@ -83,7 +82,7 @@ type MenuItemsProps = {
     dndStart: (e: any) => void;
 };
 
-function MenuItems({ items, setItems, draggable, selected, clearAnchor, dndDrop, dndOver, dndStart }: MenuItemsProps) {
+function MenuItems({ items, setItems, defaultItem, draggable, selected, clearAnchor, dndDrop, dndOver, dndStart }: MenuItemsProps) {
     let refs = items.map(item => React.createRef<HTMLDivElement | null>());
 
     useEffect(() => {
@@ -99,7 +98,7 @@ function MenuItems({ items, setItems, draggable, selected, clearAnchor, dndDrop,
 
     return items.map((item: MenuItemProps, index: number) => <div style={{ zIndex: 102 }}
         id={item.id}
-        data-testid={item["data-testid"]}
+        data-testid={(defaultItem ? "popupmenu-" : "") + item["data-testid"]}
         ref={refs[index]}
         draggable={draggable && item.id !== "name"}
         onDrop={item.id === "name" ? undefined : dndDrop}
@@ -280,6 +279,7 @@ export function PopupMenu(props: PopupMenuProps) {
             }}>
             <MenuItems
                 items={props.items}
+                defaultItem={props.defaultItem}
                 setItems={props.setItems}
                 selected={props.selected}
                 draggable={props.draggable}

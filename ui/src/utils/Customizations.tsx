@@ -4,7 +4,7 @@ import axios from "axios";
 import { TempAny } from "./types";
 import { getValue } from "../components/fields/utils";
 import { matchesPath } from "./schema";
-import React, { useEffect, useState } from "react";
+import React, { JSX, useEffect, useState } from "react";
 
 export const LOCAL_USER_SETTINGS = "nuodbaas_webui_userSettings";
 

@@ -62,7 +62,7 @@ public class DatabaseTest extends TestRoutines {
         waitInputElementByName("labels.key").sendKeys(projectName);
         waitInputElementByName("labels.value").sendKeys(databaseName);
         waitElement("add_button_labels").click();
-        waitElement("create_resource__create_button").click();
+        waitElement("create_resource__save_button").click();
         waitRestComplete();
 
         // verify database was modified
@@ -114,4 +114,50 @@ public class DatabaseTest extends TestRoutines {
        waitRestComplete();
 
   }
+
+    @Test
+    public void testDatabaseViewPopupMenu() {
+        // Setup and list databases
+        loginRest();
+        String projectName = createProjectRest();
+        String databaseName = createDatabaseRest(projectName);
+
+        // find database and start view mode
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
+        assertEquals(1, buttonsCell.size());
+        clickPopupMenu(buttonsCell.get(0), "view_button");
+
+        // Cancel out of view mode
+        waitElement("create_resource__close_button").click();
+
+        // open view mode a second time to evaluate popup menu
+        buttonsCell = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
+        assertEquals(1, buttonsCell.size());
+        clickPopupMenu(buttonsCell.get(0), "view_button");
+
+        // click "Edit" button and validate new state and cancel out of edit mode
+        waitElement("edit_button").click();
+        waitElement("create_resource__save_button");
+        waitElement("create_resource__cancel_button").click();
+
+        // check popup menu
+        waitElement("resource-popup-menu").click();
+        waitElement("popupmenu-edit_button").click();
+        waitElement("create_resource__cancel_button").click();
+
+        waitElement("resource-popup-menu").click();
+        waitElement("popupmenu-delete_button").click();
+        waitElement("dialog_button_no").click();
+
+        waitElement("resource-popup-menu").click();
+        waitElement("popupmenu-button.db.connection.info").click();
+        waitElement("dialog_button_ok").click();
+
+        waitElement("resource-popup-menu").click();
+        waitElement("popupmenu-confirm.stop.database.title").click();
+        waitElement("dialog_button_no").click();
+
+        waitElement("resource-popup-menu").click();
+        waitElement("popupmenu-button.sql.editor");
+   }
 }
