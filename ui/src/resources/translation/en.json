@@ -32,7 +32,8 @@
             "addToQueue": "Add to Queue",
             "addAllToQueue": "Add all to Queue",
             "export": "Export",
-            "editor": "SQL Editor"
+            "editor": "SQL Editor",
+            "register": "Register"
         }
     },
     "hint": {
@@ -233,12 +234,21 @@
                 "includeDdl": "Include DDL",
                 "includeData": "Include Data",
                 "includeDrop": "Include Drop Statements",
-                "allTables": "All Tables"
+                "allTables": "All Tables",
+                "dbAdmin": {
+                    "username": "Database admin username",
+                    "password": "Database admin password"
+                },
+                "registerUserWith": "Register user \"{{user}}\" with",
+                "readPermissions": "READ permissions",
+                "fullPermissions": "FULL permissions",
+                "setupLogin": "Setup automatic login for database \"{{database}}\""
             },
             "button": {
                 "login": "Login",
                 "executing": "Executing...",
-                "submit": "Submit"
+                "submit": "Submit",
+                "setupLogin": "Setup automatic login"
             }
         },
         "login": {

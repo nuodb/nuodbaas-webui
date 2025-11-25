@@ -58,6 +58,7 @@ export type SqlType = {
     runCommand: (operation: SqlOperationType, args: any[]) => Promise<SqlResponse>;
     getDefaultSchema: () => string;
     sqlImport: (file: File, progressKey: string, abortController: AbortController | undefined) => Promise<SqlImportResponseType>;
+    sqlSimpleImport: (body: string) => Promise<SqlImportResponseType>;
     getDbUsername: () => string;
     getDbPassword: () => string;
     getOrgProjDbSchemaUrl: () => string;
@@ -122,5 +123,20 @@ export default function SqlSocket(organization: string, project: string, databas
         }
     }
 
-    return { runCommand, getDefaultSchema, sqlImport, getDbUsername, getDbPassword, getOrgProjDbSchemaUrl };
+    async function sqlSimpleImport(body: string) : Promise<SqlImportResponseType> {
+        try {
+            const response = await axios.post('/api/sql/import/sql/' + getOrgProjDbSchemaUrl(), body, {
+                headers: {
+                    "Authorization": "Basic " + btoa(dbUsername + ":" + dbPassword),
+                    'Content-Type': "text/sql"
+                },
+            });
+            return response.data;
+        }
+        catch(error) {
+            return { error: "Error uploading file: " + error}
+        }
+    }
+
+    return { runCommand, getDefaultSchema, sqlImport, sqlSimpleImport, getDbUsername, getDbPassword, getOrgProjDbSchemaUrl };
 }

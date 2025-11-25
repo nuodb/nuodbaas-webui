@@ -7,7 +7,7 @@ import SqlSocket, { SqlResponse, SqlType } from '../../../utils/SqlSocket';
 import TextField from '../../controls/TextField';
 import Button from '../../controls/Button';
 import { t } from 'i18next';
-import { setDefaultResultOrder } from 'dns';
+import SqlRegisterUser from './SqlRegisterUser';
 
 type SqlLoginProps = {
     setSqlConnection: (conn: SqlType) => void;
@@ -19,8 +19,19 @@ function SqlLogin({setSqlConnection}: SqlLoginProps) {
     const [dbPassword, setDbPassword] = useState("");
     const [dbSchema, setDbSchema] = useState("");
     const [error, setError] = useState<string|undefined>("");
+    const [showRegisterUserDialog, setShowRegisterUserDialog] = useState(false);
 
     return <form>
+        {params.organization && params.project && params.database && showRegisterUserDialog
+            && <SqlRegisterUser
+                organization={params.organization}
+                project={params.project}
+                database={params.database}
+                onClose={(action: string) => {
+                    setShowRegisterUserDialog(false);
+                }}
+            />
+        }
         <div className="NuoFieldContainer">
             <TextField
                 id="dbUsername"
@@ -46,7 +57,7 @@ function SqlLogin({setSqlConnection}: SqlLoginProps) {
                 onChange={(event: React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>) => setDbSchema(event.currentTarget.value)}
             />
         </div>
-        <div className="NuoFieldContainer">
+        <div className="NuoFieldContainer NuoButtons">
             <Button data-testid="sql.login.button" type="submit" onClick={async () => {
                 if (params.organization && params.project && params.database && dbUsername && dbPassword && dbSchema) {
                     const conn = SqlSocket(params.organization, params.project, params.database, dbSchema, dbUsername, dbPassword);
@@ -65,6 +76,9 @@ function SqlLogin({setSqlConnection}: SqlLoginProps) {
                     setError(t("form.sqleditor.label.allFieldsRequired"))
                 }
             }}>{t("form.sqleditor.button.login")}</Button>
+            <Button data-testid="sql.login.button" variant="outlined" onClick={async () => {
+                setShowRegisterUserDialog(true);
+            }}>{t("form.sqleditor.button.setupLogin")}</Button>
         </div>
         <div className="NuoSqlError">{error}</div>
     </form>;
