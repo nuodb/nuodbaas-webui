@@ -200,7 +200,7 @@ deploy-monitoring:
 .PHONY: undeploy-monitoring
 undeploy-monitoring:
 	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
-		$(HELM) uninstall prometheus-community; \
+		$(HELM) uninstall kube-prometheus-stack; \
 	fi
 
 .PHONY: build-sql

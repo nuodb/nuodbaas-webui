@@ -36,6 +36,7 @@ export default function TextField(props: TextFieldProps): JSX.Element {
             fullWidth={true}
             {...fieldProps}
             name={props.id}
+            multiline={fieldProps.disabled}
             aria-details={props.description}
             error={!!props.error}
             helperText={props.error}

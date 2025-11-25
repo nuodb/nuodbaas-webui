@@ -1,7 +1,7 @@
 // (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
 import { useNavigate } from "react-router-dom";
-import { evaluate, getCustomizationsView } from "../../../utils/Customizations";
+import { CustomViewMenu, evaluate, getCustomizationsView } from "../../../utils/Customizations";
 import { getResourceByPath, getSchemaPath, hasMonitoredPath, replaceVariables } from "../../../utils/schema";
 import { MenuItemProps, TempAny } from "../../../utils/types";
 import Menu from "../../controls/Menu";
@@ -12,10 +12,7 @@ import { Rest } from "./Rest";
 import EditIcon from '@mui/icons-material/Edit';
 import PageviewIcon from '@mui/icons-material/Pageview';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import StopIcon from '@mui/icons-material/Stop';
-import InfoIcon from '@mui/icons-material/Info';
-import StorageIcon from '@mui/icons-material/Storage';
+import Icon from "./Icon";
 
 type ResourcePopupMenuProps = {
     row: any;
@@ -104,7 +101,7 @@ export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:Re
 
     const cv = getCustomizationsView(path)
     if (cv && cv.menu) {
-        cv.menu.forEach((menu: TempAny) => {
+        cv.menu.forEach((menu: CustomViewMenu) => {
             let menuVisible = false;
             try {
                 menuVisible = !menu.visible || evaluate(row, menu.visible);
@@ -115,25 +112,11 @@ export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:Re
                 console.error(msg, ex, row);
             }
 
-            let icon = undefined;
-            if(menu.icon === "stop") {
-                icon = <StopIcon/>
-            }
-            else if(menu.icon === "play") {
-                icon = <PlayArrowIcon/>
-            }
-            else if(menu.icon === "info") {
-                icon = <InfoIcon/>
-            }
-            else if(menu.icon === "storage") {
-                icon = <StorageIcon/>
-            }
-
             if (menuVisible) {
                 buttons.push({
                     "data-testid": menu.label,
                     id: menu.label,
-                    icon: icon,
+                    icon: <Icon name={menu.icon} />,
                     label: t(menu.label),
                     onClick: () => {
                         let label = t(menu.label, row);

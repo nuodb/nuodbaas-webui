@@ -36,9 +36,12 @@ export type CustomViewField = {
 
 export type CustomViewMenu = {
     label: string,
+    icon?: string,
     patch: any,
     visible: string,
     confirm: string,
+    dialog?: string,
+    link?: string,
 };
 
 export type CustomViewFields = { [key: string]: CustomViewField }

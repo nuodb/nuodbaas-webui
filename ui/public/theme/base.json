@@ -20,12 +20,12 @@
             "menu": [
                 {
                     "label": "button.db.connection.info",
-                    "icon": "info",
+                    "icon": "Info",
                     "dialog": "DbConnectionInfo"
                 },
                 {
                     "label": "confirm.start.database.title",
-                    "icon": "play",
+                    "icon": "PlayArrow",
                     "patch": [
                         {
                             "op": "remove",
@@ -37,7 +37,7 @@
                 },
                 {
                     "label": "confirm.stop.database.title",
-                    "icon": "stop",
+                    "icon": "Stop",
                     "patch": [
                         {
                             "op": "add",
@@ -52,7 +52,7 @@
                 },
                 {
                     "label": "confirm.stop.database.title",
-                    "icon": "stop",
+                    "icon": "Stop",
                     "patch": [
                         {
                             "op": "replace",
@@ -67,7 +67,7 @@
                 },
                 {
                     "label": "button.sql.editor",
-                    "icon": "storage",
+                    "icon": "Storage",
                     "link": "/ui/page/sql/{organization}/{project}/{name}"
                 }
             ]
