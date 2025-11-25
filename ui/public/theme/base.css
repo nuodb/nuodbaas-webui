@@ -847,6 +847,7 @@ button:focus,
     background-color: transparent;
     color: #4f8dbf;
     border: none;
+    margin: 0 5px;
 }
 
 .NuoButtonText:hover,
