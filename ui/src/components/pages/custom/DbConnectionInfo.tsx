@@ -83,7 +83,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
         "#define DB_PASSWORD \"<db password>\"",
         "",
         "#define DB_CONNECTION \"" + dbName + "@" + sqlEndpoint + ":" + port + "\"",
-        "#define DB_TRUSTED_CERTIFICATE \"" + caPem.replaceAll("\n", "\\n") + "\"",
+        "#define DB_TRUSTED_CERTIFICATE \"" + caPem?.replaceAll("\n", "\\n") + "\"",
         "",
         "#include <stdlib.h>",
         "#include <stdio.h>",

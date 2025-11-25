@@ -1,7 +1,7 @@
 {
     "copyright": "(C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.",
     "views": {
-        "/databases?/{organization}?/{project}": {
+        "/databases?/{organization}?/{project}?/{name}": {
             "columns": [
                 "organization",
                 "project",
@@ -20,10 +20,12 @@
             "menu": [
                 {
                     "label": "button.db.connection.info",
+                    "icon": "Info",
                     "dialog": "DbConnectionInfo"
                 },
                 {
                     "label": "confirm.start.database.title",
+                    "icon": "PlayArrow",
                     "patch": [
                         {
                             "op": "remove",
@@ -35,6 +37,7 @@
                 },
                 {
                     "label": "confirm.stop.database.title",
+                    "icon": "Stop",
                     "patch": [
                         {
                             "op": "add",
@@ -49,6 +52,7 @@
                 },
                 {
                     "label": "confirm.stop.database.title",
+                    "icon": "Stop",
                     "patch": [
                         {
                             "op": "replace",
@@ -63,11 +67,12 @@
                 },
                 {
                     "label": "button.sql.editor",
+                    "icon": "Storage",
                     "link": "/ui/page/sql/{organization}/{project}/{name}"
                 }
             ]
         },
-        "/backuppolicies?/{organization}": {
+        "/backuppolicies?/{organization}?/{name}": {
             "columns": [
                 "organization",
                 "name",
@@ -88,7 +93,7 @@
                 }
             ]
         },
-        "/projects?/{organization}": {
+        "/projects?/{organization}?/{name}": {
             "menu": [
                 {
                     "label": "button.show.databases",

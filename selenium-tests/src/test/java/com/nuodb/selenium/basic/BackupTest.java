@@ -64,7 +64,7 @@ public class BackupTest extends TestRoutines {
         waitInputElementByName("labels.key").sendKeys(projectName);
         waitInputElementByName("labels.value").sendKeys(databaseName);
         waitElement("add_button_labels").click();
-        waitElement("create_resource__create_button").click();
+        waitElement("create_resource__save_button").click();
         waitRestComplete();
 
         // verify backup was modified

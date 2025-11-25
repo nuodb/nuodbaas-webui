@@ -790,10 +790,15 @@ code {
     background-color: lightgray;
     cursor: pointer;
 }
+.NuoIcon {
+    width: 24px;
+    height: 24px;
+    margin-right: 5px;
+}
 button,
-#NuoButton {
+.NuoButton {
     display: flex;
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
     background-color: #4f8dbf;
@@ -805,11 +810,50 @@ button,
     cursor: default;
     text-wrap: nowrap;
     text-align: left;
+    height: 38px;
 }
 
 button:hover,
-button:focus {
+button:focus,
+.NuoButton:hover,
+.NuoButton:focus {
     background-color: #4377a2;
+    box-shadow: 2px 2px 5px -3px rgba(0, 0, 0, 0.2), 4px 4px 10px 1px rgba(0, 0, 0, 0.14), 1px 1px 14px 2px rgba(0, 0, 0, 0.12);
+}
+.NuoButtonDown {
+    display: flex;
+    flex-direction: row;
+    flex: 0 0 auto;
+    background-color: #4f8dbf;
+    color: white;
+    height: 38px;
+    border-radius: 5px;
+}
+
+.NuoButtonOutlined {
+    background-color: transparent;
+    color: black;
+    border: 1px solid #4f8dbf;
+}
+
+.NuoButtonOutlined:hover,
+.NuoButtonOutlined:focus {
+    background-color: transparent;
+    color: black;
+    box-shadow: 2px 2px 5px -3px rgba(0, 0, 0, 0.2), 4px 4px 10px 1px rgba(0, 0, 0, 0.14), 1px 1px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.NuoButtonText {
+    background-color: transparent;
+    color: #4f8dbf;
+    border: none;
+    margin: 0 5px;
+}
+
+.NuoButtonText:hover,
+.NuoButtonText:focus {
+    background-color: transparent;
+    color: #4377a2;
     box-shadow: 2px 2px 5px -3px rgba(0, 0, 0, 0.2), 4px 4px 10px 1px rgba(0, 0, 0, 0.14), 1px 1px 14px 2px rgba(0, 0, 0, 0.12);
 }
 .RestSpinner {

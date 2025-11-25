@@ -182,13 +182,13 @@ public class SeleniumTestHelper {
     }
 
     public WebElement waitInputElementByName(String name) {
-        By testId = By.xpath("//input[@name='" + name + "']");
+        By testId = By.xpath("//input[@name='" + name + "'] | //textarea[@name='" + name + "']");
         WebDriverWait wait = new WebDriverWait(driver, waitTimeout);
         return wait.until(ExpectedConditions.visibilityOfElementLocated(testId));
     }
 
     public WebElement waitPresentInputElementByName(String name) {
-        By testId = By.xpath("//input[@name='" + name + "']");
+        By testId = By.xpath("//input[@name='" + name + "'] | //textarea[@name='" + name + "']");
         WebDriverWait wait = new WebDriverWait(driver, waitTimeout);
         return wait.until(ExpectedConditions.presenceOfElementLocated(testId));
     }

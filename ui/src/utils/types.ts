@@ -45,6 +45,7 @@ export type StringMapType = {
 export type MenuItemProps = {
     "data-testid"?: string,
     id: string,
+    icon?: ReactNode,
     label: ReactNode,
     selected?: boolean,
     onClick?: () => boolean
@@ -58,6 +59,7 @@ export type MenuProps = {
     draggable?: boolean,
     children?: ReactNode,
     items: MenuItemProps[],
+    defaultItem?: string,
     setItems?: (items: MenuItemProps[]) => void,
     selected?: string,
     className?: string

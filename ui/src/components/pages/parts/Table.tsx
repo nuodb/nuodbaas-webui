@@ -16,6 +16,7 @@ import CustomDialog from '../custom/CustomDialog';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { getRecursiveValue } from '../../fields/FieldBase';
 import Toast from '../../controls/Toast';
+import ResourcePopupMenu from './ResourcePopupMenu';
 
 function getFlattenedKeys(obj: TempAny, prefix?: string): string[] {
     let ret: string[] = [];
@@ -123,21 +124,6 @@ function Table(props: TableProps) {
         return ret;
     }
 
-    async function handleDelete(row: TempAny, deletePath: string) {
-        const createPathFirstPart = deletePath?.replace(/^\//, "").split("/")[0];
-        row = { ...row, resources_one: t("resource.label." + createPathFirstPart + "_one", createPathFirstPart) };
-        if ("yes" === await Dialog.confirm(t("confirm.delete.resource.title", row), t("confirm.delete.resource.body", row), t)) {
-            Rest.delete(deletePath)
-                .then(() => {
-                    if (!hasMonitoredPath(path)) {
-                        window.location.reload();
-                    }
-                }).catch((error) => {
-                    Toast.show("Unable to delete " + deletePath, error);
-                });
-        }
-    }
-
     async function handleDeleteMultiple() {
         const selectedRows = data.filter((d: any) => selected.has(d["$ref"]));
         const editDeletePaths = selectedRows.map((row: any) => {
@@ -167,96 +153,9 @@ function Table(props: TableProps) {
     }
 
     function renderMenuCell(row: any, zIndex: number) {
-        let editDeletePath: string;
-        if (lastSchemaPathElement.startsWith("{")) {
-            editDeletePath = path + "/" + row["$ref"];
-        }
-        else {
-            // special case for /backuppolicies/{organization}/{name}/databases (or similar) where the last element specifies a resource type
-            editDeletePath = "/" + lastSchemaPathElement + "/" + row["$ref"];
-        }
-        const resource = getResourceByPath(schema, editDeletePath)
-        const buttons: MenuItemProps[] = [];
-        if (resource && ("put" in resource)) {
-            buttons.push({
-                "data-testid": "edit_button",
-                id: "edit",
-                label: t("button.edit"),
-                onClick: () => {
-                    navigate("/ui/resource/edit" + editDeletePath);
-                    return true;
-                }
-            });
-        }
-        if (resource && ("delete" in resource)) {
-            buttons.push({
-                "data-testid": "delete_button",
-                id: "delete",
-                onClick: () => {
-                    handleDelete(row, editDeletePath);
-                    return true;
-                },
-                label: t("button.delete")
-            });
-        }
-
-        const cv = getCustomizationsView(path)
-        if (cv && cv.menu) {
-            cv.menu.forEach((menu: TempAny) => {
-                let menuVisible = false;
-                try {
-                    menuVisible = !menu.visible || evaluate(row, menu.visible);
-                }
-                catch (ex) {
-                    const msg = "Error in checking visibility of button.";
-                    Toast.show(msg, String(ex));
-                    console.error(msg, ex, row);
-                }
-
-                if (menuVisible) {
-                    buttons.push({
-                        "data-testid": menu.label,
-                        id: menu.label,
-                        label: t(menu.label),
-                        onClick: () => {
-                            let label = t(menu.label, row);
-                            let promiseConfirm: Promise<any>;
-                            if (menu.confirm) {
-                                let confirm = t(menu.confirm, row);
-                                promiseConfirm = Dialog.confirm(label, confirm, t);
-                            }
-                            else {
-                                promiseConfirm = Promise.resolve("yes");
-                            }
-                            promiseConfirm.then(result => {
-                                if (result === "yes") {
-                                    if (menu.patch) {
-                                        Rest.patch(path + "/" + row["$ref"], menu.patch)
-                                            .catch((error) => {
-                                                Toast.show("Unable to update " + path + "/" + row["$ref"], error);
-                                            })
-                                    }
-                                    else if (menu.link) {
-                                        const link = replaceVariables(menu.link, row);
-                                        if (!link.startsWith("//") && link.indexOf("://") === -1) {
-                                            navigate(link);
-                                        }
-                                    }
-                                    else if (menu.dialog) {
-                                        CustomDialog({ dialog: menu.dialog, data: row, t });
-                                    }
-                                }
-                            });
-                            return true;
-                        }
-                    });
-                }
-            })
-        }
         return <TableCell key={row["$ref"]} className="NuoTableMenuCell NuoStickyRight" zIndex={zIndex}>
-            <Menu popupId={"row_menu_" + row["$ref"]} items={buttons} align="right" />
+            <ResourcePopupMenu row={row} schema={schema} path={path} t={t} />
         </TableCell>;
-
     }
 
     /* gets the schema of the specified field.

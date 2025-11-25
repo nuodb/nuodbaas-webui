@@ -5,10 +5,11 @@ import Button from './Button';
 
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { MenuItemProps, MenuProps } from '../../utils/types';
 
 export default function Menu(props: MenuProps): JSX.Element {
-    const { popupId, items, className } = props;
+    const { popupId, items, className, defaultItem } = props;
     const dataTestid = props["data-testid"];
     const [popupAnchor, setPopupAnchor] = useState<Element | undefined>(undefined);
 
@@ -22,13 +23,23 @@ export default function Menu(props: MenuProps): JSX.Element {
         </Button>);
     }
 
+    const mainItem = items.find(item => !!defaultItem && item.id === defaultItem);
+
     let { children } = props;
     if (popupId && !children) {
-        children = <MoreVertIcon />
+        if (mainItem) {
+            children = <ArrowDropDownIcon />;
+        }
+        else {
+            children = <MoreVertIcon />;
+        }
     }
 
     if (children) {
-        return <div
+        return <div className={mainItem && "NuoButtonDown"}>
+            {mainItem && <button data-testid={mainItem["data-testid"]} onClick={mainItem.onClick}>
+                <div className="NuoIcon">{mainItem.icon}</div>{mainItem.label}</button>}
+            <div className="NuoRowFixed"
             tabIndex={0}
             data-testid={dataTestid}
             onClick={(event) => {
@@ -39,11 +50,13 @@ export default function Menu(props: MenuProps): JSX.Element {
                     setPopupAnchor(event.currentTarget);
                 }
             }}
-        >
-
-            <div >
-                {popupAnchor && <PopupMenu {...props} anchor={popupAnchor} clearAnchor={() => { setPopupAnchor(undefined) }} />}
-                {children}
+            >
+                <div className="NuoColumn">
+                    {popupAnchor && <PopupMenu {...props} anchor={popupAnchor} clearAnchor={() => { setPopupAnchor(undefined) }} />}
+                    <div className="NuoRow">
+                        {mainItem && <div className="NuoColumn NuoCenter" style={{ border: "1px solid #FFFFFF80" }}></div>}
+                        <div className="NuoColumn NuoCenter">{children}</div></div>
+                </div>
             </div>
         </div>;
     }
@@ -52,8 +65,6 @@ export default function Menu(props: MenuProps): JSX.Element {
     }
 }
 
-type AlignType = "right" | "left";
-
 interface PopupMenuProps extends MenuProps {
     anchor: Element;
     clearAnchor: () => void;
@@ -61,6 +72,7 @@ interface PopupMenuProps extends MenuProps {
 
 type MenuItemsProps = {
     items: MenuItemProps[];
+    defaultItem?: string;
     setItems?: (items: MenuItemProps[]) => void;
     draggable?: boolean;
     selected?: string;
@@ -70,7 +82,7 @@ type MenuItemsProps = {
     dndStart: (e: any) => void;
 };
 
-function MenuItems({ items, setItems, draggable, selected, clearAnchor, dndDrop, dndOver, dndStart }: MenuItemsProps) {
+function MenuItems({ items, setItems, defaultItem, draggable, selected, clearAnchor, dndDrop, dndOver, dndStart }: MenuItemsProps) {
     let refs = items.map(item => React.createRef<HTMLDivElement | null>());
 
     useEffect(() => {
@@ -86,7 +98,7 @@ function MenuItems({ items, setItems, draggable, selected, clearAnchor, dndDrop,
 
     return items.map((item: MenuItemProps, index: number) => <div style={{ zIndex: 102 }}
         id={item.id}
-        data-testid={item["data-testid"]}
+        data-testid={(defaultItem ? "popupmenu-" : "") + item["data-testid"]}
         ref={refs[index]}
         draggable={draggable && item.id !== "name"}
         onDrop={item.id === "name" ? undefined : dndDrop}
@@ -151,8 +163,8 @@ function MenuItems({ items, setItems, draggable, selected, clearAnchor, dndDrop,
             }
         }}
     >
-        {item.label}
-        {draggable === true && (index !== 0 || items[0].id !== "name") && <DragHandleIcon />}
+        <div className="NuoRowFixed"><div className="NuoIcon">{item.icon}</div>{item.label}</div>
+        {draggable === true && (index !== 0 || items[0].id !== "name") && <DragHandleIcon /> || <div></div>}
     </div>);
 }
 
@@ -267,6 +279,7 @@ export function PopupMenu(props: PopupMenuProps) {
             }}>
             <MenuItems
                 items={props.items}
+                defaultItem={props.defaultItem}
                 setItems={props.setItems}
                 selected={props.selected}
                 draggable={props.draggable}
