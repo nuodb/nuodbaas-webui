@@ -14,11 +14,13 @@ import SqlLogin from './sql/SqlLogin';
 import SqlBrowseTab from './sql/SqlBrowseTab';
 import Toast from '../controls/Toast';
 import SqlQueryTab from './sql/SqlQueryTab';
-import { SqlType } from '../../utils/SqlSocket';
+import SqlSocket, { SqlResponse, SqlType } from '../../utils/SqlSocket';
 import ComboBox from '../controls/ComboBox';
 import SqlImportTab from './sql/SqlImportTab';
 import SqlExportTab from './sql/SqlExportTab';
 import { BackgroundTaskType } from '../../utils/BackgroundTasks';
+import Auth from '../../utils/auth';
+import SqlUsersTab from './sql/SqlUsersTab';
 
 interface SqlTabsProps {
     tasks: BackgroundTaskType[];
@@ -41,6 +43,7 @@ function SqlTabs({ dbTable, sqlConnection, tasks, setTasks }: SqlTabsProps) {
     tabs.push(<Tab id="query" label={t("form.sqleditor.label.tab.query")}>{tabIndex === tabs.length && <SqlQueryTab sqlConnection={sqlConnection} dbTable={dbTable} />}</Tab>);
     tabs.push(<Tab id="import" label={t("form.sqleditor.label.tab.import")}>{tabIndex === tabs.length && <SqlImportTab tasks={tasks} setTasks={setTasks} sqlConnection={sqlConnection} dbTable={dbTable} />}</Tab>);
     tabs.push(<Tab id="export" label={t("form.sqleditor.label.tab.export")}>{tabIndex === tabs.length && <SqlExportTab tasks={tasks} setTasks={setTasks} sqlConnection={sqlConnection} />}</Tab>);
+    tabs.push(<Tab id="query" label={t("form.sqleditor.label.tab.users")}>{tabIndex === tabs.length && <SqlUsersTab sqlConnection={sqlConnection} />}</Tab>);
     return <Tabs currentTab={tabIndex} setCurrentTab={(tabIndex) => setTabIndex(tabIndex)}>{tabs}</Tabs>
 }
 
@@ -50,6 +53,7 @@ function SqlPage(props: PageProps) {
     const params = useParams();
     const [dbTable, setDbTable] = useState("");
     const [sqlConnection, setSqlConnection] = useState<SqlType | undefined | void | "">(undefined);
+    const [loginState, setLoginState] = useState<"loading" | "login" | "loginWithRegister" | "connected">("loading");
 
     const StyledBreadcrumbs = styled(Breadcrumbs)({
         '.MuiBreadcrumbs-ol': {
@@ -57,9 +61,38 @@ function SqlPage(props: PageProps) {
         }
     });
 
+    function tryDbaasLogin(): Promise<SqlType | undefined | void | ""> {
+        return new Promise((resolve, reject) => {
+            const authUsername = Auth.getCredentials()?.username.replace("/", "_");
+            const authToken = Auth.getCredentials()?.token;
+            if (!params.organization || !params.project || !params.database || !authUsername || !authToken) {
+                resolve(undefined);
+            }
+            else {
+                const conn = SqlSocket(params.organization, params.project, params.database, "user", authUsername, authToken);
+                conn.runCommand("EXECUTE_QUERY", ["SELECT 1 FROM DUAL"])
+                    .then(response => {
+                        resolve(response.error ? undefined : conn);;
+                    })
+                    .catch(() => {
+                        resolve(undefined);
+                    });
+            }
+        })
+    }
+
 
     useEffect(() => {
         loadTables(true);
+        tryDbaasLogin().then((sqlConnection: SqlType | undefined | void | "") => {
+            if (sqlConnection) {
+                setSqlConnection(sqlConnection);
+                setLoginState("connected");
+            }
+            else {
+                setLoginState("loginWithRegister");
+            }
+        })
     }, []);
 
     async function loadTables(useCache: boolean): Promise<MenuItemProps[]> {
@@ -85,7 +118,41 @@ function SqlPage(props: PageProps) {
                 }
             }
         }
-        return new Promise((resolve) => resolve((tablesCache || []).map(table => { return { id: table, label: table, onClick: () => { setDbTable(table) } } })));
+        return new Promise((resolve) => resolve((tablesCache || []).map(table => { return { id: table, label: table, onClick: () => { setDbTable(table); return true } } })));
+    }
+
+    function renderContent() {
+        if (loginState === "loading") {
+            return <div>Loading...</div>;
+        }
+        else if (loginState === "login") {
+            return <SqlLogin setSqlConnection={(sqlConnection) => {
+                if (sqlConnection) {
+                    setSqlConnection(sqlConnection);
+                    setLoginState("connected");
+                }
+                else {
+                    setLoginState("loading");
+                }
+            }} />;
+        }
+        else if (loginState === "loginWithRegister") {
+            return <SqlLogin setSqlConnection={(sqlConnection) => {
+                if (sqlConnection) {
+                    setSqlConnection(sqlConnection);
+                    setLoginState("connected");
+                }
+                else {
+                    setLoginState("loading");
+                }
+            }} showRegistration={true} />;
+        }
+        else if (sqlConnection && loginState === "connected") {
+            return <SqlTabs tasks={props.tasks} setTasks={props.setTasks} dbTable={dbTable} sqlConnection={sqlConnection} />;
+        }
+        else {
+            return null;
+        }
     }
 
     return <PageLayout {...props}>
@@ -101,11 +168,13 @@ function SqlPage(props: PageProps) {
                         <label>{dbTable}</label>
                     </ComboBox> || <div></div>}
                 </StyledBreadcrumbs>
+                {(sqlConnection as SqlType)?.getDbUsername() && <>Logged in as {(sqlConnection as SqlType)?.getDbUsername()}<button onClick={() => {
+                    setSqlConnection(undefined);
+                    setLoginState("login");
+                }}>Logout</button></>}
             </div>
         </div>
-        {sqlConnection ? <SqlTabs tasks={props.tasks} setTasks={props.setTasks} dbTable={dbTable} sqlConnection={sqlConnection} /> : <SqlLogin setSqlConnection={(conn: SqlType) => {
-            setSqlConnection(conn);
-        }} />}
+        {renderContent()}
     </PageLayout>;
 }
 

@@ -25,7 +25,7 @@ export default function SqlRegisterUser({onClose, organization, project, databas
     const [adminPassword, setAdminPassword] = useState("");
     const [access, setAccess] = useState("readonly");
     const [error, setError] = useState<string|undefined>();
-        const newDbUser = Auth.getCredentials()?.username.replace("/", "_");
+    const newDbUser = Auth.getCredentials()?.username.replace("/", "_").replace(/[^a-zA-Z0-9_]/g, '');;
         return <DialogMaterial open={true}>
             <DialogTitle>{t("form.sqleditor.label.setupLogin", {database: organization + "/" + project + "/" + database})}</DialogTitle>
             <DialogContent>
@@ -69,11 +69,26 @@ export default function SqlRegisterUser({onClose, organization, project, databas
             <DialogActions>
                 <Button data-testid={"dialog_button_register"} onClick={async () => {
                     const conn = SqlSocket(organization, project, database, "user", adminUsername, adminPassword);
-                    let permissions = "GRANT SELECT ON ALL TABLES TO USER " + newDbUser;
-                    if(access === "full") {
-                        permissions = "GRANT ALL TO USER " + newDbUser;
+                    let checkUser = await conn.runCommand("EXECUTE_QUERY", ["select * from system.users where `username` = '" + newDbUser + "'"]);
+                    if (checkUser.rows && checkUser.rows.length > 0) {
+                        setError("User exists already. Will not perform permission changes.");
+                        return;
                     }
-                    const response: SqlImportResponseType = await conn.sqlSimpleImport("SET AUTOCOMMIT OFF; create user " + newDbUser + " external; " + permissions + "; COMMIT");
+                    let sql = "SET AUTOCOMMIT OFF;";
+                    sql += "CREATE USER " + newDbUser + " EXTERNAL;"
+                    if(access === "full") {
+                        sql += "GRANT SYSTEM.ADMINISTRATOR TO " + newDbUser + " WITH GRANT OPTION";
+                    }
+                    else {
+                        const schemasResponse = await conn.runCommand("EXECUTE_QUERY", ["SELECT SCHEMA FROM SYSTEM.SCHEMAS"]);
+                        schemasResponse.rows?.forEach(row => {
+                            if (row.values.length > 0 && String(row.values[0]).toUpperCase() !== "SYSTEM") {
+                                sql += "GRANT SELECT ON ALL TABLES IN SCHEMA `" + row.values[0] + "` TO USER " + newDbUser + ";";
+                            }
+                        });
+                    }
+                    sql += "COMMIT;"
+                    const response: SqlImportResponseType = await conn.sqlSimpleImport(sql);
                     setError(response.error);
                     if (!response.error) {
                         onClose("register");

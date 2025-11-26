@@ -222,7 +222,8 @@
                     "browse": "Browse",
                     "query": "Query",
                     "import": "Import",
-                    "export": "Export"
+                    "export": "Export",
+                    "users": "Users"
                 },
                 "tasksComplete": "{{completed}} of {{total}} Tasks complete",
                 "exporting": "Exporting {{dbSchema}}",
