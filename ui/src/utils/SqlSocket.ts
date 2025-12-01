@@ -62,6 +62,7 @@ export type SqlType = {
     getDbUsername: () => string;
     getDbPassword: () => string;
     getOrgProjDbSchemaUrl: () => string;
+    getOrgProjDb: () => string;
 }
 
 export default function SqlSocket(organization: string, project: string, database: string, schema: string, dbUsername: string, dbPassword: string) : SqlType {
@@ -101,6 +102,10 @@ export default function SqlSocket(organization: string, project: string, databas
         return dbPassword;
     }
 
+    function getOrgProjDb() {
+        return organization + "/" + project + "/" + database;
+    }
+
     async function sqlImport(file: File, progressKey: string, abortController: AbortController | undefined) : Promise<SqlImportResponseType> {
         try {
             const response = await axios.post('/api/sql/import/sql/' + getOrgProjDbSchemaUrl() + "?progressKey=" + progressKey, file, {
@@ -138,5 +143,5 @@ export default function SqlSocket(organization: string, project: string, databas
         }
     }
 
-    return { runCommand, getDefaultSchema, sqlImport, sqlSimpleImport, getDbUsername, getDbPassword, getOrgProjDbSchemaUrl };
+    return { runCommand, getDefaultSchema, sqlImport, sqlSimpleImport, getDbUsername, getDbPassword, getOrgProjDbSchemaUrl, getOrgProjDb };
 }

@@ -243,7 +243,11 @@
                 "registerUserWith": "Register user \"{{user}}\" with",
                 "readPermissions": "READ permissions",
                 "fullPermissions": "FULL permissions",
-                "setupLogin": "Setup automatic login for database \"{{database}}\""
+                "setupLogin": "Setup automatic login for database \"{{database}}\"",
+                "delete.user.title": "Deleting user {{username}} in database {{database}}",
+                "delete.user.body": "Please confirm deleting of user {{username}} in database {{database}}?",
+                "user.deleted": "Deleted user {{username}} in database {{database}}",
+                "user.delete.failed": "Unable to delete user {{username}} in database {{database}}"
             },
             "button": {
                 "login": "Login",
