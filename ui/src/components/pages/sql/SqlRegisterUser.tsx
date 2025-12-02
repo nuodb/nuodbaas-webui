@@ -12,7 +12,6 @@ import TextField from '../../controls/TextField';
 import SqlSocket, { SqlImportResponseType, SqlType } from '../../../utils/SqlSocket';
 import Toast from '../../controls/Toast';
 import { sqlIdentifier, sqlString } from './SqlUtils';
-//                const selectedButton = await Dialog.show(, renderSetupLogin(), [{ id: "ok", label: "Ok" }, { id: "cancel", label: "Cancel" }], t);
 
 type SqlRegisterUserProps = {
     onClose: (action: string)=>void;
@@ -56,9 +55,9 @@ export default function SqlRegisterUser({onClose, organization, project, databas
 
     function renderLoginPage() {
         return <>
-            <div>To setup automatic login, the DBaaS user needs to be registered in the database.</div>
+            <div>{t("form.sqleditor.label.userNeedsRegistration")}</div>
             <div>&nbsp;</div>
-            <div>Login with a database administrator account:</div>
+            <div>{t("form.sqleditor.label.loginWithDbAdmin")}</div>
             <div className="NuoFieldContainer">
                 <TextField
                     id="adminUsername"
@@ -80,7 +79,7 @@ export default function SqlRegisterUser({onClose, organization, project, databas
     }
 
     function RoleSelector() {
-        return <>Select Roles to be added to the user account {newDbUser}:
+        return <>{t("form.sqleditor.label.addRolestoUser", {username: newDbUser})}
             {Object.keys(roles).map((roleKey: string) => {
                 return <div className="NuoRow"><input type="checkbox" name={roleKey} checked={roles[roleKey]} onChange={() => {
                     let newRoles = { ...roles };

@@ -156,21 +156,21 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
             return null;
         }
         return <DialogMaterial open={true}>
-            <DialogTitle>{"Create User"}</DialogTitle>
+            <DialogTitle>{t("form.sqleditor.label.createUser")}</DialogTitle>
             <DialogContent>
                 {renderError()}
             </DialogContent>
             <DialogActions>
                 <Button data-testid="dialog_button_local" onClick={() => {
                     setEditDialogProps({ ...editDialogProps, type: "create_local" });
-                }}>Create Database User</Button>
+                }}>{t("form.sqleditor.button.createDatabaseUser")}</Button>
                 <Button data-testid="dialog_button_dbaas" onClick={async () => {
                     const users: string[] = (await Rest.get("/users?listAccessible=true") as any).items;
                     setEditDialogProps({ ...editDialogProps, type: "add_dbaas", allDbaasUsers: users });
-                }}>Add DBaaS User</Button>
+                }}>{t("form.sqleditor.button.addDbaasUser")}</Button>
                 <Button data-testid="dialog_button_dbaas" onClick={async () => {
                     setEditDialogProps(undefined);
-                }}>Cancel</Button>
+                }}>{t("button.cancel")}</Button>
             </DialogActions>
         </DialogMaterial>
     }
@@ -180,13 +180,13 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
             return null;
         }
         return <DialogMaterial open={true}>
-            <DialogTitle>{"Create local user"}</DialogTitle>
+            <DialogTitle>{t("form.sqleditor.button.createDatabaseUser")}</DialogTitle>
             <DialogContent>
                 <div className="NuoColumn">
                     <div className="NuoFieldContainer">
                         <TextField
                             id="username"
-                            label="Username"
+                            label={t("field.label.username")}
                             value={editDialogProps.username}
                             onChange={(event) => {
                                 setEditDialogProps({ ...editDialogProps, username: event.currentTarget.value });
@@ -196,7 +196,7 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                     <div className="NuoFieldContainer">
                         <TextField
                             id="password"
-                            label="Password"
+                            label={t("field.label.password")}
                             type="password"
                             value={editDialogProps.password || ""}
                             onChange={(event) => {
@@ -235,11 +235,11 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                         }
                     }}
                 >
-                    Create
+                    {t("button.create")}
                 </Button>
                 <Button data-testid="dialog_button_cancel" onClick={() => {
                     setEditDialogProps(undefined);
-                }}>Cancel</Button>
+                }}>{t("button.cancel")}</Button>
             </DialogActions>
         </DialogMaterial>
     }
@@ -252,16 +252,15 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
         return <DialogMaterial
             open={true}
         >
-            <DialogTitle>{"Add DBaaS user to database"}</DialogTitle>
+            <DialogTitle>{t("form.sqleditor.label.addDbaasUserToDatabase")}</DialogTitle>
             <DialogContent>
                 <div className="NuoColumn">
                     <div className="NuoFieldContainer">
                         <Select
                             id="username"
-                            label="Username"
+                            label={t("button.username")}
                             value={editDialogProps.username}
                             onChange={(event) => {
-                                console.log("onChange", event);
                                 setEditDialogProps({ ...editDialogProps, username: event.target.value });
                             }}
                         >
@@ -295,10 +294,10 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                             setEditDialogProps({ ...editDialogProps, error: "Adding DBaaS user failed: " + sqlResponse.error });
                         }
                     }
-                }}>Add</Button>
+                }}>{t("button.add")}</Button>
                 <Button data-testid="dialog_button_cancel" onClick={() => {
                     setEditDialogProps(undefined);
-                }}>Cancel</Button>
+                }}>{t("button.cancel")}</Button>
             </DialogActions>
         </DialogMaterial>;
     }
@@ -308,13 +307,13 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
             return null;
         }
         return <DialogMaterial open={true}>
-            <DialogTitle>{"Edit User " + editDialogProps.username}</DialogTitle>
+            <DialogTitle>{t("form.sqleditor.label.editUser", {username: editDialogProps.username})}</DialogTitle>
             <DialogContent>
                 <div className="NuoColumn">
                     <div className="NuoFieldContainer">
                         <TextField
                             id="username"
-                            label="Username"
+                            label={t("field.label.username")}
                             value={editDialogProps.username}
                             onChange={(event) => {
                                 setEditDialogProps({ ...editDialogProps, username: event.currentTarget.value });
@@ -349,10 +348,10 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                             setEditDialogProps({ ...editDialogProps, error: "User update failed: " + sqlResponse.error });
                         }
                     }
-                }}>Save</Button>
+                }}>{t("button.save")}</Button>
                 <Button data-testid="dialog_button_cancel" onClick={() => {
                     setEditDialogProps(undefined);
-                }}>Cancel</Button>
+                }}>{t("button.cancel")}</Button>
             </DialogActions>
         </DialogMaterial>
     }

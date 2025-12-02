@@ -15,7 +15,9 @@ export type ButtonProps = {
 export default function Button(props: ButtonProps): JSX.Element {
     return <button
         {...props}
-        className={props.disabled ? "NuoButtonDisabled" : props.variant === "outlined" ? "NuoButtonOutlined" : props.variant === "text" ? "NuoButtonText" : ""}
+        className={props.disabled ? "NuoButtonDisabled"
+            : props.variant === "outlined" ? "NuoButtonOutlined"
+            : props.variant === "text" ? "NuoButtonText" : ""}
         onClick={(event) => {
             event.preventDefault();
             props.onClick();

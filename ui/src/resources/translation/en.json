@@ -247,13 +247,21 @@
                 "delete.user.title": "Deleting user {{username}} in database {{database}}",
                 "delete.user.body": "Please confirm deleting of user {{username}} in database {{database}}?",
                 "user.deleted": "Deleted user {{username}} in database {{database}}",
-                "user.delete.failed": "Unable to delete user {{username}} in database {{database}}"
+                "user.delete.failed": "Unable to delete user {{username}} in database {{database}}",
+                "userNeedsRegistration": "To setup automatic login, the DBaaS user needs to be registered in the database.",
+                "loginWithDbAdmin": "Login with a database administrator account:",
+                "addRolesToUser": "Select Roles to be added to the user account {{username}}:",
+                "createUser": "Create User",
+                "addDbaasUserToDatabase": "Add DBaaS user to database",
+                "editUser": "Edit User {{username}}"
             },
             "button": {
                 "login": "Login",
                 "executing": "Executing...",
                 "submit": "Submit",
-                "setupLogin": "Setup automatic login"
+                "setupLogin": "Setup automatic login",
+                "createDatabaseUser": "Create Database User",
+                "addDbaasUser": "Add DBaaS User"
             }
         },
         "login": {
