@@ -219,6 +219,12 @@ html {
     justify-content: center;
 }
 
+.NuoRight {
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    justify-content: center;
+}
 .NuoTableSettingsItem>label {
     display: flex;
     flex: 1 1 auto;

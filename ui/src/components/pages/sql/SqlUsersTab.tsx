@@ -15,6 +15,8 @@ import Button from "../../controls/Button";
 import TextField from "../../controls/TextField";
 import Select, { SelectOption } from "../../controls/Select";
 import { Rest } from "../parts/Rest";
+import AddIcon from '@mui/icons-material/Add';
+import { sqlIdentifier, sqlString } from "./SqlUtils";
 
 type SqlUsersTabProps = {
     sqlConnection: SqlType;
@@ -48,20 +50,6 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
         const newState = { ...state, page: 1, lastPage: 1, orderBy: "" };
         refreshResults(newState);
     }, []);
-
-    function sqlValue(value: string): string {
-        if (value === null) {
-            return "NULL";
-        }
-        return "'" + (value || "").replace("'", "''") + "'";
-    }
-
-    function sqlIdentifier(value: string): string {
-        if (value === null) {
-            return "NULL";
-        }
-        return "`" + (value || "").replace("`", "``") + "`";
-    }
 
     async function refreshResults(args: SqlResponseState) {
         const { page, orderBy, isAscending } = args;
@@ -116,7 +104,7 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
             SELECT r.schema, r.rolename, ur.username
             FROM system.roles r
             FULL JOIN (
-                SELECT username,rolename FROM system.userroles WHERE username=` + sqlValue(username) + `
+                SELECT username,rolename FROM system.userroles WHERE username=` + sqlString(username) + `
             ) ur
             ON ur.rolename = r.rolename`
         }
@@ -225,12 +213,17 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                     data-testid="dialog_button_save"
                     disabled={!editDialogProps.username || !editDialogProps.password}
                     onClick={async () => {
-                        let sql = "create user " + sqlIdentifier(editDialogProps.username) + " password '" + editDialogProps.password + "';";
+                        if (!editDialogProps.password) {
+                            return;
+                        }
+                        let sql = "START TRANSACTION;";
+                        sql += "CREATE USER " + sqlIdentifier(editDialogProps.username) + " PASSWORD " + sqlString(editDialogProps.password) + ";";
                         Object.keys(editDialogProps.roles).forEach(role => {
                             if (editDialogProps.roles[role]) {
-                                sql += "grant " + role + " to " + editDialogProps.username + ";";
+                                sql += "GRANT " + sqlIdentifier(role) + " TO " + sqlIdentifier(editDialogProps.username) + ";";
                             }
                         });
+                        sql += "COMMIT;";
                         let sqlResponse = await sqlConnection.runCommand("EXECUTE", [sql]);
                         if (sqlResponse.status === "SUCCESS") {
                             Toast.show("User " + editDialogProps.username + " created", undefined);
@@ -283,12 +276,14 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
             </DialogContent>
             <DialogActions>
                 <Button data-testid="dialog_button_save" onClick={async () => {
-                    let sql = "create user " + editDialogProps.username + " external;";
+                    let sql = "START TRANSACTION;";
+                    sql += "CREATE USER " + sqlIdentifier(editDialogProps.username) + " EXTERNAL;";
                     Object.keys(editDialogProps.roles).forEach(role => {
                         if (editDialogProps.roles[role] && !editDialogProps.origRoles[role]) {
-                            sql += "grant " + role + " to " + editDialogProps.username + ";";
+                            sql += "GRANT " + sqlIdentifier(role) + " TO " + sqlIdentifier(editDialogProps.username) + ";";
                         }
                     });
+                    sql += "COMMIT;"
                     if (sql) {
                         let sqlResponse = await sqlConnection.runCommand("EXECUTE", [sql]);
                         if (sqlResponse.status === "SUCCESS") {
@@ -336,13 +331,14 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                     let sql = "";
                     Object.keys(editDialogProps.roles).forEach(role => {
                         if (editDialogProps.roles[role] && !editDialogProps.origRoles[role]) {
-                            sql += "grant " + role + " to " + editDialogProps.username + ";";
+                            sql += "GRANT " + sqlIdentifier(role) + " TO " + sqlIdentifier(editDialogProps.username) + ";";
                         }
                         else if (!editDialogProps.roles[role] && editDialogProps.origRoles[role]) {
-                            sql += "revoke " + role + " from " + editDialogProps.username + ";";
+                            sql += "REVOKE " + sqlIdentifier(role) + " FROM " + sqlIdentifier(editDialogProps.username) + ";";
                         }
                     });
                     if (sql) {
+                        sql = "START TRANSACTION;" + sql + "COMMIT;";
                         let sqlResponse = await sqlConnection.runCommand("EXECUTE", [sql]);
                         if (sqlResponse.status === "SUCCESS") {
                             Toast.show("User updated", undefined);
@@ -369,7 +365,7 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
         if ("yes" === await Dialog.confirm(
             t("form.sqleditor.label.delete.user.title", i18nData),
             t("form.sqleditor.label.delete.user.body", i18nData), t)) {
-            sqlConnection.runCommand("EXECUTE", ["DROP USER \"" + username + "\""])
+            sqlConnection.runCommand("EXECUTE", ["DROP USER " + sqlIdentifier(username)])
                 .then(sqlResponse => {
                     if (sqlResponse.status === "SUCCESS") {
                         Toast.show(t("form.sqleditor.label.user.deleted", i18nData), undefined);
@@ -402,8 +398,8 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
             }}
             onDelete={(username: string) => {
                 handleDelete(username);
-            }
-            }
+            }}
+            addLabel={<><AddIcon />New User</>}
         />
         <Pagination
             count={state.lastPage}

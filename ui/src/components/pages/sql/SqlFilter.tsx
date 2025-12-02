@@ -12,10 +12,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import DialogTitle from '@mui/material/DialogTitle';
 import { t } from 'i18next';
-
-function sqlString(value: string) {
-    return "'" + value.replaceAll("'", "''") + "'";
-}
+import { sqlString } from './SqlUtils';
 
 const FilterOptions: { id: string, label: string, string?: ((value: string) => string), number?: ((value: string) => string), boolean?: ((value: string) => string) }[] = [
     {

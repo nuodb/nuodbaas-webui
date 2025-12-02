@@ -54,8 +54,8 @@ export default function Menu(props: MenuProps): JSX.Element {
                 <div className="NuoColumn">
                     {popupAnchor && <PopupMenu {...props} anchor={popupAnchor} clearAnchor={() => { setPopupAnchor(undefined) }} />}
                     <div className="NuoRow">
-                        {mainItem && <div className="NuoColumn NuoCenter" style={{ border: "1px solid #FFFFFF80" }}></div>}
-                        <div className="NuoColumn NuoCenter">{children}</div></div>
+                        {mainItem && <div className="NuoColumn NuoRight" style={{ border: "1px solid #FFFFFF80" }}></div>}
+                        <div className="NuoColumn NuoRight">{children}</div></div>
                 </div>
             </div>
         </div>;

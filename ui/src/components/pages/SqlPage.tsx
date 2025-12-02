@@ -21,6 +21,9 @@ import SqlExportTab from './sql/SqlExportTab';
 import { BackgroundTaskType } from '../../utils/BackgroundTasks';
 import Auth from '../../utils/auth';
 import SqlUsersTab from './sql/SqlUsersTab';
+import Menu from '../controls/Menu';
+import ArrowDropDown from '@mui/icons-material/ArrowDropDown';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 interface SqlTabsProps {
     tasks: BackgroundTaskType[];
@@ -43,7 +46,7 @@ function SqlTabs({ dbTable, sqlConnection, tasks, setTasks }: SqlTabsProps) {
     tabs.push(<Tab id="query" label={t("form.sqleditor.label.tab.query")}>{tabIndex === tabs.length && <SqlQueryTab sqlConnection={sqlConnection} dbTable={dbTable} />}</Tab>);
     tabs.push(<Tab id="import" label={t("form.sqleditor.label.tab.import")}>{tabIndex === tabs.length && <SqlImportTab tasks={tasks} setTasks={setTasks} sqlConnection={sqlConnection} dbTable={dbTable} />}</Tab>);
     tabs.push(<Tab id="export" label={t("form.sqleditor.label.tab.export")}>{tabIndex === tabs.length && <SqlExportTab tasks={tasks} setTasks={setTasks} sqlConnection={sqlConnection} />}</Tab>);
-    tabs.push(<Tab id="query" label={t("form.sqleditor.label.tab.users")}>{tabIndex === tabs.length && <SqlUsersTab sqlConnection={sqlConnection} />}</Tab>);
+    tabs.push(<Tab id="users" label={t("form.sqleditor.label.tab.users")}>{tabIndex === tabs.length && <SqlUsersTab sqlConnection={sqlConnection} />}</Tab>);
     return <Tabs currentTab={tabIndex} setCurrentTab={(tabIndex) => setTabIndex(tabIndex)}>{tabs}</Tabs>
 }
 
@@ -168,10 +171,25 @@ function SqlPage(props: PageProps) {
                         <label>{dbTable}</label>
                     </ComboBox> || <div></div>}
                 </StyledBreadcrumbs>
-                {(sqlConnection as SqlType)?.getDbUsername() && <>Logged in as {(sqlConnection as SqlType)?.getDbUsername()}<button onClick={() => {
-                    setSqlConnection(undefined);
-                    setLoginState("login");
-                }}>Logout</button></>}
+                <div className="NuoRight">
+                    {(sqlConnection as SqlType)?.getDbUsername() && <div className="NuoRow">
+                        <Menu
+                            popupId="sql_switch"
+                            align="right"
+                            items={[{
+                                id: "switch",
+                                label: "Switch Database User",
+                                icon: <LogoutIcon />,
+                                onClick: () => {
+                                    setSqlConnection(undefined);
+                                    setLoginState("login");
+                                    return true;
+                                }
+                            }]}>
+                            <div className="NuoRow">{(sqlConnection as SqlType)?.getDbUsername()}<ArrowDropDown /></div>
+                        </Menu>
+                    </div>}
+                </div>
             </div>
         </div>
         {renderContent()}

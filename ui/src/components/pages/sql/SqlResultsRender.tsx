@@ -1,6 +1,6 @@
 // (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableTh } from '../../controls/Table';
 import { withTranslation } from 'react-i18next';
 import { SqlResponse } from '../../../utils/SqlSocket';
@@ -24,11 +24,11 @@ type SqlTableProps = {
     onAdd?: () => void;
     onEdit?: (name: string) => void;
     onDelete?: (name: string) => void;
-    addButton?: string;
+    addLabel?: ReactNode;
     t: any;
 };
 
-function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, isAscending, setIsAscending, isFiltered, onAdd, onEdit, onDelete, addButton, t }: SqlTableProps) {
+function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, isAscending, setIsAscending, isFiltered, onAdd, onEdit, onDelete, addLabel, t }: SqlTableProps) {
     if(!results) {
         return null;
     }
@@ -104,8 +104,8 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
                         <FilterListIcon />
                     </div>
                 </TableTh>}
-                {onAdd && <TableTh className="NuoTableMenuCell NuoStickyRight NuoCenter">
-                    <button onClick={() => onAdd()}>Add</button>
+                {onAdd && addLabel && <TableTh className="NuoTableMenuCell NuoStickyRight">
+                    <div className="NuoColumn NuoRight"><button onClick={() => onAdd()}>{addLabel}</button></div>
                 </TableTh>}
             </TableRow>
         </TableHead>
