@@ -32,7 +32,7 @@ export default function FieldPassword(props: FieldProps): ReactNode {
      * @returns
      */
     function edit(): ReactNode {
-        if (readonly && matchesPath(path, "/databases/{organization}/{project}/{database}") && window.location.pathname.startsWith("/ui/resource/edit")) {
+        if (matchesPath(path, "/databases/{organization}/{project}/{database}") && window.location.pathname.startsWith("/ui/resource/edit/")) {
             return renderChangeDatabasePassword();
         }
 
