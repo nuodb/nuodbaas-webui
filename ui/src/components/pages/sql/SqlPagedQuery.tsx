@@ -50,7 +50,7 @@ function SqlPagedQuery({pageSize, sqlConnection, sqlQuery}: SqlQueryProps) {
         return <SqlResultsRender results={results} />
     }
     else if (results.error) {
-        return <div className="NuoSqlError">{results.error.split("\n").map((line, index) => <div key={index}>{line}</div>)}</div>
+        return <div className="NuoError">{results.error.split("\n").map((line, index) => <div key={index}>{line}</div>)}</div>
     }
     return <>
         <SqlResultsRender results={results} />
