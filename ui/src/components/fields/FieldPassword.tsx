@@ -51,10 +51,10 @@ export default function FieldPassword(props: FieldProps): ReactNode {
 
     function validateField(errors: { [field: string]: string | undefined }, name: string) {
         if (!passwords[name]) {
-            return { ...errors, [name]: t("form.databasePassword.fieldRequired") };
+            return { ...errors, [name]: t("dialog.databasePassword.fieldRequired") };
         }
         if (name === "newPassword2" && passwords["newPassword1"] !== passwords["newPassword2"]) {
-            return { ...errors, [name]: t("form.databasePassword.noMatch") }
+            return { ...errors, [name]: t("dialog.databasePassword.noMatch") }
         }
 
         let newErrors = { ...errors };
@@ -81,16 +81,15 @@ export default function FieldPassword(props: FieldProps): ReactNode {
                 Change Password
             </Button>
             <DialogMaterial open={showChangePasswordDialog}>
-                <DialogTitle>{t("form.databasePassword.changeForDatabase", { database: dbName })}</DialogTitle>
+                <DialogTitle>{t("dialog.databasePassword.changeForDatabase", { database: dbName })}</DialogTitle>
                 <DialogContent>
                     <div className="NuoFieldContainer">
                         <TextField
                             required={true}
                             id="oldPassword"
                             type="password"
-                            label={t("form.databasePassword.currentPassword")}
+                            label={t("dialog.databasePassword.currentPassword")}
                             value={passwords["oldPassword"] || ""}
-                            autoFocus={true}
                             onChange={handleChange}
                             error={errors["oldPassword"]}
                             onBlur={handleBlur}
@@ -101,7 +100,7 @@ export default function FieldPassword(props: FieldProps): ReactNode {
                             required={true}
                             id="newPassword1"
                             type="password"
-                            label={t("form.databasePassword.newPassword")}
+                            label={t("dialog.databasePassword.newPassword")}
                             value={passwords["newPassword1"]}
                             onChange={handleChange}
                             error={errors["newPassword1"]}
@@ -112,7 +111,7 @@ export default function FieldPassword(props: FieldProps): ReactNode {
                         <TextField required={true}
                             id="newPassword2"
                             type="password"
-                            label={t("form.databasePassword.reenterPassword")}
+                            label={t("dialog.databasePassword.reenterPassword")}
                             value={passwords["newPassword2"]}
                             onChange={handleChange}
                             error={errors["newPassword2"]}
@@ -135,12 +134,12 @@ export default function FieldPassword(props: FieldProps): ReactNode {
                         if (Object.keys(newErrors).length === 0) {
                             try {
                                 await Rest.post(path + "/dbaPassword", { current: passwords["oldPassword"], target: passwords["newPassword1"] });
-                                Toast.show(t("form.databasePassword.passwordChanged", { database: dbName }), undefined);
+                                Toast.show(t("dialog.databasePassword.passwordChanged", { database: dbName }), undefined);
                                 setShowChangePasswordDialog(false);
                             }
                             catch (error) {
                                 if (axios.isAxiosError(error)) {
-                                    setDialogError(t("form.databasePassword.cannotChangePassword", { error: error.response?.data?.detail }));
+                                    setDialogError(t("dialog.databasePassword.cannotChangePassword", { error: error.response?.data?.detail }));
                                 }
                                 else {
                                     throw error;

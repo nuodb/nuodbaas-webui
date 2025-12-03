@@ -66,7 +66,7 @@ export default function TextField(props: TextFieldProps): JSX.Element {
         return <div>
             <div className="NuoFieldBase NuoFieldString" key={props.id} aria-details={props.description}>
                 <label>{props.label}</label>
-                <input name={props.id} {...fieldProps} />
+                <input name={props.id} {...fieldProps} size={undefined} />
                 {props.iconOnClick && <button onClick={(event) => {
                     event.preventDefault();
                     props.iconOnClick && props.iconOnClick(event);

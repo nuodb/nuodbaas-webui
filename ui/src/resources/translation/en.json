@@ -248,16 +248,6 @@
                 "goBack": "Go Back",
                 "login": "Login"
             }
-        },
-        "databasePassword": {
-            "changeForDatabase": "Change Password for database {{database}}",
-            "cannotChangePassword": "Cannot change password. {{error}}",
-            "passwordChanged": "Database password changed for {{database}}",
-            "currentPassword": "Current Password",
-            "newPassword": "New Password",
-            "reenterPassword": "Reenter new Password",
-            "noMatch": "Passwords don't match",
-            "fieldRequired": "Field is required"
         }
     },
     "dialog": {
@@ -283,7 +273,18 @@
             "hideGetRequests": "Hide GET requests",
             "convertUpdatesToPatchRequests": "Convert updates to PATCH requests",
             "noWriteRequests": "No write requests recorded."
+        },
+        "databasePassword": {
+            "changeForDatabase": "Change Password for database {{database}}",
+            "cannotChangePassword": "Cannot change password. {{error}}",
+            "passwordChanged": "Database password changed for {{database}}",
+            "currentPassword": "Current Password",
+            "newPassword": "New Password",
+            "reenterPassword": "Reenter new Password",
+            "noMatch": "Passwords don't match",
+            "fieldRequired": "Field is required"
         }
+
     },
     "text": {
         "editEntryForPath": "Edit entry for {{path}}",
