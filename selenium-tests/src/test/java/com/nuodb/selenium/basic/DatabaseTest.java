@@ -74,6 +74,40 @@ public class DatabaseTest extends TestRoutines {
         });
    }
 
+    @Test
+    public void testChangeDatabasePassword() {
+        // Setup and list databases
+        loginRest();
+        String projectName = createProjectRest();
+        String databaseName = createDatabaseRest(projectName);
+
+        // find database and start edit mode
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
+        assertEquals(1, buttonsCell.size());
+        clickPopupMenu(buttonsCell.get(0), "edit_button");
+
+        // validate cancel button in Change Password dialog
+        waitElement("button.changePassword").click();
+        waitElement("button.cancel").click();
+
+        // change password for the first time
+        waitElement("button.changePassword").click();
+        waitInputElementByName("oldPassword").sendKeys("passw0rd");
+        waitInputElementByName("newPassword1").sendKeys("db1");
+        waitInputElementByName("newPassword2").sendKeys("db1");
+        waitElement("dialog.button.changePassword").click();
+        waitRestComplete();
+
+        // change password for the second time (to validate it changed before)
+        waitElement("button.changePassword").click();
+        waitInputElementByName("oldPassword").sendKeys("db1");
+        waitInputElementByName("newPassword1").sendKeys("passw0rd");
+        waitInputElementByName("newPassword2").sendKeys("passw0rd");
+        waitElement("dialog.button.changePassword").click();
+        waitRestComplete();
+        waitElement("button.changePassword");
+   }
+
    @Test
    public void testStartStopDatabase() {
        // Setup and list databases

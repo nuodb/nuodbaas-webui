@@ -11,7 +11,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import DialogTitle from '@mui/material/DialogTitle';
 import { Rest } from "../pages/parts/Rest";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import Toast from "../controls/Toast";
 
 export default function FieldPassword(props: FieldProps): ReactNode {
@@ -51,10 +51,10 @@ export default function FieldPassword(props: FieldProps): ReactNode {
 
     function validateField(errors: { [field: string]: string | undefined }, name: string) {
         if (!passwords[name]) {
-            return { ...errors, [name]: "Field is required" };
+            return { ...errors, [name]: t("form.databasePassword.fieldRequired") };
         }
         if (name === "newPassword2" && passwords["newPassword1"] !== passwords["newPassword2"]) {
-            return { ...errors, [name]: "Passwords don't match" }
+            return { ...errors, [name]: t("form.databasePassword.noMatch") }
         }
 
         let newErrors = { ...errors };
@@ -70,6 +70,7 @@ export default function FieldPassword(props: FieldProps): ReactNode {
         const dbName = path.startsWith("/databases/") ? path.substring("/databases/".length) : path;
         return <>
             <Button
+                data-testid="button.changePassword"
                 variant="outlined"
                 onClick={() => {
                     setShowChangePasswordDialog(true);
@@ -80,14 +81,14 @@ export default function FieldPassword(props: FieldProps): ReactNode {
                 Change Password
             </Button>
             <DialogMaterial open={showChangePasswordDialog}>
-                <DialogTitle>Change Password for database {dbName} </DialogTitle>
+                <DialogTitle>{t("form.databasePassword.changeForDatabase", { database: dbName })}</DialogTitle>
                 <DialogContent>
                     <div className="NuoFieldContainer">
                         <TextField
                             required={true}
                             id="oldPassword"
                             type="password"
-                            label={"Old Password"}
+                            label={t("form.databasePassword.currentPassword")}
                             value={passwords["oldPassword"] || ""}
                             autoFocus={true}
                             onChange={handleChange}
@@ -100,7 +101,7 @@ export default function FieldPassword(props: FieldProps): ReactNode {
                             required={true}
                             id="newPassword1"
                             type="password"
-                            label={"New Password"}
+                            label={t("form.databasePassword.newPassword")}
                             value={passwords["newPassword1"]}
                             onChange={handleChange}
                             error={errors["newPassword1"]}
@@ -111,7 +112,7 @@ export default function FieldPassword(props: FieldProps): ReactNode {
                         <TextField required={true}
                             id="newPassword2"
                             type="password"
-                            label={"Reenter new Password"}
+                            label={t("form.databasePassword.reenterPassword")}
                             value={passwords["newPassword2"]}
                             onChange={handleChange}
                             error={errors["newPassword2"]}
@@ -126,7 +127,7 @@ export default function FieldPassword(props: FieldProps): ReactNode {
                     }}>
                         {t("button.cancel")}
                     </Button>
-                    <Button data-testid="button.changePassword" onClick={async () => {
+                    <Button data-testid="dialog.button.changePassword" onClick={async () => {
                         let newErrors = validateField(errors, "oldPassword");
                         newErrors = validateField(newErrors, "newPassword1");
                         newErrors = validateField(newErrors, "newPassword2");
@@ -134,12 +135,12 @@ export default function FieldPassword(props: FieldProps): ReactNode {
                         if (Object.keys(newErrors).length === 0) {
                             try {
                                 await Rest.post(path + "/dbaPassword", { current: passwords["oldPassword"], target: passwords["newPassword1"] });
-                                Toast.show("Database password changed for " + dbName, undefined);
+                                Toast.show(t("form.databasePassword.passwordChanged", { database: dbName }), undefined);
                                 setShowChangePasswordDialog(false);
                             }
                             catch (error) {
                                 if (axios.isAxiosError(error)) {
-                                    setDialogError("Cannot change password. " + error.response?.data?.detail);
+                                    setDialogError(t("form.databasePassword.cannotChangePassword", { error: error.response?.data?.detail }));
                                 }
                                 else {
                                     throw error;
@@ -147,7 +148,7 @@ export default function FieldPassword(props: FieldProps): ReactNode {
                             }
                         }
                     }}>
-                        Change Password
+                        {t("button.changePassword")}
                     </Button>
                 </DialogActions>
             </DialogMaterial>
