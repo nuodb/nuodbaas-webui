@@ -281,7 +281,7 @@
             "passwordChanged": "Database password changed for {{database}}",
             "currentPassword": "Current Password",
             "newPassword": "New Password",
-            "reenterPassword": "Reenter new Password",
+            "confirmPassword": "Confirm new Password",
             "noMatch": "Passwords don't match",
             "fieldRequired": "Field is required"
         }

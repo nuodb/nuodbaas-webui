@@ -73,6 +73,7 @@ export default function ChangeDbaPassword({path, data, t}: ChangeDbaPasswordProp
             <div className="NuoFieldContainer">
                 <TextField
                     required={true}
+                    autoFocus={true}
                     id="oldPassword"
                     type="password"
                     label={t("dialog.databasePassword.currentPassword")}
@@ -98,7 +99,7 @@ export default function ChangeDbaPassword({path, data, t}: ChangeDbaPasswordProp
                 <TextField required={true}
                     id="newPassword2"
                     type="password"
-                    label={t("dialog.databasePassword.reenterPassword")}
+                    label={t("dialog.databasePassword.confirmPassword")}
                     value={passwords["newPassword2"]}
                     onChange={handleChange}
                     error={errors["newPassword2"]}

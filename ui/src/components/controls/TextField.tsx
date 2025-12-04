@@ -1,9 +1,11 @@
 // (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
-import React, { JSX } from 'react';
+import React, { JSX, useState } from 'react';
 import { isMaterial } from '../../utils/Customizations';
 import { IconButton, InputAdornment, TextField as MuiTextField } from '@mui/material';
 import InfoPopup from './InfoPopup';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 export type TextFieldProps = {
     "data-testid"?: string,
@@ -27,6 +29,8 @@ export type TextFieldProps = {
 }
 
 export default function TextField(props: TextFieldProps): JSX.Element {
+    const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
+
     let fieldProps = { ...props };
     delete fieldProps.icon;
     delete fieldProps.leftIcon;
@@ -41,10 +45,19 @@ export default function TextField(props: TextFieldProps): JSX.Element {
             error={!!props.error}
             helperText={props.error}
             size={props.size}
-            slotProps={((props.icon || props.leftIcon || fieldProps.description) && {
+            type={props.type === "password" && passwordVisible ? "text" : props.type}
+            slotProps={((props.icon || props.leftIcon || fieldProps.description || props.type === "password") && {
                 input: {
-                    endAdornment: (props.icon || props.description) &&
+                    endAdornment: (props.icon || props.description || props.type === "password") &&
                         <InputAdornment position="end">
+                            {props.type === "password" && <IconButton
+                                aria-label=""
+                                onClick={() => {
+                                    setPasswordVisible(!passwordVisible);
+                                }}
+                                tabIndex={-1}>
+                                {passwordVisible ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                            </IconButton>}
                             {props.icon && <IconButton
                                 aria-label=""
                                 onClick={props.iconOnClick}
