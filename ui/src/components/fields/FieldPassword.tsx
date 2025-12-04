@@ -5,18 +5,9 @@ import { getValue, setValue } from "./utils"
 import { FieldBase_display, FieldBase_validate, FieldProps } from "./FieldBase"
 import React, { ReactNode, useState } from 'react';
 import { matchesPath } from "../../utils/schema";
-import Button from "../controls/Button";
-import DialogMaterial from '@mui/material/Dialog';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import DialogTitle from '@mui/material/DialogTitle';
-import { Rest } from "../pages/parts/Rest";
-import axios from "axios";
-import Toast from "../controls/Toast";
 
 export default function FieldPassword(props: FieldProps): ReactNode {
-    const [errors, setErrors] = useState<{ [field: string]: string | undefined }>({});
-    const { path, prefix, label, values, required, setValues, autoFocus, readonly, parameter, t } = props;
+    const { path, prefix, label, values, required, setValues, autoFocus, readonly, parameter, errors } = props;
 
     switch (props.op) {
         case "edit": return edit();
