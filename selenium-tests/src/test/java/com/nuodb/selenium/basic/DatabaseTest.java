@@ -81,30 +81,36 @@ public class DatabaseTest extends TestRoutines {
         String projectName = createProjectRest();
         String databaseName = createDatabaseRest(projectName);
 
-        // find database and start edit mode
+        // find database and start view mode
         clickMenu(Resource.databases.name());
         List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
         assertEquals(1, buttonsCell.size());
-        clickPopupMenu(buttonsCell.get(0), "edit_button");
+        clickPopupMenu(buttonsCell.get(0), "view_button");
+        waitElement("resource-popup-menu").click();
+        waitElement("popupmenu-button.db.changeDbaPassword").click();
 
         // validate cancel button in Change Password dialog
-        waitElement("button.changePassword").click();
         waitElement("button.cancel").click();
 
         // change password for the first time
-        waitElement("button.changePassword").click();
+        waitElement("resource-popup-menu").click();
+        waitElement("popupmenu-button.db.changeDbaPassword").click();
         waitInputElementByName("oldPassword").sendKeys("passw0rd");
         waitInputElementByName("newPassword1").sendKeys("db1");
         waitInputElementByName("newPassword2").sendKeys("db1");
-        waitElement("dialog.button.changePassword").click();
+        waitElement("button.changePassword").click();
         waitRestComplete();
 
-        // change password for the second time (to validate it changed before)
-        waitElement("button.changePassword").click();
+        // change password for the second time from the view
+        clickMenu(Resource.databases.name());
+        buttonsCell = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
+        assertEquals(1, buttonsCell.size());
+        clickPopupMenu(buttonsCell.get(0), "button.db.changeDbaPassword");
+
         waitInputElementByName("oldPassword").sendKeys("db1");
         waitInputElementByName("newPassword1").sendKeys("passw0rd");
         waitInputElementByName("newPassword2").sendKeys("passw0rd");
-        waitElement("dialog.button.changePassword").click();
+        waitElement("button.changePassword").click();
         waitRestComplete();
         waitElement("button.changePassword");
    }

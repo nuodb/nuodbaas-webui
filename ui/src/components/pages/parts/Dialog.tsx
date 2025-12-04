@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import Button from '../../controls/Button';
 import DialogMaterial from '@mui/material/Dialog';
@@ -16,12 +16,12 @@ interface IProps {
 type MaxWidthType = "xs" | "sm" | "md" | "lg" | "xl";
 
 interface DialogProps {
-    buttons?: TempAny
-    title?: string
-    body?: ReactNode,
-    maxWidth?: MaxWidthType,
-    resolve: TempAny,
-    reject: TempAny
+    buttons: ButtonProps[];
+    title?: string;
+    body?: ReactNode;
+    maxWidth?: MaxWidthType;
+    resolve: TempAny;
+    reject: TempAny;
 }
 
 interface IProps { }
@@ -90,18 +90,35 @@ export default class Dialog extends Component<IProps, IState> {
         lastItem.resolve(button);
     }
 
+    static close = (buttonId: string) => {
+        if (s_instance === null) {
+            return;
+        }
+        s_instance.handleClose(buttonId);
+    }
+
     render() {
         return this.state.dialogs.map((dialog: DialogProps, index: number) => {
             return <DialogMaterial key={index} maxWidth={dialog.maxWidth}
                 open={true}
             >
                 <DialogTitle>{dialog.title}</DialogTitle>
+                {dialog.buttons.length > 0 ? <>
                 <DialogContent>
                     {dialog.body}
                 </DialogContent>
                 <DialogActions>
-                    {dialog.buttons.map((button: { id: string, label: string }) => <Button key={button.id} data-testid={"dialog_button_" + button.id} onClick={() => this.handleClose(button.id)}>{button.label}</Button>)}
+                        {dialog.buttons.map((button: ButtonProps) => (
+                            <Button
+                                key={button.id}
+                                data-testid={"dialog_button_" + button.id}
+                                onClick={() => {
+                                    this.handleClose(button.id);
+                                }}
+                            >{button.label}</Button>
+                        ))}
                 </DialogActions>
+                </> : dialog.body}
             </DialogMaterial>;
         });
     }

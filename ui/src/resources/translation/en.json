@@ -17,6 +17,7 @@
         "false": "False",
         "unassigned": "Unassigned",
         "db.connection.info": "Show DB Connection Info",
+        "db.changeDbaPassword": "Change DBA Password",
         "start.database": "Start Database",
         "stop.database": "Stop Database",
         "show.databases": "Show Databases",
@@ -275,7 +276,7 @@
             "noWriteRequests": "No write requests recorded."
         },
         "databasePassword": {
-            "changeForDatabase": "Change Password for database {{database}}",
+            "changeForDatabase": "Change DBA Password for database {{database}}",
             "cannotChangePassword": "Cannot change password. {{error}}",
             "passwordChanged": "Database password changed for {{database}}",
             "currentPassword": "Current Password",
