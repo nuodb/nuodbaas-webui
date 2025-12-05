@@ -273,7 +273,7 @@ export function PopupMenu(props: PopupMenuProps) {
                 top: anchorRect.height,
                 right: -anchorRect.width,
                 overflowY: "auto",
-                padding: "0",
+                padding: "2px 0",
                 margin: "0",
                 zIndex: 102
             }}>

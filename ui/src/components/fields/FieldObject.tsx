@@ -1,23 +1,28 @@
 // (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import { ReactNode } from "react";
-import FieldBase, { FieldBaseType, FieldProps } from "./FieldBase";
-import FieldFactory from "./FieldFactory";
+import { FieldProps } from "./FieldBase";
 import { getDefaultValue } from "../../utils/schema";
 import { setValue, getValue } from "./utils";
 import FieldMessage from "./FieldMessage";
 import Accordion from "../controls/Accordion";
+import { Field } from "./Field";
 
-export default function FieldObject(props: FieldProps): FieldBaseType {
+export default function FieldObject(props: FieldProps): ReactNode {
+    switch (props.op) {
+        case "edit": return edit();
+        case "view": return view();
+        case "validate": return validate();
+    }
     /**
      * show Field of type Object using the values and schema definition
      * @returns
      */
-    function show(): ReactNode {
-        const { prefix, parameter, values, errors, required, setValues, updateErrors, expand, hideTitle, t } = props;
+    function edit(): ReactNode {
+        const { prefix, parameter, values, expand, hideTitle, t } = props;
         const properties = parameter.properties;
         if (!properties) {
-            return FieldMessage({ ...props, message: "\"properties\" attribute missing from schema for field \"" + prefix + "\"" }).show();
+            return FieldMessage({ ...props, message: "\"properties\" attribute missing from schema for field \"" + prefix + "\"" });
         }
         let ret = Object.keys(properties).map(key => {
             let prefixKey = prefix ? (prefix + "." + key) : key;
@@ -25,18 +30,13 @@ export default function FieldObject(props: FieldProps): FieldBaseType {
             if (defaultValue !== null) {
                 setValue(values, prefixKey, defaultValue);
             }
-            return <div key={key} className="NuoFieldContainer">{(FieldFactory.create({
+            return <div key={key} className="NuoFieldContainer">{(Field({
                 ...props,
                 prefix: prefixKey,
                 parameter: properties[key],
-                values,
-                errors,
-                required,
-                setValues,
-                updateErrors,
                 expand: false,
                 label: t("field.label." + prefixKey, prefixKey)
-            })).show()}</div>
+            }))}</div>
         });
         if (hideTitle) {
             return ret;
@@ -54,27 +54,25 @@ export default function FieldObject(props: FieldProps): FieldBaseType {
         if (properties && value) {
             // validate objects (hierarchical fields)
             Object.keys(value).forEach(subKey => {
-                const field = FieldFactory.create({ ...props, prefix: prefix + "." + subKey, parameter: properties[subKey], values, updateErrors });
-                success = field.validate() && success;
+                const fieldValidate = Field({ ...props, prefix: prefix + "." + subKey, parameter: properties[subKey], values, updateErrors });
+                success = !!fieldValidate && success;
             });
         }
         return success;
     }
 
-    function getDisplayValue(): ReactNode {
+    function view(): ReactNode {
         const { prefix, parameter, values, t } = props;
         const properties = parameter.properties;
         if (!properties) {
-            return FieldMessage({ ...props, message: "\"properties\" attribute missing from schema for field \"" + prefix + "\"" }).show();
+            return FieldMessage({ ...props, message: "\"properties\" attribute missing from schema for field \"" + prefix + "\"" });
         }
         return <dl className="map">
             {Object.keys(properties).map(key => {
                 const prefixKey = prefix ? (prefix + "." + key) : key;
-                const field = FieldFactory.create({ ...props, prefix: prefixKey, parameter: properties[key], values });
-                return <div key={key}><dt>{t("field.label." + prefixKey, prefixKey)}</dt><dd>{field.getDisplayValue()}</dd></div>;
+                const fieldView = Field({ ...props, prefix: prefixKey, parameter: properties[key], values });
+                return <div key={key}><dt>{t("field.label." + prefixKey, prefixKey)}</dt><dd>{fieldView}</dd></div>;
             })}
         </dl>
     }
-
-    return { ...FieldBase(props), show, validate, getDisplayValue };
 }

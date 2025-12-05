@@ -2,16 +2,21 @@
 
 import TextField from "../controls/TextField";
 import { getValue, setValue } from "./utils"
-import FieldBase, { FieldBaseType, FieldProps } from "./FieldBase"
+import { FieldBase_display, FieldBase_validate, FieldProps } from "./FieldBase"
 import { ReactNode } from 'react';
 
-export default function FieldInteger(props: FieldProps): FieldBaseType {
+export default function FieldInteger(props: FieldProps): ReactNode {
+    switch (props.op) {
+        case "edit": return edit();
+        case "view": return FieldBase_display(props);
+        case "validate": return FieldBase_validate(props);
+    }
 
     /**
      * show Field of type Integer using the values and schema definition
      * @returns
      */
-    function show(): ReactNode {
+    function edit(): ReactNode {
         const { prefix, label, values, required, setValues, autoFocus, readonly, parameter } = props;
         let value = String(getValue(values, prefix) || "");
 
@@ -21,6 +26,4 @@ export default function FieldInteger(props: FieldProps): FieldBaseType {
             setValues(v);
         }} disabled={readonly} />
     }
-
-    return { ...FieldBase(props), show };
 }

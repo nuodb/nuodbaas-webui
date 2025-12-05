@@ -143,7 +143,7 @@ export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:Re
                                     }
                                 }
                                 else if (menu.dialog) {
-                                    CustomDialog({ dialog: menu.dialog, data: row, t });
+                                    CustomDialog({ dialog: menu.dialog, path, data: row, t });
                                 }
                             }
                         });

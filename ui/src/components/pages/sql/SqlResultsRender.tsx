@@ -33,7 +33,7 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
         return null;
     }
     else if (results.error) {
-        return <div className="NuoSqlError">{results.error}</div>
+        return <div className="NuoError">{results.error}</div>
     }
 
     function sort(name: string) {

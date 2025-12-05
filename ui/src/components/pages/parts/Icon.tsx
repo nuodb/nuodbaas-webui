@@ -4,6 +4,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import InfoIcon from '@mui/icons-material/Info';
 import StorageIcon from '@mui/icons-material/Storage';
+import PasswordIcon from '@mui/icons-material/Password';
 
 export default function Icon({name}: {name: string|undefined;}) {
 
@@ -12,6 +13,7 @@ export default function Icon({name}: {name: string|undefined;}) {
         case "PlayArrow": return <PlayArrowIcon/>;
         case "Info": return <InfoIcon/>;
         case "Storage": return <StorageIcon/>;
+        case "Password": return <PasswordIcon />;
         default: return null;
     }
 }

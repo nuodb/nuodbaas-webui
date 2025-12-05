@@ -1,16 +1,20 @@
 // (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import { getValue, setValue } from "./utils"
-import FieldBase, { FieldBaseType, FieldProps } from "./FieldBase"
+import { FieldBase_validate, FieldProps } from "./FieldBase"
 import { ReactNode } from 'react'
 import Select, { SelectOption } from "../controls/Select";
 
-export default function FieldSelect(props: FieldProps): FieldBaseType {
-
+export default function FieldSelect(props: FieldProps): ReactNode {
+    switch (props.op) {
+        case "edit": return edit();
+        case "view": return view();
+        case "validate": return FieldBase_validate(props);
+    }
     /**
      * show Field of type Boolean using the values and schema definition
      */
-    function show(): ReactNode {
+    function edit(): ReactNode {
         const { prefix, label, values, parameter, required, setValues, autoFocus, readonly, t } = props;
         let value = getValue(values, prefix);
 
@@ -18,7 +22,7 @@ export default function FieldSelect(props: FieldProps): FieldBaseType {
             let v = { ...values };
             setValue(v, prefix, e.target.value);
             setValues(v);
-        }} onBlur={() => FieldBase(props).validate()} disabled={readonly}>
+        }} onBlur={() => FieldBase_validate(props)} disabled={readonly}>
             <SelectOption value="">{t("field.select.selectItem")}</SelectOption>
             {parameter && parameter.enum && parameter.enum.map(e => {
                 let description = undefined;
@@ -36,11 +40,9 @@ export default function FieldSelect(props: FieldProps): FieldBaseType {
         </Select>;
     }
 
-    function getDisplayValue(): ReactNode {
+    function view(): ReactNode {
         const { prefix, values, t } = props;
         const value = getValue(values, prefix);
         return t("field.enum." + prefix + "." + value, value);
     }
-
-    return { ...FieldBase(props), show, getDisplayValue };
 }

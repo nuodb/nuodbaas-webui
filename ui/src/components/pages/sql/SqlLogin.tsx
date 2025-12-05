@@ -97,7 +97,7 @@ function SqlLogin({ setSqlConnection, showRegistration }: SqlLoginProps) {
                 setShowRegisterUserDialog(true);
             }}>{t("form.sqleditor.button.setupLogin")}</Button>}
         </div>
-        <div className="NuoSqlError">{error}</div>
+        <div className="NuoError">{error}</div>
     </form>;
 }
 
