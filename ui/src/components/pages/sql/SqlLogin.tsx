@@ -66,7 +66,7 @@ function SqlLogin({setSqlConnection}: SqlLoginProps) {
                 }
             }}>{t("form.sqleditor.button.login")}</Button>
         </div>
-        <div className="NuoSqlError">{error}</div>
+        <div className="NuoError">{error}</div>
     </form>;
 }
 

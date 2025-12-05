@@ -74,6 +74,47 @@ public class DatabaseTest extends TestRoutines {
         });
    }
 
+    @Test
+    public void testChangeDatabasePassword() {
+        // Setup and list databases
+        loginRest();
+        String projectName = createProjectRest();
+        String databaseName = createDatabaseRest(projectName);
+
+        // find database and start view mode
+        clickMenu(Resource.databases.name());
+        List<WebElement> buttonsCell = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
+        assertEquals(1, buttonsCell.size());
+        clickPopupMenu(buttonsCell.get(0), "view_button");
+        waitElement("resource-popup-menu").click();
+        waitElement("popupmenu-button.db.changeDbaPassword").click();
+
+        // validate cancel button in Change Password dialog
+        waitElement("button.cancel").click();
+
+        // change password for the first time
+        waitElement("resource-popup-menu").click();
+        waitElement("popupmenu-button.db.changeDbaPassword").click();
+        waitInputElementByName("oldPassword").sendKeys("passw0rd");
+        waitInputElementByName("newPassword1").sendKeys("db1");
+        waitInputElementByName("newPassword2").sendKeys("db1");
+        waitElement("button.changePassword").click();
+        waitRestComplete();
+
+        // change password for the second time from the view
+        clickMenu(Resource.databases.name());
+        buttonsCell = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
+        assertEquals(1, buttonsCell.size());
+        clickPopupMenu(buttonsCell.get(0), "button.db.changeDbaPassword");
+
+        waitInputElementByName("oldPassword").sendKeys("db1");
+        waitInputElementByName("newPassword1").sendKeys("passw0rd");
+        waitInputElementByName("newPassword2").sendKeys("passw0rd");
+        waitElement("button.changePassword").click();
+        waitRestComplete();
+        waitElement("button.changePassword");
+   }
+
    @Test
    public void testStartStopDatabase() {
        // Setup and list databases

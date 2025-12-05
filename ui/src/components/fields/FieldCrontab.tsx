@@ -1,18 +1,23 @@
 // (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
 import { getValue, setValue } from "./utils"
-import FieldBase, { FieldBaseType, FieldProps } from "./FieldBase"
+import { FieldBase_validate, FieldProps } from "./FieldBase"
 import { ReactNode } from 'react';
 import Select, { SelectOption } from "../controls/Select";
 import TextField from "../controls/TextField";
 import { FieldParameterType } from "../../utils/types";
 
-export default function FieldCrontab(props: FieldProps): FieldBaseType {
+export default function FieldCrontab(props: FieldProps): ReactNode {
+    switch (props.op) {
+        case "edit": return edit();
+        case "view": return view();
+        case "validate": return validate();
+    }
 
     /**
      * show Field of type Boolean using the values and schema definition
      */
-    function show(): ReactNode {
+    function edit(): ReactNode {
         const { prefix, label, parameter, values, setValues, errors, autoFocus, readonly, required, t } = props;
         let error = (errors && (prefix in errors) && errors[prefix]) || "";
         let value = getValue(values, prefix) || "";
@@ -35,7 +40,7 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
         }
 
         function handleBlur() {
-            FieldBase(props).validate() && validate();
+            FieldBase_validate(props) && validate();
         }
 
         return <div key={prefix} className={(isOther && "NuoFieldCrontab") || ""}>
@@ -78,7 +83,7 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
         </div>;
     }
 
-    function getDisplayValue(): ReactNode {
+    function view(): ReactNode {
         const { prefix, values, t } = props;
         const value = getValue(values, prefix);
         return t("field.enum." + prefix + "." + value, value);
@@ -90,17 +95,9 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
  * value - value to check. if undefined, defaults to the value for "prefix"
  * @returns true if validation passed.
  */
-    function validate(prefix?: string, parameter?: FieldParameterType, value?: string): boolean {
-        const { values, updateErrors } = props;
-        if (!prefix) {
-            prefix = props.prefix;
-        }
-        if (!parameter) {
-            parameter = props.parameter;
-        }
-        if (value === undefined) {
-            value = getValue(values, prefix);
-        }
+    function validate(): boolean {
+        const { prefix, parameter, values, updateErrors } = props;
+        const value = getValue(values, prefix);
         if (!value) {
             if (parameter?.required) {
                 updateErrors(prefix, "Field " + prefix + " is required");
@@ -126,6 +123,4 @@ export default function FieldCrontab(props: FieldProps): FieldBaseType {
         updateErrors(prefix, null);
         return true;
     }
-
-    return { ...FieldBase(props), show, validate, getDisplayValue };
 }

@@ -1003,8 +1003,8 @@ details[open] summary::before {
 .NuoMoreValueExpanded {
     display: inline;
 }
-.NuoSqlError {
-    white-space: preserve nowrap;
+.NuoError {
+    white-space: preserve;
     color: red;
     font-size: .8em;
         font-family: monospace;
