@@ -257,6 +257,9 @@
                 "addDbaasUserToDatabase": "Add DBaaS user to database",
                 "editUser": "Edit User {{username}}"
             },
+            "error": {
+                "userExists": "User exists already."
+            },
             "button": {
                 "login": "Login",
                 "executing": "Executing...",

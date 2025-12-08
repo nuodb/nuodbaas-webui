@@ -47,7 +47,7 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
         }
     }
 
-    function renderMenuCell(username: string, zIndex: number, t: any) {
+    function renderMenuCell(value: string, zIndex: number, t: any) {
         const buttons: MenuItemProps[] = [];
         if (onEdit) {
             buttons.push({
@@ -56,7 +56,7 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
                 icon: <EditIcon />,
                 label: t("button.edit"),
                 onClick: () => {
-                    onEdit(username);
+                    onEdit(value);
                     return true;
                 }
             });
@@ -68,7 +68,7 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
                 icon: <DeleteForeverIcon />,
                 label: t("button.delete"),
                 onClick: () => {
-                    onDelete(username);
+                    onDelete(value);
                     return true;
                 },
             });
@@ -77,8 +77,8 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
             return null;
         }
 
-        return <TableCell key={username} className="NuoTableMenuCell NuoStickyRight" zIndex={zIndex}>
-            <Menu data-testid="resource-popup-menu" popupId={"row_menu_" + username} items={buttons} align="right" />
+        return <TableCell key={value} className="NuoTableMenuCell NuoStickyRight" zIndex={zIndex}>
+            <Menu data-testid="resource-popup-menu" popupId={"row_menu_" + value} items={buttons} align="right" />
         </TableCell>;
     }
 

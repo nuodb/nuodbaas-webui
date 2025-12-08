@@ -12,6 +12,7 @@ import TextField from '../../controls/TextField';
 import SqlSocket, { SqlImportResponseType, SqlType } from '../../../utils/SqlSocket';
 import Toast from '../../controls/Toast';
 import { sqlIdentifier, sqlString } from './SqlUtils';
+import SqlRoleSelector, { RolesType } from './SqlRoleSelector';
 
 type SqlRegisterUserProps = {
     onClose: (action: string)=>void;
@@ -20,17 +21,13 @@ type SqlRegisterUserProps = {
     database: string;
 }
 
-type RolesType = {
-    [roleName: string]: boolean;
-}
-
 export default function SqlRegisterUser({onClose, organization, project, database}: SqlRegisterUserProps ) {
     const [adminUsername, setAdminUsername] = useState("");
     const [adminPassword, setAdminPassword] = useState("");
     const [conn, setConn] = useState<SqlType | undefined>(undefined);
     const [error, setError] = useState<string|undefined>();
     const newDbUser = Auth.getCredentials()?.username.replace("/", "_").replace(/[^a-zA-Z0-9_]/g, '');
-    const [roles, setRoles] = useState<RolesType>({});
+    const [roles, setRoles] = useState<{ [role: string]: RolesType }>({});
 
     useEffect(() => {
         if (!conn) {
@@ -40,9 +37,9 @@ export default function SqlRegisterUser({onClose, organization, project, databas
         let sql = "SELECT r.schema, r.rolename FROM system.roles r";
         conn.runCommand("EXECUTE_QUERY", [sql]).then(sqlResponse => {
             if (sqlResponse.status === "SUCCESS" && sqlResponse.columns && sqlResponse.rows) {
-                let roles: { [key: string]: boolean } = {};
+                let roles: { [key: string]: RolesType } = {};
                 sqlResponse.rows.forEach(row => {
-                    roles[row.values[0] + "." + row.values[1]] = false;
+                    roles[row.values[0] + "." + row.values[1]] = "disabled";
                 })
                 setRoles(roles);
             }
@@ -78,18 +75,6 @@ export default function SqlRegisterUser({onClose, organization, project, databas
         </>;
     }
 
-    function RoleSelector() {
-        return <>{t("form.sqleditor.label.addRolestoUser", {username: newDbUser})}
-            {Object.keys(roles).map((roleKey: string) => {
-                return <div className="NuoRow"><input type="checkbox" name={roleKey} checked={roles[roleKey]} onChange={() => {
-                    let newRoles = { ...roles };
-                    newRoles[roleKey] = !newRoles[roleKey];
-                    setRoles(newRoles);
-                }} />{roleKey}</div>;
-            })}
-        </>
-    }
-
     if (!newDbUser) {
         return null;
     }
@@ -99,7 +84,7 @@ export default function SqlRegisterUser({onClose, organization, project, databas
         <DialogContent>
             <div>
                 {!conn && renderLoginPage()}
-                {conn && <RoleSelector />}
+                {conn && <SqlRoleSelector roles={roles} setRoles={setRoles} />}
                 <div>&nbsp;</div>
                 <div className="NuoSqlError">{error}</div>
             </div>
@@ -118,7 +103,7 @@ export default function SqlRegisterUser({onClose, organization, project, databas
                     return;
                 }
                 if (checkUser.rows && checkUser.rows.length > 0) {
-                    setError("User exists already.");
+                    setError(t("form.sqleditor.error.userExists"));
                     return;
                 }
                 setConn(socket);

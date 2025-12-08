@@ -17,6 +17,8 @@ import Select, { SelectOption } from "../../controls/Select";
 import { Rest } from "../parts/Rest";
 import AddIcon from '@mui/icons-material/Add';
 import { sqlIdentifier, sqlString } from "./SqlUtils";
+import Auth from "../../../utils/auth";
+import SqlRoleSelector, { getRoles, RolesType } from "./SqlRoleSelector";
 
 type SqlUsersTabProps = {
     sqlConnection: SqlType;
@@ -32,8 +34,8 @@ type SqlResponseState = {
 };
 
 type EditDialogProps = {
-    roles: { [role: string]: boolean };
-    origRoles: { [role: string]: boolean };
+    roles: { [role: string]: RolesType };
+    origRoles: { [role: string]: RolesType };
     username: string;
     password?: string;
     type: "create" | "edit" | "create_local" | "add_dbaas";
@@ -57,7 +59,15 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
         let sqlQuery = `
             select
                 LCASE(p.username) as "Username",
-                LCASE(REPLACE(LISTAGG(IfNull(CONCAT(ur.roleschema, '.', ur.rolename), ''), ','), ',', CHAR(10))) AS "Roles",
+                LCASE(REPLACE(LISTAGG(IfNull(CONCAT(
+                    ur.roleschema,
+                    '.',
+                    ur.rolename,
+                    CASE WHEN ur.options = '0' THEN
+                        ''
+                    ELSE ' (with grant)'
+                    END
+                ), ''), ','), ',', CHAR(10))) AS "Roles",
                 CASE WHEN
                     p.verifier IS NULL
                 THEN
@@ -95,58 +105,6 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
         setState(newState);
     }
 
-    // returns {[rolename: string]: (enabled: boolean)} for the given user
-    // i.e. {administrator:true, role1: false}
-    async function getRoles(username: string | undefined): Promise<{ [role: string]: boolean }> {
-        let sql = "SELECT r.schema, r.rolename, NULL FROM system.roles r";
-        if (username) {
-            sql = `
-            SELECT r.schema, r.rolename, ur.username
-            FROM system.roles r
-            FULL JOIN (
-                SELECT username,rolename FROM system.userroles WHERE username=` + sqlString(username) + `
-            ) ur
-            ON ur.rolename = r.rolename`
-        }
-        let sqlResponse = await sqlConnection.runCommand("EXECUTE_QUERY", [sql]);
-        if (sqlResponse.status === "SUCCESS" && sqlResponse.columns && sqlResponse.rows) {
-            let roles: { [key: string]: boolean } = {};
-            sqlResponse.rows.forEach(row => {
-                if (row.values.length === 3) {
-                    const role = (row.values[0] + "." + row.values[1]).toLowerCase();
-                    if (username) {
-                        roles[role] = String(row.values[2]).toLowerCase() === username.toLowerCase();
-                    }
-                    else {
-                        roles[role] = false;
-                    }
-                }
-            })
-            return Promise.resolve(roles);
-        }
-        else if (editDialogProps) {
-            let newEditDialogProps: EditDialogProps = { ...editDialogProps, error: ("Unable to retrieve roles: " + sqlResponse.error) };
-            setEditDialogProps(newEditDialogProps);
-        }
-        return Promise.resolve({});
-    }
-
-    function renderUserRoles() {
-        if (!editDialogProps) {
-            return null;
-        }
-        return <>User Roles:
-            {Object.keys(editDialogProps.roles).map(roleKey => {
-                return <div className="NuoRow"><input type="checkbox" name={roleKey} checked={editDialogProps.roles[roleKey]} onChange={() => {
-                    let newEditDialogProps = { ...editDialogProps };
-                    newEditDialogProps.roles = { ...newEditDialogProps.roles };
-                    newEditDialogProps.roles[roleKey] = !newEditDialogProps.roles[roleKey];
-                    setEditDialogProps(newEditDialogProps);
-                }} />{roleKey}</div>;
-            })}
-        </>
-    }
-
     function renderError() {
         return editDialogProps?.error && <div className="NuoError">{editDialogProps.error}</div>
     }
@@ -166,7 +124,37 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                 }}>{t("form.sqleditor.button.createDatabaseUser")}</Button>
                 <Button data-testid="dialog_button_dbaas" onClick={async () => {
                     const users: string[] = (await Rest.get("/users?listAccessible=true") as any).items;
-                    setEditDialogProps({ ...editDialogProps, type: "add_dbaas", allDbaasUsers: users });
+                    const existingUsers: string[] = state.sqlResponse?.rows?.map(row => row.values[0].replace("_", "/")) || []
+                    const filteredUsers = users.filter(user => {
+                        if (user.startsWith("system/")) {
+                            return false;
+                        }
+                        if (existingUsers.includes(user)) {
+                            return false;
+                        }
+                        return true;
+                    })
+                    const loggedInOrg = Auth.getCredentials()?.username.split("/")[0] || "";
+                    const sortedUsers = filteredUsers.sort((a: string, b: string) => {
+                        const orgA = a.split("/")[0];
+                        const orgB = b.split("/")[0];
+                        if (orgA === loggedInOrg && orgB !== loggedInOrg) {
+                            return -1;
+                        }
+                        else if (orgB === loggedInOrg) {
+                            return 1;
+                        }
+                        else if (a < b) {
+                            return -1;
+                        }
+                        else if (a > b) {
+                            return 1;
+                        }
+                        else {
+                            return 0;
+                        }
+                    });
+                    setEditDialogProps({ ...editDialogProps, type: "add_dbaas", allDbaasUsers: sortedUsers });
                 }}>{t("form.sqleditor.button.addDbaasUser")}</Button>
                 <Button data-testid="dialog_button_dbaas" onClick={async () => {
                     setEditDialogProps(undefined);
@@ -204,7 +192,7 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                             }}
                         />
                     </div>
-                    {renderUserRoles()}
+                    <SqlRoleSelector roles={editDialogProps.roles} setRoles={(roles) => setEditDialogProps({ ...editDialogProps, roles })} />
                     {renderError()}
                 </div>
             </DialogContent>
@@ -220,7 +208,11 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                         sql += "CREATE USER " + sqlIdentifier(editDialogProps.username) + " PASSWORD " + sqlString(editDialogProps.password) + ";";
                         Object.keys(editDialogProps.roles).forEach(role => {
                             if (editDialogProps.roles[role]) {
-                                sql += "GRANT " + sqlIdentifier(role) + " TO " + sqlIdentifier(editDialogProps.username) + ";";
+                                sql += "GRANT " + sqlIdentifier(role) + " TO " + sqlIdentifier(editDialogProps.username);
+                                if (editDialogProps.roles[role] === "grant") {
+                                    sql += " WITH GRANT OPTION";
+                                }
+                                sql += ";";
                             }
                         });
                         sql += "COMMIT;";
@@ -258,7 +250,7 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                     <div className="NuoFieldContainer">
                         <Select
                             id="username"
-                            label={t("button.username")}
+                            label={t("field.label.username")}
                             value={editDialogProps.username}
                             onChange={(event) => {
                                 setEditDialogProps({ ...editDialogProps, username: event.target.value });
@@ -269,7 +261,7 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                             ))}
                         </Select>
                     </div>
-                    {renderUserRoles()}
+                    <SqlRoleSelector roles={editDialogProps.roles} setRoles={(roles) => setEditDialogProps({ ...editDialogProps, roles })} />
                     {renderError()}
                 </div>
             </DialogContent>
@@ -321,7 +313,7 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                             disabled={editDialogProps.type === "edit"}
                         />
                     </div>
-                    {renderUserRoles()}
+                    <SqlRoleSelector roles={editDialogProps.roles} setRoles={(roles) => setEditDialogProps({ ...editDialogProps, roles })} />
                     {renderError()}
                 </div>
             </DialogContent>
@@ -329,11 +321,18 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                 <Button data-testid="dialog_button_save" onClick={async () => {
                     let sql = "";
                     Object.keys(editDialogProps.roles).forEach(role => {
-                        if (editDialogProps.roles[role] && !editDialogProps.origRoles[role]) {
+                        if (editDialogProps.roles[role] === editDialogProps.origRoles[role]) {
+                            // no change
+                        }
+                        else if (editDialogProps.roles[role] === "disabled") {
+                            // revoke role
+                            sql += "REVOKE " + sqlIdentifier(role) + " FROM " + sqlIdentifier(editDialogProps.username) + ";";
+                        }
+                        else if (editDialogProps.roles[role] === "enabled") {
                             sql += "GRANT " + sqlIdentifier(role) + " TO " + sqlIdentifier(editDialogProps.username) + ";";
                         }
-                        else if (!editDialogProps.roles[role] && editDialogProps.origRoles[role]) {
-                            sql += "REVOKE " + sqlIdentifier(role) + " FROM " + sqlIdentifier(editDialogProps.username) + ";";
+                        else if (editDialogProps.roles[role] === "grant") {
+                            sql += "GRANT " + sqlIdentifier(role) + " TO " + sqlIdentifier(editDialogProps.username) + " WITH GRANT OPTION;";
                         }
                     });
                     if (sql) {
@@ -380,6 +379,7 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
     if(!state.sqlResponse || state.sqlResponse.error) {
         return <SqlResultsRender results={state.sqlResponse} />
     }
+
     return <div className="NuoTableScrollWrapper">
         {renderCreateDialog()}
         {renderCreateLocalDialog()}
@@ -388,11 +388,11 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
         <SqlResultsRender
             results={state.sqlResponse}
             onAdd={async () => {
-                const roles = await getRoles(undefined);
-                setEditDialogProps({ roles, origRoles: roles, username: "", type: "create" });
+                const roles = await getRoles(undefined, sqlConnection, (error: string) => editDialogProps && setEditDialogProps({ ...editDialogProps, error }));
+                setEditDialogProps({ roles, origRoles: roles, username: "", type: "edit" });
             }}
             onEdit={async (username: string) => {
-                const roles = await getRoles(username);
+                const roles = await getRoles(username, sqlConnection, (error: string) => editDialogProps && setEditDialogProps({ ...editDialogProps, error }));
                 setEditDialogProps({ roles, origRoles: roles, username, type: "edit" });
             }}
             onDelete={(username: string) => {
