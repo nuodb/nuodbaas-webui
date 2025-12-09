@@ -49,6 +49,7 @@ export default class Auth {
                         localStorage.setItem("credentials", JSON.stringify({
                             token: response.data.token,
                             expiresAtTime: response.data.expiresAtTime,
+                            accessRule: response.data.accessRule,
                             username
                         }));
                         resolve(null);
@@ -56,6 +57,73 @@ export default class Auth {
                 })
                 .catch(resolve);
         });
+    }
+
+    static hasAccess(method: "GET"|"PUT"|"PATCH"|"DELETE", path: string, sla?: string) : boolean {
+        function isMatch(rule: string) {
+            const ruleParts = rule.split(":");
+            if(ruleParts.length < 2) {
+                return false;
+            }
+            const verb = ruleParts[0];
+            const resourceSpecifier = ruleParts[1];
+            const slaMatch = !sla || ruleParts.length < 3 || ruleParts[2] === sla;
+
+            if(!resourceSpecifier || !slaMatch || !path || !path.startsWith("/")) {
+                return false;
+            }
+
+            if(verb === "read" && method !== "GET") {
+                return false;
+            }
+            else if(verb === "write" && method !== "PUT" && method !== "PATCH") {
+                return false;
+            }
+            else if(verb === "delete" && method !== "DELETE") {
+                return false;
+            }
+            else if(verb !== "all") {
+                return false;
+            }
+
+            const specifierParts = resourceSpecifier.split("/");
+            const pathParts = path.split("/");
+            if(resourceSpecifier.startsWith("/")) {
+                if(specifierParts.length > pathParts.length) {
+                    return false;
+                }
+                for(let i=0; i<specifierParts.length; i++) {
+                    if(specifierParts[i] !== "*" && specifierParts[i] !== pathParts[i] && !pathParts[i].startsWith("{")) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            else {
+                if(specifierParts.length > pathParts.length - 2) {
+                    return false;
+                }
+                for(let i=0; i<specifierParts.length; i++) {
+                    if(specifierParts[i] !== "*" && specifierParts[i] !== pathParts[i+2] && !pathParts[i+2].startsWith("{")) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        const accessRule = Auth.getAccessRule();
+        for(let i=0; i<accessRule.deny.length; i++) {
+            if(isMatch(accessRule.deny[i])) {
+                return false;
+            }
+        }
+        for(let i=0; i<accessRule.allow.length; i++) {
+            if(isMatch(accessRule.allow[i])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     static logout() {
@@ -99,5 +167,11 @@ export default class Auth {
             Auth.logout();
             window.location.href = "/ui/login?redirect=" + encodeURIComponent(window.location.pathname);
         }
+    }
+
+    static getAccessRule() : {allow:[allow:string],deny:[deny:string]} {
+        const credentials = JSON.parse(localStorage.getItem("credentials") || "{}");
+        const accessRule = credentials.accessRule || {};
+        return {allow: accessRule.allow || ["all:*"], deny: accessRule.deny || []};
     }
 }

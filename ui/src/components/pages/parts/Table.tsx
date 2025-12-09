@@ -199,7 +199,7 @@ function Table(props: TableProps) {
             });
         }
 
-        return fieldName === "name" ? <button onClick={(event) => {
+        return fieldName === "name" ? <button key={row["$ref"]} onClick={(event) => {
                 event.preventDefault();
                 navigate("/ui/resource/view" + path + "/" + row["$ref"]);
         }}>{value}</button> : value;

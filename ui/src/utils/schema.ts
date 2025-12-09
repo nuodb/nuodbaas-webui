@@ -16,12 +16,36 @@ export async function getSchema() {
             schema = await Rest.get("openapi");
             parseSchema(schema, schema, []);
             schema = schema["paths"];
+            removeNoAccessPaths(schema);
+            console.log("schema", schema);
         }
         catch(error) {
+            console.log("ERROR", error);
             Auth.handle401Error(error);
         }
     }
     return schema;
+}
+
+/**
+ * removes all the path / methods from the schema where the user doesn't have access
+ * (without SLA verification to avoid network traffic)
+ */
+function removeNoAccessPaths(schema: any) : void {
+    Object.keys(schema).forEach(path => {
+        let atLeastOneMethod = false;
+        Object.keys(schema[path]).forEach(method => {
+            if(!Auth.hasAccess(method.toUpperCase() as "GET"|"PUT"|"PATCH"|"DELETE", path, undefined)) {
+                delete schema[path][method];
+            }
+            else {
+                atLeastOneMethod = true;
+            }
+        })
+        if(!atLeastOneMethod) {
+            delete schema[path];
+        }
+    });
 }
 
 /**
