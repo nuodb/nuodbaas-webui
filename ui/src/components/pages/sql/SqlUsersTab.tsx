@@ -261,35 +261,39 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                             ))}
                         </Select>
                     </div>
-                    <SqlRoleSelector roles={editDialogProps.roles} setRoles={(roles) => setEditDialogProps({ ...editDialogProps, roles })} />
+                    {editDialogProps.username && <SqlRoleSelector roles={editDialogProps.roles} setRoles={(roles) => setEditDialogProps({ ...editDialogProps, roles })} />}
                     {renderError()}
                 </div>
             </DialogContent>
             <DialogActions>
-                <Button data-testid="dialog_button_save" onClick={async () => {
-                    let sql = "START TRANSACTION;";
-                    sql += "CREATE USER " + sqlIdentifier(editDialogProps.username) + " EXTERNAL;";
-                    Object.keys(editDialogProps.roles).forEach(role => {
-                        if (editDialogProps.roles[role] && !editDialogProps.origRoles[role]) {
-                            sql += "GRANT " + sqlIdentifier(role) + " TO " + sqlIdentifier(editDialogProps.username) + ";";
-                        }
-                    });
-                    sql += "COMMIT;"
-                    if (sql) {
-                        let sqlResponse = await sqlConnection.runCommand("EXECUTE", [sql]);
-                        if (sqlResponse.status === "SUCCESS") {
-                            Toast.show("DBaaS user added to database", undefined);
-                            refreshResults(state);
-                            setEditDialogProps(undefined);
-                        }
-                        else {
-                            setEditDialogProps({ ...editDialogProps, error: "Adding DBaaS user failed: " + sqlResponse.error });
-                        }
-                    }
-                }}>{t("button.add")}</Button>
-                <Button data-testid="dialog_button_cancel" onClick={() => {
+                <Button data-testid="dialog_button_cancel" variant="outlined" onClick={() => {
                     setEditDialogProps(undefined);
                 }}>{t("button.cancel")}</Button>
+                <Button
+                    data-testid="dialog_button_save"
+                    onClick={async () => {
+                        let sql = "START TRANSACTION;";
+                        sql += "CREATE USER " + sqlIdentifier(editDialogProps.username) + " EXTERNAL;";
+                        Object.keys(editDialogProps.roles).forEach(role => {
+                            if (editDialogProps.roles[role] && !editDialogProps.origRoles[role]) {
+                                sql += "GRANT " + sqlIdentifier(role) + " TO " + sqlIdentifier(editDialogProps.username) + ";";
+                            }
+                        });
+                        sql += "COMMIT;"
+                        if (sql) {
+                            let sqlResponse = await sqlConnection.runCommand("EXECUTE", [sql]);
+                            if (sqlResponse.status === "SUCCESS") {
+                                Toast.show("DBaaS user added to database", undefined);
+                                refreshResults(state);
+                                setEditDialogProps(undefined);
+                            }
+                            else {
+                                setEditDialogProps({ ...editDialogProps, error: "Adding DBaaS user failed: " + sqlResponse.error });
+                            }
+                        }
+                    }}
+                    disabled={!editDialogProps.username}
+                >{t("button.add")}</Button>
             </DialogActions>
         </DialogMaterial>;
     }
@@ -380,6 +384,16 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
         return <SqlResultsRender results={state.sqlResponse} />
     }
 
+    function equalsIgnoreCase(a: string | undefined | null, b: string | undefined | null) {
+        if (!a && !b) {
+            return true;
+        }
+        if (!a || !b) {
+            return false;
+        }
+        return a.toLowerCase() === b.toLowerCase();
+    }
+
     return <div className="NuoTableScrollWrapper">
         {renderCreateDialog()}
         {renderCreateLocalDialog()}
@@ -389,15 +403,17 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
             results={state.sqlResponse}
             onAdd={async () => {
                 const roles = await getRoles(undefined, sqlConnection, (error: string) => editDialogProps && setEditDialogProps({ ...editDialogProps, error }));
-                setEditDialogProps({ roles, origRoles: roles, username: "", type: "edit" });
+                setEditDialogProps({ roles, origRoles: roles, username: "", type: "create" });
             }}
             onEdit={async (username: string) => {
                 const roles = await getRoles(username, sqlConnection, (error: string) => editDialogProps && setEditDialogProps({ ...editDialogProps, error }));
                 setEditDialogProps({ roles, origRoles: roles, username, type: "edit" });
             }}
+            onEditDisabled={(username: string) => equalsIgnoreCase(username, "dba")}
             onDelete={(username: string) => {
                 handleDelete(username);
             }}
+            onDeleteDisabled={(username: string) => equalsIgnoreCase(username, "dba") || equalsIgnoreCase(username, sqlConnection.getDbUsername())}
             addLabel={<><AddIcon />New User</>}
         />
         <Pagination

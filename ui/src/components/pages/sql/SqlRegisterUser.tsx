@@ -114,8 +114,12 @@ export default function SqlRegisterUser({onClose, organization, project, databas
             {conn && <Button data-testid="dialog_button_register" onClick={async () => {
                 let sql = "START TRANSACTION;";
                 sql += "CREATE USER " + sqlIdentifier(newDbUser) + " EXTERNAL;"
-                Object.keys(roles).filter(role => roles[role]).forEach(role => {
-                    sql += "GRANT " + sqlIdentifier(role) + " TO " + sqlIdentifier(newDbUser) + ";";
+                Object.keys(roles).filter(role => roles[role] !== "disabled").forEach(role => {
+                    sql += "GRANT " + sqlIdentifier(role) + " TO " + sqlIdentifier(newDbUser);
+                    if (roles[role] === "grant") {
+                        sql += " WITH GRANT OPTION";
+                    }
+                    sql += ";";
                 });
                 sql += "COMMIT;"
                 const response: SqlImportResponseType = await conn.sqlSimpleImport(sql);

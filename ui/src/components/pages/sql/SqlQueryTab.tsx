@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { withTranslation } from "react-i18next";
 import { t } from 'i18next';
-import { SqlResponse, SqlType } from '../../../utils/SqlSocket';
+import { SQL_EXTENDED_TIMEOUT, SqlResponse, SqlType } from '../../../utils/SqlSocket';
 import TextField from '../../controls/TextField';
 import Button from '../../controls/Button';
 import SqlResultsRender from './SqlResultsRender';
@@ -41,7 +41,7 @@ function SqlQueryTab({ sqlConnection, dbTable }: SqlQueryTabProps) {
             <TextField disabled={!sqlConnection || executing} required data-testid="sqlQuery" id="sqlQuery" label="SQL Query" value={sqlQuery} onChange={(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSqlQuery(event.target.value)} />
             <Button data-testid="submitSql" disabled={!sqlConnection || executing} variant="contained" type="submit" onClick={async () => {
                 setExecuting(true);
-                const response: SqlResponse = await sqlConnection.runCommand("EXECUTE", [sqlQuery]);
+                const response: SqlResponse = await sqlConnection.runCommand("EXECUTE", [sqlQuery], SQL_EXTENDED_TIMEOUT);
                 if (response.status === "SUCCESS") {
                     let shortQuery = sqlQuery.replaceAll("\n", " ");
                     if (shortQuery.length > 80) {

@@ -23,12 +23,14 @@ type SqlTableProps = {
     setIsAscending?: (isAscending: boolean) => void;
     onAdd?: () => void;
     onEdit?: (name: string) => void;
+    onEditDisabled?: (name: string) => boolean;
     onDelete?: (name: string) => void;
+    onDeleteDisabled?: (name: string) => boolean;
     addLabel?: ReactNode;
     t: any;
 };
 
-function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, isAscending, setIsAscending, isFiltered, onAdd, onEdit, onDelete, addLabel, t }: SqlTableProps) {
+function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, isAscending, setIsAscending, isFiltered, onAdd, onEdit, onEditDisabled, onDelete, onDeleteDisabled, addLabel, t }: SqlTableProps) {
     if(!results) {
         return null;
     }
@@ -55,6 +57,7 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
                 id: "edit",
                 icon: <EditIcon />,
                 label: t("button.edit"),
+                disabled: onEditDisabled && onEditDisabled(value),
                 onClick: () => {
                     onEdit(value);
                     return true;
@@ -67,6 +70,7 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
                 id: "delete",
                 icon: <DeleteForeverIcon />,
                 label: t("button.delete"),
+                disabled: onDeleteDisabled && onDeleteDisabled(value),
                 onClick: () => {
                     onDelete(value);
                     return true;

@@ -55,7 +55,7 @@ export type SqlImportResponseType = {
 
 
 export type SqlType = {
-    runCommand: (operation: SqlOperationType, args: any[]) => Promise<SqlResponse>;
+    runCommand: (operation: SqlOperationType, args: any[], timeout?: number) => Promise<SqlResponse>;
     getDefaultSchema: () => string;
     sqlImport: (file: File, progressKey: string, abortController: AbortController | undefined) => Promise<SqlImportResponseType>;
     sqlSimpleImport: (body: string) => Promise<SqlImportResponseType>;
@@ -65,10 +65,13 @@ export type SqlType = {
     getOrgProjDb: () => string;
 }
 
+export const SQL_TIMEOUT = 30 * 1000;
+export const SQL_EXTENDED_TIMEOUT = 120 * 1000;
+
 export default function SqlSocket(organization: string, project: string, database: string, schema: string, dbUsername: string, dbPassword: string) : SqlType {
     let nextTransactionId = 0;
 
-    async function runCommand(operation: SqlOperationType, args: any[]) : Promise<SqlResponse> {
+    async function runCommand(operation: SqlOperationType, args: any[], timeout?: number) : Promise<SqlResponse> {
         let request : SqlRequest = {operation: operation.toString(), args, requestId: String(nextTransactionId)};
         nextTransactionId++;
         try {
@@ -76,9 +79,12 @@ export default function SqlSocket(organization: string, project: string, databas
             const response = await axios.post(
                 "/api/sql/query" + getOrgProjDbSchemaUrl(),
                 request,
-                { headers:{
-                    "Authorization": "Basic " + btoa(dbUsername + ":" + dbPassword)
-                }});
+                {
+                    headers:{
+                        "Authorization": "Basic " + btoa(dbUsername + ":" + dbPassword)
+                    },
+                    timeout: timeout || SQL_TIMEOUT
+                });
             return response.data;
         }
         finally {

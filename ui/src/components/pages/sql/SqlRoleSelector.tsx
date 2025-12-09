@@ -1,4 +1,5 @@
-import { setDefaultResultOrder } from "dns";
+// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+
 import { SqlType } from "../../../utils/SqlSocket";
 import { sqlString } from "./SqlUtils";
 

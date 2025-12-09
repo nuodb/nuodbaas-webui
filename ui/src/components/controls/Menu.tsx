@@ -17,6 +17,7 @@ export default function Menu(props: MenuProps): JSX.Element {
         return items.map((item, index) => <Button
             data-testid={item.id}
             key={item.id}
+            disabled={item.disabled}
             onClick={() => item.onClick && item.onClick()}
         >
             {item.label}
@@ -105,11 +106,11 @@ function MenuItems({ items, setItems, defaultItem, draggable, selected, clearAnc
         onDragOver={dndOver}
         onDragStart={dndStart}
         key={item.id}
-        className={"NuoMenuPopupItem" + (item.id === selected ? " NuoMenuSelected" : "")}
+        className={"NuoMenuPopupItem" + (item.disabled ? " NuoMenuDisabled" : item.id === selected ? " NuoMenuSelected" : "")}
         tabIndex={item.id === "name" ? -1 : 0}
         onClick={(e) => {
             e.stopPropagation();
-            if (item.onClick) {
+            if (item.onClick && !item.disabled) {
                 if (item.onClick()) {
                     clearAnchor();
                 }

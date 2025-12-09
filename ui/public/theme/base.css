@@ -126,6 +126,14 @@ html {
 .NuoMenuSelected:hover {
     background-color: rgba(110, 110, 110, 0.2);
 }
+.NuoMenuDisabled {
+    color: rgb(0, 0, 0, 0.2);
+    cursor: default;
+}
+
+.NuoMenuDisabled:hover {
+    background-color: white;
+}
 .NuoAlignRight {
     left: auto;
     right: 0;
