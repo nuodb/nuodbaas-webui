@@ -61,6 +61,7 @@ function Banner(props: Props) {
             "data-testid": "settings",
             onClick: () => {
               navigate("/ui/settings");
+              return true;
             }
           },
           {
@@ -69,6 +70,7 @@ function Banner(props: Props) {
             "data-testid": "automation",
             onClick: () => {
               navigate("/ui/automation");
+              return true;
             }
           },
           {
@@ -78,6 +80,7 @@ function Banner(props: Props) {
             onClick: () => {
               Auth.logout();
               window.location.href = "/ui";
+              return true;
             }
           }
         ]}

@@ -1,6 +1,6 @@
 // (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow, TableTh } from '../../controls/Table';
 import { withTranslation } from 'react-i18next';
 import { SqlResponse } from '../../../utils/SqlSocket';
@@ -8,6 +8,10 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { MenuItemProps } from '../../../utils/types';
+import Menu from '../../controls/Menu';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 type SqlTableProps = {
     results?: SqlResponse;
@@ -17,9 +21,16 @@ type SqlTableProps = {
     setOrderBy?: (orderBy: string) => void;
     isAscending?: boolean;
     setIsAscending?: (isAscending: boolean) => void;
+    onAdd?: () => void;
+    onEdit?: (name: string) => void;
+    onEditDisabled?: (name: string) => boolean;
+    onDelete?: (name: string) => void;
+    onDeleteDisabled?: (name: string) => boolean;
+    addLabel?: ReactNode;
+    t: any;
 };
 
-function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, isAscending, setIsAscending, isFiltered }: SqlTableProps) {
+function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, isAscending, setIsAscending, isFiltered, onAdd, onEdit, onEditDisabled, onDelete, onDeleteDisabled, addLabel, t }: SqlTableProps) {
     if(!results) {
         return null;
     }
@@ -38,10 +49,47 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
         }
     }
 
+    function renderMenuCell(value: string, zIndex: number, t: any) {
+        const buttons: MenuItemProps[] = [];
+        if (onEdit) {
+            buttons.push({
+                "data-testid": "edit_button",
+                id: "edit",
+                icon: <EditIcon />,
+                label: t("button.edit"),
+                disabled: onEditDisabled && onEditDisabled(value),
+                onClick: () => {
+                    onEdit(value);
+                    return true;
+                }
+            });
+        }
+        if (onDelete) {
+            buttons.push({
+                "data-testid": "delete_button",
+                id: "delete",
+                icon: <DeleteForeverIcon />,
+                label: t("button.delete"),
+                disabled: onDeleteDisabled && onDeleteDisabled(value),
+                onClick: () => {
+                    onDelete(value);
+                    return true;
+                },
+            });
+        }
+        if (buttons.length === 0) {
+            return null;
+        }
+
+        return <TableCell key={value} className="NuoTableMenuCell NuoStickyRight" zIndex={zIndex}>
+            <Menu data-testid="resource-popup-menu" popupId={"row_menu_" + value} items={buttons} align="right" />
+        </TableCell>;
+    }
+
     return <Table>
         <TableHead>
             <TableRow>
-                {results.columns?.map((column, index: number) => <TableTh key={index}>
+                {results.columns?.map((column, index: number) => <TableTh key={index} className={(onEdit || onDelete) && index === 0 ? "NuoStickyLeft" : ""}>
                     <div className="NuoRow">
                         {column.label || column.name}
                         {orderBy !== undefined && <div onClick={() => sort(column.name)}>
@@ -60,16 +108,28 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
                         <FilterListIcon />
                     </div>
                 </TableTh>}
+                {onAdd && addLabel && <TableTh className="NuoTableMenuCell NuoStickyRight">
+                    <div className="NuoColumn NuoRight"><button onClick={() => onAdd()}>{addLabel}</button></div>
+                </TableTh>}
             </TableRow>
         </TableHead>
         <TableBody>
             {results.rows?.map((row, index) => <TableRow key={index}>
-                {row.values.map((col, cindex) => <TableCell key={cindex}>
-                    <div style={{ whiteSpace: "pre" }}>
-                        {String(col).trim()}
-                    </div>
+                {row.values.map((col, cindex) => <TableCell className={onEdit && cindex === 0 ? "NuoStickyLeft" : ""} key={cindex}>
+                    {(onEdit && cindex === 0)
+                        ? <button
+                            className="NuoLinkButton"
+                            style={{ whiteSpace: "pre" }}
+                            onClick={() => onEdit(col)}
+                        >
+                            {String(col).trim()}
+                        </button>
+                        : <div style={{ whiteSpace: "pre" }}>
+                            {String(col).trim()}
+                        </div>
+                    }
                 </TableCell>)}
-                {isFiltered !== undefined && <TableCell>&nbsp;</TableCell>}
+                {renderMenuCell(row.values[0], 1000 + (results.rows || []).length - 1 - index, t)}
             </TableRow>)}
         </TableBody>
     </Table>

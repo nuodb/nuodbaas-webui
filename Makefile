@@ -29,7 +29,7 @@ UNCOMMITTED := $(shell git status --porcelain)
 
 MVN_TEST ?= ResourcesTest
 
-HELM_CP_SETTINGS := --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api --set cpRest.extraArgs[0]=-p --set cpRest.extraArgs[1]='com.nuodb.controlplane.server.passthroughLabelKeyPrefixes=ds.com/\,*.ds.com/'
+HELM_CP_SETTINGS := --set cpRest.fullnameOverride=nuodb-cp-rest --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api --set cpRest.extraArgs[0]=-p --set cpRest.extraArgs[1]='com.nuodb.controlplane.server.passthroughLabelKeyPrefixes=ds.com/\,*.ds.com/'
 HELM_OPERATOR_SETTINGS := --set nuodb-cp-config.nuodb.license.enabled=true --set nuodb-cp-config.nuodb.license.secret.create=true --set nuodb-cp-config.nuodb.license.secret.name=nuodb-license --set nuodb-cp-config.nuodb.license.content="$(shell cat nuodb.lic)"
 
 # The help target prints out all targets with their descriptions organized
@@ -200,7 +200,7 @@ deploy-monitoring:
 .PHONY: undeploy-monitoring
 undeploy-monitoring:
 	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
-		$(HELM) uninstall kube-prometheus-stack; \
+		$(HELM) uninstall -n default kube-prometheus-stack; \
 	fi
 
 .PHONY: build-sql
@@ -213,7 +213,7 @@ build-sql:
 deploy-sql: build-sql $(HELM) $(KIND)
 	@if [ -d ../nuodbaas-sql/charts/nuodbaas-sql ] ; then \
 		$(KIND) load docker-image nuodbaas-sql:latest; \
-		$(HELM) upgrade --install --wait -n default nuodbaas-sql ../nuodbaas-sql/charts/nuodbaas-sql --set image.repository=nuodbaas-sql --set image.tag=latest --set nuodbaasSql.ingress.enabled=true; \
+		$(HELM) upgrade --install --wait -n default nuodbaas-sql ../nuodbaas-sql/charts/nuodbaas-sql --set image.repository=nuodbaas-sql --set image.tag=latest --set nuodbaasSql.ingress.enabled=true --set nuodbaasSql.cpUrl=http://nuodb-cp-rest:8080; \
 	fi
 
 .PHONY: undeploy-sql
@@ -268,12 +268,12 @@ setup-integration-tests: $(KUBECTL) build-image setup-nginx-default-conf install
 	fi
 
 	@docker compose -f selenium-tests/compose.yaml up --wait
-	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-nuodb-cp-rest" -o name) -- bash -c "curl \
+	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-rest" -o name) -- bash -c "curl \
 		http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true \
 		--data-binary \
             '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"acme\", \"accessRule\":{\"allow\": \"all:*\"}}' \
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
-	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-nuodb-cp-rest" -o name) -- bash -c "curl \
+	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-rest" -o name) -- bash -c "curl \
 		http://localhost:8080/users/integrationtest/admin \
 		--data-binary \
             '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"integrationtest\", \"accessRule\":{\"allow\": \"all:integrationtest\"}}' \

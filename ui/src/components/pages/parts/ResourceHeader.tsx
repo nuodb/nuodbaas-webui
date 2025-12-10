@@ -5,7 +5,6 @@ import Button from "../../controls/Button";
 import Path from "./Path";
 import { SchemaType } from "../../../utils/types";
 import { getCreatePath, getSchemaPath } from "../../../utils/schema";
-import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import CreateIcon from '@mui/icons-material/Create';
 import SaveIcon from '@mui/icons-material/Save';

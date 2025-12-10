@@ -33,7 +33,8 @@
             "addToQueue": "Add to Queue",
             "addAllToQueue": "Add all to Queue",
             "export": "Export",
-            "editor": "SQL Editor"
+            "editor": "SQL Editor",
+            "register": "Register"
         },
         "changePassword": "Change Password"
     },
@@ -223,7 +224,8 @@
                     "browse": "Browse",
                     "query": "Query",
                     "import": "Import",
-                    "export": "Export"
+                    "export": "Export",
+                    "users": "Users"
                 },
                 "tasksComplete": "{{completed}} of {{total}} Tasks complete",
                 "exporting": "Exporting {{dbSchema}}",
@@ -235,12 +237,36 @@
                 "includeDdl": "Include DDL",
                 "includeData": "Include Data",
                 "includeDrop": "Include Drop Statements",
-                "allTables": "All Tables"
+                "allTables": "All Tables",
+                "dbAdmin": {
+                    "username": "Database admin username",
+                    "password": "Database admin password"
+                },
+                "registerUserWith": "Register user \"{{user}}\" with",
+                "readPermissions": "READ permissions",
+                "fullPermissions": "FULL permissions",
+                "setupLogin": "Setup automatic login for database \"{{database}}\"",
+                "delete.user.title": "Deleting user {{username}} in database {{database}}",
+                "delete.user.body": "Please confirm deleting of user {{username}} in database {{database}}?",
+                "user.deleted": "Deleted user {{username}} in database {{database}}",
+                "user.delete.failed": "Unable to delete user {{username}} in database {{database}}",
+                "userNeedsRegistration": "To setup automatic login, the DBaaS user needs to be registered in the database.",
+                "loginWithDbAdmin": "Login with a database administrator account:",
+                "addRolesToUser": "Select Roles to be added to the user account {{username}}:",
+                "createUser": "Create User",
+                "addDbaasUserToDatabase": "Add DBaaS user to database",
+                "editUser": "Edit User {{username}}"
+            },
+            "error": {
+                "userExists": "User exists already."
             },
             "button": {
                 "login": "Login",
                 "executing": "Executing...",
-                "submit": "Submit"
+                "submit": "Submit",
+                "setupLogin": "Setup automatic login",
+                "createDatabaseUser": "Create Database User",
+                "addDbaasUser": "Add DBaaS User"
             }
         },
         "login": {
