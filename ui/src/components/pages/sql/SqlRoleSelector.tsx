@@ -56,7 +56,7 @@ export default function SqlRoleSelector({roles, setRoles}: RoleSelectorProps) {
             </tr>
         </thead>
         <tbody>
-            {Object.keys(roles).map(roleKey => <tr>
+            {Object.keys(roles).map(roleKey => <tr key={roleKey}>
                 <td>
                     <input type="checkbox" name={roleKey} checked={roles[roleKey] !== "disabled"} onChange={() => {
                         let newRoles = {...roles};

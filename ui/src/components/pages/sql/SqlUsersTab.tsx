@@ -207,7 +207,7 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                         let sql = "START TRANSACTION;";
                         sql += "CREATE USER " + sqlIdentifier(editDialogProps.username) + " PASSWORD " + sqlString(editDialogProps.password) + ";";
                         Object.keys(editDialogProps.roles).forEach(role => {
-                            if (editDialogProps.roles[role]) {
+                            if (editDialogProps.roles[role] !== "disabled") {
                                 sql += "GRANT " + sqlIdentifier(role) + " TO " + sqlIdentifier(editDialogProps.username);
                                 if (editDialogProps.roles[role] === "grant") {
                                     sql += " WITH GRANT OPTION";
@@ -275,8 +275,12 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                         let sql = "START TRANSACTION;";
                         sql += "CREATE USER " + sqlIdentifier(editDialogProps.username) + " EXTERNAL;";
                         Object.keys(editDialogProps.roles).forEach(role => {
-                            if (editDialogProps.roles[role] && !editDialogProps.origRoles[role]) {
-                                sql += "GRANT " + sqlIdentifier(role) + " TO " + sqlIdentifier(editDialogProps.username) + ";";
+                            if (editDialogProps.roles[role] !== "disabled") {
+                                sql += "GRANT " + sqlIdentifier(role) + " TO " + sqlIdentifier(editDialogProps.username);
+                                if (editDialogProps.roles[role] === "grant") {
+                                    sql += " WITH GRANT OPTION";
+                                }
+                                sql += ";";
                             }
                         });
                         sql += "COMMIT;"
