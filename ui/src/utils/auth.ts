@@ -73,16 +73,16 @@ export default class Auth {
                 return false;
             }
 
-            if(verb === "read" && method !== "GET") {
+            if(verb === "all") {
+                // all HTML methods are allowed
+            }
+            else if(verb === "read" && method !== "GET") {
                 return false;
             }
             else if(verb === "write" && method !== "PUT" && method !== "PATCH") {
                 return false;
             }
             else if(verb === "delete" && method !== "DELETE") {
-                return false;
-            }
-            else if(verb !== "all") {
                 return false;
             }
 
