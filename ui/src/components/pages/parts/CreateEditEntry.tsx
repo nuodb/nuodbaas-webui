@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import FieldFactory from "../../fields/FieldFactory";
 import { getResourceByPath, getCreatePath, getChild, arrayToObject, getDefaultValue, submitForm, getSchemaPath } from "../../../utils/schema";
 import { Rest } from "./Rest";
 import Auth from "../../../utils/auth";
@@ -13,6 +12,7 @@ import { getCustomizations } from "../../../utils/Customizations";
 import { withTranslation } from "react-i18next";
 import ResourceHeader from "./ResourceHeader";
 import { Tab, Tabs } from "../../controls/Tabs";
+import { Field } from "../../fields/Field";
 
 type SectionFormParameterType = {
     params: FieldParametersType;
@@ -168,7 +168,23 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
             Object.keys(params).forEach(key => {
                 let parameter = params[key];
                 if (parameter && fieldName === null && key in values) {
-                    if (!FieldFactory.validateProps({ path, prefix: key, label: t("field.label." + key, key), parameter, values, updateErrors, setValues, t })) {
+                    if (!Field({
+                        op: "validate",
+                        path,
+                        prefix: key,
+                        label: t("field.label." + key, key),
+                        parameter,
+                        values,
+                        updateErrors,
+                        setValues,
+                        t,
+                        errors: {},
+                        required: false,
+                        autoFocus: false,
+                        expand: false,
+                        hideTitle: false,
+                        readonly: false
+                    })) {
                         fieldName = key;
                     }
                 }
@@ -369,7 +385,23 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
 
         Object.keys(formParameters).forEach((key: string) => {
             let parameter: TempAny = formParameters[key];
-            FieldFactory.validateProps({ path, prefix: key, label: t("field.label." + key), parameter, values, updateErrors: updateErrors_, setValues, t });
+            Field({
+                op: "validate",
+                path,
+                prefix: key,
+                label: t("field.label." + key),
+                parameter,
+                values,
+                updateErrors: updateErrors_,
+                setValues,
+                t,
+                errors: {},
+                required: false,
+                autoFocus: false,
+                expand: false,
+                hideTitle: false,
+                readonly: false
+            });
         });
         return errs;
     }
@@ -490,7 +522,8 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
                 }
             }
 
-            return <div className="NuoFieldContainer" key={key}>{(FieldFactory.create({
+            return <div className="NuoFieldContainer" key={key}>{(Field({
+                op: "edit",
                 path,
                 prefix: key,
                 label: t("field.label." + key, key),
@@ -515,7 +548,7 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
                 required: false,
                 readonly: ro,
                 t
-            })).show()}</div>
+            }))}</div>
         });
 
         const label = section.title || t("section.title.general");
@@ -541,10 +574,23 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
     });
     if (values.status && readonly) {
         sectionsWithStatus.push(<Tab key="section-status" id="section-status" label="Status">
-            {FieldFactory.create({
-                path, prefix: "status", label: "Status", parameter: formParameters["status"], values, t: t,
-                errors: {}, required: false, autoFocus: false, expand: false, hideTitle: true, readonly: true, updateErrors: () => { }, setValues: () => { }
-            }).show()}</Tab>);
+            {Field({
+                op: "edit",
+                path,
+                prefix: "status",
+                label: "Status",
+                parameter: formParameters["status"],
+                values,
+                t: t,
+                errors: {},
+                required: false,
+                autoFocus: false,
+                expand: false,
+                hideTitle: true,
+                readonly: true,
+                updateErrors: () => { },
+                setValues: () => { }
+            })}</Tab>);
     }
 
     return <>

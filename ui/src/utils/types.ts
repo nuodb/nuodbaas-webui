@@ -48,6 +48,7 @@ export type MenuItemProps = {
     icon?: ReactNode,
     label: ReactNode,
     selected?: boolean,
+    disabled?: boolean,
     onClick?: () => boolean
     onKeyDown?: (event: React.KeyboardEvent<HTMLDivElement>) => void
 }

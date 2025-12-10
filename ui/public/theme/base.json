@@ -69,6 +69,11 @@
                     "label": "button.sql.editor",
                     "icon": "Storage",
                     "link": "/ui/page/sql/{organization}/{project}/{name}"
+                },
+                {
+                    "label": "button.db.changeDbaPassword",
+                    "icon": "Password",
+                    "dialog": "ChangeDbaPassword"
                 }
             ]
         },

@@ -4,19 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import { withTranslation } from "react-i18next";
 import { TableBody, TableTh, TableCell, Table as TableCustom, TableHead, TableRow } from '../../controls/Table';
 import { getResourceByPath, getCreatePath, getChild, replaceVariables, getSchemaPath, hasMonitoredPath } from "../../../utils/schema";
-import FieldFactory from "../../fields/FieldFactory";
 import { Rest } from "./Rest";
 import Dialog from "./Dialog";
 import { MenuItemProps, PageProps, TempAny } from "../../../utils/types";
 import { CustomViewField, evaluate, getCustomizationsView } from '../../../utils/Customizations';
-import Menu from '../../controls/Menu';
 import TableSettingsColumns from './TableSettingsColumns';
 import { useEffect, useState } from 'react';
-import CustomDialog from '../custom/CustomDialog';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { getRecursiveValue } from '../../fields/FieldBase';
 import Toast from '../../controls/Toast';
 import ResourcePopupMenu from './ResourcePopupMenu';
+import { Field } from '../../fields/Field';
 
 function getFlattenedKeys(obj: TempAny, prefix?: string): string[] {
     let ret: string[] = [];
@@ -189,13 +187,22 @@ function Table(props: TableProps) {
             }
         }
         else {
-            value = FieldFactory.createDisplayValue({
+            value = Field({
+                op: "view",
                 path: path,
                 prefix: fieldName,
                 label: t("field.label." + fieldName, fieldName),
                 parameter: getFieldSchema(fieldName),
                 values: row,
-                t
+                t,
+                errors: {},
+                required: false,
+                autoFocus: false,
+                expand: false,
+                hideTitle: false,
+                readonly: false,
+                updateErrors: () => { },
+                setValues: () => { }
             });
         }
 

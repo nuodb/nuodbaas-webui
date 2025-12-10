@@ -3,38 +3,47 @@
 import { ReactNode } from "react";
 import { setValue, getValue } from "./utils";
 import { Table, TableBody, TableCell, TableHead, TableRow } from "../controls/Table";
-import FieldBase, { FieldBaseType, FieldProps, getRecursiveValue } from './FieldBase'
-import FieldFactory from "./FieldFactory"
+import { FieldBase_validate, FieldProps, getRecursiveValue } from './FieldBase'
 import FieldMessage from "./FieldMessage";
 import InfoPopup from "../controls/InfoPopup";
+import { Field } from "./Field";
 
-export default function FieldArray(props: FieldProps): FieldBaseType {
+export default function FieldArray(props: FieldProps): ReactNode {
+    switch (props.op) {
+        case "edit": return edit();
+        case "view": return view();
+        case "validate": return FieldBase_validate(props);
+    }
+
     /**
      * show Field of type Array using the values and schema definition
      * @returns
      */
-    function show(): ReactNode {
-        const { prefix, parameter, values, errors, required, setValues, updateErrors, readonly, t } = props;
+    function edit(): ReactNode {
+        const { prefix, parameter, values, required, setValues, readonly, t } = props;
         if (!parameter.items) {
-            return FieldMessage({ ...props, message: "\"items\" attribute missing in schema definition" }).show();
+            return FieldMessage({ ...props, message: "\"items\" attribute missing in schema definition" });
         }
         let ret = [];
         let value = getValue(values, prefix);
         if (value !== null) {
             for (let i = 0; i < value.length; i++) {
                 let prefixKey = prefix + "." + i;
-                const field = FieldFactory.create({
+                const fieldEdit = Field({
                     ...props,
-                    prefix: prefixKey, parameter: parameter.items, values, errors, required: (i === 0 && required), setValues: (vs) => {
+                    prefix: prefixKey,
+                    parameter: parameter.items,
+                    required: (i === 0 && required),
+                    setValues: (vs: any) => {
                         vs = { ...vs };
                         let v = getValue(values, prefixKey);
                         setValue(vs, prefixKey, v === "" ? null : v);
                         setValues(vs)
-                    }, updateErrors
+                    }
                 });
                 ret.push(<TableRow key={prefixKey}>
                     <TableCell>
-                        {field.show()}
+                        {fieldEdit}
                     </TableCell>
                 </TableRow>);
             }
@@ -43,18 +52,20 @@ export default function FieldArray(props: FieldProps): FieldBaseType {
         if (!readonly) {
             let nextIndex = value === null ? 0 : value.length;
             let prefixKey = prefix + "." + nextIndex;
-            let field = FieldFactory.create({
+            let fieldEdit = Field({
                 ...props,
-                prefix: prefixKey, parameter: parameter.items, values, setValues: (vs) => {
+                prefix: prefixKey,
+                parameter: parameter.items,
+                setValues: (vs) => {
                     vs = { ...vs };
                     let v = getValue(values, prefixKey);
                     setValue(vs, prefixKey, v === "" ? null : v);
                     setValues(vs);
-                }, updateErrors
+                }
             });
             ret.push(<TableRow key={prefixKey}>
                 <TableCell>
-                    {field.show()}
+                    {fieldEdit}
                 </TableCell>
             </TableRow>);
         }
@@ -74,10 +85,8 @@ export default function FieldArray(props: FieldProps): FieldBaseType {
         </Table>;
     }
 
-    function getDisplayValue(): ReactNode {
+    function view(): ReactNode {
         const { prefix, values } = props;
         return getRecursiveValue(getValue(values, prefix), props.t);
     }
-
-    return { ...FieldBase(props), show, getDisplayValue };
 }

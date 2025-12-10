@@ -4,7 +4,7 @@ import React, { ReactNode } from "react";
 import { getValue } from "./utils";
 import { FieldValuesType, FieldParameterType, TempAny } from "../../utils/types";
 
-export interface FieldPropsDisplay {
+interface FieldPropsDisplay {
     /** contains resource path */
     path: string,
 
@@ -25,7 +25,7 @@ export interface FieldPropsDisplay {
     t: any;
 }
 
-export interface FieldPropsValidate extends FieldPropsDisplay {
+interface FieldPropsValidate extends FieldPropsDisplay {
     /** callback to updates errors for the specified field (prefix) and error message.
      *  the prefix is the field name (name is separated by period if the field is hierarchical)
      *  the message is the error message or null if the error message should be cleared. */
@@ -64,74 +64,54 @@ export interface FieldProps extends FieldPropsValidate {
     /** used by FieldMessage to indicate an error message */
     message?: string;
 
+    op: "edit" | "view" | "validate"
+
     t: any;
 }
 
-export interface FieldBaseType {
-    props: FieldProps,
-    validate: (prefix?: string, parameter?: FieldParameterType, value?: string) => boolean,
-    show: () => ReactNode,
-    getDisplayValue: () => ReactNode,
-}
-
-/**
- * Base function for all the Field* functions. Performs general field validation and text display of the field
+/** validate field and set error state
+ * prefix - field name to validate (separated by period on hierarchical fields). Defaults to props.prefix
+ * parameter - schema definition for this field. Defaults to props.parameter
+ * value - value to check. if undefined, defaults to the value for "prefix"
+ * @returns true if validation passed.
  */
-export default function FieldBase(props: FieldProps): FieldBaseType {
+export function FieldBase_validate(props: FieldProps, prefix?: string, parameter?: FieldParameterType, value?: string): boolean {
+    const { values, updateErrors } = props;
+    if (!prefix) {
+        prefix = props.prefix;
+    }
+    if (!parameter) {
+        parameter = props.parameter;
+    }
+    if (value === undefined) {
+        value = getValue(values, prefix);
+    }
 
-    /** validate field and set error state
-     * prefix - field name to validate (separated by period on hierarchical fields). Defaults to props.prefix
-     * parameter - schema definition for this field. Defaults to props.parameter
-     * value - value to check. if undefined, defaults to the value for "prefix"
-     * @returns true if validation passed.
-     */
-    function validate(prefix?: string, parameter?: FieldParameterType, value?: string): boolean {
-        const { values, updateErrors } = props;
-        if (!prefix) {
-            prefix = props.prefix;
+    if (!value) {
+        if (parameter.required && !value) {
+            updateErrors(prefix, "Field " + prefix + " is required");
+            return false;
         }
-        if (!parameter) {
-            parameter = props.parameter;
-        }
-        if (value === undefined) {
-            value = getValue(values, prefix);
-        }
-
-        if (!value) {
-            if (parameter.required && !value) {
-                updateErrors(prefix, "Field " + prefix + " is required");
+    }
+    else {
+        if (parameter.pattern) {
+            if (!(new RegExp("^" + parameter.pattern + "$")).test(value)) {
+                updateErrors(prefix, "Field \"" + prefix + "\" must match pattern \"" + parameter.pattern + "\"");
                 return false;
             }
         }
-        else {
-            if (parameter.pattern) {
-                if (!(new RegExp("^" + parameter.pattern + "$")).test(value)) {
-                    updateErrors(prefix, "Field \"" + prefix + "\" must match pattern \"" + parameter.pattern + "\"");
-                    return false;
-                }
-            }
-        }
-        updateErrors(prefix, null);
-        return true;
     }
+    updateErrors(prefix, null);
+    return true;
+}
 
-    /**
-     * shows field. Must be implemented
-     */
-    function show(): ReactNode {
-        throw new Error("show() must be implemented");
-    };
-
-    /**
-     * shows display value of the field (read only)
-     * @returns display value
-     */
-    function getDisplayValue(): ReactNode {
-        const { prefix, values } = props;
-        return getRecursiveValue(getValue(values, prefix), props.t);
-    }
-
-    return { props, validate, show, getDisplayValue }
+/**
+ * shows display value of the field (read only)
+ * @returns display value
+ */
+export function FieldBase_display(props: FieldProps): ReactNode {
+    const { prefix, values } = props;
+    return getRecursiveValue(getValue(values, prefix), props.t);
 }
 
 export function getRecursiveValue(value: TempAny, t: any) {

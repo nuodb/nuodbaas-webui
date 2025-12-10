@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { withTranslation } from 'react-i18next';
-import { SqlResponse, SqlType } from '../../../utils/SqlSocket';
+import { SQL_EXTENDED_TIMEOUT, SqlResponse, SqlType } from '../../../utils/SqlSocket';
 import Pagination from '../../controls/Pagination';
 import SqlResultsRender from './SqlResultsRender';
 
@@ -32,9 +32,9 @@ function SqlPagedQuery({pageSize, sqlConnection, sqlQuery}: SqlQueryProps) {
         if (pageSize > 0) {
             limitedSql += " limit " + String(pageSize) + " offset " + String((page-1)*pageSize);
         }
-        const results = await sqlConnection.runCommand("EXECUTE_QUERY", [limitedSql]);
+        const results = await sqlConnection.runCommand("EXECUTE_QUERY", [limitedSql], SQL_EXTENDED_TIMEOUT);
         if(results.status === "SUCCESS" && results.rows && results.rows.length === pageSize) {
-            const countResults = await sqlConnection.runCommand("EXECUTE_QUERY", ["SELECT count(*) FROM (" + sqlQuery + ") total"]);
+            const countResults = await sqlConnection.runCommand("EXECUTE_QUERY", ["SELECT count(*) FROM (" + sqlQuery + ") total"], SQL_EXTENDED_TIMEOUT);
             if(countResults.status === "SUCCESS" && countResults.rows && countResults.rows[0] && countResults.rows[0].values) {
                 const totalRows = countResults.rows[0].values[0];
                 setLastPage(Math.ceil(totalRows / pageSize));
@@ -50,7 +50,7 @@ function SqlPagedQuery({pageSize, sqlConnection, sqlQuery}: SqlQueryProps) {
         return <SqlResultsRender results={results} />
     }
     else if (results.error) {
-        return <div className="NuoSqlError">{results.error.split("\n").map((line, index) => <div key={index}>{line}</div>)}</div>
+        return <div className="NuoError">{results.error.split("\n").map((line, index) => <div key={index}>{line}</div>)}</div>
     }
     return <>
         <SqlResultsRender results={results} />

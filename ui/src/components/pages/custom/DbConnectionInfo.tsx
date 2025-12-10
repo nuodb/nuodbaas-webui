@@ -157,7 +157,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
                     })
                 }} />
             </Tooltip>
-            {value.includes("\n") ?
+            {value?.includes("\n") ?
                 <Textarea name={fieldname} disabled={true} value={value}></Textarea>
                 :
                 <input name={fieldname} disabled={true} value={value} />

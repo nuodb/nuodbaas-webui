@@ -1,8 +1,8 @@
 // (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
 
-import FieldBase, { FieldBaseType, FieldProps } from "./FieldBase";
+import { FieldBase_display, FieldBase_validate, FieldProps } from "./FieldBase";
 import { getValue, setValue } from "./utils"
-import { ReactNode, useState } from "react";
+import { JSX, ReactNode, useState } from "react";
 import TextField from "../controls/TextField";
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import Dialog from "../pages/parts/Dialog";
@@ -166,12 +166,17 @@ function CalendarPopup(props: CalendarPopupProps): JSX.Element {
     </div >;
 }
 
-export default function FieldDateTime(props: FieldProps): FieldBaseType {
+export default function FieldDateTime(props: FieldProps): ReactNode {
+    switch (props.op) {
+        case "edit": return edit();
+        case "view": return view();
+        case "validate": return validate();
+    }
     /**
      * show Field of type DateTime using the values and schema definition
      * @returns
      */
-    function show(): ReactNode {
+    function edit(): ReactNode {
         const { prefix, label, values, errors, required, setValues, autoFocus, updateErrors, readonly, parameter, t } = props;
         let value = getValue(values, prefix);
         let editValue = getValue(values, "_" + prefix);
@@ -242,11 +247,11 @@ export default function FieldDateTime(props: FieldProps): FieldBaseType {
             updateErrors(prefix, "Field \"" + prefix + "\" has invalid date/time format");
             return false;
         }
-        return FieldBase(props).validate();
+        return FieldBase_validate(props);
     }
 
-    function getDisplayValue(): ReactNode {
-        const value = String(FieldBase(props).getDisplayValue());
+    function view(): ReactNode {
+        const value = String(FieldBase_display(props));
         if (!value) {
             return value;
         }
@@ -257,6 +262,4 @@ export default function FieldDateTime(props: FieldProps): FieldBaseType {
         }
         return value;
     }
-
-    return { ...FieldBase(props), show, validate, getDisplayValue };
 }

@@ -3,22 +3,34 @@
 import { setValue, getValue } from "./utils";
 import TextField from "../controls/TextField";
 import Button from "../controls/Button";
-import FieldBase, { FieldBaseType, FieldProps } from "./FieldBase"
+import { FieldBase_validate, FieldProps } from "./FieldBase"
 import { TempAny } from "../../utils/types";
 import { ReactNode } from "react";
 import { Table, TableBody, TableCell, TableHead, TableRow } from "../controls/Table";
 import InfoPopup from "../controls/InfoPopup";
 
-export default function FieldMap(props: FieldProps): FieldBaseType {
+export default function FieldMap(props: FieldProps): ReactNode {
+    switch (props.op) {
+        case "edit": return edit();
+        case "view": return view();
+        case "validate": return validate();
+    }
 
     function validateNewKey(): boolean {
-        const { prefix, parameter, updateErrors } = props;
+        const { prefix, updateErrors } = props;
         let prefixKeyLabel = prefix + ".key";
         let prefixValueLabel = prefix + ".value";
         let keyElement = document.getElementById(prefixKeyLabel) as HTMLInputElement;
         let valueElement = document.getElementById(prefixValueLabel) as HTMLInputElement;
         if ((keyElement && keyElement.value !== "") || (valueElement && valueElement.value !== "")) {
-            return FieldBase(props).validate(prefixKeyLabel, parameter, keyElement.value);
+            return FieldBase_validate({
+                ...props,
+                prefix: prefixKeyLabel,
+                values: {
+                    ...props.values,
+                    [prefixKeyLabel]: keyElement.value
+                }
+            });
         }
 
         updateErrors(prefixKeyLabel, null);
@@ -33,7 +45,15 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
         let keyElement = document.getElementById(prefixKeyLabel) as HTMLInputElement;
         let valueElement = document.getElementById(prefixValueLabel) as HTMLInputElement;
         if ((keyElement && keyElement.value !== "") || (valueElement && valueElement.value !== "")) {
-            return FieldBase(props).validate(prefixValueLabel, parameter["additionalProperties"], valueElement.value);
+            return FieldBase_validate({
+                ...props,
+                prefix: prefixValueLabel,
+                parameter: parameter["additionalProperties"] || parameter,
+                values: {
+                    ...props.values,
+                    [prefixValueLabel]: valueElement.value
+                }
+            });
         }
 
         updateErrors(prefixKeyLabel, null);
@@ -53,7 +73,7 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
      * @param setValues - callback to update field value
      * @returns
      */
-    function show(): ReactNode {
+    function edit(): ReactNode {
         const { prefix, values, errors, setValues, readonly, parameter, t } = props;
 
         let valueKeys = Object.keys(getValue(values, prefix) || {});
@@ -82,7 +102,12 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
                             setValues(v)
                         }}
                         error={errorValue}
-                        onBlur={event => FieldBase(props).validate(prefixKeyValue, getValue(values, prefix)[valueKeys[i]])} />
+                        onBlur={event => FieldBase_validate({
+                            ...props,
+                            prefix: prefixKeyValue,
+                            parameter: getValue(values, prefix)[valueKeys[i]]
+                        }
+                        )} />
                 </TableCell>
                 <TableCell><Button onClick={() => {
                     let v = { ...values };
@@ -165,7 +190,15 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
             if (value) {
                 Object.values(value).forEach((v: TempAny, index: number) => {
                     const fieldKey = prefix + "." + index + ".value";
-                    success = FieldBase(props).validate(fieldKey, parameter["additionalProperties"], v) && success;
+                    success = FieldBase_validate({
+                        ...props,
+                        prefix: fieldKey,
+                        parameter: parameter["additionalProperties"] || parameter,
+                        values: {
+                            ...values,
+                            [fieldKey]: v
+                        }
+                    }) && success;
                 })
             }
         }
@@ -178,7 +211,7 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
         return [...new Set(array)];
     }
 
-    function getDisplayValue(): ReactNode {
+    function view(): ReactNode {
         const { prefix, values } = props;
         const value = getValue(values, prefix);
 
@@ -217,6 +250,4 @@ export default function FieldMap(props: FieldProps): FieldBaseType {
 
         return ret;
     }
-
-    return { ...FieldBase(props), show, validate, getDisplayValue }
 }
