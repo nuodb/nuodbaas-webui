@@ -87,7 +87,7 @@ export default class Auth {
             }
 
             const specifierParts = resourceSpecifier.split("/");
-            const pathParts = path.split("/");
+            const pathParts = path.startsWith("/events/") ? path.substring("/events".length).split("/") : path.split("/");
             if(resourceSpecifier.startsWith("/")) {
                 if(specifierParts.length > pathParts.length) {
                     return false;

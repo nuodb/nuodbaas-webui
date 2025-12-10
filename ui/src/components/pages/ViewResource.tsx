@@ -24,7 +24,7 @@ function ViewResource(props: PageProps) {
     useEffect(() => {
         let resourceByPath = getResourceByPath(schema, path);
         if ("get" in resourceByPath) {
-            getResourceEvents(path, (data: TempAny) => {
+            getResourceEvents(schema, path, (data: TempAny) => {
                 if (data === null) {
                     setError({ response: { status: 404 } })
                     setData({});

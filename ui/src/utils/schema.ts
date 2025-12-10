@@ -16,8 +16,7 @@ export async function getSchema() {
             schema = await Rest.get("openapi");
             parseSchema(schema, schema, []);
             schema = schema["paths"];
-            removeNoAccessPaths(schema);
-            console.log("schema", schema);
+            schema = filterAccessPaths(schema);
         }
         catch(error) {
             console.log("ERROR", error);
@@ -28,24 +27,40 @@ export async function getSchema() {
 }
 
 /**
- * removes all the path / methods from the schema where the user doesn't have access
+ * filter all the path / methods from the schema where the user has access (+ parent resources "get" operation (for ?listAccessible=true))
  * (without SLA verification to avoid network traffic)
  */
-function removeNoAccessPaths(schema: any) : void {
+function filterAccessPaths(schema: any) : void {
+    let newSchema:any = {};
+
+    // get all resources whe have access to directly
     Object.keys(schema).forEach(path => {
-        let atLeastOneMethod = false;
         Object.keys(schema[path]).forEach(method => {
-            if(!Auth.hasAccess(method.toUpperCase() as "GET"|"PUT"|"PATCH"|"DELETE", path, undefined)) {
-                delete schema[path][method];
-            }
-            else {
-                atLeastOneMethod = true;
+            if(Auth.hasAccess(method.toUpperCase() as "GET"|"PUT"|"PATCH"|"DELETE", path, undefined)) {
+                if(!newSchema[path]) {
+                    newSchema[path] = {};
+                }
+                newSchema[path] = {...newSchema[path], [method]: JSON.parse(JSON.stringify(schema[path][method]))}
             }
         })
-        if(!atLeastOneMethod) {
-            delete schema[path];
-        }
     });
+
+    // get all parent resources
+    Object.keys(newSchema).forEach(path => {
+        let lastSlash;
+        while((lastSlash = path.lastIndexOf("/")) > 0) {
+            path = path.substring(0, lastSlash);
+            if(schema[path] && schema[path]["get"]) {
+                if(!newSchema[path]) {
+                    newSchema[path] = {};
+                }
+                if(!newSchema[path].get) {
+                    newSchema[path] = {...newSchema[path], get: JSON.parse(JSON.stringify(schema[path].get))}
+                }
+            }
+        }
+    })
+    return newSchema;
 }
 
 /**
@@ -305,9 +320,23 @@ export function hasMonitoredPath(path: string) : boolean {
  * @param {*} multiReject - returns error
  * @returns AbortController - use ret.abort() to abort
  */
-export function getResourceEvents(path: string, multiResolve: TempAny, multiReject: TempAny) {
+export function getResourceEvents(schema: any, path: string, multiResolve: TempAny, multiReject: TempAny) {
     //only one event stream is supported - close prior one if it exists.
     let eventsAbortController = new AbortController();
+
+    let hasEventsAccess = false;
+    Object.keys(schema).forEach(schemaPath => {
+        if(matchesPath("/events" + path, schemaPath)) {
+            hasEventsAccess = true;
+        }
+    })
+
+    if(!hasEventsAccess) {
+        Rest.get(path)
+        .then(data => multiResolve(data))
+        .catch(reason => multiReject(reason));
+        return;
+    }
 
     Rest.getStream(Auth.getNuodbCpRestUrl("events" + path), Auth.getHeaders(), eventsAbortController)
       .then(async (response: TempAny) => {
