@@ -100,7 +100,7 @@ export default class Auth {
                 return true;
             }
             else {
-                if(specifierParts.length > pathParts.length - 2) {
+                if(specifierParts.length > pathParts.length - 2 && specifierParts[pathParts.length - 2] !== "*") {
                     return false;
                 }
                 for(let i=0; i<specifierParts.length; i++) {

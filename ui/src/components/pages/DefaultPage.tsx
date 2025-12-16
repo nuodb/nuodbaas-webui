@@ -12,9 +12,7 @@ export default function DefaultPage() {
     const navigate = useNavigate();
     useEffect(()=>{
         getSchema().then(schema => {
-            const homePage = getHomeUrl(schema);
-            console.log("HOMEPAGE", homePage);
-            navigate(homePage);
+          navigate(getHomeUrl(schema));
         });
     })
 

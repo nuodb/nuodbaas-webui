@@ -269,18 +269,31 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
             return JSON.parse(JSON.stringify(obj));
         }
 
-        let createPath = data ? path : getCreatePath(schema, path);
-        let putResource = getResourceByPath(schema, createPath)["put"];
+        const createPath = data ? path : getCreatePath(schema, path);
+        const resource = getResourceByPath(schema, createPath);
+        let formParams: any = undefined;
+        let required: any = false;
+        if (resource["put"]) {
+            formParams = getChild(resource["put"], ["requestBody", "content", "application/json", "schema", "properties"])
+            formParams = cloneRecursive(formParams);
+            required = getChild(resource["put"], ["requestBody", "content", "application/json", "schema", "required"])
+            required.forEach((req: TempAny) => {
+                formParams[req].required = true;
+            })
+        }
+        else if (resource["get"]) {
+            formParams = getChild(resource["get"], ["responses", "200", "content", "application/json", "schema", "properties"])
+            formParams = cloneRecursive(formParams);
+            required = getChild(resource["get"], ["responses", "200", "content", "application/json", "schema", "required"])
+            required.forEach((req: TempAny) => {
+                formParams[req].required = true;
+            })
+        }
+        const putOrGetResource = resource["put"] || resource["get"];
 
-        let urlParams = arrayToObject(putResource["parameters"], "name");
+        let urlParams = arrayToObject(putOrGetResource["parameters"], "name");
         setUrlParameters(urlParams);
 
-        let formParams = getChild(putResource, ["requestBody", "content", "application/json", "schema", "properties"])
-        formParams = cloneRecursive(formParams);
-        let required = getChild(putResource, ["requestBody", "content", "application/json", "schema", "required"])
-        required.forEach((req: TempAny) => {
-            formParams[req].required = true;
-        })
         let remainingFormParams = cloneRecursive(formParams);
         let sectionFormParams: TempAny = [{ params: formParams }];
 

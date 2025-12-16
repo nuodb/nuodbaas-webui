@@ -13,6 +13,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import PageviewIcon from '@mui/icons-material/Pageview';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import Icon from "./Icon";
+import Auth from "../../../utils/auth";
 
 type ResourcePopupMenuProps = {
     row: any;
@@ -62,7 +63,7 @@ export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:Re
     }
     const resource = getResourceByPath(schema, editDeletePath);
     const buttons: MenuItemProps[] = [];
-    if (resource && ("get" in resource) && row["$ref"]) {
+    if (resource && ("get" in resource) && row["$ref"] && Auth.hasAccess("GET", path, undefined)) {
         buttons.push({
             "data-testid": "view_button",
             id: "view",
@@ -74,7 +75,7 @@ export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:Re
             }
         });
     }
-    if (resource && ("put" in resource)) {
+    if (resource && ("put" in resource) && Auth.hasAccess("PUT", editDeletePath, undefined)) {
         buttons.push({
             "data-testid": "edit_button",
             id: "edit",
@@ -86,7 +87,7 @@ export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:Re
             }
         });
     }
-    if (resource && ("delete" in resource)) {
+    if (resource && ("delete" in resource) && Auth.hasAccess("DELETE", editDeletePath, undefined)) {
         buttons.push({
             "data-testid": "delete_button",
             id: "delete",
