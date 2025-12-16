@@ -24,8 +24,8 @@ type ResourceHeaderProps = {
 
 function ResourceHeader({ schema, path, data, type, filterValues, onAction, t }: ResourceHeaderProps) {
     const navigate = useNavigate();
-    const createPath = getCreatePath(schema, path);
-    const createPathFirstPart = createPath?.replace(/^\//, "").split("/")[0];
+    const createPath = getCreatePath(schema, path)?.replace(/^\//, "").replace(/^cluster\//, "cluster.");
+    const createPathFirstPart = createPath?.split("/")[0];
     const createLabel = t('button.create.resource', { resource: t("resource.label." + createPathFirstPart + "_one", createPathFirstPart) });
 
     let title;
@@ -59,7 +59,7 @@ function ResourceHeader({ schema, path, data, type, filterValues, onAction, t }:
     return <div className="NuoListResourceHeader">
         <h3>{title}</h3>
         <div>
-            <Path schema={schema} path={path} prefixLabel={t("list.label.management")} postfixLabel={postfixLabel} filterValues={filterValues} />
+            <Path schema={schema} path={path} prefixLabel={path.startsWith("/cluster") ? t("list.label.cluster") : t("list.label.management")} postfixLabel={postfixLabel} filterValues={filterValues} />
             <div className="NuoRow" style={{ justifyContent: "end" }}>
                 {(type === "not_found" || type === "view") && <div className="Nuo-p20"><Button data-testid={"create_resource__close_button"} variant="text" onClick={() => { navigate(-1) }}><CloseIcon />{t("button.close")}</Button></div>}
                 {(type === "create" || type === "edit") && <div className="Nuo-p20"><Button data-testid={"create_resource__cancel_button"} variant="text" onClick={() => { navigate(-1) }}><CloseIcon />{t("button.cancel")}</Button></div>}

@@ -59,6 +59,10 @@ function ListResource(props: PageProps) {
         }
 
         let resourcesByPath_ = getResourceByPath(schema, path);
+        if (!resourcesByPath_) {
+            navigate("/ui/notfound");
+            return;
+        }
         if ("get" in resourcesByPath_) {
             Rest.get(path + "?listAccessible=true" + labelFilter).then((data: TempAny) => {
                 let start = 0;

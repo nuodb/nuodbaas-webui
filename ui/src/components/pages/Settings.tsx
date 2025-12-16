@@ -33,6 +33,7 @@ function Settings(props: PageProps) {
         const jsonSettings = JSON.parse(settings || "{}");
         const theme = (jsonSettings.theme && jsonSettings.theme.type) || "material";
         return FieldSelect({
+            op: "edit",
             path: "",
             errors: {},
             required: false,
@@ -58,7 +59,7 @@ function Settings(props: PageProps) {
             },
             t
 
-        }).show();
+        });
     }
 
     function renderAdvanced(): ReactNode {

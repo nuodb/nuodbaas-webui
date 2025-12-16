@@ -31,7 +31,17 @@ function Select(props: SelectProps): JSX.Element {
     if (isMaterial()) {
         return <FormControl key={id} fullWidth>
             <InputLabel id={"label_" + id}>{label}</InputLabel>
-            <MuiSelect labelId={"label_" + id} name={id} label={label} {...props} value={props.value || ""}
+            <MuiSelect
+                labelId={"label_" + id}
+                id={id}
+                name={id}
+                label={label}
+                value={props.value || ""}
+                required={props.required}
+                autoFocus={props.autoFocus}
+                disabled={props.disabled}
+                onChange={props.onChange}
+                onBlur={props.onBlur}
                 endAdornment={(description) &&
                     <InputAdornment position="end">
                         <InfoPopup description={description} />

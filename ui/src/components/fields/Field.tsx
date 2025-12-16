@@ -18,7 +18,7 @@ import FieldCrontab from "./FieldCrontab";
 /** Factory function to create components based on the field type */
 export function Field(props: FieldProps) : ReactNode {
     props = { ...props };
-    const op = props.op;
+    props.values = JSON.parse(JSON.stringify(props.values));
 
     let leftOvers = JSON.parse(JSON.stringify(props.parameter || {}));
     if (!("schema" in leftOvers)) {

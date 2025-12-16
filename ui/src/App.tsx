@@ -25,13 +25,14 @@ import Toast from './components/controls/Toast';
 import BackgroundTasks, { BackgroundTaskType } from './utils/BackgroundTasks';
 import { withTranslation } from 'react-i18next';
 import Redirect from './components/pages/Redirect';
+import DefaultPage from './components/pages/DefaultPage';
 
 /**
  * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
  * @returns
  */
 function App({ t }: { t: any }) {
-  const [schema, setSchema] = useState();
+  const [schema, setSchema] = useState<any>();
   const [isLoggedIn, setIsLoggedIn] = useState(Auth.isLoggedIn());
   const [isRecording, setIsRecording] = useState(sessionStorage.getItem(NUODBAAS_WEBUI_ISRECORDING) === "true");
   const [org, setOrg] = useState("");
@@ -98,16 +99,6 @@ function App({ t }: { t: any }) {
     };
   }, [tasks]);
 
-  function getHomeUrl() {
-    const credentials = Auth.getCredentials();
-    if (credentials) {
-      return "/ui/resource/list/databases/" + encodeURIComponent(credentials.username.split("/")[0]);
-    }
-    else {
-      return "/ui/resource/list/databases";
-    }
-  }
-
   return (
     <div className="App" data-testid={orgs.length > 0 ? "banner-done" : ""}>
       <GlobalErrorBoundary>
@@ -132,7 +123,7 @@ function App({ t }: { t: any }) {
                   <Route path="/ui/settings" element={<Settings {...pageProps} />} />
                   <Route path="/ui/automation" element={<Automation {...pageProps} />} />
                   <Route path="/ui/page/sql/:organization/:project/:database" element={<SqlPage {...pageProps} />} />
-                  <Route path="/ui" element={<Navigate to={getHomeUrl()} />} />
+                  <Route path="/ui" element={<DefaultPage />} />
                   <Route path="/webui" element={<Navigate to="/ui" />} />
                   <Route path="/webui/*" element={<Redirect baseUrl="/ui" />} />
                   <Route path="/*" element={<NotFound {...pageProps} />} />

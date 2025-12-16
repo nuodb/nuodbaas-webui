@@ -39,6 +39,7 @@ function Organization({ schema, org, orgs, setOrg, onSelection, t }: Organizatio
         label: t("field.select.allOrgs"),
         onClick: () => {
             selectOrg("");
+            return true;
         }
     }
         , ...orgs.map(o => {
@@ -47,6 +48,7 @@ function Organization({ schema, org, orgs, setOrg, onSelection, t }: Organizatio
                 label: o,
                 onClick: () => {
                     selectOrg(o);
+                    return true;
                 }
             }
         })];
@@ -55,9 +57,8 @@ function Organization({ schema, org, orgs, setOrg, onSelection, t }: Organizatio
     </ComboBox>;
 }
 
-type MenuProps = {
-    data: {
-        [key: string]: {
+type MenuDataType = {
+    [key: string]: {
             label: string,
             children: {
                 [key: string]: {
@@ -67,6 +68,9 @@ type MenuProps = {
             }
         }
     };
+
+type MenuProps = {
+    data: MenuDataType;
     org: string;
     onSelection?: () => void;
 };
@@ -134,7 +138,7 @@ export default function LeftMenu(props: LeftMenuProps) {
     if (!schema) {
         return null;
     }
-    let resources: string[] = Object.keys(schema).filter(path => !path.includes("{") && schema[path]["get"] && ("x-ui" in schema[path]["get"])).map(path => {
+    let resources: string[] = Object.keys(schema).filter(path => !path.includes("{") && schema[path]["get"] && !path.startsWith("/login") && !path.startsWith("/events/")).map(path => {
         while (path.startsWith("/")) {
             path = path.substring(1);
         }
@@ -153,29 +157,37 @@ export default function LeftMenu(props: LeftMenuProps) {
         return index1 - index2;
     })
 
-    let children: { [key: string]: any } = {};
+    let childrenManagement: { [key: string]: any } = {};
+    let childrenCluster: { [key: string]: any } = {};
     resources.forEach(resource => {
-        children[resource] = {
-            id: "menu-button-" + resource,
-            label: t("resource.label." + resource, resource),
-            path: "/ui/resource/list/" + resource + "/{organization}"
-        };
+        if (resource.startsWith("cluster/")) {
+            childrenCluster[resource] = {
+                id: "menu-button-" + resource.replace("/", "-"),
+                label: t("resource.label." + resource.replace("/", "."), resource.substring("cluster/".length)),
+                path: "/ui/resource/list/" + resource
+            };
+        }
+        else {
+            childrenManagement[resource] = {
+                id: "menu-button-" + resource,
+                label: t("resource.label." + resource, resource),
+                path: "/ui/resource/list/" + resource + "/{organization}"
+            };
+        }
     })
 
-    const data = {
-/*        "overview": {
-            label: "Overview",
-            children: {
-                "organization": {
-                    label: "Organization",
-                    path: "/ui/page/organization",
-                }
-            }
-        },*/
-        "management": {
+    let data: MenuDataType = {};
+    if (Object.keys(childrenManagement).length > 0) {
+        data.management = {
             label: "Management",
-            children
-        }
+            children: childrenManagement
+        };
+    }
+    if (Object.keys(childrenCluster).length > 0) {
+        data.cluster = {
+            label: "Cluster",
+            children: childrenCluster
+        };
     }
     return <div className={className}>
         <img className="NuoForDesktop" alt="" />

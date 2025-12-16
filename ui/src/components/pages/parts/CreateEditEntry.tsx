@@ -353,6 +353,9 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
     }, [schema, path, data, t]);
 
     useEffect(() => {
+        if (sectionFormParameters.length === 0) {
+            return;
+        }
         updateOrgProjDbEnums(values, sectionFormParameters)
             .then((sectionFormParams: SectionFormParameterType[]) => {
                 setSectionFormParameters(sectionFormParams);
