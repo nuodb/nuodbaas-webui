@@ -63,7 +63,7 @@ export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:Re
     }
     const resource = getResourceByPath(schema, editDeletePath);
     const buttons: MenuItemProps[] = [];
-    if (resource && ("get" in resource) && row["$ref"] && Auth.hasAccess("GET", path, undefined)) {
+    if (resource && ("get" in resource) && row["$ref"] && Auth.hasAccess("GET", editDeletePath, undefined)) {
         buttons.push({
             "data-testid": "view_button",
             id: "view",
@@ -113,7 +113,7 @@ export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:Re
                 console.error(msg, ex, row);
             }
 
-            if (menuVisible) {
+            if (menuVisible && (!menu.patch || Auth.hasAccess("PATCH", editDeletePath, undefined))) {
                 buttons.push({
                     "data-testid": menu.label,
                     id: menu.label,

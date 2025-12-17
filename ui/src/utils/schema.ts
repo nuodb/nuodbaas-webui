@@ -32,17 +32,20 @@ export async function getSchema() {
  */
 function filterAccessPaths(schema: any) : void {
     let newSchema:any = {};
+    const ignorePaths = ["/login", "/healthz", "/openapi"];
 
     // get all resources whe have access to directly
     Object.keys(schema).forEach(path => {
-        Object.keys(schema[path]).forEach(method => {
-            if(Auth.hasAccess(method.toUpperCase() as "GET"|"PUT"|"PATCH"|"DELETE", path, undefined)) {
-                if(!newSchema[path]) {
-                    newSchema[path] = {};
+        if(!ignorePaths.includes(path)) {
+            Object.keys(schema[path]).forEach(method => {
+                if(Auth.hasAccess(method.toUpperCase() as "GET"|"PUT"|"PATCH"|"DELETE", path, undefined)) {
+                    if(!newSchema[path]) {
+                        newSchema[path] = {};
+                    }
+                    newSchema[path] = {...newSchema[path], [method]: JSON.parse(JSON.stringify(schema[path][method]))}
                 }
-                newSchema[path] = {...newSchema[path], [method]: JSON.parse(JSON.stringify(schema[path][method]))}
-            }
-        })
+            })
+        }
     });
 
     // get all parent resources
