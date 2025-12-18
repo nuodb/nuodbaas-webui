@@ -208,7 +208,7 @@ public class TestRoutines extends SeleniumTestHelper {
                 }
             }
             try {
-                Thread.sleep(Duration.ofMillis(waitMillis/maxRetries));
+                Thread.sleep(waitMillis/maxRetries);
             }
             catch(InterruptedException e) {
                 Thread.currentThread().interrupt();
