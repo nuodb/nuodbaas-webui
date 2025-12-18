@@ -87,8 +87,8 @@ export default class Auth {
             }
 
             const specifierParts = resourceSpecifier.split("/");
-            const pathParts = path.startsWith("/events/") ? path.substring("/events".length).split("/") : path.split("/");
             if(resourceSpecifier.startsWith("/")) {
+                const pathParts = path.split("/");
                 if(specifierParts.length > pathParts.length) {
                     return false;
                 }
@@ -100,6 +100,7 @@ export default class Auth {
                 return true;
             }
             else {
+                const pathParts = path.startsWith("/events/") ? path.substring("/events".length).split("/") : path.split("/");
                 if(specifierParts.length > pathParts.length - 2 && specifierParts[pathParts.length - 2] !== "*") {
                     return false;
                 }

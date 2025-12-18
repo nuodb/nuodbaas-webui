@@ -113,7 +113,14 @@ export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:Re
                 console.error(msg, ex, row);
             }
 
-            if (menuVisible && (!menu.patch || Auth.hasAccess("PATCH", editDeletePath, undefined))) {
+            if (menuVisible && menu.patch && !Auth.hasAccess("PATCH", editDeletePath, undefined)) {
+                menuVisible = false;
+            }
+            if (menuVisible && menu.writeAccessRequired && !Auth.hasAccess("PUT", editDeletePath, undefined)) {
+                menuVisible = false;
+            }
+
+            if (menuVisible) {
                 buttons.push({
                     "data-testid": menu.label,
                     id: menu.label,
