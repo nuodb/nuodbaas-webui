@@ -153,17 +153,6 @@ public class SeleniumTestHelper {
         }
     }
 
-    public boolean hasElement(String id) {
-        try {
-            By testId = By.xpath("//*[@data-testid='" + id + "']");
-            List<WebElement> elements = driver.findElements(testId);
-            return elements.size() > 0;
-        }
-        catch(NoSuchElementException e) {
-            return false;
-        }
-    }
-
     public WebElement waitElement(String id) {
         By testId = By.xpath("//*[@data-testid='" + id + "']");
         WebDriverWait wait = new WebDriverWait(driver, waitTimeout);
@@ -326,9 +315,10 @@ public class SeleniumTestHelper {
         click("login_button");
 
         retryStale(()->{
-            String expected = "management\n>\ndatabases\n>\n" + organization.toLowerCase();
+            String expected1 = "management\n>\ndatabases\n>\n" + organization.toLowerCase();
+            String expected2 = "management\n>\nprojects\n>\n" + organization.toLowerCase();
             String actual = waitText("path_component").toLowerCase();
-            assumeTrue(actual.startsWith(expected), "\"" + actual + "\" does not start with \"" + expected + "\"");
+            assumeTrue(actual.startsWith(expected1) || actual.startsWith(expected2), "\"" + actual + "\" does not start with \"" + expected1 + "\" or \"" + expected2 + "\"");
         });
         waitElement("banner-done");
     }

@@ -170,6 +170,52 @@ public class TestRoutines extends SeleniumTestHelper {
         waitRestComplete();
     }
 
+    public void hasMenu(String resource) {
+        hasElement("menu-button-" + resource);
+    }
+
+    public void hasNotMenu(String resource, long waitMillis) {
+        hasNotElement("menu-button-" + resource, waitMillis);
+    }
+
+    public void hasElement(String id) {
+        final int maxRetries = 3;
+        for(int retry=0; retry<3; retry++) {
+            try {
+                waitElement(id);
+                return;
+            }
+            catch(StaleElementReferenceException e) {
+                if(retry+1 == maxRetries) {
+                    throw e;
+                }
+            }
+        }
+        throw new RuntimeException("Element " + id + " not found");
+    }
+
+    public void hasNotElement(String id, long waitMillis) {
+        final int maxRetries = 10;
+        for(int retry=0; retry<maxRetries; retry++) {
+            try {
+                if(getElement(id) != null) {
+                    throw new RuntimeException("Element " + id + " found");
+                }
+            }
+            catch(StaleElementReferenceException e) {
+                if(retry+1 == maxRetries) {
+                    throw e;
+                }
+            }
+            try {
+                Thread.sleep(Duration.ofMillis(waitMillis/maxRetries));
+            }
+            catch(InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
     public void waitRestComplete() {
         waitElement("rest_spinner__complete");
     }
@@ -180,6 +226,24 @@ public class TestRoutines extends SeleniumTestHelper {
         List<WebElement> menuItems = menuPopup.findElements(By.xpath(".//div[@data-testid='" + dataTestId + "']"));
         assertEquals(1, menuItems.size());
         menuItems.get(0).click();
+    }
+
+    public void hasPopupMenu(WebElement menuToggle, String dataTestId) {
+        menuToggle.click();
+        WebElement menuPopup = getElement("menu-popup");
+        List<WebElement> menuItems = menuPopup.findElements(By.xpath(".//div[@data-testid='" + dataTestId + "']"));
+        int size = menuItems.size();
+        menuToggle.click();
+        assertEquals(1, size);
+    }
+
+    public void hasNotPopupMenu(WebElement menuToggle, String dataTestId) {
+        menuToggle.click();
+        WebElement menuPopup = getElement("menu-popup");
+        List<WebElement> menuItems = menuPopup.findElements(By.xpath(".//div[@data-testid='" + dataTestId + "']"));
+        int size = menuItems.size();
+        menuToggle.click();
+        assertEquals(0, size);
     }
 
     public void clickUserMenu(String dataTestId) {
@@ -402,6 +466,37 @@ public class TestRoutines extends SeleniumTestHelper {
 
     public void deleteUser(String userName) {
         deleteResource(Resource.users, userName);
+    }
+
+    public String createUser(String allow0, String allow1, String deny0, String deny1) {
+        String name = shortUnique("u");
+        List<String> params = new ArrayList<>();
+        params.add("organization");
+        params.add(TEST_ORGANIZATION);
+        params.add("name");
+        params.add(name);
+        params.add("password");
+        params.add(TEST_ADMIN_PASSWORD);
+        if(allow0 != null) {
+            params.add("accessRule.allow.0");
+            params.add(allow0);
+            if(allow1 != null) {
+                params.add("accessRule.allow.1");
+                params.add(allow1);
+            }
+        }
+        if(deny0 != null) {
+            params.add("accessRule.deny.0");
+            params.add(deny0);
+            if(deny1 != null) {
+                params.add("accessRule.deny.1");
+                params.add(deny1);
+            }
+        }
+        createResource(Resource.users, name,
+            params.toArray(new String[0])
+        );
+        return name;
     }
 
     public String createProject() {
