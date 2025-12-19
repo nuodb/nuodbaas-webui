@@ -14,6 +14,7 @@ import PageviewIcon from '@mui/icons-material/Pageview';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import Icon from "./Icon";
 import Auth from "../../../utils/auth";
+import { useEffect, useState } from "react";
 
 type ResourcePopupMenuProps = {
     row: any;
@@ -25,6 +26,19 @@ type ResourcePopupMenuProps = {
 
 export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:ResourcePopupMenuProps) {
     const navigate = useNavigate();
+    const [sla, setSla] = useState<string | undefined>(undefined);
+
+    useEffect(() => {
+        const elementPath = row["$ref"] ? path + "/" + row["$ref"] : path;
+        const pathParts = elementPath.split("/");
+        if (pathParts.length >= 4) { // ["","projects|databases|backups|backuppolicies|...","{organization}","{project}",...]
+            const organization = pathParts[2];
+            const project = pathParts[3];
+            Rest.get("/projects/" + encodeURIComponent(organization) + "/" + encodeURIComponent(project)).then((proj: any) => {
+                setSla(proj.sla || undefined);
+            })
+        }
+    }, [schema, path]);
 
     async function handleDelete(row: TempAny, deletePath: string) {
         const createPathFirstPart = deletePath?.replace(/^\//, "").split("/")[0];
@@ -63,7 +77,7 @@ export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:Re
     }
     const resource = getResourceByPath(schema, editDeletePath);
     const buttons: MenuItemProps[] = [];
-    if (resource && ("get" in resource) && row["$ref"] && Auth.hasAccess("GET", editDeletePath, undefined)) {
+    if (resource && ("get" in resource) && row["$ref"] && Auth.hasAccess("GET", editDeletePath, sla)) {
         buttons.push({
             "data-testid": "view_button",
             id: "view",
@@ -75,7 +89,7 @@ export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:Re
             }
         });
     }
-    if (resource && ("put" in resource) && Auth.hasAccess("PUT", editDeletePath, undefined)) {
+    if (resource && ("put" in resource) && Auth.hasAccess("PUT", editDeletePath, sla)) {
         buttons.push({
             "data-testid": "edit_button",
             id: "edit",
@@ -87,7 +101,7 @@ export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:Re
             }
         });
     }
-    if (resource && ("delete" in resource) && Auth.hasAccess("DELETE", editDeletePath, undefined)) {
+    if (resource && ("delete" in resource) && Auth.hasAccess("DELETE", editDeletePath, sla)) {
         buttons.push({
             "data-testid": "delete_button",
             id: "delete",
@@ -113,10 +127,10 @@ export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:Re
                 console.error(msg, ex, row);
             }
 
-            if (menuVisible && menu.patch && !Auth.hasAccess("PATCH", editDeletePath, undefined)) {
+            if (menuVisible && menu.patch && !Auth.hasAccess("PATCH", editDeletePath, sla)) {
                 menuVisible = false;
             }
-            if (menuVisible && menu.writeAccessRequired && !Auth.hasAccess("PUT", editDeletePath, undefined)) {
+            if (menuVisible && menu.writeAccessRequired && !Auth.hasAccess("PUT", editDeletePath, sla)) {
                 menuVisible = false;
             }
 

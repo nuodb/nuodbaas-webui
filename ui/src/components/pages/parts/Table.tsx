@@ -15,6 +15,7 @@ import { getRecursiveValue } from '../../fields/FieldBase';
 import Toast from '../../controls/Toast';
 import ResourcePopupMenu from './ResourcePopupMenu';
 import { Field } from '../../fields/Field';
+import Auth from '../../../utils/auth';
 
 function getFlattenedKeys(obj: TempAny, prefix?: string): string[] {
     let ret: string[] = [];
@@ -48,6 +49,7 @@ function Table(props: TableProps) {
     const { schema, data, path, t } = props;
     const [columns, setColumns] = useState<MenuItemProps[]>([]);
     const [selected, setSelected] = useState<Set<string>>(new Set());
+    const [slaByPath, setSlaByPath] = useState<{ [path: string]: string }>({});
     let navigate = useNavigate();
     const schemaPath = getSchemaPath(schema, path);
     let lastSchemaPathElement = "/" + schemaPath;
@@ -98,6 +100,18 @@ function Table(props: TableProps) {
         })
 
         setColumns(cols);
+
+        const pathParts = path.split("/");
+        const organization = pathParts.length >= 3 ? pathParts[2] : undefined;
+        const projPath = "/projects" + (organization ? ("/" + organization) : "");
+        Rest.get(projPath + "?listAccessible=true&expand=true&offset=0&limit=1000").then((projects: any) => {
+            let newSlaByPath: { [path: string]: string } = {};
+            projects.items.forEach((proj: any) => {
+                const key = "/" + pathParts[1] + projPath.substring("/projects".length) + "/" + proj["$ref"];
+                newSlaByPath[key] = proj.sla;
+            })
+            setSlaByPath(newSlaByPath);
+        })
     }, [data, path, schema, t]);
 
     useEffect(() => {
@@ -225,21 +239,23 @@ function Table(props: TableProps) {
 
     function renderTableSelectedActions() {
         const firstHeader = visibleColumns.length > 0 ? visibleColumns[0] : undefined;
+        const deletableRefs = data.filter((d: any) => canDelete(d)).map((d: any) => d["$ref"]);
         return <TableTh data-testid={firstHeader?.id} className="NuoStickyLeft" key="__all_selected__" colSpan={selected.size === 0 ? 1 : (visibleColumns.length + 2)}>
             <div className="NuoTableSelectedActions">
                 {data.length > 0 && <input className="NuoTableCheckbox"
                     type="checkbox"
                     data-testid="check_all"
-                    checked={selected.size === data.length}
+                    checked={selected.size !== 0 && selected.size === deletableRefs.length}
                     onChange={() => {
-                        let allSelected = selected.size === data.length;
+                        let allSelected = selected.size === data.filter((d: any) => canDelete(d)).length;
                         if (allSelected) {
                             setSelected(new Set());
                         }
                         else {
-                            setSelected(new Set(data.map((d: any) => d["$ref"])));
+                            setSelected(new Set(deletableRefs));
                         }
                     }}
+                    disabled={deletableRefs.length === 0}
                 />}
                 {selected.size > 0 ? <>
                     <label>{selected.size} selected</label>
@@ -251,6 +267,18 @@ function Table(props: TableProps) {
                 }
             </div>
         </TableTh>
+    }
+
+    function canDelete(row: any): boolean {
+        const deletePath = path + "/" + row["$ref"];
+        const deletePathParent = deletePath.substring(0, deletePath.lastIndexOf("/"));
+        const resource = getResourceByPath(schema, deletePath);
+        if (resource && ("delete" in resource) && Auth.hasAccess("DELETE", deletePath, slaByPath[deletePathParent])) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     const tableLabels = getTableLabels();
@@ -279,16 +307,22 @@ function Table(props: TableProps) {
                     <TableRow key={row["$ref"] || index}>
                         <TableCell key="__selected__" className="NuoStickyLeft">
                             <div className="NuoTableCheckbox">
-                                <input type="checkbox" data-testid={"check_" + index} checked={selected.has(row["$ref"])} onChange={(event) => {
-                                    let tmpSelected = new Set(selected);
-                                    if (tmpSelected.has(row["$ref"])) {
-                                        tmpSelected.delete(row["$ref"]);
-                                    }
-                                    else {
-                                        tmpSelected.add(row["$ref"]);
-                                    }
-                                    setSelected(tmpSelected);
-                                }} />
+                                <input
+                                    type="checkbox"
+                                    data-testid={"check_" + index}
+                                    checked={selected.has(row["$ref"])}
+                                    disabled={!canDelete(row)}
+                                    onChange={(event) => {
+                                        let tmpSelected = new Set(selected);
+                                        if (tmpSelected.has(row["$ref"])) {
+                                            tmpSelected.delete(row["$ref"]);
+                                        }
+                                        else {
+                                            tmpSelected.add(row["$ref"]);
+                                        }
+                                        setSelected(tmpSelected);
+                                    }}
+                                />
                                 {visibleColumns.filter((_, index) => index === 0).map(column => renderDataCell(column.id, row))}
                             </div>
                         </TableCell>
