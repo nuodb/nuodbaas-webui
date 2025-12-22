@@ -18,6 +18,7 @@ public class PermissionsTest extends TestRoutines {
         // Setup
         login();
         String project = createProject();
+        clickUserMenu("logout");
         createAndLoginUser("read:" + TEST_ORGANIZATION, null, null, null);
 
         // Validate access to all resources
