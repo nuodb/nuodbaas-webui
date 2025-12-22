@@ -43,6 +43,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 
@@ -211,6 +213,7 @@ public class TestRoutines extends SeleniumTestHelper {
                 Thread.sleep(waitMillis/maxRetries);
             }
             catch(InterruptedException e) {
+                System.out.println("Test has been interrupted: " + e.getMessage());
                 Thread.currentThread().interrupt();
             }
         }
@@ -251,7 +254,7 @@ public class TestRoutines extends SeleniumTestHelper {
         clickPopupMenu(userMenu, dataTestId);
     }
 
-    private void createResource(Resource resource, String name, String ...fieldValueList) {
+    public void createResource(Resource resource, String name, String ...fieldValueList) {
         clickMenu(resource.name());
 
         WebElement createButton = waitElement("list_resource__create_button_" + resource);
@@ -267,7 +270,21 @@ public class TestRoutines extends SeleniumTestHelper {
         waitRestComplete();
     }
 
-    private void createResourceRest(Resource resource, String name, String ...fieldValueList) {
+    /* returns index number or -1 if it is not an index */
+    private int getIndex(String strIndex) {
+        try {
+            return Integer.parseInt(strIndex);
+        }
+        catch(NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    private boolean isIndex(String strIndex) {
+        return getIndex(strIndex) != -1;
+    }
+
+    public void createResourceRest(Resource resource, String name, String ...fieldValueList) {
         String organization = null;
         String project = null;
         String database = null;
@@ -285,15 +302,51 @@ public class TestRoutines extends SeleniumTestHelper {
                 }
                 ObjectNode obj = root;
                 String parts[] = fieldValueList[i].split(Pattern.quote("."));
-                for(int j=0; j<parts.length-1; j++) {
-                    if(!obj.has(parts[j])) {
-                        obj = obj.putObject(parts[j]);
+                for(int j=0; j<parts.length; j++) {
+                    String part = parts[j];
+                    String nextPart = j+1 < parts.length ? parts[j+1] : null;
+                    String nextNextPart = j+2 < parts.length ? parts[j+2] : null;
+                    if(nextPart == null) {
+                        // add key with value
+                        obj.put(part, fieldValueList[i+1]);
+                    }
+                    else if(isIndex(nextPart)) {
+                        j++;
+                        ArrayNode array;
+                        if(!obj.has(part) || !(obj.get(part) instanceof ArrayNode)) {
+                            array = obj.putArray(part);
+                        }
+                        else {
+                            array = (ArrayNode)obj.get(part);
+                        }
+                        int index = getIndex(nextPart);
+                        for(int k=array.size(); k<=index; k++) {
+                            array.addNull();
+                        }
+
+                        if(nextNextPart == null) {
+                            array.set(index, fieldValueList[i+1]);
+                        }
+                        else {
+                            JsonNode arrayElement = array.get(index);
+                            if(arrayElement instanceof NullNode) {
+                                obj = obj.objectNode();
+                                array.set(index, obj);
+                            }
+                            else {
+                                obj = (ObjectNode)arrayElement;
+                            }
+                        }
                     }
                     else {
-                        obj = (ObjectNode)obj.get(parts[j]);
+                        if(obj.has(part)) {
+                            obj = (ObjectNode)obj.get(part);
+                        }
+                        else {
+                            obj = obj.putObject(part);
+                        }
                     }
                 }
-                obj.put(parts[parts.length-1], fieldValueList[i+1]);
             }
             String path = "";
             if(organization != null) {

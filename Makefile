@@ -271,12 +271,12 @@ setup-integration-tests: $(KUBECTL) build-image setup-nginx-default-conf install
 	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-rest" -o name) -- bash -c "curl \
 		http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true \
 		--data-binary \
-            '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"acme\", \"accessRule\":{\"allow\": \"all:*\"}}' \
+            '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"acme\", \"accessRule\":{\"allow\": [\"all:*\",\"all:/cluster/*\"]}}' \
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
 	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-rest" -o name) -- bash -c "curl \
-		http://localhost:8080/users/integrationtest/admin \
+		http://localhost:8080/users/integrationtest/admin?allowCrossOrganizationAccess=true \
 		--data-binary \
-            '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"integrationtest\", \"accessRule\":{\"allow\": \"all:integrationtest\"}}' \
+            '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"integrationtest\", \"accessRule\":{\"allow\": [\"all:integrationtest\",\"all:/cluster/*\"]}}' \
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
 	$(KUBECTL) apply -n default -f selenium-tests/files/cas-idp.yaml
 	$(KUBECTL) apply -n default -f selenium-tests/files/nuodb-cp-image-versions.yaml

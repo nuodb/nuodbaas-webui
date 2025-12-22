@@ -59,7 +59,7 @@ export default class Auth {
         });
     }
 
-    static hasAccess(method: "GET"|"PUT"|"PATCH"|"DELETE", path: string, sla?: string) : boolean {
+    static hasAccess(method: "GET"|"PUT"|"PATCH"|"POST"|"DELETE", path: string, sla?: string) : boolean {
         function isMatch(rule: string) {
             const ruleParts = rule.split(":");
             if(ruleParts.length < 2) {
@@ -79,13 +79,17 @@ export default class Auth {
             else if(verb === "read" && method !== "GET") {
                 return false;
             }
-            else if(verb === "write" && method !== "PUT" && method !== "PATCH") {
+            else if(verb === "write" && method !== "PUT" && method !== "PATCH" && method !== "POST") {
                 return false;
             }
             else if(verb === "delete" && method !== "DELETE") {
                 return false;
             }
 
+            // There are two types of resource specifiers - see:
+            // https://nuodb.github.io/nuodb-cp-docs/docs/administration/authentication/user-management/#resource-specifier
+            // If a resource specifier starts with /, then it is interpreted as an absolute resource path (i.e. /databases/org1/project1/databaseq)
+            // Otherwise it is interpreted as a scope, which has the format <organization>/<project>/<database>, <organization>/<project>, or <organization>.
             const specifierParts = resourceSpecifier.split("/");
             if(resourceSpecifier.startsWith("/")) {
                 const pathParts = path.split("/");
@@ -93,7 +97,10 @@ export default class Auth {
                     return false;
                 }
                 for(let i=0; i<specifierParts.length; i++) {
-                    if(specifierParts[i] !== "*" && specifierParts[i] !== pathParts[i] && !pathParts[i].startsWith("{")) {
+                    if(specifierParts[i] === "*") {
+                        return true;
+                    }
+                    else if(specifierParts[i] !== pathParts[i] && !pathParts[i].startsWith("{")) {
                         return false;
                     }
                 }
@@ -105,7 +112,13 @@ export default class Auth {
                     return false;
                 }
                 for(let i=0; i<specifierParts.length; i++) {
-                    if(specifierParts[i] !== "*" && specifierParts[i] !== pathParts[i+2] && !pathParts[i+2].startsWith("{")) {
+                    if(specifierParts[i] === "*") {
+                        return true;
+                    }
+                    // Example values (to explain "+2" logic below):
+                    // resourceSpecifier: "project1/db1" -> specifierParts: ["project1", "db1"]
+                    // path: "/databases/project1/db1" -> pathParts: ["", "databases", "project1", "db1"]
+                    else if(specifierParts[i] !== pathParts[i+2] && !pathParts[i+2].startsWith("{")) {
                         return false;
                     }
                 }

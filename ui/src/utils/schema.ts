@@ -29,6 +29,7 @@ export async function getSchema() {
 /**
  * filter all the path / methods from the schema where the user has access (+ parent resources "get" operation (for ?listAccessible=true))
  * (without SLA verification to avoid network traffic)
+ * It also skips URL prefixes which are not relevant for the UI (/login, /healthz, /openapi)
  */
 function filterAccessPaths(schema: any) : void {
     let newSchema:any = {};
@@ -38,7 +39,7 @@ function filterAccessPaths(schema: any) : void {
     Object.keys(schema).forEach(path => {
         if(!ignorePaths.includes(path)) {
             Object.keys(schema[path]).forEach(method => {
-                if(Auth.hasAccess(method.toUpperCase() as "GET"|"PUT"|"PATCH"|"DELETE", path, undefined)) {
+                if(Auth.hasAccess(method.toUpperCase() as "GET"|"PUT"|"PATCH"|"POST"|"DELETE", path, undefined)) {
                     if(!newSchema[path]) {
                         newSchema[path] = {};
                     }
