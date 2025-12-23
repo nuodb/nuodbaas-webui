@@ -59,6 +59,10 @@ function ListResource(props: PageProps) {
         }
 
         let resourcesByPath_ = getResourceByPath(schema, path);
+        if (!resourcesByPath_) {
+            navigate("/ui/notfound");
+            return;
+        }
         if ("get" in resourcesByPath_) {
             Rest.get(path + "?listAccessible=true" + labelFilter).then((data: TempAny) => {
                 let start = 0;
@@ -71,7 +75,7 @@ function ListResource(props: PageProps) {
                 }
                 setAllItems(data.items.slice(start, end));
                 setAbortController(
-                    getResourceEvents(path + "?listAccessible=true&expand=true&offset=" + String(start + (page - 1) * pageSize) + "&limit=" + Math.min(pageSize, end - start) + labelFilter, (data: TempAny) => {
+                    getResourceEvents(schema, path + "?listAccessible=true&expand=true&offset=" + String(start + (page - 1) * pageSize) + "&limit=" + Math.min(pageSize, end - start) + labelFilter, (data: TempAny) => {
                         if (data.items) {
                             setItemsAndPath({ items: data.items, path });
                         }

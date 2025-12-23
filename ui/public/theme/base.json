@@ -73,6 +73,7 @@
                 {
                     "label": "button.db.changeDbaPassword",
                     "icon": "Password",
+                    "writeAccessRequired": true,
                     "dialog": "ChangeDbaPassword"
                 }
             ]

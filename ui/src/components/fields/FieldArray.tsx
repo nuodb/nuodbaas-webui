@@ -36,7 +36,7 @@ export default function FieldArray(props: FieldProps): ReactNode {
                     required: (i === 0 && required),
                     setValues: (vs: any) => {
                         vs = { ...vs };
-                        let v = getValue(values, prefixKey);
+                        let v = getValue(vs, prefixKey);
                         setValue(vs, prefixKey, v === "" ? null : v);
                         setValues(vs)
                     }
@@ -58,7 +58,7 @@ export default function FieldArray(props: FieldProps): ReactNode {
                 parameter: parameter.items,
                 setValues: (vs) => {
                     vs = { ...vs };
-                    let v = getValue(values, prefixKey);
+                    let v = getValue(vs, prefixKey);
                     setValue(vs, prefixKey, v === "" ? null : v);
                     setValues(vs);
                 }

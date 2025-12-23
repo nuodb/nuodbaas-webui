@@ -66,7 +66,27 @@
             "projects": "projects",
             "projects_one": "project",
             "users": "users",
-            "users_one": "user"
+            "users_one": "user",
+            "cluster": {
+                "canaryrollouts": "Canary Rollouts",
+                "canaryrollouts_one": "Canary Rollout",
+                "canaryrollouttemplates": "Canary Rollout Templates",
+                "canaryrollouttemplates_one": "Canary Rollout Template",
+                "databasequotas": "Database Quotas",
+                "databasequotas_one": "Database Quota",
+                "helmfeatures": "Helm Features",
+                "helmfeatures_one": "Helm Feature",
+                "identityproviders": "Identity Providers",
+                "identityproviders_one": "Identity Provider",
+                "metrics": "Metrics",
+                "metrics_one": "Metric",
+                "metricsources": "Metric Sources",
+                "metricsources_one": "Metric Source",
+                "roletemplates": "Role Templates",
+                "roletemplates_one": "Role Template",
+                "servicetiers": "Service Tiers",
+                "servicetiers_one": "Service Tier"
+            }
         }
     },
     "field": {
@@ -198,7 +218,8 @@
     },
     "list": {
         "label": {
-            "management": "Management"
+            "management": "Management",
+            "cluster": "Cluster"
         }
     },
     "form": {

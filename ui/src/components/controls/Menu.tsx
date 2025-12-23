@@ -13,6 +13,10 @@ export default function Menu(props: MenuProps): JSX.Element {
     const dataTestid = props["data-testid"];
     const [popupAnchor, setPopupAnchor] = useState<Element | undefined>(undefined);
 
+    if (!items || items.length === 0) {
+        return <></>;
+    }
+
     function listMenu(items: MenuItemProps[]) {
         return items.map((item, index) => <Button
             data-testid={item.id}

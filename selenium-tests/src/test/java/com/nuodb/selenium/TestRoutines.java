@@ -43,6 +43,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 
@@ -170,6 +172,53 @@ public class TestRoutines extends SeleniumTestHelper {
         waitRestComplete();
     }
 
+    public void hasMenu(String resource) {
+        hasElement("menu-button-" + resource);
+    }
+
+    public void hasNotMenu(String resource, long waitMillis) {
+        hasNotElement("menu-button-" + resource, waitMillis);
+    }
+
+    public void hasElement(String id) {
+        final int maxRetries = 3;
+        for(int retry=0; retry<3; retry++) {
+            try {
+                waitElement(id);
+                return;
+            }
+            catch(StaleElementReferenceException e) {
+                if(retry+1 == maxRetries) {
+                    throw e;
+                }
+            }
+        }
+        throw new RuntimeException("Element " + id + " not found");
+    }
+
+    public void hasNotElement(String id, long waitMillis) {
+        final int maxRetries = 10;
+        for(int retry=0; retry<maxRetries; retry++) {
+            try {
+                if(getElement(id) != null) {
+                    throw new RuntimeException("Element " + id + " found");
+                }
+            }
+            catch(StaleElementReferenceException e) {
+                if(retry+1 == maxRetries) {
+                    throw e;
+                }
+            }
+            try {
+                Thread.sleep(waitMillis/maxRetries);
+            }
+            catch(InterruptedException e) {
+                System.out.println("Test has been interrupted: " + e.getMessage());
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
     public void waitRestComplete() {
         waitElement("rest_spinner__complete");
     }
@@ -182,12 +231,30 @@ public class TestRoutines extends SeleniumTestHelper {
         menuItems.get(0).click();
     }
 
+    public void hasPopupMenu(WebElement menuToggle, String dataTestId) {
+        menuToggle.click();
+        WebElement menuPopup = getElement("menu-popup");
+        List<WebElement> menuItems = menuPopup.findElements(By.xpath(".//div[@data-testid='" + dataTestId + "']"));
+        int size = menuItems.size();
+        menuToggle.click();
+        assertEquals(1, size);
+    }
+
+    public void hasNotPopupMenu(WebElement menuToggle, String dataTestId) {
+        menuToggle.click();
+        WebElement menuPopup = getElement("menu-popup");
+        List<WebElement> menuItems = menuPopup.findElements(By.xpath(".//div[@data-testid='" + dataTestId + "']"));
+        int size = menuItems.size();
+        menuToggle.click();
+        assertEquals(0, size);
+    }
+
     public void clickUserMenu(String dataTestId) {
         WebElement userMenu = waitElement("user-menu");
         clickPopupMenu(userMenu, dataTestId);
     }
 
-    private void createResource(Resource resource, String name, String ...fieldValueList) {
+    public void createResource(Resource resource, String name, String ...fieldValueList) {
         clickMenu(resource.name());
 
         WebElement createButton = waitElement("list_resource__create_button_" + resource);
@@ -203,7 +270,21 @@ public class TestRoutines extends SeleniumTestHelper {
         waitRestComplete();
     }
 
-    private void createResourceRest(Resource resource, String name, String ...fieldValueList) {
+    /* returns index number or -1 if it is not an index */
+    private int getIndex(String strIndex) {
+        try {
+            return Integer.parseInt(strIndex);
+        }
+        catch(NumberFormatException e) {
+            return -1;
+        }
+    }
+
+    private boolean isIndex(String strIndex) {
+        return getIndex(strIndex) != -1;
+    }
+
+    public void createResourceRest(Resource resource, String name, String ...fieldValueList) {
         String organization = null;
         String project = null;
         String database = null;
@@ -221,15 +302,51 @@ public class TestRoutines extends SeleniumTestHelper {
                 }
                 ObjectNode obj = root;
                 String parts[] = fieldValueList[i].split(Pattern.quote("."));
-                for(int j=0; j<parts.length-1; j++) {
-                    if(!obj.has(parts[j])) {
-                        obj = obj.putObject(parts[j]);
+                for(int j=0; j<parts.length; j++) {
+                    String part = parts[j];
+                    String nextPart = j+1 < parts.length ? parts[j+1] : null;
+                    String nextNextPart = j+2 < parts.length ? parts[j+2] : null;
+                    if(nextPart == null) {
+                        // add key with value
+                        obj.put(part, fieldValueList[i+1]);
+                    }
+                    else if(isIndex(nextPart)) {
+                        j++;
+                        ArrayNode array;
+                        if(!obj.has(part) || !(obj.get(part) instanceof ArrayNode)) {
+                            array = obj.putArray(part);
+                        }
+                        else {
+                            array = (ArrayNode)obj.get(part);
+                        }
+                        int index = getIndex(nextPart);
+                        for(int k=array.size(); k<=index; k++) {
+                            array.addNull();
+                        }
+
+                        if(nextNextPart == null) {
+                            array.set(index, fieldValueList[i+1]);
+                        }
+                        else {
+                            JsonNode arrayElement = array.get(index);
+                            if(arrayElement instanceof NullNode) {
+                                obj = obj.objectNode();
+                                array.set(index, obj);
+                            }
+                            else {
+                                obj = (ObjectNode)arrayElement;
+                            }
+                        }
                     }
                     else {
-                        obj = (ObjectNode)obj.get(parts[j]);
+                        if(obj.has(part)) {
+                            obj = (ObjectNode)obj.get(part);
+                        }
+                        else {
+                            obj = obj.putObject(part);
+                        }
                     }
                 }
-                obj.put(parts[parts.length-1], fieldValueList[i+1]);
             }
             String path = "";
             if(organization != null) {
@@ -402,6 +519,37 @@ public class TestRoutines extends SeleniumTestHelper {
 
     public void deleteUser(String userName) {
         deleteResource(Resource.users, userName);
+    }
+
+    public String createUser(String allow0, String allow1, String deny0, String deny1) {
+        String name = shortUnique("u");
+        List<String> params = new ArrayList<>();
+        params.add("organization");
+        params.add(TEST_ORGANIZATION);
+        params.add("name");
+        params.add(name);
+        params.add("password");
+        params.add(TEST_ADMIN_PASSWORD);
+        if(allow0 != null) {
+            params.add("accessRule.allow.0");
+            params.add(allow0);
+            if(allow1 != null) {
+                params.add("accessRule.allow.1");
+                params.add(allow1);
+            }
+        }
+        if(deny0 != null) {
+            params.add("accessRule.deny.0");
+            params.add(deny0);
+            if(deny1 != null) {
+                params.add("accessRule.deny.1");
+                params.add(deny1);
+            }
+        }
+        createResource(Resource.users, name,
+            params.toArray(new String[0])
+        );
+        return name;
     }
 
     public String createProject() {

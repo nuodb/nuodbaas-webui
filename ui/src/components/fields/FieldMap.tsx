@@ -3,7 +3,7 @@
 import { setValue, getValue } from "./utils";
 import TextField from "../controls/TextField";
 import Button from "../controls/Button";
-import { FieldBase_validate, FieldProps } from "./FieldBase"
+import { FieldBase_validate, FieldProps, getRecursiveValue } from "./FieldBase"
 import { TempAny } from "../../utils/types";
 import { ReactNode } from "react";
 import { Table, TableBody, TableCell, TableHead, TableRow } from "../controls/Table";
@@ -214,6 +214,9 @@ export default function FieldMap(props: FieldProps): ReactNode {
     function view(): ReactNode {
         const { prefix, values } = props;
         const value = getValue(values, prefix);
+        if (value === undefined || value === null) {
+            return null;
+        }
 
         // If a key has a forward slash (/), we'll group the key (the group name is the text before the slash).
         // Show the non-group items first, followed by the group items.
@@ -222,7 +225,7 @@ export default function FieldMap(props: FieldProps): ReactNode {
                 .filter(key => !key.includes("/"))
                 .map(key => {
                     return <div key={key} className={"NuoTableField_" + prefix.replaceAll(".", "_")}>
-                        {String(key)}: {getValue(values, prefix + "." + key)}
+                        {String(key)}: {getRecursiveValue(getValue(values, prefix + "." + key), props.t)}
                     </div>;
                 })
         ]

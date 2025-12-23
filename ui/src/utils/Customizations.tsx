@@ -38,6 +38,7 @@ export type CustomViewMenu = {
     label: string,
     icon?: string,
     patch: any,
+    writeAccessRequired?: boolean,
     visible: string,
     confirm: string,
     dialog?: string,

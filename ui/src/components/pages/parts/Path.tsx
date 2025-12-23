@@ -55,6 +55,11 @@ function Path({ schema, path, prefixLabel, postfixLabel, filterValues, org, t }:
     let filterField = getFilterField(schema, path);
 
     let pathParts = (path.startsWith("/") ? path.substring(1) : path).split("/");
+    let pathPrefix = "";
+    if (pathParts[0] === "cluster") {
+        pathParts.shift();
+        pathPrefix = "cluster/";
+    }
     const schemaPath = getSchemaPath(schema, path) || "";
     return <div style={{ display: "flex", flexDirection: "row", alignItems: "center", overflow: "auto" }}>
         <StyledBreadcrumbs data-testid="path_component" separator=">" aria-label="resources" style={{ color: "#b5b9bc", fontSize: "1em", display: "flex", flexWrap: "nowrap" }}>
@@ -67,14 +72,14 @@ function Path({ schema, path, prefixLabel, postfixLabel, filterValues, org, t }:
                     return <Typography key={index} color="text.primary" style={{ fontSize: "1em", textWrap: "nowrap" }}>{p}</Typography>
                 }
                 else if (index === pathParts.length - 2 && schemaPath != null && !schemaPath.endsWith("}")) {
-                    let subPath = "/ui/resource/view/" + pathParts.slice(0, index + 1).join("/")
+                    let subPath = "/ui/resource/view/" + pathPrefix + pathParts.slice(0, index + 1).join("/")
                     return <Link underline="hover" key={index} color="inherit" href="#" style={{ textWrap: "nowrap" }} onClick={() => {
                         navigate(subPath);
                     }
                     }>{p}</Link>;
                 }
                 else {
-                    let subPath = "/ui/resource/list/" + pathParts.slice(0, index + 1).join("/")
+                    let subPath = "/ui/resource/list/" + pathPrefix + pathParts.slice(0, index + 1).join("/")
                     return <Link underline="hover" key={index} color="inherit" href="#" style={{ textWrap: "nowrap" }} onClick={() => {
                         navigate(subPath);
                     }
