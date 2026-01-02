@@ -1,6 +1,7 @@
 // (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
 import InfoIconOutlined from '@mui/icons-material/InfoOutlined';
+import { JSX } from 'react';
 
 type InfoPopupProps = {
     description?: string;

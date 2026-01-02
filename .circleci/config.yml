@@ -77,21 +77,11 @@ jobs:
               echo "Docker Image needs to be built."
             fi
       - run:
-          name: Build Image
-          command: make build-image
+          name: Run Integration Tests for Code Coverage
+          command: COVERAGE=true make run-integration-tests
       - run:
-          name: Build Integration Test Image
-          command: make build-integration-tests-docker
-      - run:
-          name: Setup Integration Test Environment
-          command: make setup-integration-tests
-      - run:
-          name: Run Integration Tests
-          command: make run-integration-tests-only
-      - run:
-          name: Teardown Integration Test Environment
-          when: always
-          command: make teardown-integration-tests
+          name: Run Integration Tests on Production Build
+          command: make run-integration-tests
       - run:
           name: Deploy Helm Charts
           command: ./build_utils.sh createAndUploadHelmPackage
@@ -113,6 +103,13 @@ jobs:
       - store_artifacts:
           path: selenium-test-results.tar.gz
           destination: selenium_test_results
+      - run:
+          name: Compress Code Coverage Report
+          when: always
+          command: tar -cvzf code_coverage.tar.gz -C selenium-tests/target/coverage .
+      - store_artifacts:
+          path: code_coverage.tar.gz
+          destination: code_coverage_report
 
   promote_build:
     # Terragunt executor is needed because the promote-version.sh needs to

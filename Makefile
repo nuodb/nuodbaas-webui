@@ -3,6 +3,7 @@
 PROJECT_DIR := $(shell pwd)
 BIN_DIR ?= $(PROJECT_DIR)/bin
 export PATH := $(BIN_DIR):$(PATH)
+COVERAGE ?= "false"
 
 OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ARCH := $(shell uname -m | sed "s/x86_64/amd64/g" | sed "s/aarch64/arm64/g")
@@ -56,6 +57,10 @@ all: run-integration-tests copyright ## build, test + deploy everything
 .PHONY: build-image
 build-image:  ## build UI and create Docker image
 	@docker build -t "${IMG_REPO}:latest" --build-arg "REACT_APP_GIT_SHA=${VERSION_SHA}" -f docker/production/Dockerfile .
+
+.PHONY: build-coverage
+build-coverage:  ## build code coverage UI and create Docker image
+	@docker build -t "${IMG_REPO}:coverage" --build-arg "REACT_APP_GIT_SHA=${VERSION_SHA}" -f docker/production/Dockerfile-coverage .
 
 .PHONY: copyright
 copyright: ### check copyrights
@@ -222,20 +227,20 @@ undeploy-sql: $(KIND) $(HELM) build-sql
 		$(HELM) uninstall --ignore-not-found -n default nuodbaas-sql; \
 	fi
 
-.PHONY: build-webui
-build-webui:
-	@if [ -f Makefile ] ; then \
-		${MAKE} build-image; \
-	else \
-		docker pull ghcr.io/nuodb/nuodbaas-webui; \
-		docker tag ghcr.io/nuodb/nuodbaas-webui nuodbaas-webui; \
-	fi
-
 .PHONY: deploy-webui
-deploy-webui: build-webui $(HELM) $(KIND)  ## deploy WebUI
+deploy-webui: $(HELM) $(KIND)  ## deploy WebUI
 	@if [ -d charts/nuodbaas-webui ] ; then \
-		$(KIND) load docker-image nuodbaas-webui:latest; \
-		$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=latest --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api; \
+		if [ "${COVERAGE}" = "true" ] ; then \
+			${MAKE} build-coverage && \
+			$(KIND) load docker-image nuodbaas-webui:coverage && \
+			$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=coverage --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api && \
+			mkdir -p selenium-tests/target && \
+			curl http://localhost/ui/build_js.tgz | tar -C selenium-tests/target -xzf -; \
+		else \
+			${MAKE} build-image && \
+			$(KIND) load docker-image nuodbaas-webui:coverage && \
+			$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=coverage --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api; \
+		fi \
 	fi
 
 .PHONY: undeploy-webui
@@ -258,7 +263,7 @@ setup-nginx-default-conf:
 	fi
 
 .PHONY: setup-integration-tests
-setup-integration-tests: $(KUBECTL) build-image setup-nginx-default-conf install-crds deploy-monitoring deploy-cp deploy-operator deploy-sql deploy-webui ## setup containers before running integration tests
+setup-integration-tests: $(KUBECTL) setup-nginx-default-conf install-crds deploy-monitoring deploy-cp deploy-operator deploy-sql deploy-webui ## setup containers before running integration tests
 	@if [ "$(ARCH)" = "arm64" ] ; then \
 		docker pull seleniarm/standalone-chromium && \
 		docker tag seleniarm/standalone-chromium selenium-standalone; \
@@ -296,7 +301,14 @@ teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-operato
 
 .PHONY: run-integration-tests-only
 run-integration-tests-only: ## integration tests without setup/teardown
+	@rm -rf selenium-tests/target/.nyc_output
 	@cd selenium-tests && mvn test && cd ..
+	@if [ "${COVERAGE}" = "true" ] ; then \
+		cd selenium-tests && \
+		npx nyc report -r text --cwd target && \
+		npx nyc report -r html --cwd target --report-dir coverage && \
+		cd .. ; \
+	fi
 
 .PHONY: build-integration-tests-docker
 build-integration-tests-docker:

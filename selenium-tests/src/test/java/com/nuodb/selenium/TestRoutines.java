@@ -73,6 +73,7 @@ public class TestRoutines extends SeleniumTestHelper {
 
     @AfterEach
     public void after() {
+        saveCoverage();
         // clean up all the created resources except admin user
         for(int i=Resource.values().length-1; i >= 0; i--) {
             Resource resource = Resource.values()[i];

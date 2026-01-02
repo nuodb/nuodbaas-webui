@@ -4,6 +4,7 @@ ui/node_modules
 ui/package-lock.json
 ui/build
 selenium-tests/files/kubeconfig
+selenium-tests/node_modules
 bin/
 tmp/
 selenium-tests/target

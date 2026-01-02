@@ -1,0 +1,27 @@
+# (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+
+FROM node:18-alpine AS build-ui
+WORKDIR /app/
+ARG REACT_APP_GIT_SHA
+COPY ui/ /app/
+RUN npx tsc --outDir build_js
+RUN npm install
+RUN mkdir build_instrument
+RUN npx nyc instrument build_js build_instrument/src
+RUN cp -r public eslint.config.js package-lock.json package.json tsconfig.json vite-env.d.ts vite.config.mjs build_instrument/
+RUN cat index.html | sed "s@/src/index.tsx@/src/index.js@g" > build_instrument/index.html
+RUN cp -r src/resources build_instrument/src/
+RUN cp -r node_modules build_instrument
+RUN tar -czf build_js.tgz build_js
+WORKDIR /app/build_instrument
+RUN npm run build
+WORKDIR /app/
+
+FROM nginx:alpine
+COPY --from=build-ui /app/build_instrument/build /usr/share/nginx/html/ui/
+COPY --from=build-ui /app/build_js.tgz /usr/share/nginx/html/ui/
+RUN cp /usr/share/nginx/html/ui/index.html /usr/share/nginx/html/
+COPY docker/production/files/ /
+HEALTHCHECK --interval=1s --timeout=3s --start-period=5s --retries=3 CMD [ "curl", "http://localhost/" ]
+EXPOSE 80
+ENTRYPOINT [ "/entrypoint.sh" ]

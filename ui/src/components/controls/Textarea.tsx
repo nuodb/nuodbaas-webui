@@ -1,6 +1,6 @@
 // (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
 
-import { useEffect, useRef } from "react";
+import { JSX, useEffect, useRef } from "react";
 
 export type TextareaProps = {
     name: string,
