@@ -4,8 +4,8 @@ FROM node:18-alpine AS build-ui
 WORKDIR /app/
 ARG REACT_APP_GIT_SHA
 COPY ui/ /app/
-RUN npx tsc --outDir build_js
 RUN npm install
+RUN npx tsc --outDir build_js
 RUN mkdir build_instrument
 RUN npx nyc instrument build_js build_instrument/src
 RUN cp -r public eslint.config.js package-lock.json package.json tsconfig.json vite-env.d.ts vite.config.mjs build_instrument/
