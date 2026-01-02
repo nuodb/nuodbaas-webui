@@ -1,4 +1,4 @@
-# (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+# (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 PROJECT_DIR := $(shell pwd)
 BIN_DIR ?= $(PROJECT_DIR)/bin
