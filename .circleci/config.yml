@@ -35,7 +35,79 @@ executors:
     resource_class: medium
 
 jobs:
-  build_and_deploy:
+  prechecks:
+    executor: ubuntu_vm
+    machine:
+      image: ubuntu-2204:2023.10.1
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          name: Validate Copyrights
+          command: |
+            if [ "$(./build_utils.sh doesImageExist)" == "yes" ] ; then
+                echo "Docker Image exists already - no need to check copyrights."
+            else
+              make copyright
+            fi
+
+  coverage_tests:
+    executor: ubuntu_vm
+    machine:
+      image: ubuntu-2204:2023.10.1
+    resource_class: large
+    steps:
+      - checkout
+      - run:
+          name: Checking if Docker image exists already
+          command: |
+            if [ "$(./build_utils.sh doesImageExist)" == "yes" ] ; then
+                echo "Docker Image exists already - no need to run code coverage tests."
+                circleci-agent step halt
+            else
+              echo "Running Code coverage tests."
+            fi
+      - run:
+          name: Run Integration Tests for Code Coverage
+          command: COVERAGE=true make run-integration-tests
+      - run:
+          name: Compress Code Coverage Report
+          when: always
+          command: tar -cvzf code_coverage.tar.gz -C selenium-tests/target/coverage .
+      - store_artifacts:
+          path: code_coverage.tar.gz
+          destination: code_coverage_report
+
+  integration_tests:
+    executor: ubuntu_vm
+    machine:
+      image: ubuntu-2204:2023.10.1
+    resource_class: large
+    steps:
+      - checkout
+      - run:
+          name: Checking if Docker image exists already
+          command: |
+            if [ "$(./build_utils.sh doesImageExist)" == "yes" ] ; then
+                echo "Docker Image exists already - no need to run integration tests."
+                circleci-agent step halt
+            else
+              echo "Running integration tests."
+            fi
+      - run:
+          name: Run Integration Tests on Production Build
+          command: make run-integration-tests
+      - run:
+          name: Save Docker image to workspace
+          command: |
+            mkdir -p images
+            docker image save -o "images/nuodbaas-webui" "nuodbaas-webui:latest"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - images
+
+  deploy_images:
     executor: ubuntu_vm
     machine:
       image: ubuntu-2204:2023.10.1
@@ -49,15 +121,27 @@ jobs:
           command: |
             rm -f get_helm.sh
       - run:
+          name: Checking if Docker image exists already
+          command: |
+            if [ "$(./build_utils.sh doesImageExist)" == "yes" ] ; then
+                echo "Docker Image exists already - no need to deploy image."
+                circleci-agent step halt
+            else
+              echo "Deploying Docker Image."
+            fi
+      - attach_workspace:
+          at: .
+      - run:
+          name: Load Docker Image from workspace
+          command: |
+            docker image load < "images/nuodbaas-webui"
+      - run:
           name: Check that AWS environment variables were supplied
           command: |
             : ${AWS_REGION:?"Must specify AWS region"}
             AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account | sed 's/^"\(.*\)"$/\1/g')"
             ECR_ACCOUNT_URL="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
             echo "export ECR_ACCOUNT_URL=\"$ECR_ACCOUNT_URL\"" >> "$BASH_ENV"
-      - run:
-          name: Validate Copyrights
-          command: make copyright
       - run:
           name: Login to ECR for Docker and Helm
           command: |
@@ -68,48 +152,11 @@ jobs:
           command: |
             echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_USER" --password-stdin
       - run:
-          name: Checking if Docker image exists already
-          command: |
-            if [ "$(./build_utils.sh doesImageExist)" == "yes" ] ; then
-                echo "Docker Image exists already - no need to build image."
-                circleci-agent step halt
-            else
-              echo "Docker Image needs to be built."
-            fi
-      - run:
-          name: Run Integration Tests for Code Coverage
-          command: COVERAGE=true make run-integration-tests
-      - run:
-          name: Run Integration Tests on Production Build
-          command: make run-integration-tests
-      - run:
           name: Deploy Helm Charts
           command: ./build_utils.sh createAndUploadHelmPackage
       - run:
           name: Deploy Docker images
           command: ./build_utils.sh deployDockerImages
-      - run:
-          name: Save test results
-          command: |
-            mkdir -p ~/test-results/junit/
-            find ./selenium-tests/target/test-reports -type f -name "*.xml" -exec cp {} ~/test-results/junit/ \;
-          when: always
-      - store_test_results:
-          path: ~/test-results
-      - run:
-          name: Compress Test Results
-          when: always
-          command: tar -cvzf selenium-test-results.tar.gz -C selenium-tests/target/test-results .
-      - store_artifacts:
-          path: selenium-test-results.tar.gz
-          destination: selenium_test_results
-      - run:
-          name: Compress Code Coverage Report
-          when: always
-          command: tar -cvzf code_coverage.tar.gz -C selenium-tests/target/coverage .
-      - store_artifacts:
-          path: code_coverage.tar.gz
-          destination: code_coverage_report
 
   promote_build:
     # Terragunt executor is needed because the promote-version.sh needs to
@@ -224,15 +271,28 @@ workflows:
   continuous:
     jobs:
       # run test jobs in parallel
-      - build_and_deploy:
-          name: "Test and deploy"
+      - prechecks
+          name: "Prechecks"
+      - coverage_tests
+          name: "Coverage Tests"
+          requires:
+            - "Prechecks"
+      - integration_tests
+          name: "Integration Tests"
+          requires:
+            - "Prechecks"
+      - deploy_image:
+          name: "Deploy Image"
+          requires:
+            - "Coverage Tests"
+            - "Integration Tests"
           context:
             - common-config
       - promote_build:
           requires:
-            - "Test and deploy"
+            - "Deploy Image"
           name: "Optionally Promote to DBaaS DEV"
       - create_release:
           requires:
-            - "Test and deploy"
+            - "Deploy Image"
           name: "Optionally Create Release"
