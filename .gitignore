@@ -3,6 +3,7 @@
 ui/node_modules
 ui/package-lock.json
 ui/build
+ui/coverage
 selenium-tests/files/kubeconfig
 selenium-tests/node_modules
 bin/

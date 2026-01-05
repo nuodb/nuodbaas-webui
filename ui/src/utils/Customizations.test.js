@@ -1,5 +1,6 @@
 // (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
 
+import { expect, test } from 'vitest'
 import { evaluate, splitFormulaIntoParts } from './Customizations';
 
 test('Check Formula', () => {

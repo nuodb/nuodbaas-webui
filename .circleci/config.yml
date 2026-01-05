@@ -43,13 +43,18 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Validate Copyrights
+          name: Checking if docker image exists already
           command: |
             if [ "$(./build_utils.sh doesImageExist)" == "yes" ] ; then
-                echo "Docker Image exists already - no need to check copyrights."
-            else
-              make copyright
+                echo "Docker Image exists already - no need to build image."
+                circleci-agent step halt
             fi
+      - run:
+          name: Check copyrights
+          command: make copyright
+      - run:
+          name: Run Unit tests (+ coverage)
+          command: make run-unit-tests
 
   coverage_tests:
     executor: ubuntu_vm
@@ -277,10 +282,14 @@ workflows:
           name: "Coverage Tests"
           requires:
             - "Prechecks"
+          context:
+            - common-config
       - integration_tests:
           name: "Integration Tests"
           requires:
             - "Prechecks"
+          context:
+            - common-config
       - deploy_image:
           name: "Deploy Image"
           requires:

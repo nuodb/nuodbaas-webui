@@ -310,6 +310,10 @@ run-integration-tests-only: ## integration tests without setup/teardown
 		cd .. ; \
 	fi
 
+.PHONY: run-unit-tests
+run-unit-tests: ## run unit tests
+	@cd ui && npm install && npm run coverage && cd ..
+
 .PHONY: build-integration-tests-docker
 build-integration-tests-docker:
 	@cd selenium-tests && docker build -t "${IMG_REPO}:test" . && cd ..
