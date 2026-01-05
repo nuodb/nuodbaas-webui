@@ -278,6 +278,8 @@ workflows:
       # run test jobs in parallel
       - prechecks:
           name: "Prechecks"
+          context:
+            - common-config
       - coverage_tests:
           name: "Coverage Tests"
           requires:
