@@ -107,7 +107,7 @@ jobs:
           paths:
             - images
 
-  deploy_images:
+  deploy_image:
     executor: ubuntu_vm
     machine:
       image: ubuntu-2204:2023.10.1
