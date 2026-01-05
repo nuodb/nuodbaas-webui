@@ -271,13 +271,13 @@ workflows:
   continuous:
     jobs:
       # run test jobs in parallel
-      - prechecks
+      - prechecks:
           name: "Prechecks"
-      - coverage_tests
+      - coverage_tests:
           name: "Coverage Tests"
           requires:
             - "Prechecks"
-      - integration_tests
+      - integration_tests:
           name: "Integration Tests"
           requires:
             - "Prechecks"
