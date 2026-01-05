@@ -235,10 +235,15 @@ deploy-webui: $(HELM) $(KIND)  ## deploy WebUI
 			$(KIND) load docker-image nuodbaas-webui:coverage && \
 			$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=coverage --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api && \
 			mkdir -p selenium-tests/target && \
-			curl http://localhost/ui/build_js.tgz | tar -C selenium-tests/target -xzf -; \
+			for i in `seq 1 10`; do if [ ! -d selenium-tests/target/build_js ] ; then \
+				curl http://localhost/ui/build_js.tgz | tar -C selenium-tests/target -xzf -; \
+				if [ ! -d selenium-tests/target/build_js ] ; then \
+					sleep 10; \
+				fi; \
+			fi; done; \
 		else \
 			${MAKE} build-image && \
-			$(KIND) load docker-image nuodbaas-webui:coverage && \
+			$(KIND) load docker-image nuodbaas-webui:latest && \
 			$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=coverage --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api; \
 		fi \
 	fi
