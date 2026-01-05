@@ -1,5 +1,6 @@
 ^\./copyright_ignore.txt$
 ^\./ui/node_modules/
+^\./ui/coverage/
 ^\./.git/
 ^\./selenium-tests/target/
 ^\./selenium-tests/files/kubeconfig
