@@ -244,7 +244,7 @@ deploy-webui: $(HELM) $(KIND)  ## deploy WebUI
 		else \
 			${MAKE} build-image && \
 			$(KIND) load docker-image nuodbaas-webui:latest && \
-			$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=coverage --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api; \
+			$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=latest --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api; \
 		fi \
 	fi
 
