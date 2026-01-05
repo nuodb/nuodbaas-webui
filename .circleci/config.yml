@@ -39,7 +39,7 @@ jobs:
     executor: ubuntu_vm
     machine:
       image: ubuntu-2204:2023.10.1
-    resource_class: small
+    resource_class: medium
     steps:
       - checkout
       - run:
