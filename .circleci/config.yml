@@ -5,7 +5,7 @@ version: 2.1
 
 orbs:
   # Check https://circleci.com/developer/orbs/orb/circleci/node for more details
-  node: circleci/node@6.1.0
+  node: circleci/node@7.2.1
 
   # Check https://circleci.com/developer/orbs/orb/circleci/github-cli for more details
   github-cli: circleci/github-cli@2.2.0
