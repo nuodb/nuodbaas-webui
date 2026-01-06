@@ -241,6 +241,10 @@ deploy-webui: $(HELM) $(KIND)  ## deploy WebUI
 					sleep 10; \
 				fi; \
 			fi; done; \
+			if [ ! -d selenium-tests/target/build_js ] ; then \
+				echo "Unable to download Javascript sources"; \
+				exit 1; \
+			fi; \
 		else \
 			${MAKE} build-image && \
 			$(KIND) load docker-image nuodbaas-webui:latest && \

@@ -35,7 +35,7 @@ executors:
     resource_class: medium
 
 jobs:
-  prechecks:
+  unit_tests:
     executor: ubuntu_vm
     machine:
       image: ubuntu-2404:2025.09.1
@@ -75,12 +75,8 @@ jobs:
       - run:
           name: Run Integration Tests for Code Coverage
           command: COVERAGE=true make run-integration-tests
-      - run:
-          name: Compress Code Coverage Report
-          when: always
-          command: tar -cvzf code_coverage.tar.gz -C selenium-tests/target/coverage .
       - store_artifacts:
-          path: code_coverage.tar.gz
+          path: selenium-tests/target/coverage
           destination: code_coverage_report
 
   integration_tests:
@@ -276,20 +272,20 @@ workflows:
   continuous:
     jobs:
       # run test jobs in parallel
-      - prechecks:
-          name: "Prechecks"
+      - unit_tests:
+          name: "Unit Tests"
           context:
             - common-config
       - coverage_tests:
           name: "Coverage Tests"
           requires:
-            - "Prechecks"
+            - "Unit Tests"
           context:
             - common-config
       - integration_tests:
           name: "Integration Tests"
           requires:
-            - "Prechecks"
+            - "Unit Tests"
           context:
             - common-config
       - deploy_image:
