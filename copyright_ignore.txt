@@ -1,8 +1,12 @@
 ^\./copyright_ignore.txt$
 ^\./ui/node_modules/
+^\./ui/coverage/
 ^\./.git/
 ^\./selenium-tests/target/
 ^\./selenium-tests/files/kubeconfig
+^\./selenium-tests/node_modules
+^\./selenium-tests/package-lock.json$
+^\./selenium-tests/package.json$
 ^\./ui/package-lock.json$
 \.md$
 \./ui/public/favicon.ico$

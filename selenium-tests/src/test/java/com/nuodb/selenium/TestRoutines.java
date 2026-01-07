@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 package com.nuodb.selenium;
 
@@ -73,6 +73,7 @@ public class TestRoutines extends SeleniumTestHelper {
 
     @AfterEach
     public void after() {
+        saveCoverage();
         // clean up all the created resources except admin user
         for(int i=Resource.values().length-1; i >= 0; i--) {
             Resource resource = Resource.values()[i];

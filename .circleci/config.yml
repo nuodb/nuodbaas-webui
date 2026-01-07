@@ -1,11 +1,11 @@
-# (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+# (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 # CircleCI 2.1 configuration file
 version: 2.1
 
 orbs:
   # Check https://circleci.com/developer/orbs/orb/circleci/node for more details
-  node: circleci/node@6.1.0
+  node: circleci/node@7.2.1
 
   # Check https://circleci.com/developer/orbs/orb/circleci/github-cli for more details
   github-cli: circleci/github-cli@2.2.0
@@ -31,14 +31,87 @@ executors:
 
   ubuntu_vm:
     machine:
-      image: ubuntu-2204:2023.10.1
+      image: ubuntu-2404:2025.09.1
     resource_class: medium
 
 jobs:
-  build_and_deploy:
+  unit_tests:
     executor: ubuntu_vm
     machine:
-      image: ubuntu-2204:2023.10.1
+      image: ubuntu-2404:2025.09.1
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+          name: Checking if docker image exists already
+          command: |
+            if [ "$(./build_utils.sh doesImageExist)" == "yes" ] ; then
+                echo "Docker Image exists already - no need to build image."
+                circleci-agent step halt
+            fi
+      - run:
+          name: Check copyrights
+          command: make copyright
+      - run:
+          name: Run Unit tests (+ coverage)
+          command: make run-unit-tests
+
+  coverage_tests:
+    executor: ubuntu_vm
+    machine:
+      image: ubuntu-2404:2025.09.1
+    resource_class: large
+    steps:
+      - checkout
+      - run:
+          name: Checking if Docker image exists already
+          command: |
+            if [ "$(./build_utils.sh doesImageExist)" == "yes" ] ; then
+                echo "Docker Image exists already - no need to run code coverage tests."
+                circleci-agent step halt
+            else
+              echo "Running Code coverage tests."
+            fi
+      - run:
+          name: Run Integration Tests for Code Coverage
+          command: COVERAGE=true make run-integration-tests
+      - store_artifacts:
+          path: selenium-tests/target/coverage
+          destination: code_coverage_report
+
+  integration_tests:
+    executor: ubuntu_vm
+    machine:
+      image: ubuntu-2404:2025.09.1
+    resource_class: large
+    steps:
+      - checkout
+      - run:
+          name: Checking if Docker image exists already
+          command: |
+            if [ "$(./build_utils.sh doesImageExist)" == "yes" ] ; then
+                echo "Docker Image exists already - no need to run integration tests."
+                circleci-agent step halt
+            else
+              echo "Running integration tests."
+            fi
+      - run:
+          name: Run Integration Tests on Production Build
+          command: make run-integration-tests
+      - run:
+          name: Save Docker image to workspace
+          command: |
+            mkdir -p circleci_workspace
+            docker image save -o "circleci_workspace/nuodbaas-webui" "nuodbaas-webui:latest"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - circleci_workspace
+
+  deploy_image:
+    executor: ubuntu_vm
+    machine:
+      image: ubuntu-2404:2025.09.1
     resource_class: large
     steps:
       - checkout
@@ -49,15 +122,27 @@ jobs:
           command: |
             rm -f get_helm.sh
       - run:
+          name: Checking if Docker image exists already
+          command: |
+            if [ "$(./build_utils.sh doesImageExist)" == "yes" ] ; then
+                echo "Docker Image exists already - no need to deploy image."
+                circleci-agent step halt
+            else
+              echo "Deploying Docker Image."
+            fi
+      - attach_workspace:
+          at: .
+      - run:
+          name: Load Docker Image from workspace
+          command: |
+            docker image load < "circleci_workspace/nuodbaas-webui"
+      - run:
           name: Check that AWS environment variables were supplied
           command: |
             : ${AWS_REGION:?"Must specify AWS region"}
             AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account | sed 's/^"\(.*\)"$/\1/g')"
             ECR_ACCOUNT_URL="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com"
             echo "export ECR_ACCOUNT_URL=\"$ECR_ACCOUNT_URL\"" >> "$BASH_ENV"
-      - run:
-          name: Validate Copyrights
-          command: make copyright
       - run:
           name: Login to ECR for Docker and Helm
           command: |
@@ -68,51 +153,11 @@ jobs:
           command: |
             echo "$GH_TOKEN" | docker login ghcr.io -u "$GH_USER" --password-stdin
       - run:
-          name: Checking if Docker image exists already
-          command: |
-            if [ "$(./build_utils.sh doesImageExist)" == "yes" ] ; then
-                echo "Docker Image exists already - no need to build image."
-                circleci-agent step halt
-            else
-              echo "Docker Image needs to be built."
-            fi
-      - run:
-          name: Build Image
-          command: make build-image
-      - run:
-          name: Build Integration Test Image
-          command: make build-integration-tests-docker
-      - run:
-          name: Setup Integration Test Environment
-          command: make setup-integration-tests
-      - run:
-          name: Run Integration Tests
-          command: make run-integration-tests-only
-      - run:
-          name: Teardown Integration Test Environment
-          when: always
-          command: make teardown-integration-tests
-      - run:
           name: Deploy Helm Charts
           command: ./build_utils.sh createAndUploadHelmPackage
       - run:
           name: Deploy Docker images
           command: ./build_utils.sh deployDockerImages
-      - run:
-          name: Save test results
-          command: |
-            mkdir -p ~/test-results/junit/
-            find ./selenium-tests/target/test-reports -type f -name "*.xml" -exec cp {} ~/test-results/junit/ \;
-          when: always
-      - store_test_results:
-          path: ~/test-results
-      - run:
-          name: Compress Test Results
-          when: always
-          command: tar -cvzf selenium-test-results.tar.gz -C selenium-tests/target/test-results .
-      - store_artifacts:
-          path: selenium-test-results.tar.gz
-          destination: selenium_test_results
 
   promote_build:
     # Terragunt executor is needed because the promote-version.sh needs to
@@ -161,7 +206,7 @@ jobs:
 
   create_release:
     machine:
-      image: ubuntu-2204:2023.10.1
+      image: ubuntu-2404:2025.09.1
     resource_class: medium
     environment:
       CREATE_RELEASE: << pipeline.parameters.create_release >>
@@ -227,15 +272,34 @@ workflows:
   continuous:
     jobs:
       # run test jobs in parallel
-      - build_and_deploy:
-          name: "Test and deploy"
+      - unit_tests:
+          name: "Unit Tests"
+          context:
+            - common-config
+      - coverage_tests:
+          name: "Coverage Tests"
+          requires:
+            - "Unit Tests"
+          context:
+            - common-config
+      - integration_tests:
+          name: "Integration Tests"
+          requires:
+            - "Unit Tests"
+          context:
+            - common-config
+      - deploy_image:
+          name: "Deploy Image"
+          requires:
+            - "Coverage Tests"
+            - "Integration Tests"
           context:
             - common-config
       - promote_build:
           requires:
-            - "Test and deploy"
+            - "Deploy Image"
           name: "Optionally Promote to DBaaS DEV"
       - create_release:
           requires:
-            - "Test and deploy"
+            - "Deploy Image"
           name: "Optionally Create Release"

@@ -20,13 +20,15 @@
     "react-i18next": "~15.5.1",
     "react-router-dom": "^7.6.0",
     "stacktrace-js": "^2.0.2",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.3",
     "web-vitals": "^5.0.0"
   },
   "scripts": {
     "start": "vite",
     "build": "vite build --base=/ui",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "eslintConfig": {
     "extends": [
@@ -48,7 +50,23 @@
   "homepage": "/",
   "devDependencies": {
     "@vitejs/plugin-react": "^4.4.1",
+    "@vitest/coverage-v8": "^4.0.16",
+    "nyc": "^17.1.0",
     "ts-node": "^10.9.2",
-    "vite-plugin-eslint": "^1.8.1"
+    "vite-plugin-eslint": "^1.8.1",
+    "vitest": "^4.0.16"
+  },
+  "nyc": {
+    "extension": [
+      ".ts",
+      ".tsx"
+    ],
+    "exclude": [
+      "**/*.d.ts"
+    ],
+    "reporter": [
+      "html"
+    ],
+    "all": true
   }
 }

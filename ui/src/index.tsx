@@ -1,8 +1,8 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import './resources/index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import '@fontsource/roboto/300.css';

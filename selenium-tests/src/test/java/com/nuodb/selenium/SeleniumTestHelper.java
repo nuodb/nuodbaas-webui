@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 package com.nuodb.selenium;
 
@@ -10,8 +10,10 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -432,5 +434,20 @@ public class SeleniumTestHelper {
 
     public String getSessionStorage(String key) {
         return (String) ((JavascriptExecutor)driver).executeScript("return window.sessionStorage.getItem(\"" + key + "\")");
+    }
+
+    public void saveCoverage() {
+        String coverage = (String) ((JavascriptExecutor)driver).executeScript("return window.__coverage__ ? JSON.stringify(window.__coverage__, null, 2) : \"\"");
+        coverage = coverage.replace("/app/build_js/", (new File(".")).getAbsolutePath() + "/target/build_js/");
+        if(coverage.length() != 0) {
+            Path path = Paths.get("target/.nyc_output", testInfo.getTestClass().get().getName() + "." + testInfo.getTestMethod().get().getName() + ".json");
+            path.getParent().toFile().mkdirs();
+            try {
+                Files.write(path, coverage.getBytes(StandardCharsets.UTF_8));
+            }
+            catch(IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

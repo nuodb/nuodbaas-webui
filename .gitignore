@@ -1,9 +1,11 @@
-# (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+# (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 ui/node_modules
 ui/package-lock.json
 ui/build
+ui/coverage
 selenium-tests/files/kubeconfig
+selenium-tests/node_modules
 bin/
 tmp/
 selenium-tests/target
@@ -13,3 +15,4 @@ build
 docker/development/default.conf
 nuodb-control-plane/
 nuodb.lic
+circleci_workspace
