@@ -1,5 +1,5 @@
 {
-    "copyright": "(C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.",
+    "copyright": "(C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.",
     "button": {
         "advanced": "Weitere Einstellungen",
         "create": "Erstellen",
@@ -23,7 +23,6 @@
         "settings": "Einstellungen",
         "automation": "Automatisierung",
         "logout": "Ausloggen",
-        "add": "Hinzufügen",
         "copy": "Kopieren",
         "copied": "Kopiert!",
         "dismiss": "Schließen",

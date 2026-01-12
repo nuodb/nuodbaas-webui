@@ -1,15 +1,21 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { setValue, getValue } from "./utils";
 import TextField from "../controls/TextField";
 import Button from "../controls/Button";
 import { FieldBase_validate, FieldProps, getRecursiveValue } from "./FieldBase"
 import { TempAny } from "../../utils/types";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableRow } from "../controls/Table";
 import InfoPopup from "../controls/InfoPopup";
 
-export default function FieldMap(props: FieldProps): ReactNode {
+interface FieldMapProps extends FieldProps {
+    fixedKeys?: boolean;
+}
+
+export default function FieldMap(props: FieldMapProps): ReactNode {
+    const [newKey, setNewKey] = useState("");
+
     switch (props.op) {
         case "edit": return edit();
         case "view": return view();
@@ -61,6 +67,24 @@ export default function FieldMap(props: FieldProps): ReactNode {
         return true;
     }
 
+    function addKey(newKey: string) {
+        if (!newKey) {
+            return;
+        }
+        if (!validateNewKey()) {
+            return;
+        }
+
+        let values = JSON.parse(JSON.stringify(props.values));
+        let value = getValue(values, props.prefix);
+        if (value === null) {
+            value = {};
+        }
+        value[newKey] = "";
+        setValue(values, props.prefix, value);
+        props.setValues(values);
+    }
+
     /**
      * show Field of type Object using the values and schema definition
      * @param prefix - contains field name (hierarchical fields are separated by period)
@@ -78,91 +102,67 @@ export default function FieldMap(props: FieldProps): ReactNode {
 
         let valueKeys = Object.keys(getValue(values, prefix) || {});
         let rows = [];
-        for (let i = 0; i < valueKeys.length; i++) {
+        for (let i = 0; i <= valueKeys.length; i++) {
+            if ((props.fixedKeys || props.readonly) && i === valueKeys.length) {
+                break;
+            }
             let prefixKeyLabel = prefix + "." + i + ".key";
             let prefixKeyValue = prefix + "." + i + ".value";
             let prefixKey = prefix + "." + valueKeys[i];
             let errorValue = (errors && (prefixKeyValue in errors) && errors[prefixKeyValue]) || "";
+            let errorKey = (errors && (prefixKeyLabel in errors) && errors[prefixKeyLabel]) || "";
             rows.push(<TableRow key={prefixKeyLabel}>
                 <TableCell>
                     <TextField
-                        disabled={true}
+                        disabled={i < valueKeys.length || props.readonly}
                         id={prefixKeyLabel}
                         label=""
-                        value={valueKeys[i]} />
+                        value={i === valueKeys.length ? newKey : valueKeys[i]}
+                        onChange={({ currentTarget }) => {
+                            setNewKey(currentTarget.value);
+                        }}
+                        onBlur={({ currentTarget }) => {
+                            addKey(currentTarget.value);
+                            setNewKey("");
+                        }}
+                        error={errorKey}
+                    />
                 </TableCell>
                 <TableCell>
                     <TextField
                         id={prefixKeyValue}
+                        disabled={props.readonly}
                         label=""
-                        value={getValue(values, prefix)[valueKeys[i]]}
+                        value={i === valueKeys.length ? "" : getValue(values, prefix)[valueKeys[i]]}
                         onChange={({ currentTarget: input }) => {
-                            let v = { ...values };
+                            if (i === valueKeys.length) {
+                                return;
+                            }
+                            let v = JSON.parse(JSON.stringify(values));
                             setValue(v, prefixKey, input.value);
-                            setValues(v)
+                            setValues(v);
                         }}
                         error={errorValue}
                         onBlur={event => FieldBase_validate({
                             ...props,
-                            prefix: prefixKeyValue,
+                            prefix: prefix + "." + valueKeys[i],
                             parameter: getValue(values, prefix)[valueKeys[i]]
                         }
                         )} />
                 </TableCell>
-                <TableCell><Button onClick={() => {
-                    let v = { ...values };
-                    setValue(v, prefixKey, null);
-                    setValues(v);
-                }}>{t("button.delete")}</Button></TableCell>
+                <TableCell>
+                    {i < valueKeys.length && !props.readonly && !props.fixedKeys &&
+                        <Button onClick={() => {
+                            let v = { ...values };
+                            setValue(v, prefixKey, null);
+                            setValues(v);
+                        }}>
+                            {t("button.delete")}
+                        </Button>
+                    }
+                </TableCell>
             </TableRow>);
         }
-
-        let prefixKeyLabel = prefix + ".key";
-        let prefixValueLabel = prefix + ".value"
-        let errorKey = (errors && (prefixKeyLabel in errors) && errors[prefixKeyLabel]) || "";
-        let errorValue = (errors && (prefixValueLabel in errors) && errors[prefixValueLabel]) || "";
-        !readonly && rows.push(<TableRow key={prefixKeyLabel}>
-            <TableCell>
-                <TextField
-                    id={prefixKeyLabel}
-                    label={t("field.map.hint.new.key")}
-                    defaultValue=""
-                    onBlur={() => validateNewKey()}
-                    error={errorKey} />
-            </TableCell>
-            <TableCell>
-                <TextField
-                    id={prefixValueLabel}
-                    label={t("field.map.hint.new.value")}
-                    defaultValue=""
-                    onBlur={() => validateNewValue()}
-                    error={errorValue} />
-            </TableCell>
-            <TableCell>
-                <Button data-testid={"add_button_" + prefix} onClick={() => {
-                    let keyElement = document.getElementById(prefixKeyLabel) as HTMLInputElement;
-                    let valueElement = document.getElementById(prefixValueLabel) as HTMLInputElement;
-                    if (keyElement.value === "" && valueElement.value === "") {
-                        return;
-                    }
-
-                    if (!validateNewKey() || !validateNewValue()) {
-                        return;
-                    }
-
-                    let value = getValue(values, prefix);
-                    if (value === null) {
-                        value = {};
-                    }
-                    value = { ...value };
-                    value[keyElement.value] = valueElement.value;
-                    keyElement.value = "";
-                    valueElement.value = "";
-                    setValue(values, prefix, value);
-                    setValues(values);
-                }}>{t("button.add")}</Button>
-            </TableCell>
-        </TableRow>);
 
         return (
             <Table key={prefix}>
