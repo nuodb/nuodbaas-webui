@@ -44,35 +44,11 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
         return true;
     }
 
-    function validateNewValue(): boolean {
-        const { prefix, parameter, updateErrors } = props;
-        let prefixKeyLabel = prefix + ".key";
-        let prefixValueLabel = prefix + ".value";
-        let keyElement = document.getElementById(prefixKeyLabel) as HTMLInputElement;
-        let valueElement = document.getElementById(prefixValueLabel) as HTMLInputElement;
-        if ((keyElement && keyElement.value !== "") || (valueElement && valueElement.value !== "")) {
-            return FieldBase_validate({
-                ...props,
-                prefix: prefixValueLabel,
-                parameter: parameter["additionalProperties"] || parameter,
-                values: {
-                    ...props.values,
-                    [prefixValueLabel]: valueElement.value
-                }
-            });
-        }
-
-        updateErrors(prefixKeyLabel, null);
-        updateErrors(prefixValueLabel, null);
-        return true;
-    }
-
     function addKey(newKey: string) {
         if (!newKey) {
             return;
         }
         if (!validateNewKey()) {
-            console.log("VALIDATE");
             return;
         }
 
@@ -108,7 +84,7 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
                 break;
             }
             let prefixKeyLabel = prefix + "." + i + ".key";
-            let prefixKeyValue = prefix + "." + i + ".value";
+            let prefixKeyValue = prefix + "." + valueKeys[i];
             let prefixKey = prefix + "." + valueKeys[i];
             let errorValue = (errors && (prefixKeyValue in errors) && errors[prefixKeyValue]) || "";
             let errorKey = (errors && (prefixKeyLabel in errors) && errors[prefixKeyLabel]) || "";
@@ -144,12 +120,13 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
                             setValues(v);
                         }}
                         error={errorValue}
-                        onBlur={event => FieldBase_validate({
-                            ...props,
-                            prefix: prefix + "." + valueKeys[i],
-                            parameter: getValue(values, prefix)[valueKeys[i]]
-                        }
-                        )} />
+                        onBlur={() => {
+                            return FieldBase_validate({
+                                ...props,
+                                prefix: prefix + "." + valueKeys[i],
+                                parameter: props.parameter["additionalProperties"] || props.parameter,
+                            });
+                        }} />
                 </TableCell>
                 <TableCell>
                     {i < valueKeys.length && !props.readonly && !props.fixedKeys &&
@@ -204,7 +181,6 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
             }
         }
         success = validateNewKey() && success;
-        success = validateNewValue() && success;
         return success;
     }
 

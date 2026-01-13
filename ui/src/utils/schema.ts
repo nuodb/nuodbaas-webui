@@ -565,12 +565,22 @@ function deleteEmptyFields(values: FieldValuesType) {
                         delete values[key];
                     }
                 }
-                else if(values[key].length === 0) {
-                    // Delete empty arrays
-                    delete values[key];
+                else {
+                    for(let i=0; i<values[key].length; i++) {
+                        deleteEmptyFields(values[key]);
+                    }
+                    if(values[key].length === 0) {
+                        // Delete empty arrays
+                        delete values[key];
+                    }
                 }
             }
         });
+    }
+    else if(typeof values === 'object' && Array.isArray(values)) {
+        for(let i=0; i<values.length; i++) {
+            deleteEmptyFields(values[i]);
+        }
     }
 }
 

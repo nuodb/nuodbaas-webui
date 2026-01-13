@@ -37,14 +37,14 @@ test('Check Formula', () => {
     for(let i=0; i<tests.length; i+=2) {
         let value = null;
         try {
-            value = evaluate(data, tests[i]);
-            expect(value).toBe(tests[i+1]);
+            value = evaluate(data, tests[i] as string);
+            expect(value).toBe(tests[i+1] as boolean);
         }
         catch(ex) {
             console.log("Formula:", tests[i]);
             console.log("  Expected:", tests[i+1]);
             console.log("  Was:", value);
-            console.log("  Parts:", splitFormulaIntoParts(tests[i]));
+            console.log("  Parts:", splitFormulaIntoParts(tests[i] as string));
             throw ex;
         }
     }

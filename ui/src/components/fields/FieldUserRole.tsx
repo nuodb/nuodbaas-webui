@@ -6,7 +6,7 @@ import { getDefaultValue } from "../../utils/schema";
 import { setValue, getValue } from "./utils";
 import FieldMessage from "./FieldMessage";
 import Accordion from "../controls/Accordion";
-import { Field } from "./Field";
+import { Field, Field_validate } from "./Field";
 import { Rest } from "../pages/parts/Rest";
 import FieldMap from "./FieldMap";
 
@@ -53,7 +53,7 @@ export default function FieldUserRole(props: FieldProps): ReactNode {
     switch (props.op) {
         case "edit": return edit();
         case "view": return view();
-        case "validate": return validate();
+        case "validate": return Field_validate(props);
     }
     /**
      * show Field of type Object using the values and schema definition
@@ -104,8 +104,18 @@ export default function FieldUserRole(props: FieldProps): ReactNode {
                 setValue(values, prefixParams, defaultParams);
             }
             if (defaultParams && Object.keys(defaultParams).length > 0) {
+                let allValues = JSON.parse(JSON.stringify(values));
+                for(let i=0; i<allValues.roles.length; i++) {
+                    let role = allValues.roles[i];
+                    const variables = parametersByTemplate ? (parametersByTemplate[role.name] || []): [];
+                    variables.forEach(variable => {
+                        role.params[variable] = role.params[variable] || "";
+                    });
+                }
+
                 ret.push(<div key="params" className="NuoFieldContainer"><FieldMap {
                     ...props}
+                    values={allValues}
                     prefix={prefixParams}
                     parameter={properties.params}
                     expand={false}
@@ -120,21 +130,6 @@ export default function FieldUserRole(props: FieldProps): ReactNode {
         return <Accordion data-testid={"section-" + prefix} className="FieldObjectSection" key={prefix} defaultExpanded={!!expand} summary={t("field.label." + prefix, prefix)}>
             {ret}
         </Accordion>
-    }
-
-    function validate(): boolean {
-        const { prefix, parameter, values, updateErrors } = props;
-        const properties = parameter.properties;
-        const value = values[prefix];
-        let success = true;
-        if (properties && value) {
-            // validate objects (hierarchical fields)
-            Object.keys(value).forEach(subKey => {
-                const fieldValidate = Field({ ...props, prefix: prefix + "." + subKey, parameter: properties[subKey], values, updateErrors });
-                success = !!fieldValidate && success;
-            });
-        }
-        return success;
     }
 
     function view(): ReactNode {
