@@ -27,7 +27,7 @@ export default function FieldUserRole(props: FieldProps): ReactNode {
     const [parametersByTemplate, setParametersByTemplate] = useState<{[key:string]:string[]}|undefined>(undefined);
     useEffect(()=>{
         Rest.get("/cluster/roletemplates?listAccessible=true&expand=true&limit=1000").then((roleTemplates:any)=>{
-            if(roleTemplates.items) {
+            if (roleTemplates.items && roleTemplates.items.length > 0) {
                 let parameters:{[key:string]:string[]} = {};
                 roleTemplates.items.forEach((item:any)=>{
                     if(item.name && item.spec) {
@@ -103,14 +103,16 @@ export default function FieldUserRole(props: FieldProps): ReactNode {
             if (defaultParams !== null) {
                 setValue(values, prefixParams, defaultParams);
             }
-            ret.push(<div key="params" className="NuoFieldContainer"><FieldMap {
-                ...props}
-                prefix={prefixParams}
-                parameter={properties.params}
-                expand={false}
-                fixedKeys={parametersByTemplate !== undefined}
-                label={t("field.label." + prefixParams, prefixParams)}
-            /></div>);
+            if (defaultParams && Object.keys(defaultParams).length > 0) {
+                ret.push(<div key="params" className="NuoFieldContainer"><FieldMap {
+                    ...props}
+                    prefix={prefixParams}
+                    parameter={properties.params}
+                    expand={false}
+                    fixedKeys={parametersByTemplate !== undefined}
+                    label={t("field.label." + prefixParams, prefixParams)}
+                /></div>);
+            }
         }
         if (hideTitle) {
             return ret;

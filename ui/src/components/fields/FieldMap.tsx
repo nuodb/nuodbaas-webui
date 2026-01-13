@@ -24,18 +24,18 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
 
     function validateNewKey(): boolean {
         const { prefix, updateErrors } = props;
-        let prefixKeyLabel = prefix + ".key";
-        let prefixValueLabel = prefix + ".value";
+        let values = JSON.parse(JSON.stringify(props.values));
+        let valueKeys = Object.keys(getValue(props.values, prefix) || {});
+        let prefixKeyLabel = prefix + "." + valueKeys.length + ".key";
+        let prefixValueLabel = prefix + "." + valueKeys.length + ".value";
+        setValue(values, prefixKeyLabel, newKey);
         let keyElement = document.getElementById(prefixKeyLabel) as HTMLInputElement;
         let valueElement = document.getElementById(prefixValueLabel) as HTMLInputElement;
         if ((keyElement && keyElement.value !== "") || (valueElement && valueElement.value !== "")) {
             return FieldBase_validate({
                 ...props,
                 prefix: prefixKeyLabel,
-                values: {
-                    ...props.values,
-                    [prefixKeyLabel]: keyElement.value
-                }
+                values
             });
         }
 
@@ -72,6 +72,7 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
             return;
         }
         if (!validateNewKey()) {
+            console.log("VALIDATE");
             return;
         }
 
