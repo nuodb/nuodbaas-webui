@@ -1,4 +1,4 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import FieldString from "./FieldString";
 import FieldHidden from "./FieldHidden";
@@ -14,6 +14,8 @@ import { FieldBase_display, FieldBase_validate, FieldProps} from "./FieldBase";
 import { ReactNode } from "react";
 import FieldSelect from "./FieldSelect";
 import FieldCrontab from "./FieldCrontab";
+import { matchesPath } from "../../utils/schema";
+import FieldUserRole from "./FieldUserRole";
 
 /** Factory function to create components based on the field type */
 export function Field(props: FieldProps) : ReactNode {
@@ -81,7 +83,12 @@ export function Field(props: FieldProps) : ReactNode {
                 props.expand = props.parameter.expand;
             }
 
-            return <FieldObject {...props}/>;
+            if (matchesPath(props.path, "/users/{organization}/{name}") && props.prefix.startsWith("roles.")) {
+                return <FieldUserRole {...props} />;
+            }
+            else {
+                return <FieldObject {...props} />;
+            }
         }
         else if (props.parameter["additionalProperties"]) {
             return <FieldMap {...props} />;

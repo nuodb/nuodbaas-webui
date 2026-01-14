@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 package com.nuodb.selenium.basic;
 
@@ -59,9 +59,8 @@ public class DatabaseTest extends TestRoutines {
 
         // edit database and save
         waitElement("section-title-advanced").click();
-        waitInputElementByName("labels.key").sendKeys(projectName);
-        waitInputElementByName("labels.value").sendKeys(databaseName);
-        waitElement("add_button_labels").click();
+        waitInputElementByName("labels.0.key").sendKeys(projectName);
+        waitInputElementByName("labels.0.value").sendKeys(databaseName);
         waitElement("create_resource__save_button").click();
         waitRestComplete();
 
