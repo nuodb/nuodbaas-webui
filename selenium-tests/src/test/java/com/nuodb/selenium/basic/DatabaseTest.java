@@ -197,7 +197,8 @@ public class DatabaseTest extends TestRoutines {
         waitElement("popupmenu-confirm.stop.database.title").click();
         waitElement("dialog_button_no").click();
 
-        waitElement("resource-popup-menu").click();
-        waitElement("popupmenu-button.sql.editor");
+        // TODO(agr22): currently the SQL service is not running in the integration tests. Fixing this with DBAAS-815
+        // waitElement("resource-popup-menu").click();
+        // waitElement("popupmenu-button.sql.editor");
    }
 }

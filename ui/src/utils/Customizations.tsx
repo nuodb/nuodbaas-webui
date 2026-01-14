@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import axios from "axios";
 import { TempAny } from "./types";
@@ -246,6 +246,8 @@ function handleFormula(data: TempAny, parts: FormulaPart[]): FormulaPart {
     }
 }
 
+let hasSqlEditorService = false;
+
 /**
  * Evaluate the formula based on the provided data set
  * @param data
@@ -253,6 +255,10 @@ function handleFormula(data: TempAny, parts: FormulaPart[]): FormulaPart {
  * @returns
  */
 export function evaluate(data: TempAny, formula: string): TempAny {
+    if (formula === "hasSqlEditorService()") {
+        return hasSqlEditorService;
+    }
+
     let parts = splitFormulaIntoParts(formula);
     if (parts === null) {
         console.log("invalid formula: " + formula);
@@ -309,6 +315,13 @@ export default function Customizations(props: CustomizationsProps): JSX.Element 
         const userJson = JSON.parse(localStorage.getItem(LOCAL_USER_SETTINGS) || "{}");
         const themeType = userJson?.theme?.type || baseJson?.theme?.type || "material";
         const themeJson = (await axios.get("/ui/theme/" + themeType + ".json")).data || {};
+
+        try {
+            hasSqlEditorService = ((await axios.get("/api/sql/")).data || "").includes("NuoDB SQL service");
+        }
+        catch (ex) {
+            hasSqlEditorService = false;
+        }
 
         // merge configuration files together
         let merged = baseJson;
