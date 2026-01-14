@@ -29,9 +29,7 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
         let prefixKeyLabel = prefix + "." + valueKeys.length + ".key";
         let prefixValueLabel = prefix + "." + valueKeys.length + ".value";
         setValue(values, prefixKeyLabel, newKey);
-        let keyElement = document.getElementById(prefixKeyLabel) as HTMLInputElement;
-        let valueElement = document.getElementById(prefixValueLabel) as HTMLInputElement;
-        if ((keyElement && keyElement.value !== "") || (valueElement && valueElement.value !== "")) {
+        if (newKey !== "") {
             return FieldBase_validate({
                 ...props,
                 prefix: prefixKeyLabel,
@@ -84,9 +82,10 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
                 break;
             }
             let prefixKeyLabel = prefix + "." + i + ".key";
-            let prefixKeyValue = prefix + "." + valueKeys[i];
+            let prefixKeyValue = prefix + "." + i + ".value";
+            let prefixErrorValue = prefix + "." + valueKeys[i];
             let prefixKey = prefix + "." + valueKeys[i];
-            let errorValue = (errors && (prefixKeyValue in errors) && errors[prefixKeyValue]) || "";
+            let errorValue = (errors && (prefixErrorValue in errors) && errors[prefixErrorValue]) || "";
             let errorKey = (errors && (prefixKeyLabel in errors) && errors[prefixKeyLabel]) || "";
             rows.push(<TableRow key={prefixKeyLabel}>
                 <TableCell>
