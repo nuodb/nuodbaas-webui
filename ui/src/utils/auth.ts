@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 import axios from "axios";
 import { TempAny } from "./types";
 
@@ -43,7 +43,7 @@ export default class Auth {
 
     static async login(username:string, password:string) {
         return new Promise((resolve) => {
-            axios.post(Auth.getNuodbCpRestUrl("login"), { "expiresIn": "1m" }, { auth: { username, password }, headers: { "Content-Type": "application/json" } })
+            axios.post(Auth.getNuodbCpRestUrl("login"), { "expiresIn": "24h" }, { auth: { username, password }, headers: { "Content-Type": "application/json" } })
                 .then((response) => {
                     if(response.data && response.data.token && response.data.expiresAtTime) {
                         localStorage.setItem("credentials", JSON.stringify({
