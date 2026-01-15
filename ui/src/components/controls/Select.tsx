@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { JSX, ReactNode } from 'react';
 import { FormControl, InputAdornment, InputLabel, MenuItem, Select as MuiSelect } from '@mui/material'
