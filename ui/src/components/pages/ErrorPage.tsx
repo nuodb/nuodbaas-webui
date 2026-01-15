@@ -11,11 +11,13 @@ function ErrorPage(props: PageProps) {
     let [searchParams] = useSearchParams();
     return (
         <PageLayout {...props}>
-            <h1>Error occurred</h1>
-            <div>{searchParams.get("msg") || "Unknown Error occurred"}</div>
-            <Button onClick={() => {
-                navigate("/ui");
-            }}>{props.t("button.dismiss")}</Button>
+            <div className="NuoTableNoData">
+                <h1>Error occurred</h1>
+                <div>{searchParams.get("msg") || "Unknown Error occurred"}</div>
+                <Button onClick={() => {
+                    navigate("/ui");
+                }}>{props.t("button.dismiss")}</Button>
+            </div>
         </PageLayout>
     );
 }

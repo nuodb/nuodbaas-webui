@@ -144,8 +144,6 @@
             "weekday": "Wochentag"
         },
         "enum": {
-            "theme.material": "Material UI",
-            "theme.plain": "einfach",
             "retention.settings": {
                 "dayOfWeek": {
                     "Sunday": "Sonntag",
