@@ -56,7 +56,7 @@ export type CustomView = {
 export type CustomViews = { [key: string]: CustomView }
 
 export type CustomType = {
-    theme?: { type?: string, css?: string },
+    theme?: { css?: string },
     forms?: CustomForms,
     views?: CustomViews,
 };
@@ -72,11 +72,6 @@ export function getCustomizations(): CustomType {
 
     return mergedJson;
 };
-
-export function isMaterial() {
-    const theme = getCustomizations().theme || {};
-    return theme.type === undefined || theme.type === "material";
-}
 
 /**
  * Returns customization info for the specified view
@@ -331,7 +326,7 @@ export default function Customizations(props: CustomizationsProps): JSX.Element 
 
         // loading theme + user CSS files
         const themeCss = document.getElementById("theme_stylesheet");
-        themeCss?.setAttribute("href", "/ui/theme/" + (mergedJson?.theme?.type || "material") + ".css");
+        themeCss?.setAttribute("href", "/ui/theme/material.css");
 
         const userCss = document.getElementById("user_stylesheet");
         if (userCss && mergedJson?.theme?.css) {

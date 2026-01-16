@@ -1,7 +1,6 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { JSX } from 'react';
-import { isMaterial } from '../../utils/Customizations';
 import { Pagination as MuiPagination, Stack as MuiStack } from '@mui/material';
 
 export type PaginationProps = {
@@ -17,35 +16,11 @@ export default function Pagination(props: PaginationProps): JSX.Element | null {
         return null;
     }
 
-    if (isMaterial()) {
-        return <MuiStack spacing={2} style={{ alignItems: "center", marginTop: "15px", position: "sticky", left: "0" }}>
-            <MuiPagination count={count} page={page} onChange={(event, page) => {
-                props.setPage(page);
-            }} />
-        </MuiStack>
-    }
-    else {
-        return <div className="NuoPagination">
-            <div className="NuoPaginationItem NuoPaginationItemFirst" onClick={() => setPage(1)}>&lt;</div>
-            {Array(count).fill(1).map((_, index) => {
-                let className = "NuoPaginationItem";
-                if (page === index + 1) {
-                    className += " NuoPaginationItemSelected";
-                }
-                if (page === 1) {
-                    className += " NuoPaginationItemFirst";
-                }
-                if (page === count) {
-                    className += " NuoPaginationItemLast";
-                }
-
-                return <div key={index} className={className} onClick={() => {
-                    setPage(index + 1)
-                }}>{index + 1}</div>
-            })}
-            <div className="NuoPaginationItem NuoPaginationItemLast" onClick={() => setPage(count)}>&gt;</div>
-        </div>;
-    }
+    return <MuiStack spacing={2} style={{ alignItems: "center", marginTop: "15px", position: "sticky", left: "0" }}>
+        <MuiPagination count={count} page={page} onChange={(event, page) => {
+            props.setPage(page);
+        }} />
+    </MuiStack>
 }
 
 export function pageFilter<type>(data: type[], page: number, pageSize: number): type[] {

@@ -1,4 +1,4 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { ReactNode } from "react"
 import CircularProgress from '@mui/material/CircularProgress';
@@ -108,9 +108,11 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
                 .then(response => {
                     Rest.log("get", url, true);
                     resolve(response.data);
-                }).catch(reason => {
-                    Rest.log("get", url, false);
-                    reject(reason);
+                }).catch(async reason => {
+                    if (!await Rest.process401(reason)) {
+                        Rest.log("get", url, false);
+                        reject(reason);
+                    }
                 }).finally(() => {
                     Rest.decrementPending();
                 })
@@ -131,9 +133,11 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
                 .then(async response => {
                     Rest.log("get", url, true);
                     resolve(response.data);
-                }).catch(reason => {
-                    Rest.log("get", url, false);
-                    reject(reason);
+                }).catch(async reason => {
+                    if (!await Rest.process401(reason)) {
+                        Rest.log("get", url, false);
+                        reject(reason);
+                    }
                 }).finally(() => {
                     Rest.decrementPending();
                 })
@@ -148,9 +152,11 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
                 .then(response => {
                     Rest.log("put", url, true, data);
                     resolve(response.data);
-                }).catch(error => {
-                    Rest.log("put", url, false, data);
-                    reject(error);
+                }).catch(async error => {
+                    if (!await Rest.process401(error)) {
+                        Rest.log("put", url, false, data);
+                        reject(error);
+                    }
                 }).finally(() => {
                     Rest.decrementPending();
                 })
@@ -165,9 +171,11 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
                 .then(response => {
                     Rest.log("post", url, true, data);
                     resolve(response.data);
-                }).catch(error => {
-                    Rest.log("post", url, false, data);
-                    reject(error);
+                }).catch(async error => {
+                    if (!await Rest.process401(error)) {
+                        Rest.log("post", url, false, data);
+                        reject(error);
+                    }
                 }).finally(() => {
                     Rest.decrementPending();
                 })
@@ -182,9 +190,11 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
                 .then(response => {
                     Rest.log("delete", url, true);
                     resolve(response.data);
-                }).catch(reason => {
-                    Rest.log("delete", url, false);
-                    reject(reason);
+                }).catch(async reason => {
+                    if (!await Rest.process401(reason)) {
+                        Rest.log("delete", url, false);
+                        reject(reason);
+                    }
                 }).finally(() => {
                     Rest.decrementPending();
                 })
@@ -199,12 +209,32 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
                 .then(response => {
                     Rest.log("patch", url, true, data);
                     resolve(response.data);
-                }).catch(error => {
-                    Rest.log("patch", url, false, data);
-                    reject(error);
+                }).catch(async error => {
+                    if (!await Rest.process401(error)) {
+                        Rest.log("patch", url, false, data);
+                        reject(error);
+                    }
                 }).finally(() => {
                     Rest.decrementPending();
                 })
         });
+    }
+
+    // check if the error is caused by a 401 and force a re-login.
+    // note that the user might not have access to some resources (resulting in a 401), so we
+    // check if the user has at least access to the "/api/openapi" spec.
+    static async process401(error: any): Promise<boolean> {
+        if (error.response.status === 401) {
+            if (Auth.getCredentials()?.username) {
+                axios.get(Auth.getNuodbCpRestUrl("/openapi"), { headers: Auth.getHeaders() }).catch(error2 => {
+                    if (error2.response.status === 401) {
+                        Auth.logout();
+                        window.location.href = "/ui/login?redirect=" + encodeURIComponent(window.location.href);
+                        return true;
+                    }
+                });
+            }
+        }
+        return false;
     }
 }

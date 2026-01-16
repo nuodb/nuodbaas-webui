@@ -1,7 +1,6 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { JSX, ReactNode } from 'react';
-import { isMaterial } from '../../utils/Customizations';
 import { FormControl, InputAdornment, InputLabel, MenuItem, Select as MuiSelect } from '@mui/material'
 import InfoPopup from './InfoPopup';
 import { withTranslation } from 'react-i18next';
@@ -28,56 +27,39 @@ export type SelectOptionProps = {
 
 function Select(props: SelectProps): JSX.Element {
     const { id, label, description, required, children, t } = props;
-    if (isMaterial()) {
-        return <FormControl key={id} fullWidth>
-            <InputLabel id={"label_" + id}>{label}</InputLabel>
-            <MuiSelect
-                labelId={"label_" + id}
-                id={id}
-                name={id}
-                label={label}
-                value={props.value || ""}
-                required={props.required}
-                autoFocus={props.autoFocus}
-                disabled={props.disabled}
-                onChange={props.onChange}
-                onBlur={props.onBlur}
-                endAdornment={(description) &&
-                    <InputAdornment position="end">
-                        <InfoPopup description={description} />
-                    </InputAdornment>
-                }
-                sx={{
-                    "& .MuiSelect-icon": {
-                        right: description ? "40px !important;" : "0"
-                    },
-                }}
-            >
-                {children}
-            </MuiSelect>
-            {required && <span>{t("field.required")}</span>}
-        </FormControl >;
-    }
-    else {
-        return <div className="NuoFieldBase NuoFieldSelect" key={id}>
-            <label id={"label_" + id}>{label}</label>
-            <select name={id} {...props} value={props.value || ""}>
-                {children}
-            </select>
-            {required && <span>{t("field.required")}</span>}
-            <InfoPopup description={description} />
-        </div>;
-    }
+    return <FormControl key={id} fullWidth>
+        <InputLabel id={"label_" + id}>{label}</InputLabel>
+        <MuiSelect
+            labelId={"label_" + id}
+            id={id}
+            name={id}
+            label={label}
+            value={props.value || ""}
+            required={props.required}
+            autoFocus={props.autoFocus}
+            disabled={props.disabled}
+            onChange={props.onChange}
+            onBlur={props.onBlur}
+            endAdornment={(description) &&
+                <InputAdornment position="end">
+                    <InfoPopup description={description} />
+                </InputAdornment>
+            }
+            sx={{
+                "& .MuiSelect-icon": {
+                    right: description ? "40px !important;" : "0"
+                },
+            }}
+        >
+            {children}
+        </MuiSelect>
+        {required && <span>{t("field.required")}</span>}
+    </FormControl >;
 }
 
 export function SelectOption(props: SelectOptionProps): JSX.Element {
     const { value, children } = props;
-    if (isMaterial()) {
-        return <MenuItem key={value} {...props}>{children}</MenuItem>;
-    }
-    else {
-        return <option key={value} {...props}>{children}</option >;
-    }
+    return <MenuItem key={value} {...props}>{children}</MenuItem>;
 }
 
 export default withTranslation()(Select);

@@ -1,7 +1,6 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { JSX, useState } from 'react';
-import { isMaterial } from '../../utils/Customizations';
 import { IconButton, InputAdornment, TextField as MuiTextField } from '@mui/material';
 import InfoPopup from './InfoPopup';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -35,58 +34,42 @@ export default function TextField(props: TextFieldProps): JSX.Element {
     delete fieldProps.icon;
     delete fieldProps.leftIcon;
     delete fieldProps.iconOnClick;
-    if (isMaterial()) {
-        return <MuiTextField
-            fullWidth={true}
-            {...fieldProps}
-            name={props.id}
-            multiline={fieldProps.disabled}
-            aria-details={props.description}
-            error={!!props.error}
-            helperText={props.error}
-            size={props.size}
-            type={props.type === "password" && passwordVisible ? "text" : props.type}
-            slotProps={((props.icon || props.leftIcon || fieldProps.description || props.type === "password") && {
-                input: {
-                    endAdornment: (props.icon || props.description || props.type === "password") &&
-                        <InputAdornment position="end">
-                            {props.type === "password" && <IconButton
-                                aria-label=""
-                                onClick={() => {
-                                    setPasswordVisible(!passwordVisible);
-                                }}
-                                tabIndex={-1}>
-                                {passwordVisible ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                            </IconButton>}
-                            {props.icon && <IconButton
-                                aria-label=""
-                                onClick={props.iconOnClick}
-                            >
-                                {props.icon}
-                            </IconButton>}
-                            <InfoPopup description={props.description} />
-                        </InputAdornment>,
-                    startAdornment: props.leftIcon &&
-                        <InputAdornment position="start">
-                            {props.leftIcon}
-                        </InputAdornment>,
-                }
-            }) || undefined
+    return <MuiTextField
+        fullWidth={true}
+        {...fieldProps}
+        name={props.id}
+        multiline={fieldProps.disabled}
+        aria-details={props.description}
+        error={!!props.error}
+        helperText={props.error}
+        size={props.size}
+        type={props.type === "password" && passwordVisible ? "text" : props.type}
+        slotProps={((props.icon || props.leftIcon || fieldProps.description || props.type === "password") && {
+            input: {
+                endAdornment: (props.icon || props.description || props.type === "password") &&
+                    <InputAdornment position="end">
+                        {props.type === "password" && <IconButton
+                            aria-label=""
+                            onClick={() => {
+                                setPasswordVisible(!passwordVisible);
+                            }}
+                            tabIndex={-1}>
+                            {passwordVisible ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                        </IconButton>}
+                        {props.icon && <IconButton
+                            aria-label=""
+                            onClick={props.iconOnClick}
+                        >
+                            {props.icon}
+                        </IconButton>}
+                        <InfoPopup description={props.description} />
+                    </InputAdornment>,
+                startAdornment: props.leftIcon &&
+                    <InputAdornment position="start">
+                        {props.leftIcon}
+                    </InputAdornment>,
             }
-        />;
-    }
-    else {
-        return <div>
-            <div className="NuoFieldBase NuoFieldString" key={props.id} aria-details={props.description}>
-                <label>{props.label}</label>
-                <input name={props.id} {...fieldProps} size={undefined} />
-                {props.iconOnClick && <button onClick={(event) => {
-                    event.preventDefault();
-                    props.iconOnClick && props.iconOnClick(event);
-                }}>{props.icon}</button>}
-                <InfoPopup description={props.description} />
-            </div>
-            {props.error !== "" && <div className="NuoFieldError">{props.error}</div>}
-        </div>
-    }
+        }) || undefined
+        }
+    />;
 }

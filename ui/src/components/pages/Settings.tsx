@@ -1,10 +1,9 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { useState, useEffect, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { LOCAL_USER_SETTINGS } from "../../utils/Customizations";
 import axios from "axios";
-import FieldSelect from "../fields/FieldSelect";
 import Button from "../controls/Button";
 import { withTranslation } from "react-i18next";
 import { PageProps } from "../../utils/types";
@@ -14,7 +13,6 @@ function Settings(props: PageProps) {
     const { t } = props;
     const navigate = useNavigate();
     let [settings, setSettings] = useState("");
-    let [advanced, setAdvanced] = useState(false);
     let [error, setError] = useState("");
 
     useEffect(() => {
@@ -29,41 +27,9 @@ function Settings(props: PageProps) {
         })
     }, []);
 
-    function renderBasic(): ReactNode {
-        const jsonSettings = JSON.parse(settings || "{}");
-        const theme = (jsonSettings.theme && jsonSettings.theme.type) || "material";
-        return FieldSelect({
-            op: "edit",
-            path: "",
-            errors: {},
-            required: false,
-            autoFocus: false,
-            expand: false,
-            hideTitle: false,
-            readonly: false,
-            updateErrors: () => { },
-            values: { theme },
-            setValues: (values) => {
-                const jsonSettings = JSON.parse(settings || "{}");
-                if (!jsonSettings.theme) {
-                    jsonSettings.theme = {};
-                }
-                jsonSettings.theme.type = values.theme;
-                setSettings(JSON.stringify(jsonSettings, null, 2));
-            },
-            prefix: "theme",
-            label: t("form.settings.label.theme"),
-            parameter: {
-                type: "select",
-                enum: ["material", "plain"]
-            },
-            t
-
-        });
-    }
-
-    function renderAdvanced(): ReactNode {
-        return <div>
+    return (<PageLayout {...props}>
+        <div className="NuoTableNoData">
+            <h1>{t("form.settings.label.title")}</h1>
             <textarea
                 value={settings}
                 rows={40} cols={80}
@@ -72,37 +38,26 @@ function Settings(props: PageProps) {
                 }}>
 
             </textarea>
-        </div>
-    }
-
-    return (<PageLayout {...props}>
-        <div className="NuoContainerSM">
-            <h1>{t("form.settings.label.title")}</h1>
-            {advanced ? renderAdvanced() : renderBasic()}
             <div style={{ color: "red" }}>{error}</div>
-            <Button onClick={() => {
-                if (settings === "") {
-                    localStorage.removeItem(LOCAL_USER_SETTINGS);
-                    window.location.href = "/ui";
-                }
-                try {
-                    let jsonSettings = JSON.parse(settings);
-                    localStorage.setItem(LOCAL_USER_SETTINGS, JSON.stringify(jsonSettings, null, 2));
-                    window.location.href = "/ui";
-                }
-                catch (ex) {
-                    setError("Invalid JSON input: " + ex);
-                }
-            }}>{t("button.save")}</Button>&nbsp;
-            <Button onClick={() => {
-                navigate("/ui");
-            }}>{t("button.cancel")}</Button>
-            &nbsp;
-            {!advanced &&
+            <div className="NuoRow">
                 <Button onClick={() => {
-                    setAdvanced(true);
-                }}>{t("button.advanced")}</Button>
-            }
+                    if (settings === "") {
+                        localStorage.removeItem(LOCAL_USER_SETTINGS);
+                        window.location.href = "/ui";
+                    }
+                    try {
+                        let jsonSettings = JSON.parse(settings);
+                        localStorage.setItem(LOCAL_USER_SETTINGS, JSON.stringify(jsonSettings, null, 2));
+                        window.location.href = "/ui";
+                    }
+                    catch (ex) {
+                        setError("Invalid JSON input: " + ex);
+                    }
+                }}>{t("button.save")}</Button>&nbsp;
+                <Button onClick={() => {
+                    navigate("/ui");
+                }}>{t("button.cancel")}</Button>
+            </div>
         </div ></PageLayout>
     );
 }
