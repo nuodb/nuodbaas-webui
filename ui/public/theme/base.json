@@ -1,5 +1,5 @@
 {
-    "copyright": "(C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.",
+    "copyright": "(C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.",
     "views": {
         "/databases?/{organization}?/{project}?/{name}": {
             "columns": [
@@ -67,6 +67,7 @@
                 },
                 {
                     "label": "button.sql.editor",
+                    "visible": "hasSqlEditorService()",
                     "icon": "Storage",
                     "link": "/ui/page/sql/{organization}/{project}/{name}"
                 },

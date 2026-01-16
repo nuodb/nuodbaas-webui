@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { useEffect, useState } from 'react';
 import './utils/i18n';
@@ -18,7 +18,7 @@ import GlobalErrorBoundary from "./components/GlobalErrorBoundary";
 import Auth from "./utils/auth";
 import Settings from './components/pages/Settings';
 import Automation from './components/pages/Automation';
-import Customizations from './utils/Customizations';
+import Customizations, { evaluate } from './utils/Customizations';
 import { NUODBAAS_WEBUI_ISRECORDING, Rest } from './components/pages/parts/Rest';
 import { getOrgFromPath } from './utils/schema';
 import Toast from './components/controls/Toast';
@@ -122,7 +122,7 @@ function App({ t }: { t: any }) {
                   <Route path="/ui/resource/view/*" element={<ViewResource {...pageProps} />} />
                   <Route path="/ui/settings" element={<Settings {...pageProps} />} />
                   <Route path="/ui/automation" element={<Automation {...pageProps} />} />
-                  <Route path="/ui/page/sql/:organization/:project/:database" element={<SqlPage {...pageProps} />} />
+                  {evaluate({}, "hasSqlEditorService()") && <Route path="/ui/page/sql/:organization/:project/:database" element={<SqlPage {...pageProps} />} />}
                   <Route path="/ui" element={<DefaultPage />} />
                   <Route path="/webui" element={<Navigate to="/ui" />} />
                   <Route path="/webui/*" element={<Redirect baseUrl="/ui" />} />
