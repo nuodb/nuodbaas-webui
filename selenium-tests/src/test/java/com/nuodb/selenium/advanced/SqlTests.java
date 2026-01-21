@@ -25,10 +25,10 @@ public class SqlTests extends TestRoutines {
 
     // to avoid re-creating the project/database on each test run during integration test development,
     // create a project "manualproject" and a database "manualdb1" manually and flip comments in the 4 lines below.
-    private String projectName = "manualproject";
-    private String databaseName = "manualdb1";
-    // private String projectName = null;
-    // private String databaseName = null;
+    // private String projectName = "manualproject";
+    // private String databaseName = "manualdb1";
+    private String projectName = null;
+    private String databaseName = null;
 
     public static void run(String ...args) {
         try {
