@@ -15,6 +15,8 @@ NUODB_CP_VERSION ?= 2.10.0
 NUODB_SQL_VERSION ?= 1.1.0
 PROMETHEUS_VERSION ?= 79.6.1
 
+ECR_ACCOUNT_URL ?= "253548315642.dkr.ecr.us-east-1.amazonaws.com"
+
 NUODB_CP_REPO ?= ../nuodb-control-plane
 
 KIND = $(shell pwd)/bin/kind
@@ -109,8 +111,6 @@ aws-login:
 		echo "Must specify AWS_REGION, AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables"; \
 		exit 1; \
 	fi
-	@AWS_ACCOUNT_ID="$(shell aws sts get-caller-identity --query Account | sed 's/^"\(.*\)"$$/\1/g')" \
-	ECR_ACCOUNT_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com" \
 	aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${ECR_ACCOUNT_URL}"
 
 .PHONY: pull-cp-from-ecr
@@ -220,7 +220,7 @@ deploy-sql-from-ecr: aws-login
 	docker pull ${ECR_ACCOUNT_URL}/nuodbaas-sql-docker:${NUODB_SQL_VERSION}
 	docker tag ${ECR_ACCOUNT_URL}/nuodbaas-sql-docker:${NUODB_SQL_VERSION} nuodbaas-sql:latest
 	$(KIND) load docker-image nuodbaas-sql:latest
-	$(HELM) upgrade --install --wait -n default nuodbaas-sql oci://253548315642.dkr.ecr.us-east-1.amazonaws.com/nuodbaas-sql:${NUODB_SQL_VERSION} --set image.repository=nuodbaas-sql --set image.tag=latest --set nuodbaasSql.ingress.enabled=true --set nuodbaasSql.cpUrl=http://nuodb-cp-rest:8080
+	$(HELM) upgrade --install --wait -n default nuodbaas-sql oci://${ECR_ACCOUNT_URL}/nuodbaas-sql --version ${NUODB_SQL_VERSION} --set image.repository=nuodbaas-sql --set image.tag=latest --set nuodbaasSql.ingress.enabled=true --set nuodbaasSql.cpUrl=http://nuodb-cp-rest:8080
 
 .PHONY: deploy-sql
 deploy-sql: build-sql $(HELM) $(KIND)
