@@ -12,6 +12,7 @@ KIND_VERSION ?= 0.27.0
 KUBECTL_VERSION ?= 1.28.3
 HELM_VERSION ?= 3.16.2
 NUODB_CP_VERSION ?= 2.10.0
+NUODB_SQL_VERSION ?= 1.1.0
 PROMETHEUS_VERSION ?= 79.6.1
 
 NUODB_CP_REPO ?= ../nuodb-control-plane
@@ -219,6 +220,11 @@ deploy-sql: build-sql $(HELM) $(KIND)
 	@if [ -d ../nuodbaas-sql/charts/nuodbaas-sql ] ; then \
 		$(KIND) load docker-image nuodbaas-sql:latest; \
 		$(HELM) upgrade --install --wait -n default nuodbaas-sql ../nuodbaas-sql/charts/nuodbaas-sql --set image.repository=nuodbaas-sql --set image.tag=latest --set nuodbaasSql.ingress.enabled=true --set nuodbaasSql.cpUrl=http://nuodb-cp-rest:8080; \
+	else \
+		docker pull ${ECR_ACCOUNT_URL}/nuodbaas-sql-docker:${NUODB_SQL_VERSION} \
+		&& docker tag ${ECR_ACCOUNT_URL}/nuodbaas-sql-docker:${NUODB_SQL_VERSION} nuodbaas-sql:latest \
+		&& $(KIND) load docker-image nuodbaas-sql:latest \
+		&& $(HELM) upgrade --install --wait -n default nuodbaas-sql oci://253548315642.dkr.ecr.us-east-1.amazonaws.com/nuodbaas-sql:${NUODB_SQL_VERSION} --set image.repository=nuodbaas-sql --set image.tag=latest --set nuodbaasSql.ingress.enabled=true --set nuodbaasSql.cpUrl=http://nuodb-cp-rest:8080; \
 	fi
 
 .PHONY: undeploy-sql

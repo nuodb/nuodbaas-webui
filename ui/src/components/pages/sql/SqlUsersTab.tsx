@@ -156,7 +156,7 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                     });
                     setEditDialogProps({ ...editDialogProps, type: "add_dbaas", allDbaasUsers: sortedUsers });
                 }}>{t("form.sqleditor.button.addDbaasUser")}</Button>
-                <Button data-testid="dialog_button_dbaas" onClick={async () => {
+                <Button data-testid="dialog_button_cancel" onClick={async () => {
                     setEditDialogProps(undefined);
                 }}>{t("button.cancel")}</Button>
             </DialogActions>

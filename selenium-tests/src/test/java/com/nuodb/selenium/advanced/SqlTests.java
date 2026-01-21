@@ -2,7 +2,7 @@
 
 package com.nuodb.selenium.advanced;
 
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebElement;
 
@@ -23,6 +23,13 @@ public class SqlTests extends TestRoutines {
     public static final String DB_PASSWORD = "passw0rd";
     public static final String DB_SCHEMA = "schema";
 
+    // to avoid re-creating the project/database on each test run during integration test development,
+    // create a project "manualproject" and a database "manualdb1" manually and flip comments in the 4 lines below.
+    private String projectName = "manualproject";
+    private String databaseName = "manualdb1";
+    // private String projectName = null;
+    // private String databaseName = null;
+
     public static void run(String ...args) {
         try {
             Process process = Runtime.getRuntime().exec(args);
@@ -42,27 +49,33 @@ public class SqlTests extends TestRoutines {
         }
     }
 
-    @Disabled("TODO: this fails because the NuoDBaaS-SQL service is not loaded on CircleCI")
-    @Test
-    public void testSqlPage() {
+    @BeforeEach
+    private void beforeEach() {
         loginRest();
-        String projectName = createProjectRest();
-        String databaseName = createDatabaseRest(projectName);
+        if(projectName == null || databaseName == null) {
+            String projectName = createProjectRest();
+            String databaseName = createDatabaseRest(projectName);
 
-        // Wait for Database to become available
-        final AtomicInteger count = new AtomicInteger(0);
-        retry(180, 1000, ()->{
-            if(count.incrementAndGet() == 179) {
-                run("bash", "-c", "pwd");
-                run(KUBECTL_BIN, "describe", "all", "-A");
-                run(KUBECTL_BIN, "get", "all", "-A");
-            }
-            List<WebElement> statusColumn = waitTableElements("list_resource__table", "name", databaseName, "state");
-            assertEquals(1, statusColumn.size());
-            assertEquals("Available", statusColumn.get(0).getText());
-        });
+            // Wait for Database to become available
+            final AtomicInteger count = new AtomicInteger(0);
+            retry(180, 1000, ()->{
+                if(count.incrementAndGet() == 179) {
+                    run("bash", "-c", "pwd");
+                    run(KUBECTL_BIN, "describe", "all", "-A");
+                    run(KUBECTL_BIN, "get", "all", "-A");
+                }
+                clickMenu(Resource.projects.name());
+                clickMenu(Resource.databases.name());
+                List<WebElement> statusColumn = waitTableElements("list_resource__table", "name", databaseName, "state");
+                assertEquals(1, statusColumn.size());
+                assertEquals("Available", statusColumn.get(0).getText());
+            });
+        }
+    }
 
+    private void loginSqlEditor() {
         // Open SQL Editor
+        clickMenu(Resource.databases.name());
         List<WebElement> menuCells = waitTableElements("list_resource__table", "name", databaseName, MENU_COLUMN);
         assertEquals(1, menuCells.size());
         clickPopupMenu(menuCells.get(0), "button.sql.editor");
@@ -73,6 +86,11 @@ public class SqlTests extends TestRoutines {
         replaceInputElementByName("dbSchema", DB_SCHEMA);
         waitElement("sql.login.button").click();
         waitRestComplete();
+    }
+
+    @Test
+    public void testSqlPage() {
+        loginSqlEditor();
 
         // create table with row and show output
         waitElement("query").click();
@@ -99,4 +117,92 @@ public class SqlTests extends TestRoutines {
         String downloadedFile = getLocalStorage("downloadedFile");
         assertTrue(downloadedFile.contains("('abc')"));
    }
+
+    @Test
+    public void testSqlUsersLocal() {
+        loginSqlEditor();
+
+        // Select Users tab
+        waitElement("users").click();
+
+        // ensure Cancel button works in the "New User" dialog
+        waitElement("sql-add-button").click();
+        waitElement("dialog_button_cancel").click();
+
+        // open "local user" dialog and cancel out
+        waitElement("sql-add-button").click();
+        waitElement("dialog_button_local").click();
+        waitInputElementByName("username");
+        waitElement("dialog_button_cancel").click();
+
+        // open "local user" dialog and create user with all permissions
+        String dbUser = shortUnique("db");
+        waitElement("sql-add-button").click();
+        waitElement("dialog_button_local").click();
+        waitInputElementByName("username").sendKeys(dbUser);
+        waitInputElementByName("password").sendKeys("passw0rd");
+        waitElement("user-roles-system.dba").click();
+        waitElement("user-roles-system.administrator").click();
+        waitElement("grant-option-system.dba").click();
+        waitElement("grant-option-system.administrator").click();
+        waitElement("dialog_button_save").click();
+        waitRestComplete();
+
+        verifyAndDeleteDbUser(dbUser);
+    }
+
+    private void verifyAndDeleteDbUser(String user) {
+        // verify user exists
+        List<WebElement> users = waitTableElements("table_sql", "Username", user, MENU_COLUMN);
+        assertEquals(1, users.size());
+
+        // verify values in edit dialog
+        clickPopupMenu(users.get(0), "edit_button");
+        assertEquals(user, waitInputElementByName("username").getAttribute("value"));
+        assertEquals(true, waitElement("user-roles-system.dba").isSelected());
+        assertEquals(true, waitElement("user-roles-system.administrator").isSelected());
+        assertEquals(true, waitElement("grant-option-system.dba").isSelected());
+        assertEquals(true, waitElement("grant-option-system.administrator").isSelected());
+        waitElement("dialog_button_cancel").click();
+
+        // delete user (first cancel and then delete)
+        clickPopupMenu(users.get(0), "delete_button");
+        waitElement("dialog_button_no").click();
+        clickPopupMenu(users.get(0), "delete_button");
+        waitElement("dialog_button_yes").click();
+        waitRestComplete();
+
+        //ensure user is deleted
+        users = waitTableElements("table_sql", "Username", user, MENU_COLUMN);
+        assertEquals(0, users.size());
+    }
+
+    @Test
+    public void testSqlUsersDbaas() {
+        String dbaasUser = createUser();
+        loginSqlEditor();
+
+        // Select Users tab
+        waitElement("users").click();
+
+        // open "dbaas user" dialog and cancel out
+        waitElement("sql-add-button").click();
+        waitElement("dialog_button_dbaas").click();
+        replaceInputElementByName("username", TEST_ORGANIZATION + "/" + dbaasUser);
+        waitElement("dialog_button_cancel").click();
+
+        // open "dbaas user" dialog and create user with all permissions
+        waitElement("sql-add-button").click();
+        waitElement("dialog_button_dbaas").click();
+        replaceInputElementByName("username", TEST_ORGANIZATION + "/" + dbaasUser);
+        waitElement("user-roles-system.dba").click();
+        waitElement("user-roles-system.administrator").click();
+        waitElement("grant-option-system.dba").click();
+        waitElement("grant-option-system.administrator").click();
+        waitElement("dialog_button_save").click();
+        waitRestComplete();
+
+        verifyAndDeleteDbUser(TEST_ORGANIZATION + "_" + dbaasUser);
+    }
+
 }

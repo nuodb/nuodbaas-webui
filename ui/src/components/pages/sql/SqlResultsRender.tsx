@@ -86,10 +86,10 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
         </TableCell>;
     }
 
-    return <Table>
+    return <Table data-testid="table_sql">
         <TableHead>
             <TableRow>
-                {results.columns?.map((column, index: number) => <TableTh key={index} className={(onEdit || onDelete) && index === 0 ? "NuoStickyLeft" : ""}>
+                {results.columns?.map((column, index: number) => <TableTh key={index} data-testid={column.name} className={(onEdit || onDelete) && index === 0 ? "NuoStickyLeft" : ""}>
                     <div className="NuoRow">
                         {column.label || column.name}
                         {orderBy !== undefined && <div onClick={() => sort(column.name)}>
@@ -108,8 +108,8 @@ function SqlResultsRender({ results, setShowFilterDialog, orderBy, setOrderBy, i
                         <FilterListIcon />
                     </div>
                 </TableTh>}
-                {onAdd && addLabel && <TableTh className="NuoTableMenuCell NuoStickyRight">
-                    <div className="NuoColumn NuoRight"><button onClick={() => onAdd()}>{addLabel}</button></div>
+                {onAdd && addLabel && <TableTh data-testid="$ref" className="NuoTableMenuCell NuoStickyRight">
+                    <div className="NuoColumn NuoRight"><button data-testid="sql-add-button" onClick={() => onAdd()}>{addLabel}</button></div>
                 </TableTh>}
             </TableRow>
         </TableHead>
