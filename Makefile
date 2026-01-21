@@ -1,5 +1,7 @@
 # (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
+.ONESHELL:
+
 PROJECT_DIR := $(shell pwd)
 BIN_DIR ?= $(PROJECT_DIR)/bin
 export PATH := $(BIN_DIR):$(PATH)
