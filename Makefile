@@ -215,16 +215,20 @@ build-sql:
 		cd ../nuodbaas-sql; ${MAKE} build-image; \
 	fi
 
+.PHONY: deploy-sql-from-ecr
+deploy-sql-from-ecr: aws-login
+	docker pull ${ECR_ACCOUNT_URL}/nuodbaas-sql-docker:${NUODB_SQL_VERSION}
+	docker tag ${ECR_ACCOUNT_URL}/nuodbaas-sql-docker:${NUODB_SQL_VERSION} nuodbaas-sql:latest
+	$(KIND) load docker-image nuodbaas-sql:latest
+	$(HELM) upgrade --install --wait -n default nuodbaas-sql oci://253548315642.dkr.ecr.us-east-1.amazonaws.com/nuodbaas-sql:${NUODB_SQL_VERSION} --set image.repository=nuodbaas-sql --set image.tag=latest --set nuodbaasSql.ingress.enabled=true --set nuodbaasSql.cpUrl=http://nuodb-cp-rest:8080
+
 .PHONY: deploy-sql
 deploy-sql: build-sql $(HELM) $(KIND)
 	@if [ -d ../nuodbaas-sql/charts/nuodbaas-sql ] ; then \
 		$(KIND) load docker-image nuodbaas-sql:latest; \
 		$(HELM) upgrade --install --wait -n default nuodbaas-sql ../nuodbaas-sql/charts/nuodbaas-sql --set image.repository=nuodbaas-sql --set image.tag=latest --set nuodbaasSql.ingress.enabled=true --set nuodbaasSql.cpUrl=http://nuodb-cp-rest:8080; \
 	else \
-		docker pull ${ECR_ACCOUNT_URL}/nuodbaas-sql-docker:${NUODB_SQL_VERSION} \
-		&& docker tag ${ECR_ACCOUNT_URL}/nuodbaas-sql-docker:${NUODB_SQL_VERSION} nuodbaas-sql:latest \
-		&& $(KIND) load docker-image nuodbaas-sql:latest \
-		&& $(HELM) upgrade --install --wait -n default nuodbaas-sql oci://253548315642.dkr.ecr.us-east-1.amazonaws.com/nuodbaas-sql:${NUODB_SQL_VERSION} --set image.repository=nuodbaas-sql --set image.tag=latest --set nuodbaasSql.ingress.enabled=true --set nuodbaasSql.cpUrl=http://nuodb-cp-rest:8080; \
+		make deploy-sql-from-ecr; \
 	fi
 
 .PHONY: undeploy-sql
