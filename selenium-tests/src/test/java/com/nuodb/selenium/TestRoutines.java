@@ -74,9 +74,10 @@ public class TestRoutines extends SeleniumTestHelper {
     @AfterEach
     public void after() {
         saveCoverage();
-        // clean up all the created resources except admin user and the ones starting with "keep"
-        // "keep" allows us to temporarily create resources for faster integration test development without waiting for project/database creation on each test run
-        // or share resources (especially projects + databases) across tests
+        // clean up all the created resources
+        // except the admin user and the ones starting with "keep" - it allows us to temporarily create resources
+        // for faster integration test development without waiting for project/database creation on each test run
+        // or to share resources (especially projects + databases) across tests
         for(int i=Resource.values().length-1; i >= 0; i--) {
             Resource resource = Resource.values()[i];
             try {
