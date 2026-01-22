@@ -23,12 +23,8 @@ public class SqlTests extends TestRoutines {
     public static final String DB_PASSWORD = "passw0rd";
     public static final String DB_SCHEMA = "schema";
 
-    // to avoid re-creating the project/database on each test run during integration test development,
-    // create a project "manualproject" and a database "manualdb1" manually and flip comments in the 4 lines below.
-    // private String projectName = "manualproject";
-    // private String databaseName = "manualdb1";
-    private String projectName = null;
-    private String databaseName = null;
+    private static String projectName = null;
+    private static String databaseName = null;
 
     public static void run(String ...args) {
         try {
@@ -53,8 +49,16 @@ public class SqlTests extends TestRoutines {
     private void beforeEach() {
         loginRest();
         if(projectName == null || databaseName == null) {
-            String projectName = createProjectRest();
-            String databaseName = createDatabaseRest(projectName);
+            if("true".equals(System.getenv("CI_BUILD"))) {
+                projectName = createProjectRest();
+                databaseName = createDatabaseRest(projectName);
+            }
+            else {
+                // in development environment we want to create the database only once
+                // to allow for running tests multiple times without the need to re-create the database
+                projectName = createProjectRestIfNotFound("manualproject");
+                databaseName = createDatabaseRestIfNotFound("manualproject", "manualdb1");
+            }
 
             // Wait for Database to become available
             final AtomicInteger count = new AtomicInteger(0);

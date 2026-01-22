@@ -576,6 +576,25 @@ public class TestRoutines extends SeleniumTestHelper {
         return name;
     }
 
+    public String createProjectRestIfNotFound(String project) {
+        HttpGet request = new HttpGet(CP_URL + "/" + Resource.projects.name() + "/" + TEST_ORGANIZATION + "/" + project);
+        try {
+            String result = rest(request);
+            System.out.println("Project exists already: " + result);
+        }
+        catch(IOException e) {
+            //not found - create the project
+            createResourceRest(Resource.projects, project,
+                "organization", TEST_ORGANIZATION,
+                "name", project,
+                "sla", "dev",
+                "tier", "n0.nano"
+            );
+        }
+
+        return project;
+    }
+
     public void deleteProject(String projectName) {
         deleteResource(Resource.projects, projectName);
     }
@@ -600,6 +619,25 @@ public class TestRoutines extends SeleniumTestHelper {
             "dbaPassword", "passw0rd"
         );
         return name;
+    }
+
+    public String createDatabaseRestIfNotFound(String project, String database) {
+        HttpGet request = new HttpGet(CP_URL + "/" + Resource.databases.name() + "/" + TEST_ORGANIZATION + "/" + project + "/" + database);
+        try {
+            String result = rest(request);
+            System.out.println("Database exists already: " + result);
+        }
+        catch(IOException e) {
+            //not found - create the project
+            createResourceRest(Resource.databases, database,
+                "organization", TEST_ORGANIZATION,
+                "project", project,
+                "name", database,
+                "dbaPassword", "passw0rd"
+            );
+        }
+
+        return database;
     }
 
     public void deleteDatabase(String databaseName) {

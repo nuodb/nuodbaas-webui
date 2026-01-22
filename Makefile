@@ -318,15 +318,19 @@ teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-operato
 		$(KIND) delete cluster 2> /dev/null || true ; \
 	fi
 
-.PHONY: run-integration-tests-only
-run-integration-tests-only: ## integration tests without setup/teardown
-	@rm -rf selenium-tests/target/.nyc_output
-	@cd selenium-tests && mvn test && cd ..
-	@if [ "${COVERAGE}" = "true" ] ; then \
+.PHONY: create-coverage-report
+create-coverage-report: ## create coverage report
 		cd selenium-tests && \
 		npx nyc report -r text --cwd target && \
 		npx nyc report -r html --cwd target --report-dir coverage && \
-		cd .. ; \
+		cd ..
+
+.PHONY: run-integration-tests-only
+run-integration-tests-only: ## integration tests without setup/teardown
+	@rm -rf selenium-tests/target/.nyc_output
+	@cd selenium-tests && CI_BUILD=true mvn test && cd ..
+	@if [ "${COVERAGE}" = "true" ] ; then \
+		${MAKE} create-coverage-report
 	fi
 
 .PHONY: run-unit-tests
