@@ -66,7 +66,13 @@ public class SqlTests extends TestRoutines {
                 if(count.incrementAndGet() == 179) {
                     run("bash", "-c", "pwd");
                     run(KUBECTL_BIN, "describe", "all", "-A");
+                    run(KUBECTL_BIN, "describe", "pvc", "-A");
+                    run(KUBECTL_BIN, "describe", "pv", "-A");
+                    run(KUBECTL_BIN, "describe", "nodes", "-A");
                     run(KUBECTL_BIN, "get", "all", "-A");
+                    run(KUBECTL_BIN, "get", "pvc", "-A");
+                    run(KUBECTL_BIN, "get", "pv", "-A");
+                    run(KUBECTL_BIN, "get", "nodes", "-A");
                 }
                 clickMenu(Resource.projects.name());
                 clickMenu(Resource.databases.name());
