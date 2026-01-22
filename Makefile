@@ -330,7 +330,7 @@ run-integration-tests-only: ## integration tests without setup/teardown
 	@rm -rf selenium-tests/target/.nyc_output
 	@cd selenium-tests && mvn test && cd ..
 	@if [ "${COVERAGE}" = "true" ] ; then \
-		${MAKE} create-coverage-report;
+		${MAKE} create-coverage-report; \
 	fi
 
 .PHONY: run-unit-tests
