@@ -49,16 +49,9 @@ public class SqlTests extends TestRoutines {
     private void beforeEach() {
         loginRest();
         if(projectName == null || databaseName == null) {
-            if("true".equals(System.getenv("CI_BUILD"))) {
-                projectName = createProjectRest();
-                databaseName = createDatabaseRest(projectName);
-            }
-            else {
-                // in development environment we want to create the database only once
-                // to allow for running tests multiple times without the need to re-create the database
-                projectName = createProjectRestIfNotFound("manualproject");
-                databaseName = createDatabaseRestIfNotFound("manualproject", "manualdb1");
-            }
+            // start project/database with a "keep" prefix, so we don't have to recreate the resources on each test
+            projectName = createProjectRestIfNotFound("keepproject");
+            databaseName = createDatabaseRestIfNotFound("keepproject", "keepdb1");
 
             // Wait for Database to become available
             final AtomicInteger count = new AtomicInteger(0);

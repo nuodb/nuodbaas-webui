@@ -74,14 +74,15 @@ public class TestRoutines extends SeleniumTestHelper {
     @AfterEach
     public void after() {
         saveCoverage();
-        // clean up all the created resources except admin user and the ones starting with "manual"
-        // "manual" allows us to temporarily create resources for faster integration test development without waiting for project/database creation on each test run
+        // clean up all the created resources except admin user and the ones starting with "keep"
+        // "keep" allows us to temporarily create resources for faster integration test development without waiting for project/database creation on each test run
+        // or share resources (especially projects + databases) across tests
         for(int i=Resource.values().length-1; i >= 0; i--) {
             Resource resource = Resource.values()[i];
             try {
                 List<String> items = getResourcesRest(resource);
                 for(String item : items) {
-                    if(!item.startsWith(TEST_ORGANIZATION + "/manual") && (resource != Resource.users || !item.equals(TEST_ORGANIZATION + "/" + TEST_ADMIN_USER))) {
+                    if(!item.startsWith(TEST_ORGANIZATION + "/keep") && (resource != Resource.users || !item.equals(TEST_ORGANIZATION + "/" + TEST_ADMIN_USER))) {
                         System.out.println("Deleting resource " + resource.name() + "/" + item);
                         try {
                             deleteResourceRest(resource, item);
