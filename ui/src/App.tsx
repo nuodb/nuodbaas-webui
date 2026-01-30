@@ -124,6 +124,7 @@ function App({ t }: { t: any }) {
                   <Route path="/ui/automation" element={<Automation {...pageProps} />} />
                   {evaluate({}, "hasSqlEditorService()") && <Route path="/ui/page/sql/:organization/:project/:database" element={<SqlPage {...pageProps} />} />}
                   <Route path="/ui" element={<DefaultPage />} />
+                  <Route path="/ui/login" element={<DefaultPage />} />
                   <Route path="/webui" element={<Navigate to="/ui" />} />
                   <Route path="/webui/*" element={<Redirect baseUrl="/ui" />} />
                   <Route path="/*" element={<NotFound {...pageProps} />} />
