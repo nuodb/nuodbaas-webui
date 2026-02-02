@@ -52,7 +52,9 @@
         "delete.resource.title": "Deleting {{resources_one}} {{name}}",
         "delete.resource.body": "Please confirm deletion of {{resources_one}} {{name}}?",
         "delete.resources.title": "Deleting {{count}} {{resources}}",
-        "delete.resources.body": "Please confirm deleting of {{resources}} {{names}}?"
+        "delete.resources.body": "Please confirm deleting of {{resources}} {{names}}?",
+        "userAccessRuleCheck.title": "User's access rules are outside of their org",
+        "userAccessRuleCheck.body": "Are you sure you want to give this user access outside of their org?"
     },
     "resource": {
         "label": {

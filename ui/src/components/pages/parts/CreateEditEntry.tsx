@@ -13,6 +13,7 @@ import { withTranslation } from "react-i18next";
 import ResourceHeader from "./ResourceHeader";
 import { Tab, Tabs } from "../../controls/Tabs";
 import { Field } from "../../fields/Field";
+import Dialog from "./Dialog";
 
 type SectionFormParameterType = {
     params: FieldParametersType;
@@ -340,8 +341,9 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
         setFocus(v, formParams);
         setFormParameters(formParams);
 
+        // Note: for the users resource, we hide the "allowCrossOrganizationAccess" option and prompt user during form submission
         const queryParameters = (urlParams && Object.keys(urlParams)
-            .filter(key => urlParams[key].in === "query")
+            .filter(key => urlParams[key].in === "query" && (urlParams[key].name !== "allowCrossOrganizationAccess" || !path.startsWith("/users/")))
             .map(key => urlParams[key])) || [];
 
         if (queryParameters.length > 0) {
@@ -459,7 +461,28 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
         return ret;
     }
 
-    function handleSubmit() {
+    function hasOutOfOrgUserRules() {
+        if (matchesPath(path, "/users/{organization}?/{user}")) {
+            const allRules = [...(values.accessRule?.allow || []), ...(values.accessRule?.deny || [])];
+            for (let r = 0; r < allRules.length; r++) {
+                const ruleParts = allRules[r].split(":");
+                if (ruleParts.length >= 2) {
+                    if(ruleParts[1] !== values.organization) {
+                        return true;
+                    }
+                    if(ruleParts[1].startsWith("/")) {
+                        const parts = ruleParts[1].split("/"); // parts = ["", "resourceType", "org", ...]
+                        if(parts.length >=3 && parts[2] === values.organization) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    async function handleSubmit() {
         let err = { ...errors };
         delete err._error;
         delete err._errorDetail;
@@ -482,7 +505,27 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
             }
             return;
         }
-        submitForm(urlParameters, formParameters, data ? path : getCreatePath(schema, path), values)
+
+        // Handle special case where we need to add "?allowCrossOrganizationAccess=true" to the URL
+        // if a user resource is created / updated with access rules outside their org.
+        // We skip the prompt if no accessRule changes took place.
+        let submitValues = { ...values };
+        if (hasOutOfOrgUserRules()) {
+            let accessRuleUnchanged = false;
+            if (data) {
+                const persistedValues: any = await Rest.get(path);
+                if (values.accessRule && persistedValues.accessRule && JSON.stringify(values.accessRule) === JSON.stringify(persistedValues.accessRule)) {
+                    accessRuleUnchanged = true;
+                }
+            }
+            if (accessRuleUnchanged || "yes" === await Dialog.confirm(t("confirm.userAccessRuleCheck.title"), t("confirm.userAccessRuleCheck.body"), t)) {
+                submitValues["allowCrossOrganizationAccess"] = true;
+            }
+            else {
+                return;
+            }
+        }
+        submitForm(urlParameters, formParameters, data ? path : getCreatePath(schema, path), submitValues)
             .then(() => {
                 if (data) {
                 //edit mode
