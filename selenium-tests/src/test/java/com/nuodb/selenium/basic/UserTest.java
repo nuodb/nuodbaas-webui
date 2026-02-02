@@ -25,6 +25,39 @@ public class UserTest extends TestRoutines {
     }
 
     @Test
+    public void testCreateUserWithDifferentOrg() throws MalformedURLException {
+        loginRest();
+        clickMenu(Resource.users.name());
+
+        String name = shortUnique("u");
+
+        // Open "Create New User" form
+        WebElement createButton = waitElement("list_resource__create_button_" + Resource.users);
+        createButton.click();
+
+        // Fill in Fields with one non-org access rule
+        replaceInputElementByName("organization", TEST_ORGANIZATION);
+        replaceInputElementByName("name", name);
+        replaceInputElementByName("password", TEST_ADMIN_PASSWORD);
+        waitElement("section-title-access-deny-rules").click();
+        replaceInputElementByName("accessRule.allow.0", "all:" + TEST_ORGANIZATION);
+        replaceInputElementByName("accessRule.allow.1", "all:" + TEST_ORGANIZATION + "2");
+
+        // Save. Dialog "different org" appears, cancel first and then accept (and save)
+        waitElement("create_resource__create_button").click();
+        waitElement("dialog_button_no").click();
+        waitElement("create_resource__create_button").click();
+        waitElement("dialog_button_yes").click();
+
+        // add user name for later cleanup
+        addToResources(Resource.users, name);
+        waitRestComplete();
+
+        // ensure we are back in the view (and not stuck somewhere in the create form)
+        waitElement("list_resource__table");
+    }
+
+    @Test
     public void testListCreateAndDeleteUsers() {
         // Setup and list users
         loginRest();
@@ -56,8 +89,8 @@ public class UserTest extends TestRoutines {
             clickPopupMenu(buttonsCell.get(0), "edit_button");
         });
 
-        // verify allowCrossOrganizationAccess / organization / name fields are disabled in edit mode
-        String [] disabledFields = new String[]{"allowCrossOrganizationAccess", "organization", "name"};
+        // verify organization / name fields are disabled in edit mode
+        String [] disabledFields = new String[]{"organization", "name"};
         for(String field : disabledFields ) {
             assertFalse(waitPresentInputElementByName(field).isEnabled(), "\"" + field + "\" field is not disabled");
         }

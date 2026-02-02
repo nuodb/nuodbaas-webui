@@ -467,14 +467,14 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
             for (let r = 0; r < allRules.length; r++) {
                 const ruleParts = allRules[r].split(":");
                 if (ruleParts.length >= 2) {
-                    if(ruleParts[1] !== values.organization) {
-                        return true;
-                    }
                     if(ruleParts[1].startsWith("/")) {
                         const parts = ruleParts[1].split("/"); // parts = ["", "resourceType", "org", ...]
-                        if(parts.length >=3 && parts[2] === values.organization) {
+                        if (parts.length >= 3 && parts[2] !== values.organization) {
                             return true;
                         }
+                    }
+                    else if (ruleParts[1] !== values.organization) {
+                        return true;
                     }
                 }
             }

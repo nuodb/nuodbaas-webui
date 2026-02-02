@@ -7,6 +7,7 @@ import { setValue, getValue } from "./utils";
 import FieldMessage from "./FieldMessage";
 import Accordion from "../controls/Accordion";
 import { Field } from "./Field";
+import MoreDiv from "../pages/parts/MoreDiv";
 
 export default function FieldObject(props: FieldProps): ReactNode {
     switch (props.op) {
@@ -67,12 +68,12 @@ export default function FieldObject(props: FieldProps): ReactNode {
         if (!properties) {
             return FieldMessage({ ...props, message: "\"properties\" attribute missing from schema for field \"" + prefix + "\"" });
         }
-        return <dl className="map">
+        return <MoreDiv maxHeight={200} t={props.t}><dl className="map">
             {Object.keys(properties).map(key => {
                 const prefixKey = prefix ? (prefix + "." + key) : key;
                 const fieldView = Field({ ...props, prefix: prefixKey, parameter: properties[key], values });
                 return <div key={key}><dt>{t("field.label." + prefixKey, prefixKey)}</dt><dd>{fieldView}</dd></div>;
             })}
-        </dl>
+        </dl></MoreDiv>
     }
 }
