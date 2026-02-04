@@ -463,9 +463,9 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
 
     function hasOutOfOrgUserRules() {
         if (matchesPath(path, "/users/{organization}?/{user}")) {
-            const allRules = [...(values.accessRule?.allow || []), ...(values.accessRule?.deny || [])];
-            for (let r = 0; r < allRules.length; r++) {
-                const ruleParts = allRules[r].split(":");
+            const allowRules = values.accessRule?.allow;
+            for (let r = 0; r < allowRules.length; r++) {
+                const ruleParts = allowRules[r].split(":");
                 if (ruleParts.length >= 2) {
                     if(ruleParts[1].startsWith("/")) {
                         const parts = ruleParts[1].split("/"); // parts = ["", "resourceType", "org", ...]
