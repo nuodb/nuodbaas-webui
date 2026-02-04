@@ -473,7 +473,7 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
                             return true;
                         }
                     }
-                    else if (ruleParts[1] !== values.organization) {
+                    else if (ruleParts[1] !== values.organization && !ruleParts[1].startsWith(values.organization + "/")) {
                         return true;
                     }
                 }
