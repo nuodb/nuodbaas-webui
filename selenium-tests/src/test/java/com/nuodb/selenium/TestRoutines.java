@@ -71,6 +71,10 @@ public class TestRoutines extends SeleniumTestHelper {
         }
     }
 
+    public void addToResources(Resource resource, String name) {
+        createdResources.computeIfAbsent(resource, n -> new HashSet<String>()).add(name);
+    }
+
     @AfterEach
     public void after() {
         saveCoverage();
@@ -270,7 +274,7 @@ public class TestRoutines extends SeleniumTestHelper {
             replaceInputElementByName(fieldValueList[i], fieldValueList[i+1]);
         }
         waitElement("create_resource__create_button").click();
-        createdResources.computeIfAbsent(resource, n -> new HashSet<String>()).add(name);
+        addToResources(resource, name);
         waitRestComplete();
     }
 
