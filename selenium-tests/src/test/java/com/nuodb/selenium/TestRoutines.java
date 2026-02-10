@@ -78,13 +78,16 @@ public class TestRoutines extends SeleniumTestHelper {
     @AfterEach
     public void after() {
         saveCoverage();
-        // clean up all the created resources except admin user
+        // clean up all the created resources
+        // except the admin user and the ones starting with "keep" - it allows us to temporarily create resources
+        // for faster integration test development without waiting for project/database creation on each test run
+        // or to share resources (especially projects + databases) across tests
         for(int i=Resource.values().length-1; i >= 0; i--) {
             Resource resource = Resource.values()[i];
             try {
                 List<String> items = getResourcesRest(resource);
                 for(String item : items) {
-                    if(resource != Resource.users || !item.equals(TEST_ORGANIZATION + "/" + TEST_ADMIN_USER)) {
+                    if(!item.startsWith(TEST_ORGANIZATION + "/keep") && (resource != Resource.users || !item.equals(TEST_ORGANIZATION + "/" + TEST_ADMIN_USER))) {
                         System.out.println("Deleting resource " + resource.name() + "/" + item);
                         try {
                             deleteResourceRest(resource, item);
@@ -579,6 +582,25 @@ public class TestRoutines extends SeleniumTestHelper {
         return name;
     }
 
+    public String createProjectRestIfNotFound(String project) {
+        HttpGet request = new HttpGet(CP_URL + "/" + Resource.projects.name() + "/" + TEST_ORGANIZATION + "/" + project);
+        try {
+            String result = rest(request);
+            System.out.println("Project exists already: " + result);
+        }
+        catch(IOException e) {
+            //not found - create the project
+            createResourceRest(Resource.projects, project,
+                "organization", TEST_ORGANIZATION,
+                "name", project,
+                "sla", "dev",
+                "tier", "n0.nano"
+            );
+        }
+
+        return project;
+    }
+
     public void deleteProject(String projectName) {
         deleteResource(Resource.projects, projectName);
     }
@@ -603,6 +625,25 @@ public class TestRoutines extends SeleniumTestHelper {
             "dbaPassword", "passw0rd"
         );
         return name;
+    }
+
+    public String createDatabaseRestIfNotFound(String project, String database) {
+        HttpGet request = new HttpGet(CP_URL + "/" + Resource.databases.name() + "/" + TEST_ORGANIZATION + "/" + project + "/" + database);
+        try {
+            String result = rest(request);
+            System.out.println("Database exists already: " + result);
+        }
+        catch(IOException e) {
+            //not found - create the project
+            createResourceRest(Resource.databases, database,
+                "organization", TEST_ORGANIZATION,
+                "project", project,
+                "name", database,
+                "dbaPassword", "passw0rd"
+            );
+        }
+
+        return database;
     }
 
     public void deleteDatabase(String databaseName) {
