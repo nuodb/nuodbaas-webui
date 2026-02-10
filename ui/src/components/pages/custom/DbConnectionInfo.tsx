@@ -145,7 +145,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
         return <fieldset key={fieldname}>
             <label htmlFor={fieldname}>{fieldname}</label>
             <Tooltip title={copiedField === fieldname ? t("button.copied") : t("button.copy")}>
-                <ContentCopyOutlinedIcon className="NuoCopyButton" onClick={() => {
+                <ContentCopyOutlinedIcon data-testid={"copy-" + fieldname} className="NuoCopyButton" onClick={() => {
                     navigator.clipboard.writeText(value).then(() => {
                         setCopiedField(fieldname);
                         if (copiedTimeout) {
@@ -158,17 +158,17 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
                 }} />
             </Tooltip>
             {value?.includes("\n") ?
-                <Textarea name={fieldname} disabled={true} value={value}></Textarea>
+                <Textarea name={fieldname} data-testid={"value-" + fieldname} disabled={true} value={value}></Textarea>
                 :
-                <input name={fieldname} disabled={true} value={value} />
+                <input name={fieldname} data-testid={"value-" + fieldname} disabled={true} value={value} />
             }
         </fieldset>
     }
 
-    function renderCopyCode(summary: string, lines: string[]) {
-        return <Accordion summary={summary}>
+    function renderCopyCode(dataTestid: string, summary: string, lines: string[]) {
+        return <Accordion data-testid={dataTestid} summary={summary}>
             <Tooltip title={copiedField === summary ? t("button.copied") : t("button.copy")}>
-                <ContentCopyOutlinedIcon className="NuoCopyButton" onClick={() => {
+                <ContentCopyOutlinedIcon data-testid={"copy-" + dataTestid} className="NuoCopyButton" onClick={() => {
                     navigator.clipboard.writeText(lines.join("\n")).then(() => {
                         setCopiedField(summary);
                         if (copiedTimeout) {
@@ -180,7 +180,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
                     })
                 }} />
             </Tooltip>
-            <textarea disabled={true} className="NuoDbConnectionInfoSample" value={lines.join("\n")}></textarea>
+            <textarea data-testid={"value-" + dataTestid} disabled={true} className="NuoDbConnectionInfoSample" value={lines.join("\n")}></textarea>
         </Accordion>
     }
 
@@ -212,16 +212,16 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
         {renderCopyField(t("dialog.dbConnectionInfo.label.database"), dbName)}
         {renderCopyField(t("dialog.dbConnectionInfo.label.sqlEndpoint"), sqlEndpoint)}
         {renderCopyField(t("dialog.dbConnectionInfo.label.certificate"), caPem)}
-        <Accordion summary={t("dialog.dbConnectionInfo.label.codeSamples")} defaultExpanded={false}>
+        <Accordion data-testid="codesamples" summary={t("dialog.dbConnectionInfo.label.codeSamples")} defaultExpanded={false}>
             <div>{processMarkdownLinks(t("dialog.dbConnectionInfo.label.description"))}</div>
-            {renderCopyCode(t("dialog.dbConnectionInfo.label.nuosql"), nuosql)}
-            <Accordion summary={t("dialog.dbConnectionInfo.label.jdbc")} defaultExpanded={false}>
-                {renderCopyCode("HelloDb.java", jdbcJava)}
-                {renderCopyCode("build_run.sh", jdbcSh)}
+            {renderCopyCode("nuosql", t("dialog.dbConnectionInfo.label.nuosql"), nuosql)}
+            <Accordion data-testid="jdbc" summary={t("dialog.dbConnectionInfo.label.jdbc")} defaultExpanded={false}>
+                {renderCopyCode("jdbcJava", "HelloDb.java", jdbcJava)}
+                {renderCopyCode("jdbcSh", "build_run.sh", jdbcSh)}
             </Accordion>
-            <Accordion summary={t("dialog.dbConnectionInfo.label.cpp")} defaultExpanded={false}>
-                {renderCopyCode("HelloDb.cpp", cppSource)}
-                {renderCopyCode("build_run.sh", cppBuild)}
+            <Accordion data-tesetid="cpp" summary={t("dialog.dbConnectionInfo.label.cpp")} defaultExpanded={false}>
+                {renderCopyCode("cpp-source", "HelloDb.cpp", cppSource)}
+                {renderCopyCode("cpp-sh", "build_run.sh", cppBuild)}
             </Accordion>
         </Accordion>
     </div>

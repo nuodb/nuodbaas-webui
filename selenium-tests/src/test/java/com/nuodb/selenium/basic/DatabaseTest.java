@@ -191,6 +191,9 @@ public class DatabaseTest extends TestRoutines {
 
         waitElement("resource-popup-menu").click();
         waitElement("popupmenu-button.db.connection.info").click();
+        waitElement("copy-Database").click();
+        waitElement("copy-SQL Endpoint").click();
+        waitElement("copy-Certificate").click();
         waitElement("dialog_button_ok").click();
 
         waitElement("resource-popup-menu").click();
