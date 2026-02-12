@@ -3,7 +3,7 @@
 import { useNavigate } from 'react-router-dom';
 import { withTranslation } from "react-i18next";
 import { TableBody, TableTh, TableCell, Table as TableCustom, TableHead, TableRow } from '../../controls/Table';
-import { getResourceByPath, getCreatePath, getChild, replaceVariables, getSchemaPath, hasMonitoredPath } from "../../../utils/schema";
+import { getResourceByPath, getChild, getSchemaPath, hasMonitoredPath, getEntryPath } from "../../../utils/schema";
 import { Rest } from "./Rest";
 import Dialog from "./Dialog";
 import { MenuItemProps, PageProps, TempAny } from "../../../utils/types";
@@ -174,7 +174,7 @@ function Table(props: TableProps) {
        If the field is hierarchical, it will find the schema of the right most field.
        Returns defaults if not found. */
     function getFieldSchema(fieldName: string) {
-        const fieldsSchema = getChild(getResourceByPath(schema, getCreatePath(schema, path) || path), ["get", "responses", "200", "content", "application/json", "schema", "properties"]);
+        const fieldsSchema = getChild(getResourceByPath(schema, getEntryPath(schema, path) || path), ["get", "responses", "200", "content", "application/json", "schema", "properties"]);
         let fs = fieldsSchema;
         let fn = fieldName;
         while (fs && fn.includes(".") && fn.split(".")[0] in fs) {
