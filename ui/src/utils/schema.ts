@@ -257,9 +257,9 @@ export function getEntryPath(rootSchema: TempAny, path: string) : string|null {
     }
 
     let retPath = "";
+    const parts = path.split("/");
     Object.keys(rootSchema).forEach(sPath => {
-        let parts = path.split("/");
-        let sParts = sPath.split("/");
+        const sParts = sPath.split("/");
         if(parts.length >= sParts.length) {
             return;
         }
