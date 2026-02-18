@@ -5,6 +5,8 @@ import { withTranslation } from "react-i18next";
 import TextField from "../../controls/TextField"
 import { TempAny } from "../../../utils/types"
 import SearchIcon from '@mui/icons-material/Search';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import Menu from "../../controls/Menu";
 
 export function parseSearch(search: string) {
     search = search.trim();
@@ -44,10 +46,11 @@ export function parseSearch(search: string) {
 type SearchProps = {
     search: string;
     setSearch: (search: string) => void;
+    fieldNames?: string[];
     t: TempAny;
 }
 
-function Search({ search, setSearch, t }: SearchProps) {
+function Search({ search, setSearch, fieldNames, t }: SearchProps) {
     const [searchField, setSearchField] = useState(search);
     const [error, setError] = useState(undefined);
 
@@ -55,18 +58,7 @@ function Search({ search, setSearch, t }: SearchProps) {
         setSearchField(search);
     }, [search]);
 
-    function handleSearch() {
-        const parsed: TempAny = parseSearch(searchField);
-        if ("error" in parsed) {
-            setError(parsed["error"]);
-        }
-        else {
-            setError(undefined);
-            setSearch(searchField);
-        }
-    }
-
-    return <div style={{ display: "flex", flexDirection: "row", flex: "1 1 auto", alignItems: "center", justifyContent: "center" }}>
+    return <div style={{ display: "flex", flexDirection: "row", flex: "1 1 auto", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1100 }}>
         <TextField
             required={false}
             data-testid="searchField"
@@ -78,12 +70,36 @@ function Search({ search, setSearch, t }: SearchProps) {
                 setSearchField(input.value);
             }}
             onKeyDown={(event) => {
-                if (event.keyCode === 13) {
-                    handleSearch();
+                if (event.key === "Enter") {
+                    setSearch(searchField);
                 }
             }}
+            icon={fieldNames && <Menu
+                data-testid="search-popup-menu"
+                popupId="search-popup-menu"
+                items={fieldNames.map(fn => {
+                    return {
+                        id: fn,
+                        label: t("field.label." + fn, fn),
+                        onClick: () => {
+                            search = searchField.trim();
+                            if (search) {
+                                search += " ";
+                            }
+                            search += fn + "=";
+                            setSearchField(search);
+                            const elementId = document.getElementById("search");
+                            if (elementId) {
+                                elementId.focus();
+                            }
+                            return true;
+                        }
+                    };
+                })}
+                defaultItem={undefined} align="right" />}
             error={error}
         />
+
     </div>;
 }
 

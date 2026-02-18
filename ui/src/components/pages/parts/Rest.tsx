@@ -15,10 +15,21 @@ interface State {
 const AUTOMATION_LOG = "nuodbaas-webui-recorded";
 export const NUODBAAS_WEBUI_ISRECORDING = "nuodbaas-webui-isRecording";
 
+type CacheValueType = {
+    timeout: number,
+    value: any,
+    status: "pending" | "done",
+    pendingRequests: (() => Promise<any>)[]
+};
+
 export class Rest extends React.Component<{ isRecording: boolean, setIsRecording: (isRecording: boolean) => void }> {
     state: State = {
         pendingRequests: 0,
     }
+
+    // cache for getCache() operations with timeout
+    static CACHE_TIMEOUT = 60 * 1000;
+    static cache: Map<string, CacheValueType> = new Map<string, any>();
 
     componentDidMount() {
         if (!instance) {
@@ -119,6 +130,48 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
         })
     }
 
+    static deleteCacheEntry(path: string) {
+        const entry = this.cache.get(path);
+        if (entry && entry.status === "done") {
+            this.cache.delete(path);
+        }
+    }
+
+    static async getWithCache(path: string) {
+        //clean out old entries
+        const now = Date.now();
+        [...this.cache.keys()].forEach(key => {
+            const entry = this.cache.get(key);
+            if (entry && entry.timeout < now) {
+                this.cache.delete(key);
+            }
+        });
+
+        let entry = this.cache.get(path);
+        if (entry) {
+            if (entry.status === "done") {
+                return Promise.resolve(entry.value);
+            }
+            else {
+                entry.pendingRequests.push(() => {
+                    return Promise.resolve(entry?.value);
+                });
+            }
+        }
+        else {
+            let data: CacheValueType = { timeout: now + this.CACHE_TIMEOUT, value: undefined, status: "pending", pendingRequests: [] };
+            this.cache.set(path, data);
+            let entry = await this.get(path);
+            data.value = entry;
+            for (let i = 0; i < data.pendingRequests.length; i++) {
+                await data.pendingRequests[i]();
+            }
+            data.pendingRequests = [];
+            data.status = "done"; //keep this after the "pendingRequests"
+            return entry;
+        }
+    }
+
     static async getStream(url: string, headers: { [key: string]: string }, eventsAbortController: AbortController) {
         return new Promise((resolve, reject) => {
             Rest.incrementPending();
@@ -145,6 +198,8 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
     }
 
     static async put(path: string, data: JsonType) {
+        this.cache.delete(path);
+
         return new Promise((resolve, reject) => {
             Rest.incrementPending();
             const url = Auth.getNuodbCpRestUrl(path);
@@ -164,6 +219,8 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
     }
 
     static async post(path: string, data: JsonType) {
+        this.cache.delete(path);
+
         return new Promise((resolve, reject) => {
             Rest.incrementPending();
             const url = Auth.getNuodbCpRestUrl(path);
@@ -183,6 +240,8 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
     }
 
     static async delete(path: string) {
+        this.cache.delete(path);
+
         return new Promise((resolve, reject) => {
             Rest.incrementPending();
             const url = Auth.getNuodbCpRestUrl(path);
@@ -202,6 +261,8 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
     }
 
     static async patch(path: string, data: JsonType) {
+        this.cache.delete(path);
+
         return new Promise((resolve, reject) => {
             Rest.incrementPending();
             const url = Auth.getNuodbCpRestUrl(path);

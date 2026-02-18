@@ -85,3 +85,8 @@ export interface PageProps {
     setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>;
     t: any
 };
+
+export type SortColumnDirectionType = {
+    column: string;
+    direction: "none" | "asc" | "desc";
+};

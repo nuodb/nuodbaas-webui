@@ -3,20 +3,15 @@
     "views": {
         "/databases?/{organization}?/{project}?/{name}": {
             "columns": [
+                "name",
                 "organization",
                 "project",
-                "name",
                 "labels",
                 "tier",
                 "properties",
-                "state",
+                "status.state",
                 "status"
             ],
-            "fields": {
-                "state": {
-                    "value": "status.state"
-                }
-            },
             "menu": [
                 {
                     "label": "button.db.connection.info",
@@ -81,8 +76,8 @@
         },
         "/backuppolicies?/{organization}?/{name}": {
             "columns": [
-                "organization",
                 "name",
+                "organization",
                 "labels",
                 "frequency",
                 "selector",

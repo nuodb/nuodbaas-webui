@@ -7,12 +7,13 @@ import { getResourceEvents, getResourceByPath, getFilterField } from "../../util
 import { Rest } from "./parts/Rest";
 import PageLayout from './parts/PageLayout'
 import Auth from "../../utils/auth"
-import { PageProps, TempAny } from "../../utils/types";
+import { PageProps, SortColumnDirectionType, TempAny } from "../../utils/types";
 import Pagination from "../controls/Pagination";
 import { withTranslation } from "react-i18next";
 import Search, { parseSearch } from "./parts/Search";
 import ResourceHeader from "./parts/ResourceHeader";
 import Toast from "../controls/Toast";
+import { getValue } from "../fields/utils";
 
 type ItemsAndPathProps = {
     items: [] | null,
@@ -30,22 +31,39 @@ function ListResource(props: PageProps) {
     const [itemsAndPath, setItemsAndPath] = useState<ItemsAndPathProps>({ items: null, path });
     const [page, setPage] = useState(1);
     const [allItems, setAllItems] = useState([]);
+    const [allFieldNames, setAllFieldNames] = useState<string[]>([]);
     const [abortController, setAbortController] = useState<TempAny>(null);
     const [search, setSearch] = useState("");
+    const [sort, setSort] = useState<SortColumnDirectionType>({ column: "", direction: "none" });
 
     const navigate = useNavigate();
+
+    function makeFieldnameList(prefix: string, items: any): string[] {
+        let list: Set<string> = new Set<string>();
+
+        if (typeof items === "object") {
+            if (Array.isArray(items)) {
+                if (prefix === "") {
+                    items.forEach(item => {
+                        makeFieldnameList("", item).forEach(value => list.add(value));
+                    });
+                }
+            }
+            else {
+                Object.keys(items).forEach(key => {
+                    makeFieldnameList((prefix ? (prefix + ".") : "") + key, items[key]).forEach(value => list.add(value));
+                });
+            }
+        }
+        if (prefix && list.size === 0 && prefix !== "$ref") {
+            list.add(prefix);
+        }
+        return [...list];
+    }
 
     useEffect(() => {
         if (!schema) {
             return;
-        }
-
-        function lastPartLower(value: string) {
-            const lastSlash = value.lastIndexOf("/");
-            if (lastSlash !== -1) {
-                value = value.substring(lastSlash + 1);
-            }
-            return value.toLowerCase();
         }
 
         const parsedSearch = parseSearch(search);
@@ -65,19 +83,12 @@ function ListResource(props: PageProps) {
         }
         if ("get" in resourcesByPath_) {
             Rest.get(path + "?listAccessible=true" + labelFilter).then((data: TempAny) => {
-                let start = 0;
-                let end = data.items.length;
-                while (data.items.length > start && !lastPartLower(data.items[start]).startsWith(name)) {
-                    start++;
-                }
-                while (end - 1 >= start && !lastPartLower(data.items[end - 1]).startsWith(name)) {
-                    end--;
-                }
-                setAllItems(data.items.slice(start, end));
+                setAllItems(data.items);
                 setAbortController(
-                    getResourceEvents(schema, path + "?listAccessible=true&expand=true&offset=" + String(start + (page - 1) * pageSize) + "&limit=" + Math.min(pageSize, end - start) + labelFilter, (data: TempAny) => {
+                    getResourceEvents(schema, path + "?listAccessible=true&expand=true&offset=0&limit=1000000", (data: TempAny) => {
                         if (data.items) {
                             setItemsAndPath({ items: data.items, path });
+                            setAllFieldNames(makeFieldnameList("", data.items));
                         }
                         else {
                             setItemsAndPath({ items: [], path });
@@ -130,14 +141,76 @@ function ListResource(props: PageProps) {
         return [...filterValues];
     }
 
+    function includesValue(entry: any, value: string): boolean {
+        const splitEqual = value.split("=");
+        if (splitEqual.length === 1) {
+            if (typeof entry === "object") {
+                const keys = Object.keys(entry);
+                for (let i = 0; i < keys.length; i++) {
+                    if (!includesValue(entry[keys[i]], value)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            else {
+                if (!String(entry).toUpperCase().includes(value.toUpperCase())) {
+                    return false;
+                }
+            }
+        }
+        else if (splitEqual.length === 2) {
+            const splitPeriod = splitEqual[0].split(".");
+            for (let i = 0; i < splitPeriod.length; i++) {
+                entry = entry[splitPeriod[i]];
+                if (!entry) {
+                    return false;
+                }
+            }
+            return String(entry).toUpperCase().includes(splitEqual[1].toUpperCase());
+        }
+        return false;
+    }
+
     if (itemsAndPath.items) {
         const dataNotDeleted = itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true);
+        const sorted = (sort.column && sort.direction !== "none") ?
+            dataNotDeleted.sort((item1: any, item2: any) => {
+                const value1 = getValue(item1, sort.column);
+                const value2 = getValue(item2, sort.column);
+                let asc;
+                if (typeof value1 === "number" && typeof value2 === "number") {
+                    asc = value1 - value2;
+                }
+                else if (typeof value1 === "object" && typeof value2 === "object") {
+                    asc = JSON.stringify(value1).localeCompare(JSON.stringify(value2));
+                }
+                else {
+                    asc = String(value1).localeCompare(String(value2));
+                }
+                return sort.direction === "asc" ? asc : -asc;
+            }) : dataNotDeleted;
+
+        const searchFiltered = sorted.filter(entry => {
+            const searchParts = search.split(" ");
+            for (let i = 0; i < searchParts.length; i++) {
+                if (searchParts[i] && !includesValue(entry, searchParts[i])) {
+                    return false;
+                }
+            }
+            return true;
+        });
+
+        const pageData = searchFiltered.filter((s, index) => index >= (page - 1) * pageSize && index < page * pageSize);
+
+        const data = pageData;
+
         return (
             <PageLayout {...props} >
                 <ResourceHeader schema={schema} path={path} type="list" filterValues={getFilterValues()} onAction={() => navigate("/ui/resource/create" + path)} />
                 <div className="NuoTableContainer">
                     <div className="NuoTableOptions">
-                        <Search search={search} setSearch={(search: string) => {
+                        <Search fieldNames={allFieldNames} search={search} setSearch={(search: string) => {
                             setPage(1);
                             setSearch(search);
                         }} />
@@ -146,8 +219,10 @@ function ListResource(props: PageProps) {
                         <Table
                             data-testid="list_resource__table"
                             {...props}
-                            data={dataNotDeleted}
+                            data={data}
                             path={itemsAndPath.path}
+                            sort={sort}
+                            setSort={setSort}
                         />
                         {renderPaging()}
                     </div>

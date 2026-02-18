@@ -34,8 +34,8 @@ export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:Re
         if (pathParts.length >= 4) { // ["","projects|databases|backups|backuppolicies|...","{organization}","{project}",...]
             const organization = pathParts[2];
             const project = pathParts[3];
-            Rest.get("/projects/" + encodeURIComponent(organization) + "/" + encodeURIComponent(project)).then((proj: any) => {
-                setSla(proj.sla || undefined);
+            Rest.getWithCache("/projects/" + encodeURIComponent(organization) + "/" + encodeURIComponent(project)).then((proj: any) => {
+                setSla(proj?.sla || undefined);
             })
         }
     }, [schema, path]);
