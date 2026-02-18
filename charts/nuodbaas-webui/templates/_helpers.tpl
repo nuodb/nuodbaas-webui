@@ -103,9 +103,9 @@ Create the name of the service account to use
 */}}
 {{- define "nuodbaas-webui.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "nuodbaas-webui.fullname" .) .Values.serviceAccount.name }}
+{{- tpl .Values.serviceAccount.name . | default (include "nuodbaas-webui.fullname" .) }}
 {{- else }}
-{{- default "default" .Values.serviceAccount.name }}
+{{- tpl .Values.serviceAccount.name . | default "default" }}
 {{- end }}
 {{- end }}
 
