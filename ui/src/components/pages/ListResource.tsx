@@ -141,6 +141,64 @@ function ListResource(props: PageProps) {
         return [...filterValues];
     }
 
+    /* compares both values. value2 can have asterisks ("*") at the beginning, end or both as wildcards.
+       - "value1" or "value2" can be string, null or undefined values
+       - if "value1" or "value2" are objects or arrays, they are converted to JSON text and then used for comparison
+       - the match is case-insensitive
+    */
+    function isMatch(value1: any, value2: any) {
+        if (value1 === null && value2 === null || value1 === undefined && value2 === undefined) {
+            return true;
+        }
+        if (value1 === null || value2 === null || value1 === undefined || value2 === undefined) {
+            return false;
+        }
+
+        if (typeof value1 === "object") {
+            value1 = JSON.stringify(value1);
+        }
+        if (typeof value2 === "object") {
+            value2 = JSON.stringify(value2);
+        }
+
+        value1 = String(value1).trim().toUpperCase();
+        value2 = String(value2).trim().toUpperCase();
+
+        if (value2.startsWith("*")) {
+            if (value2.endsWith("*")) {
+                return value1.includes(value2.substring(1, value2.length - 1));
+            }
+            else {
+                return value1.endsWith(value2.substring(1));
+            }
+        }
+        else if (value2.endsWith("*")) {
+            return value1.startsWith(value2.substring(0, value2.length - 1));
+        }
+        else {
+            return value1 === value2;
+        }
+    }
+
+    /* check if value is in the entry
+       There are multiple scenarios:
+       - the last element of "value.split("=")" can have asterisks("*") at the beginning and/or end to do a partial search
+       - "value" has no equal sign: check if any value in the "entry" object matches (hierarchically)
+           Example: entry={"tier":"n0.nano"} value="n0.nano"
+                    entry={"labels":{"key1":"value1"}} value="value1"
+       - "value" has a single equal sign:
+           value.split("=")[0] contains the field identifier in the object (periods in the field identifier do a hierarchical field lookup)
+           value.split("=")[1] contains the value to search in that field. If the field is an object, it will match the key in the object
+           Example: entry={"tier":"n0.nano"} value="tier=n0.nano"
+                    entry={"labels":{"key1":"value1", "key2":"value2"}} value="labels=key1"
+       - "value" has two equal signs:
+           value.split("=")[0] contains the field identifier pointing to a Map object (periods in the field identifier do a hierarchical field lookup)
+           - if it is not a Map object, it returns "false"
+           value.split("=")[1] contains the key to search in that field's Map Object
+           value.split("=")[2] contains the value to search in that Map Object's field
+           Example: entry={"a":{"b":{"c":{"d":"e"}}}} value="a.b.c=d=e"
+                    entry={"labels":{"key1":"value1","key2":"value2"}} value="labels=key2=value2"
+    */
     function includesValue(entry: any, value: string): boolean {
         const splitEqual = value.split("=");
         if (splitEqual.length === 1) {
@@ -154,7 +212,7 @@ function ListResource(props: PageProps) {
                 return false;
             }
             else {
-                return String(entry).toUpperCase().includes(value.toUpperCase());
+                return isMatch(entry, value);
             }
         }
         else if (splitEqual.length === 2 || splitEqual.length === 3) {
@@ -167,11 +225,14 @@ function ListResource(props: PageProps) {
             }
 
             if (splitEqual.length === 2) {
-                return String(entry).toUpperCase().includes(splitEqual[1].toUpperCase());
+                if (typeof entry === "object" && !Array.isArray(entry)) {
+                    return !!Object.keys(entry).find(k => isMatch(k, splitEqual[1]));
+                }
+                return isMatch(entry, splitEqual[1]);
             }
             else if (typeof entry === "object") {
-                const key = Object.keys(entry).find(k => k.toUpperCase() === splitEqual[1].trim().toUpperCase());
-                if (key && String(entry[key]).toUpperCase().includes(splitEqual[2].trim().toUpperCase())) {
+                const key = Object.keys(entry).find(k => isMatch(k, splitEqual[1]));
+                if (key && isMatch(entry[key], splitEqual[2])) {
                     return true;
                 }
                 else {

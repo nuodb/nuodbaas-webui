@@ -102,7 +102,7 @@
             "accessRule.deny": "Deny",
             "name": "Name",
             "labels": "Labels",
-            "search": "search, i.e. \"somevalue\" or \"fieldname=value\" or \"label=key=value\"",
+            "search": "search, i.e. \"somevalue\" or \"fieldname=value\" or \"fieldname=*partialvalue*\" or \"label=key=value\"",
             "sla": "SLA",
             "tier": "Tier",
             "properties": "Properties",
