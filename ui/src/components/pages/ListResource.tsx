@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -120,8 +120,8 @@ function ListResource(props: PageProps) {
         }
     }, [abortController]);
 
-    function renderPaging() {
-        const lastPage = Math.ceil(allItems.length / pageSize);
+    function renderPaging(total: number) {
+        const lastPage = Math.ceil(total / pageSize);
         return <Pagination count={lastPage} page={page} setPage={(page) => {
                 setPage(page);
         }} />;
@@ -147,19 +147,17 @@ function ListResource(props: PageProps) {
             if (typeof entry === "object") {
                 const keys = Object.keys(entry);
                 for (let i = 0; i < keys.length; i++) {
-                    if (!includesValue(entry[keys[i]], value)) {
-                        return false;
+                    if (includesValue(entry[keys[i]], value)) {
+                        return true;
                     }
                 }
-                return true;
+                return false;
             }
             else {
-                if (!String(entry).toUpperCase().includes(value.toUpperCase())) {
-                    return false;
-                }
+                return String(entry).toUpperCase().includes(value.toUpperCase());
             }
         }
-        else if (splitEqual.length === 2) {
+        else if (splitEqual.length === 2 || splitEqual.length === 3) {
             const splitPeriod = splitEqual[0].split(".");
             for (let i = 0; i < splitPeriod.length; i++) {
                 entry = entry[splitPeriod[i]];
@@ -167,7 +165,20 @@ function ListResource(props: PageProps) {
                     return false;
                 }
             }
-            return String(entry).toUpperCase().includes(splitEqual[1].toUpperCase());
+
+            if (splitEqual.length === 2) {
+                return String(entry).toUpperCase().includes(splitEqual[1].toUpperCase());
+            }
+            else if (typeof entry === "object") {
+                const key = Object.keys(entry).find(k => k.toUpperCase() === splitEqual[1].trim().toUpperCase());
+                if (key && String(entry[key]).toUpperCase().includes(splitEqual[2].trim().toUpperCase())) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            return false;
         }
         return false;
     }
@@ -224,7 +235,7 @@ function ListResource(props: PageProps) {
                             sort={sort}
                             setSort={setSort}
                         />
-                        {renderPaging()}
+                        {renderPaging(data ? data.length : 0)}
                     </div>
                 </div>
             </PageLayout>

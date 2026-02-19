@@ -1,3 +1,5 @@
+// (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
+
 import { ReactNode } from "react";
 
 export type SortIconProps = {

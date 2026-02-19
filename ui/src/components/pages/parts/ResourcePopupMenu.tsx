@@ -1,4 +1,4 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { useNavigate } from "react-router-dom";
 import { CustomViewMenu, evaluate, getCustomizationsView } from "../../../utils/Customizations";
