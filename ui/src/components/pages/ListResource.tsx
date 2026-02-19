@@ -10,7 +10,7 @@ import Auth from "../../utils/auth"
 import { PageProps, SortColumnDirectionType, TempAny } from "../../utils/types";
 import Pagination from "../controls/Pagination";
 import { withTranslation } from "react-i18next";
-import Search, { parseSearch } from "./parts/Search";
+import Search from "./parts/Search";
 import ResourceHeader from "./parts/ResourceHeader";
 import Toast from "../controls/Toast";
 import { getValue } from "../fields/utils";
@@ -66,23 +66,13 @@ function ListResource(props: PageProps) {
             return;
         }
 
-        const parsedSearch = parseSearch(search);
-        let labelFilter = "";
-        if ("label" in parsedSearch) {
-            labelFilter = "&labelFilter=" + parsedSearch["label"];
-        }
-        let name = "";
-        if ("name" in parsedSearch) {
-            name = parsedSearch["name"];
-        }
-
         let resourcesByPath_ = getResourceByPath(schema, path);
         if (!resourcesByPath_) {
             navigate("/ui/notfound");
             return;
         }
         if ("get" in resourcesByPath_) {
-            Rest.get(path + "?listAccessible=true" + labelFilter).then((data: TempAny) => {
+            Rest.get(path + "?listAccessible=true").then((data: TempAny) => {
                 setAllItems(data.items);
                 setAbortController(
                     getResourceEvents(schema, path + "?listAccessible=true&expand=true&offset=0&limit=1000000", (data: TempAny) => {

@@ -1,7 +1,7 @@
 {
     "copyright": "(C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.",
     "views": {
-        "/databases?/{organization}?/{project}?/{name}": {
+        "/databases": {
             "columns": [
                 "name",
                 "organization",
@@ -74,7 +74,7 @@
                 }
             ]
         },
-        "/backuppolicies?/{organization}?/{name}": {
+        "/backuppolicies": {
             "columns": [
                 "name",
                 "organization",
@@ -95,7 +95,7 @@
                 }
             ]
         },
-        "/projects?/{organization}?/{name}": {
+        "/projects": {
             "menu": [
                 {
                     "label": "button.show.databases",
