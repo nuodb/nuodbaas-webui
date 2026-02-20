@@ -1,5 +1,5 @@
 #!/bin/bash
-# (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+# (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 REPOSITORY="nuodbaas-webui"
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 CHART_FILE="charts/${REPOSITORY}/Chart.yaml"
