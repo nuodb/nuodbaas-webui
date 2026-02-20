@@ -130,13 +130,6 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
         })
     }
 
-    static deleteCacheEntry(path: string) {
-        const entry = this.cache.get(path);
-        if (entry && entry.status === "done") {
-            this.cache.delete(path);
-        }
-    }
-
     static async getWithCache(path: string) {
         //clean out old entries
         const now = Date.now();
