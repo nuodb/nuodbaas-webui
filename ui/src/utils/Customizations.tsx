@@ -82,7 +82,7 @@ export function getCustomizationsView(path: string): CustomView | null {
     const views: CustomViews | undefined = getCustomizations()?.views;
     if (views) {
         for (const sPath of Object.keys(views)) {
-            if (matchesPath(path, sPath)) {
+            if (path === sPath || path.startsWith(sPath + "/")) {
                 return views[sPath];
             }
         }

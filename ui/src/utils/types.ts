@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { ReactNode } from "react";
 import { BackgroundTaskType } from "./BackgroundTasks";
@@ -84,4 +84,9 @@ export interface PageProps {
     tasks: BackgroundTaskType[];
     setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>;
     t: any
+};
+
+export type SortColumnDirectionType = {
+    column: string;
+    direction: "none" | "asc" | "desc";
 };

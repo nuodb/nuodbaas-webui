@@ -1,4 +1,4 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { useNavigate } from "react-router-dom";
 import { CustomViewMenu, evaluate, getCustomizationsView } from "../../../utils/Customizations";
@@ -34,8 +34,8 @@ export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:Re
         if (pathParts.length >= 4) { // ["","projects|databases|backups|backuppolicies|...","{organization}","{project}",...]
             const organization = pathParts[2];
             const project = pathParts[3];
-            Rest.get("/projects/" + encodeURIComponent(organization) + "/" + encodeURIComponent(project)).then((proj: any) => {
-                setSla(proj.sla || undefined);
+            Rest.getWithCache("/projects/" + encodeURIComponent(organization) + "/" + encodeURIComponent(project)).then((proj: any) => {
+                setSla(proj?.sla || undefined);
             })
         }
     }, [schema, path]);

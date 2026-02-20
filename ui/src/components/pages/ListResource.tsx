@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -7,12 +7,13 @@ import { getResourceEvents, getResourceByPath, getFilterField } from "../../util
 import { Rest } from "./parts/Rest";
 import PageLayout from './parts/PageLayout'
 import Auth from "../../utils/auth"
-import { PageProps, TempAny } from "../../utils/types";
+import { PageProps, SortColumnDirectionType, TempAny } from "../../utils/types";
 import Pagination from "../controls/Pagination";
 import { withTranslation } from "react-i18next";
-import Search, { parseSearch } from "./parts/Search";
+import Search from "./parts/Search";
 import ResourceHeader from "./parts/ResourceHeader";
 import Toast from "../controls/Toast";
+import { getValue } from "../fields/utils";
 
 type ItemsAndPathProps = {
     items: [] | null,
@@ -30,32 +31,39 @@ function ListResource(props: PageProps) {
     const [itemsAndPath, setItemsAndPath] = useState<ItemsAndPathProps>({ items: null, path });
     const [page, setPage] = useState(1);
     const [allItems, setAllItems] = useState([]);
+    const [allFieldNames, setAllFieldNames] = useState<string[]>([]);
     const [abortController, setAbortController] = useState<TempAny>(null);
     const [search, setSearch] = useState("");
+    const [sort, setSort] = useState<SortColumnDirectionType>({ column: "", direction: "none" });
 
     const navigate = useNavigate();
+
+    function makeFieldnameList(prefix: string, items: any): string[] {
+        let list: Set<string> = new Set<string>();
+
+        if (typeof items === "object") {
+            if (Array.isArray(items)) {
+                if (prefix === "") {
+                    items.forEach(item => {
+                        makeFieldnameList("", item).forEach(value => list.add(value));
+                    });
+                }
+            }
+            else {
+                Object.keys(items).forEach(key => {
+                    makeFieldnameList((prefix ? (prefix + ".") : "") + key, items[key]).forEach(value => list.add(value));
+                });
+            }
+        }
+        if (prefix && list.size === 0 && prefix !== "$ref") {
+            list.add(prefix);
+        }
+        return [...list];
+    }
 
     useEffect(() => {
         if (!schema) {
             return;
-        }
-
-        function lastPartLower(value: string) {
-            const lastSlash = value.lastIndexOf("/");
-            if (lastSlash !== -1) {
-                value = value.substring(lastSlash + 1);
-            }
-            return value.toLowerCase();
-        }
-
-        const parsedSearch = parseSearch(search);
-        let labelFilter = "";
-        if ("label" in parsedSearch) {
-            labelFilter = "&labelFilter=" + parsedSearch["label"];
-        }
-        let name = "";
-        if ("name" in parsedSearch) {
-            name = parsedSearch["name"];
         }
 
         let resourcesByPath_ = getResourceByPath(schema, path);
@@ -64,20 +72,13 @@ function ListResource(props: PageProps) {
             return;
         }
         if ("get" in resourcesByPath_) {
-            Rest.get(path + "?listAccessible=true" + labelFilter).then((data: TempAny) => {
-                let start = 0;
-                let end = data.items.length;
-                while (data.items.length > start && !lastPartLower(data.items[start]).startsWith(name)) {
-                    start++;
-                }
-                while (end - 1 >= start && !lastPartLower(data.items[end - 1]).startsWith(name)) {
-                    end--;
-                }
-                setAllItems(data.items.slice(start, end));
+            Rest.get(path + "?listAccessible=true").then((data: TempAny) => {
+                setAllItems(data.items);
                 setAbortController(
-                    getResourceEvents(schema, path + "?listAccessible=true&expand=true&offset=" + String(start + (page - 1) * pageSize) + "&limit=" + Math.min(pageSize, end - start) + labelFilter, (data: TempAny) => {
+                    getResourceEvents(schema, path + "?listAccessible=true&expand=true&offset=0&limit=1000000", (data: TempAny) => {
                         if (data.items) {
                             setItemsAndPath({ items: data.items, path });
+                            setAllFieldNames(makeFieldnameList("", data.items));
                         }
                         else {
                             setItemsAndPath({ items: [], path });
@@ -109,8 +110,8 @@ function ListResource(props: PageProps) {
         }
     }, [abortController]);
 
-    function renderPaging() {
-        const lastPage = Math.ceil(allItems.length / pageSize);
+    function renderPaging(total: number) {
+        const lastPage = Math.ceil(total / pageSize);
         return <Pagination count={lastPage} page={page} setPage={(page) => {
                 setPage(page);
         }} />;
@@ -130,14 +131,148 @@ function ListResource(props: PageProps) {
         return [...filterValues];
     }
 
+    /* compares both values. value2 can have asterisks ("*") at the beginning, end or both as wildcards.
+       - "value1" or "value2" can be string, null or undefined values
+       - if "value1" or "value2" are objects or arrays, they are converted to JSON text and then used for comparison
+       - the match is case-insensitive
+    */
+    function isMatch(value1: any, value2: any) {
+        if (value1 === null && value2 === null || value1 === undefined && value2 === undefined) {
+            return true;
+        }
+        if (value1 === null || value2 === null || value1 === undefined || value2 === undefined) {
+            return false;
+        }
+
+        if (typeof value1 === "object") {
+            value1 = JSON.stringify(value1);
+        }
+        if (typeof value2 === "object") {
+            value2 = JSON.stringify(value2);
+        }
+
+        value1 = String(value1).trim().toUpperCase();
+        value2 = String(value2).trim().toUpperCase();
+
+        if (value2.startsWith("*")) {
+            if (value2.endsWith("*")) {
+                return value1.includes(value2.substring(1, value2.length - 1));
+            }
+            else {
+                return value1.endsWith(value2.substring(1));
+            }
+        }
+        else if (value2.endsWith("*")) {
+            return value1.startsWith(value2.substring(0, value2.length - 1));
+        }
+        else {
+            return value1 === value2;
+        }
+    }
+
+    /* check if value is in the entry
+       There are multiple scenarios:
+       - the last element of "value.split("=")" can have asterisks("*") at the beginning and/or end to do a partial search
+       - "value" has no equal sign: check if any value in the "entry" object matches (hierarchically)
+           Example: entry={"tier":"n0.nano"} value="n0.nano"
+                    entry={"labels":{"key1":"value1"}} value="value1"
+       - "value" has a single equal sign:
+           value.split("=")[0] contains the field identifier in the object (periods in the field identifier do a hierarchical field lookup)
+           value.split("=")[1] contains the value to search in that field. If the field is an object, it will match the key in the object
+           Example: entry={"tier":"n0.nano"} value="tier=n0.nano"
+                    entry={"labels":{"key1":"value1", "key2":"value2"}} value="labels=key1"
+       - "value" has two equal signs:
+           value.split("=")[0] contains the field identifier pointing to a Map object (periods in the field identifier do a hierarchical field lookup)
+           - if it is not a Map object, it returns "false"
+           value.split("=")[1] contains the key to search in that field's Map Object
+           value.split("=")[2] contains the value to search in that Map Object's field
+           Example: entry={"a":{"b":{"c":{"d":"e"}}}} value="a.b.c=d=e"
+                    entry={"labels":{"key1":"value1","key2":"value2"}} value="labels=key2=value2"
+    */
+    function includesValue(entry: any, value: string): boolean {
+        const splitEqual = value.split("=");
+        if (splitEqual.length === 1) {
+            if (typeof entry === "object") {
+                const keys = Object.keys(entry);
+                for (let i = 0; i < keys.length; i++) {
+                    if (includesValue(entry[keys[i]], value)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            else {
+                return isMatch(entry, value);
+            }
+        }
+        else if (splitEqual.length === 2 || splitEqual.length === 3) {
+            const splitPeriod = splitEqual[0].split(".");
+            for (let i = 0; i < splitPeriod.length; i++) {
+                entry = entry[splitPeriod[i]];
+                if (!entry) {
+                    return false;
+                }
+            }
+
+            if (splitEqual.length === 2) {
+                if (typeof entry === "object" && !Array.isArray(entry)) {
+                    return !!Object.keys(entry).find(k => isMatch(k, splitEqual[1]));
+                }
+                return isMatch(entry, splitEqual[1]);
+            }
+            else if (typeof entry === "object") {
+                const key = Object.keys(entry).find(k => isMatch(k, splitEqual[1]));
+                if (key && isMatch(entry[key], splitEqual[2])) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            return false;
+        }
+        return false;
+    }
+
     if (itemsAndPath.items) {
         const dataNotDeleted = itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true);
+        const sorted = (sort.column && sort.direction !== "none") ?
+            dataNotDeleted.sort((item1: any, item2: any) => {
+                const value1 = getValue(item1, sort.column);
+                const value2 = getValue(item2, sort.column);
+                let asc;
+                if (typeof value1 === "number" && typeof value2 === "number") {
+                    asc = value1 - value2;
+                }
+                else if (typeof value1 === "object" && typeof value2 === "object") {
+                    asc = JSON.stringify(value1).localeCompare(JSON.stringify(value2));
+                }
+                else {
+                    asc = String(value1).localeCompare(String(value2));
+                }
+                return sort.direction === "asc" ? asc : -asc;
+            }) : dataNotDeleted;
+
+        const searchFiltered = sorted.filter(entry => {
+            const searchParts = search.split(" ");
+            for (let i = 0; i < searchParts.length; i++) {
+                if (searchParts[i] && !includesValue(entry, searchParts[i])) {
+                    return false;
+                }
+            }
+            return true;
+        });
+
+        const pageData = searchFiltered.filter((s, index) => index >= (page - 1) * pageSize && index < page * pageSize);
+
+        const data = pageData;
+
         return (
             <PageLayout {...props} >
                 <ResourceHeader schema={schema} path={path} type="list" filterValues={getFilterValues()} onAction={() => navigate("/ui/resource/create" + path)} />
                 <div className="NuoTableContainer">
                     <div className="NuoTableOptions">
-                        <Search search={search} setSearch={(search: string) => {
+                        <Search fieldNames={allFieldNames} search={search} setSearch={(search: string) => {
                             setPage(1);
                             setSearch(search);
                         }} />
@@ -146,10 +281,12 @@ function ListResource(props: PageProps) {
                         <Table
                             data-testid="list_resource__table"
                             {...props}
-                            data={dataNotDeleted}
+                            data={data}
                             path={itemsAndPath.path}
+                            sort={sort}
+                            setSort={setSort}
                         />
-                        {renderPaging()}
+                        {renderPaging(data ? data.length : 0)}
                     </div>
                 </div>
             </PageLayout>

@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { withTranslation } from "react-i18next";
 import { MenuItemProps, TempAny } from "../../../utils/types";
@@ -8,22 +8,17 @@ import { getSchema, getSchemaPath } from "../../../utils/schema";
 
 async function saveColumns(cols: MenuItemProps[], path: string) {
 
-    // find appropriate schema path - the longest path with these conditions:
+    // find appropriate schema path - the longest path with no placeholders:
     // - is a view path (doesn't have a "delete" method (or no "put" / "patch"))
-    // - schema path ends with a "{variable}" component (ignoring first path component)
-    // It makes all the variable components optional (prepends with "?")
     const schema = await getSchema();
-    let p = path;
-    let schemaPath;
-    let sp;
-    while ((sp = getSchemaPath(schema, p)) && (sp.endsWith("}") || sp.split("/").length === 2) && (!("delete" in schema[sp]))) {
-        schemaPath = sp;
-        p = p + "/next";
+    let schemaPath = "";
+    const pathParts = path.split("/");
+    for (let i = 1; i < pathParts.length; i++) {
+        const sp = getSchemaPath(schema, pathParts.slice(0, i + 1).join("/"));
+        if (sp && !sp.includes("{") && (!("delete" in schema[sp])) && sp.length > schemaPath.length) {
+            schemaPath = sp;
+        }
     }
-    if (!schemaPath) {
-        schemaPath = path;
-    }
-    schemaPath = schemaPath.replaceAll("/{", "?/{");
 
     // merge columns into the customizations
     mergeCustomizations({

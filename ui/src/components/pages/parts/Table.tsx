@@ -6,7 +6,7 @@ import { TableBody, TableTh, TableCell, Table as TableCustom, TableHead, TableRo
 import { getResourceByPath, getChild, getSchemaPath, hasMonitoredPath, getEntryPath } from "../../../utils/schema";
 import { Rest } from "./Rest";
 import Dialog from "./Dialog";
-import { MenuItemProps, PageProps, TempAny } from "../../../utils/types";
+import { MenuItemProps, PageProps, SortColumnDirectionType, TempAny } from "../../../utils/types";
 import { CustomViewField, evaluate, getCustomizationsView } from '../../../utils/Customizations';
 import TableSettingsColumns from './TableSettingsColumns';
 import { useEffect, useState } from 'react';
@@ -16,6 +16,7 @@ import Toast from '../../controls/Toast';
 import ResourcePopupMenu from './ResourcePopupMenu';
 import { Field } from '../../fields/Field';
 import Auth from '../../../utils/auth';
+import SortIcon from '../../controls/SortIcon';
 
 function getFlattenedKeys(obj: TempAny, prefix?: string): string[] {
     let ret: string[] = [];
@@ -38,6 +39,8 @@ interface TableProps extends PageProps {
     ["data-testid"]: string;
     data: TempAny;
     path: string;
+    sort?: SortColumnDirectionType;
+    setSort?: (sort: SortColumnDirectionType) => void;
 }
 
 /**
@@ -237,6 +240,26 @@ function Table(props: TableProps) {
         }
     }
 
+
+    function renderColumn(column: MenuItemProps | undefined) {
+        if (!column || data.length === 0) {
+            return undefined;
+        }
+        return (
+            <div className="NuoRow" style={{ alignItems: "center" }}>
+                <div>{data.length > 0 && tableLabels[column.id]}</div>
+                {props.sort !== undefined
+                    && <SortIcon
+                        sort={props.sort.column !== column.id ? "none" : props.sort.direction || "none"}
+                        setSort={(direction: "asc" | "desc") => {
+                            props.setSort && props.setSort({ column: column.id, direction })
+                        }}
+                    />
+                }
+            </div>
+        );
+    }
+
     function renderTableSelectedActions() {
         const firstHeader = visibleColumns.length > 0 ? visibleColumns[0] : undefined;
         const deletableRefs = data.filter((d: any) => canDelete(d)).map((d: any) => d["$ref"]);
@@ -263,7 +286,7 @@ function Table(props: TableProps) {
                         event?.preventDefault();
                         handleDeleteMultiple();
                     }}><DeleteIcon />Delete</button>
-                </> : firstHeader && data.length > 0 ? tableLabels[firstHeader.id] : undefined
+                </> : renderColumn(firstHeader)
                 }
             </div>
         </TableTh>
@@ -292,7 +315,7 @@ function Table(props: TableProps) {
                         <>
                             {visibleColumns.filter((_, index) => index > 0).map((column) => (
                                 <TableTh key={column.id} data-testid={column.id}>
-                                    {data.length > 0 && tableLabels[column.id]}
+                                    {renderColumn(column)}
                                 </TableTh>
                             ))}
                         <TableTh key="$ref" data-testid="$ref" className="NuoTableMenuCell NuoStickyRight" zIndex={1000 + data.length}>

@@ -76,7 +76,7 @@
             "accessRule.deny": "Ablehnen",
             "name": "Name",
             "labels": "Etiketten",
-            "search": "suchen, z.B. \"einname\" or \"label=schlüssel=wert,!andererschlüssel name=anderername\"",
+            "search": "suchen, z.B. \"wert\" oder \"feldname=wert\" oder \"feldname=*teilwert*\" oder \"label=schlüssel=wert\"",
             "sla": "SLA",
             "tier": "Tier",
             "properties": "Eigenschaften",

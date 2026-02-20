@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 package com.nuodb.selenium.basic;
 
@@ -31,9 +31,10 @@ public class SearchTest extends TestRoutines {
 
         // Setup users
         String name = shortUnique("u");
+        String labelName = "l" + name.substring(1);
         for(int i=10; i<=99; i++) {
             System.out.println("Creating user /" + TEST_ORGANIZATION + "/" + (name + i));
-            createResourceRest(Resource.users, "/" + TEST_ORGANIZATION + "/" + (name + i), body.replaceAll("%%%NAME%%%", name + i).replaceAll("%%%VALUE2%%%", (name + (i%10))));
+            createResourceRest(Resource.users, "/" + TEST_ORGANIZATION + "/" + (name + i), body.replaceAll("%%%NAME%%%", name + i).replaceAll("%%%VALUE2%%%", (labelName + (i%10))));
         }
 
         // verify we have full page of users
@@ -46,7 +47,7 @@ public class SearchTest extends TestRoutines {
         });
 
         // search users starting with "1" index and check that 10 users are returned
-        replaceInputElementByName("search", name + "1");
+        replaceInputElementByName("search", name + "1*");
         waitInputElementByName("search").sendKeys(Keys.RETURN);
         waitRestComplete();
         retry(()-> {
@@ -55,7 +56,7 @@ public class SearchTest extends TestRoutines {
         });
 
         // search users by label existence
-        replaceInputElementByName("search", "label=label1");
+        replaceInputElementByName("search", "labels=label1");
         waitInputElementByName("search").sendKeys(Keys.RETURN);
         waitRestComplete();
         retry(()-> {
@@ -64,7 +65,7 @@ public class SearchTest extends TestRoutines {
         });
 
         // search users by label value
-        replaceInputElementByName("search", "label=label2=" + name + "8");
+        replaceInputElementByName("search", "labels=label2=" + labelName + "8");
         waitInputElementByName("search").sendKeys(Keys.RETURN);
         waitRestComplete();
         retry(()->{
@@ -73,7 +74,7 @@ public class SearchTest extends TestRoutines {
         });
 
         // search users by label value and name
-        replaceInputElementByName("search", "label=label2=" + name + "8" + " name=" + name + "1");
+        replaceInputElementByName("search", "labels=label2=" + labelName + "8" + " name=" + name + "1*");
         waitInputElementByName("search").sendKeys(Keys.RETURN);
         waitRestComplete();
         retry(()-> {
@@ -82,12 +83,28 @@ public class SearchTest extends TestRoutines {
         });
 
         // search users by partial name
-        replaceInputElementByName("search", "name=" + name + "1");
+        replaceInputElementByName("search", "name=" + name + "1*");
         waitInputElementByName("search").sendKeys(Keys.RETURN);
         waitRestComplete();
         retry(()->{
             var nc = waitTableElements("list_resource__table", "name", null, "name");
             assertEquals(10, nc.size());
+        });
+
+        replaceInputElementByName("search", "name=*" + name.substring(1) + "1*");
+        waitInputElementByName("search").sendKeys(Keys.RETURN);
+        waitRestComplete();
+        retry(()->{
+            var nc = waitTableElements("list_resource__table", "name", null, "name");
+            assertEquals(10, nc.size());
+        });
+
+        replaceInputElementByName("search", "name=*" + name.substring(2) + "18");
+        waitInputElementByName("search").sendKeys(Keys.RETURN);
+        waitRestComplete();
+        retry(()->{
+            var nc = waitTableElements("list_resource__table", "name", null, "name");
+            assertEquals(1, nc.size());
         });
 
         // search users by full name
