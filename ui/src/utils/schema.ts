@@ -245,6 +245,42 @@ export function getCreatePath(rootSchema: TempAny, path: string) : string|null {
 }
 
 /**
+ * finds path which can be used to view a single entry. It finds the subpath having the longest path
+ * in a GET request and ending with a placeholder (i.e. {})
+ * @param {*} rootSchema
+ * @param {*} path
+ * @returns full path or null if not found
+ */
+export function getEntryPath(rootSchema: TempAny, path: string) : string|null {
+    if(!rootSchema) {
+        return null;
+    }
+
+    let retPath = "";
+    const parts = path.split("/");
+    Object.keys(rootSchema).forEach(sPath => {
+        const sParts = sPath.split("/");
+        if(parts.length >= sParts.length) {
+            return;
+        }
+        for (let i = 0; i < parts.length; i++) {
+            if(parts[i] !== sParts[i] && !sParts[i].startsWith("{")) {
+                return;
+            }
+        }
+        if(retPath.length < sPath.length && ("get" in rootSchema[sPath]) && sPath[sPath.length-1].endsWith("}")) {
+            retPath = sPath;
+        }
+    });
+    if(!retPath) {
+        return null;
+    }
+    else {
+        return retPath;
+    }
+}
+
+/**
  * returns field name which can be used as filter for this list
  * @param {*} rootSchema
  * @param {*} path

@@ -1,5 +1,5 @@
 #!/bin/bash
-# (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+# (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 REPOSITORY="nuodbaas-webui"
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 CHART_FILE="charts/${REPOSITORY}/Chart.yaml"
@@ -8,10 +8,8 @@ APP_VERSION="$(sed -n -E 's/^appVersion: *"?([^ "]*)"?.*/\1/p' "$CHART_FILE")"
 VERSION="$(sed -n -E 's/^version: *"?([^ "]*)"?.*/\1/p' "$CHART_FILE")"
 GIT_HASH="$(git rev-parse --short HEAD)"
 GIT_DOCKER_IMAGE_RELEASE="ghcr.io/nuodb/${REPOSITORY}:${VERSION}"
-GIT_DOCKER_IMAGE_TEST="ghcr.io/nuodb/${REPOSITORY}-test:${VERSION}-${GIT_HASH}"
 GIT_DOCKER_IMAGE_SHA="${GIT_DOCKER_IMAGE_RELEASE}-${GIT_HASH}"
 AWS_DOCKER_IMAGE_RELEASE="${ECR_ACCOUNT_URL}/${REPOSITORY}-docker:${VERSION}"
-AWS_DOCKER_IMAGE_TEST="${ECR_ACCOUNT_URL}/${REPOSITORY}-test:${VERSION}-${GIT_HASH}"
 AWS_DOCKER_IMAGE_SHA="${AWS_DOCKER_IMAGE_RELEASE}-${GIT_HASH}"
 
 if [[ "${BRANCH}" == rel/* ]] ; then
@@ -135,10 +133,8 @@ if [ "$1" == "deployDockerImages" ] ; then
         else
             docker tag "${REPOSITORY}:latest" "${AWS_DOCKER_IMAGE_SHA}" && \
             docker push "${AWS_DOCKER_IMAGE_SHA}" && \
-            docker tag "${REPOSITORY}:test" "${AWS_DOCKER_IMAGE_TEST}" && \
-            docker push "${AWS_DOCKER_IMAGE_TEST}" && \
-            docker tag "${REPOSITORY}:test" "${GIT_DOCKER_IMAGE_TEST}" && \
-            docker push "${GIT_DOCKER_IMAGE_TEST}" && \
+            docker tag "${REPOSITORY}:latest" "${GIT_DOCKER_IMAGE_SHA}" && \
+            docker push "${GIT_DOCKER_IMAGE_SHA}" && \
 
             # use this last - the github docker image is used to determine a prior
             # successful build succeeded (to avoid rebuilding and ensuring an identical
@@ -192,6 +188,10 @@ if [ "$1" == "createRelease" ] && [ "$2" != "" ] ; then
         uploadHelmPackage
         exit $?
     fi
+fi
+
+if [ "$1" != "" ] ; then
+    echo "Invalid first argument: \"$1\""
 fi
 
 echo "$0 doesImageExist"
