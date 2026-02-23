@@ -63,7 +63,7 @@ public class SqlTests extends TestRoutines {
                 }
                 clickMenu(Resource.projects.name());
                 clickMenu(Resource.databases.name());
-                List<WebElement> statusColumn = waitTableElements("list_resource__table", "name", databaseName, "state");
+                List<WebElement> statusColumn = waitTableElements("list_resource__table", "name", databaseName, "status.state");
                 assertEquals(1, statusColumn.size());
                 assertEquals("Available", statusColumn.get(0).getText());
             });
