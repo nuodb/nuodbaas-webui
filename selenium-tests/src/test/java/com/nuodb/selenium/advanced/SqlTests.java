@@ -49,13 +49,13 @@ public class SqlTests extends TestRoutines {
     private void beforeEach() {
         loginRest();
         if(projectName == null || databaseName == null) {
-            // start project/database with a "keep" prefix, so we don't have to recreate the resources on each test
-            projectName = createProjectRestIfNotFound("keepproject");
-            databaseName = createDatabaseRestIfNotFound("keepproject", "keepdb1");
-
             // Wait for Database to become available
             final AtomicInteger count = new AtomicInteger(0);
             retry(180, 1000, ()->{
+                // start project/database with a "keep" prefix, so we don't have to recreate the resources on each test
+                projectName = createProjectRestIfNotFound("keepproject");
+                databaseName = createDatabaseRestIfNotFound("keepproject", "keepdb1");
+
                 if(count.incrementAndGet() == 179) {
                     run("bash", "-c", "pwd");
                     run(KUBECTL_BIN, "describe", "all", "-A");
