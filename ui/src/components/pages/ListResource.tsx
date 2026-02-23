@@ -154,7 +154,10 @@ function ListResource(props: PageProps) {
         value1 = String(value1).trim().toUpperCase();
         value2 = String(value2).trim().toUpperCase();
 
-        if (value2.startsWith("*")) {
+        if (value2 === "*") {
+            return true;
+        }
+        else if (value2.startsWith("*")) {
             if (value2.endsWith("*")) {
                 return value1.includes(value2.substring(1, value2.length - 1));
             }

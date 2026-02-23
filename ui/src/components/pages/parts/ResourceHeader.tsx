@@ -1,4 +1,4 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { withTranslation } from "react-i18next";
 import Button from "../../controls/Button";
@@ -12,6 +12,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useNavigate } from "react-router-dom";
 import ResourcePopupMenu from "./ResourcePopupMenu";
 import Auth from "../../../utils/auth";
+import { useEffect, useState } from "react";
+import { Rest } from "./Rest";
 
 type ResourceHeaderProps = {
     schema: SchemaType;
@@ -25,9 +27,25 @@ type ResourceHeaderProps = {
 
 function ResourceHeader({ schema, path, data, type, filterValues, onAction, t }: ResourceHeaderProps) {
     const navigate = useNavigate();
+    const [sla, setSla] = useState<string | undefined>(undefined);
     const createPath = getCreatePath(schema, path);
     const pathFirstPart = path.replace(/^\/cluster\//, "/cluster.").split("/")[1];
     const createLabel = t('button.create.resource', { resource: t("resource.label." + pathFirstPart + "_one", pathFirstPart) });
+
+    useEffect(() => {
+        if (!data) {
+            return;
+        }
+        const elementPath = data["$ref"] ? path + "/" + data["$ref"] : path;
+        const pathParts = elementPath.split("/");
+        if (pathParts.length >= 4) { // ["","projects|databases|backups|backuppolicies|...","{organization}","{project}",...]
+            const organization = pathParts[2];
+            const project = pathParts[3];
+            Rest.get("/projects/" + encodeURIComponent(organization) + "/" + encodeURIComponent(project)).then((proj: any) => {
+                setSla(proj?.sla || undefined);
+            })
+        }
+    }, [schema, path, data]);
 
     let title;
     let postfixLabel = undefined;
@@ -67,7 +85,7 @@ function ResourceHeader({ schema, path, data, type, filterValues, onAction, t }:
                 {type === "list" && createPath && Auth.hasAccess("PUT", createPath, undefined) && <div className="Nuo-p20"><Button data-testid={"list_resource__create_button_" + pathFirstPart} variant="contained" onClick={onAction}><AddIcon />{createLabel}</Button></div>}
                 {type === "create" && createPath && Auth.hasAccess("PUT", createPath, undefined) && <div className="Nuo-p20"><Button data-testid={"create_resource__create_button"} variant="contained" onClick={onAction}><CreateIcon />{t("button.create")}</Button></div>}
                 {type === "edit" && <div className="Nuo-p20"><Button data-testid={"create_resource__save_button"} variant="contained" onClick={onAction}><SaveIcon />{t("button.save")}</Button></div>}
-                {type === "view" && <ResourcePopupMenu row={data} schema={schema} path={path} t={t} defaultItem="edit" />}
+                {type === "view" && <ResourcePopupMenu row={data} schema={schema} path={path} sla={sla} t={t} defaultItem="edit" />}
             </div>
         </div>
     </div>

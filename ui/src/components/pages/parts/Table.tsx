@@ -167,9 +167,9 @@ function Table(props: TableProps) {
         }
     }
 
-    function renderMenuCell(row: any, zIndex: number) {
+    function renderMenuCell(row: any, zIndex: number, sla: string | undefined) {
         return <TableCell key={row["$ref"]} className="NuoTableMenuCell NuoStickyRight" zIndex={zIndex}>
-            <ResourcePopupMenu row={row} schema={schema} path={path} t={t} />
+            <ResourcePopupMenu row={row} schema={schema} path={path} sla={sla} t={t} />
         </TableCell>;
     }
 
@@ -304,6 +304,12 @@ function Table(props: TableProps) {
         }
     }
 
+    function getSla(ref: string) {
+        const pathParts = path.split("/"); // returns i.e. ["", "resource", "organization"]
+        const organization = pathParts.length >= 3 ? ("/" + pathParts[2]) : "";
+        return slaByPath["/" + pathParts[1] + organization + "/" + ref];
+    }
+
     const tableLabels = getTableLabels();
     let visibleColumns = moveNameColumnToFront(columns.filter(col => col.selected && !schemaPath?.includes("{" + col.id + "}")));
     return (
@@ -326,8 +332,8 @@ function Table(props: TableProps) {
                 </TableRow>}
             </TableHead>
             <TableBody>
-                {data.map((row: TempAny, index: number) => (
-                    <TableRow key={row["$ref"] || index}>
+                {data.map((row: TempAny, index: number) => {
+                    return <TableRow key={row["$ref"] || index}>
                         <TableCell key="__selected__" className="NuoStickyLeft">
                             <div className="NuoTableCheckbox">
                                 <input
@@ -350,9 +356,9 @@ function Table(props: TableProps) {
                             </div>
                         </TableCell>
                         {visibleColumns.filter((_, index) => index > 0).map(column => <TableCell key={column.id}>{renderDataCell(column.id, row)}</TableCell>)}
-                        {renderMenuCell(row, 1000 + data.length - 1 - index)}
-                    </TableRow>
-                ))}
+                        {renderMenuCell(row, 1000 + data.length - 1 - index, getSla(row))}
+                    </TableRow>;
+                })}
                 {data.length === 0 && <tr><td><div data-testid="table_nodata" className="NuoTableNoData">{t("text.noData")}</div></td></tr>}
             </TableBody>
         </TableCustom>

@@ -82,6 +82,15 @@ public class SearchTest extends TestRoutines {
             assertEquals(1, nc.size());
         });
 
+        // search all users by name=*
+        replaceInputElementByName("search", "name=" + name + "*");
+        waitInputElementByName("search").sendKeys(Keys.RETURN);
+        waitRestComplete();
+        retry(()->{
+            var nc = waitTableElements("list_resource__table", "name", null, "name");
+            assertEquals(20, nc.size());
+        });
+
         // search users by partial name
         replaceInputElementByName("search", "name=" + name + "1*");
         waitInputElementByName("search").sendKeys(Keys.RETURN);
