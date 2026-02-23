@@ -327,14 +327,6 @@ run-unit-tests: ## run unit tests
 build-integration-tests-docker:
 	@cd selenium-tests && docker build -t "${IMG_REPO}:test" . && cd ..
 
-.PHONY: run-smoke-tests-docker-only
-run-smoke-tests-docker-only: build-integration-tests-docker
-	@cd selenium-tests && docker run -e URL_BASE=http://selenium-tests-nginx-1 -e CP_URL="http://selenium-tests-nuodb-cp-1:8080" -e MVN_TEST=${MVN_TEST} --net kind -it "${IMG_REPO}:test" && cd ..
-
-.PHONY: run-smoke-tests-docker
-run-smoke-tests-docker: setup-integration-tests ## integration tests without setup/teardown (docker version)
-	@${MAKE} run-smoke-tests-docker-only teardown-integration-tests || (${MAKE} teardown-integration-tests && exit 1)
-
 .PHONY: run-integration-tests
 run-integration-tests: build-image setup-integration-tests ## run integration tests (+setup)
 	${MAKE} run-integration-tests-only teardown-integration-tests || (${MAKE} teardown-integration-tests && exit 1)

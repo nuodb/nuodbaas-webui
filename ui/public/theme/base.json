@@ -1,22 +1,17 @@
 {
     "copyright": "(C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.",
     "views": {
-        "/databases?/{organization}?/{project}?/{name}": {
+        "/databases": {
             "columns": [
+                "name",
                 "organization",
                 "project",
-                "name",
                 "labels",
                 "tier",
                 "properties",
-                "state",
+                "status.state",
                 "status"
             ],
-            "fields": {
-                "state": {
-                    "value": "status.state"
-                }
-            },
             "menu": [
                 {
                     "label": "button.db.connection.info",
@@ -79,10 +74,10 @@
                 }
             ]
         },
-        "/backuppolicies?/{organization}?/{name}": {
+        "/backuppolicies": {
             "columns": [
-                "organization",
                 "name",
+                "organization",
                 "labels",
                 "frequency",
                 "selector",
@@ -100,7 +95,7 @@
                 }
             ]
         },
-        "/projects?/{organization}?/{name}": {
+        "/projects": {
             "menu": [
                 {
                     "label": "button.show.databases",

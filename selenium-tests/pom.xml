@@ -1,4 +1,4 @@
-<!-- (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved. -->
+<!-- (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved. -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -33,17 +33,17 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.23.1</version>
+            <version>2.25.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.23.1</version>
+            <version>2.25.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.23.1</version>
+            <version>2.25.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>

@@ -1,4 +1,4 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { useNavigate } from "react-router-dom";
 import { CustomViewMenu, evaluate, getCustomizationsView } from "../../../utils/Customizations";
@@ -19,26 +19,14 @@ import { useEffect, useState } from "react";
 type ResourcePopupMenuProps = {
     row: any;
     schema: any;
-    path:string;
+    path: string;
+    sla?: string;
     defaultItem?: string;
     t: any;
 }
 
-export default function ResourcePopupMenu({row, schema, path, defaultItem, t}:ResourcePopupMenuProps) {
+export default function ResourcePopupMenu({ row, schema, path, sla, defaultItem, t }: ResourcePopupMenuProps) {
     const navigate = useNavigate();
-    const [sla, setSla] = useState<string | undefined>(undefined);
-
-    useEffect(() => {
-        const elementPath = row["$ref"] ? path + "/" + row["$ref"] : path;
-        const pathParts = elementPath.split("/");
-        if (pathParts.length >= 4) { // ["","projects|databases|backups|backuppolicies|...","{organization}","{project}",...]
-            const organization = pathParts[2];
-            const project = pathParts[3];
-            Rest.get("/projects/" + encodeURIComponent(organization) + "/" + encodeURIComponent(project)).then((proj: any) => {
-                setSla(proj.sla || undefined);
-            })
-        }
-    }, [schema, path]);
 
     async function handleDelete(row: TempAny, deletePath: string) {
         const createPathFirstPart = deletePath?.replace(/^\//, "").split("/")[0];
