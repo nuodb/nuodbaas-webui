@@ -1,12 +1,12 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { useNavigate } from 'react-router-dom';
 import { withTranslation } from "react-i18next";
 import { TableBody, TableTh, TableCell, Table as TableCustom, TableHead, TableRow } from '../../controls/Table';
-import { getResourceByPath, getCreatePath, getChild, replaceVariables, getSchemaPath, hasMonitoredPath } from "../../../utils/schema";
+import { getResourceByPath, getChild, getSchemaPath, hasMonitoredPath, getEntryPath } from "../../../utils/schema";
 import { Rest } from "./Rest";
 import Dialog from "./Dialog";
-import { MenuItemProps, PageProps, TempAny } from "../../../utils/types";
+import { MenuItemProps, PageProps, SortColumnDirectionType, TempAny } from "../../../utils/types";
 import { CustomViewField, evaluate, getCustomizationsView } from '../../../utils/Customizations';
 import TableSettingsColumns from './TableSettingsColumns';
 import { useEffect, useState } from 'react';
@@ -16,6 +16,7 @@ import Toast from '../../controls/Toast';
 import ResourcePopupMenu from './ResourcePopupMenu';
 import { Field } from '../../fields/Field';
 import Auth from '../../../utils/auth';
+import SortIcon from '../../controls/SortIcon';
 
 function getFlattenedKeys(obj: TempAny, prefix?: string): string[] {
     let ret: string[] = [];
@@ -38,6 +39,8 @@ interface TableProps extends PageProps {
     ["data-testid"]: string;
     data: TempAny;
     path: string;
+    sort?: SortColumnDirectionType;
+    setSort?: (sort: SortColumnDirectionType) => void;
 }
 
 /**
@@ -164,9 +167,9 @@ function Table(props: TableProps) {
         }
     }
 
-    function renderMenuCell(row: any, zIndex: number) {
+    function renderMenuCell(row: any, zIndex: number, sla: string | undefined) {
         return <TableCell key={row["$ref"]} className="NuoTableMenuCell NuoStickyRight" zIndex={zIndex}>
-            <ResourcePopupMenu row={row} schema={schema} path={path} t={t} />
+            <ResourcePopupMenu row={row} schema={schema} path={path} sla={sla} t={t} />
         </TableCell>;
     }
 
@@ -174,7 +177,7 @@ function Table(props: TableProps) {
        If the field is hierarchical, it will find the schema of the right most field.
        Returns defaults if not found. */
     function getFieldSchema(fieldName: string) {
-        const fieldsSchema = getChild(getResourceByPath(schema, getCreatePath(schema, path) || path), ["get", "responses", "200", "content", "application/json", "schema", "properties"]);
+        const fieldsSchema = getChild(getResourceByPath(schema, getEntryPath(schema, path) || path), ["get", "responses", "200", "content", "application/json", "schema", "properties"]);
         let fs = fieldsSchema;
         let fn = fieldName;
         while (fs && fn.includes(".") && fn.split(".")[0] in fs) {
@@ -237,6 +240,26 @@ function Table(props: TableProps) {
         }
     }
 
+
+    function renderColumn(column: MenuItemProps | undefined) {
+        if (!column || data.length === 0) {
+            return undefined;
+        }
+        return (
+            <div className="NuoRow" style={{ alignItems: "center" }}>
+                <div>{data.length > 0 && tableLabels[column.id]}</div>
+                {props.sort !== undefined
+                    && <SortIcon
+                        sort={props.sort.column !== column.id ? "none" : props.sort.direction || "none"}
+                        setSort={(direction: "asc" | "desc") => {
+                            props.setSort && props.setSort({ column: column.id, direction })
+                        }}
+                    />
+                }
+            </div>
+        );
+    }
+
     function renderTableSelectedActions() {
         const firstHeader = visibleColumns.length > 0 ? visibleColumns[0] : undefined;
         const deletableRefs = data.filter((d: any) => canDelete(d)).map((d: any) => d["$ref"]);
@@ -263,7 +286,7 @@ function Table(props: TableProps) {
                         event?.preventDefault();
                         handleDeleteMultiple();
                     }}><DeleteIcon />Delete</button>
-                </> : firstHeader && data.length > 0 ? tableLabels[firstHeader.id] : undefined
+                </> : renderColumn(firstHeader)
                 }
             </div>
         </TableTh>
@@ -281,6 +304,12 @@ function Table(props: TableProps) {
         }
     }
 
+    function getSla(ref: string) {
+        const pathParts = path.split("/"); // returns i.e. ["", "resource", "organization"]
+        const organization = pathParts.length >= 3 ? ("/" + pathParts[2]) : "";
+        return slaByPath["/" + pathParts[1] + organization + "/" + ref];
+    }
+
     const tableLabels = getTableLabels();
     let visibleColumns = moveNameColumnToFront(columns.filter(col => col.selected && !schemaPath?.includes("{" + col.id + "}")));
     return (
@@ -292,7 +321,7 @@ function Table(props: TableProps) {
                         <>
                             {visibleColumns.filter((_, index) => index > 0).map((column) => (
                                 <TableTh key={column.id} data-testid={column.id}>
-                                    {data.length > 0 && tableLabels[column.id]}
+                                    {renderColumn(column)}
                                 </TableTh>
                             ))}
                         <TableTh key="$ref" data-testid="$ref" className="NuoTableMenuCell NuoStickyRight" zIndex={1000 + data.length}>
@@ -303,8 +332,8 @@ function Table(props: TableProps) {
                 </TableRow>}
             </TableHead>
             <TableBody>
-                {data.map((row: TempAny, index: number) => (
-                    <TableRow key={row["$ref"] || index}>
+                {data.map((row: TempAny, index: number) => {
+                    return <TableRow key={row["$ref"] || index}>
                         <TableCell key="__selected__" className="NuoStickyLeft">
                             <div className="NuoTableCheckbox">
                                 <input
@@ -327,9 +356,9 @@ function Table(props: TableProps) {
                             </div>
                         </TableCell>
                         {visibleColumns.filter((_, index) => index > 0).map(column => <TableCell key={column.id}>{renderDataCell(column.id, row)}</TableCell>)}
-                        {renderMenuCell(row, 1000 + data.length - 1 - index)}
-                    </TableRow>
-                ))}
+                        {renderMenuCell(row, 1000 + data.length - 1 - index, getSla(row))}
+                    </TableRow>;
+                })}
                 {data.length === 0 && <tr><td><div data-testid="table_nodata" className="NuoTableNoData">{t("text.noData")}</div></td></tr>}
             </TableBody>
         </TableCustom>

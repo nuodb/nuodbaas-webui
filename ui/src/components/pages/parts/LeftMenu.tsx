@@ -1,4 +1,4 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -94,7 +94,7 @@ function TOC(props: MenuProps) {
             {Object.keys(data[key].children).map(childKey => {
                 let icon: React.ReactNode = icons[childKey];
                 if (!icon) {
-                    icon = <svg className="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root" focusable="false" aria-hidden="true" viewBox="0 0 24 24"></svg>
+                    icon = <svg style={{ width: "24px", height: "24px" }} className="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root" focusable="false" aria-hidden="true" viewBox="0 0 24 24"></svg>
                 }
                 let path = data[key].children[childKey].path;
                 if (path) {
