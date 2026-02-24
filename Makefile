@@ -12,7 +12,10 @@ KIND_VERSION ?= 0.27.0
 KUBECTL_VERSION ?= 1.28.3
 HELM_VERSION ?= 3.16.2
 NUODB_CP_VERSION ?= 2.10.0
+NUODB_SQL_VERSION ?= 1.1.0
 PROMETHEUS_VERSION ?= 79.6.1
+
+ECR_ACCOUNT_URL ?= "253548315642.dkr.ecr.us-east-1.amazonaws.com"
 
 NUODB_CP_REPO ?= ../nuodb-control-plane
 
@@ -31,7 +34,7 @@ UNCOMMITTED := $(shell git status --porcelain)
 MVN_TEST ?= ResourcesTest
 
 HELM_CP_SETTINGS := --set cpRest.fullnameOverride=nuodb-cp-rest --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api --set cpRest.extraArgs[0]=-p --set cpRest.extraArgs[1]='com.nuodb.controlplane.server.passthroughLabelKeyPrefixes=ds.com/\,*.ds.com/'
-HELM_OPERATOR_SETTINGS := --set nuodb-cp-config.nuodb.license.enabled=true --set nuodb-cp-config.nuodb.license.secret.create=true --set nuodb-cp-config.nuodb.license.secret.name=nuodb-license --set nuodb-cp-config.nuodb.license.content="$(shell cat nuodb.lic)"
+HELM_OPERATOR_SETTINGS := --set nuodb-cp-config.nuodb.license.enabled=true --set nuodb-cp-config.nuodb.license.secret.create=true --set nuodb-cp-config.nuodb.license.secret.name=nuodb-license --set nuodb-cp-config.nuodb.license.content="$(shell if [ "${NUODB_LICENSE_CONTENT}" != "" ]; then echo "${NUODB_LICENSE_CONTENT}" | base64 -d > nuodb.lic; fi; if [ -f nuodb.lic ] ; then cat nuodb.lic; else echo ""; fi)"
 
 # The help target prints out all targets with their descriptions organized
 # beneath their categories. The categories are represented by '##@' and the
@@ -108,8 +111,6 @@ aws-login:
 		echo "Must specify AWS_REGION, AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables"; \
 		exit 1; \
 	fi
-	@AWS_ACCOUNT_ID="$(shell aws sts get-caller-identity --query Account | sed 's/^"\(.*\)"$$/\1/g')" \
-	ECR_ACCOUNT_URL="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com" \
 	aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${ECR_ACCOUNT_URL}"
 
 .PHONY: pull-cp-from-ecr
@@ -214,11 +215,20 @@ build-sql:
 		cd ../nuodbaas-sql; ${MAKE} build-image; \
 	fi
 
+.PHONY: deploy-sql-from-ecr
+deploy-sql-from-ecr: aws-login
+	docker pull ${ECR_ACCOUNT_URL}/nuodbaas-sql-docker:${NUODB_SQL_VERSION}
+	docker tag ${ECR_ACCOUNT_URL}/nuodbaas-sql-docker:${NUODB_SQL_VERSION} nuodbaas-sql:latest
+	$(KIND) load docker-image nuodbaas-sql:latest
+	$(HELM) upgrade --install --wait -n default nuodbaas-sql oci://${ECR_ACCOUNT_URL}/nuodbaas-sql --version ${NUODB_SQL_VERSION} --set image.repository=nuodbaas-sql --set image.tag=latest --set nuodbaasSql.ingress.enabled=true --set nuodbaasSql.cpUrl=http://nuodb-cp-rest:8080
+
 .PHONY: deploy-sql
 deploy-sql: build-sql $(HELM) $(KIND)
 	@if [ -d ../nuodbaas-sql/charts/nuodbaas-sql ] ; then \
 		$(KIND) load docker-image nuodbaas-sql:latest; \
 		$(HELM) upgrade --install --wait -n default nuodbaas-sql ../nuodbaas-sql/charts/nuodbaas-sql --set image.repository=nuodbaas-sql --set image.tag=latest --set nuodbaasSql.ingress.enabled=true --set nuodbaasSql.cpUrl=http://nuodb-cp-rest:8080; \
+	else \
+		make deploy-sql-from-ecr; \
 	fi
 
 .PHONY: undeploy-sql
@@ -308,15 +318,19 @@ teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-operato
 		$(KIND) delete cluster 2> /dev/null || true ; \
 	fi
 
+.PHONY: create-coverage-report
+create-coverage-report: ## create coverage report
+		cd selenium-tests && \
+		npx nyc report -r text --cwd target && \
+		npx nyc report -r html --cwd target --report-dir coverage && \
+		cd ..
+
 .PHONY: run-integration-tests-only
 run-integration-tests-only: ## integration tests without setup/teardown
 	@rm -rf selenium-tests/target/.nyc_output
 	@cd selenium-tests && mvn test && cd ..
 	@if [ "${COVERAGE}" = "true" ] ; then \
-		cd selenium-tests && \
-		npx nyc report -r text --cwd target && \
-		npx nyc report -r html --cwd target --report-dir coverage && \
-		cd .. ; \
+		${MAKE} create-coverage-report; \
 	fi
 
 .PHONY: run-unit-tests

@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { ErrorInfo, ReactNode } from "react";
 import Button from "./controls/Button";
@@ -40,13 +40,13 @@ export default class GlobalErrorBoundary extends React.Component<IProps, IState>
             return (
                 <div className="ErrorPage">
                     <label>Error occurred</label>
-                    {this.state.error && this.state.error.toString()}
+                    <div data-testid="error-message">{this.state.error && this.state.error.toString()}</div>
                     <label>Stack</label>
                     {this.state.stack}
                     <label>Build</label>
                     <BuildNumber />
                     <br />
-                    <Button onClick={() => {
+                    <Button data-testid="button.ok" onClick={() => {
                         window.location.href = "/ui";
                     }}>{t("button.dismiss")}</Button>
                 </div>

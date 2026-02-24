@@ -191,14 +191,16 @@ public class DatabaseTest extends TestRoutines {
 
         waitElement("resource-popup-menu").click();
         waitElement("popupmenu-button.db.connection.info").click();
+        waitElement("copy-Certificate").click(); // start from bottom up to void clicking the hover text
+        waitElement("copy-SQL Endpoint").click();
+        waitElement("copy-Database").click();
         waitElement("dialog_button_ok").click();
 
         waitElement("resource-popup-menu").click();
         waitElement("popupmenu-confirm.stop.database.title").click();
         waitElement("dialog_button_no").click();
 
-        // TODO(agr22): currently the SQL service is not running in the integration tests. Fixing this with DBAAS-815
-        // waitElement("resource-popup-menu").click();
-        // waitElement("popupmenu-button.sql.editor");
+        waitElement("resource-popup-menu").click();
+        waitElement("popupmenu-button.sql.editor");
    }
 }
