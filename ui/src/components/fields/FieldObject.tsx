@@ -68,7 +68,7 @@ export default function FieldObject(props: FieldProps): ReactNode {
         if (!properties) {
             return FieldMessage({ ...props, message: "\"properties\" attribute missing from schema for field \"" + prefix + "\"" });
         }
-        return <MoreDiv maxHeight={200} t={props.t}><dl className="map">
+        return <MoreDiv maxHeight={150} t={props.t}><dl className="map">
             {Object.keys(properties).map(key => {
                 const prefixKey = prefix ? (prefix + "." + key) : key;
                 const fieldView = Field({ ...props, prefix: prefixKey, parameter: properties[key], values });

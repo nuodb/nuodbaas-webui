@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -46,11 +46,12 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     const [authHeader, setAuthHeader] = useState("");
     const [showLoginForm, setShowLoginForm] = useState(false);
     // Specify redirect URL so that provider name is supplied as query parameter
+    let queryRedirect = queryParams.get("redirect") || queryParams.get("redirectUrl") || "";
     const redirectUrl = encodeURIComponent(
         window.location.protocol +
             "//" +
             window.location.host +
-        "/ui/login?provider={name}&redirectUrl=https://" + window.location.host + queryParams.get("redirect")
+        "/ui/login?provider={name}&redirectUrl=" + window.location.protocol + "//" + window.location.host + queryRedirect
     );
 
     useEffect(() => {
@@ -121,6 +122,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                 token: data.token,
                 expiresAtTime: data.expiresAtTime,
                 username: data.username,
+                accessRule: data.accessRule,
             })
         );
         window.location.href = queryParams.get("redirectUrl") || "/ui";

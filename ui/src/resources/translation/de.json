@@ -277,7 +277,8 @@
         "editForResource": "{{resources_one}} bearbeiten",
         "newResource": "{{resources_one}} erstellen",
         "noData": "Keine Daten",
-        "more": "Mehr"
+        "more": "Mehr",
+        "less": "Weniger"
     },
     "section": {
         "title": {

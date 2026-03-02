@@ -124,7 +124,7 @@ export function getRecursiveValue(value: TempAny, t: any) {
             return <>{value.map((v, index) => <div key={index}>{getRecursiveValue(v, t)}</div>)}</>;
         }
         else {
-            return <MoreDiv maxHeight={200} t={t}><dl className="map">{Object.keys(value).map(key => {
+            return <MoreDiv maxHeight={150} t={t}><dl className="map">{Object.keys(value).map(key => {
                 if (typeof value[key] === "object" && Object.keys(value[key]).length === 0) {
                     return null;
                 }
