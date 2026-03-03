@@ -54,9 +54,23 @@ public class IdpTests extends TestRoutines {
 
     @Test
     public void testCasKeycloak() throws IOException, InterruptedException {
+        // Note: This cannot be split into two test cases and needs to be in this order since keycloak is keeping the login info within a session
+
+        // validate invalid credentials
         get("/ui");
         waitRestComplete();
         String user = shortUnique("u");
+        kcCreateUser(REALM, user, "first", "last", user + "@example.com", "passw0rd");
+        waitElement("login_cas-keycloak").click();
+        waitInputElementByName("username").sendKeys("userinvalid");
+        waitInputElementByName("password").sendKeys("passw0rd");
+        waitElementById("kc-login").click();
+        waitElementById("input-error-username");
+
+        // validate credentials
+        get("/ui");
+        waitRestComplete();
+        user = shortUnique("u");
         kcCreateUser(REALM, user, "first", "last", "user@example.com", "passw0rd");
         waitElement("login_cas-keycloak").click();
         waitInputElementByName("username").sendKeys(user);
@@ -64,18 +78,6 @@ public class IdpTests extends TestRoutines {
         waitElementById("kc-login").click();
         clickMenu(Resource.databases.name());
         assertEquals("NuoDB", getTitle());
-    }
-
-    @Test
-    public void testCasKeycloakInvalid() throws IOException, InterruptedException {
-        get("/ui");
-        waitRestComplete();
-        kcCreateUser(REALM, shortUnique("u"), "first", "last", "user@example.com", "passw0rd");
-        waitElement("login_cas-keycloak").click();
-        waitInputElementByName("username").sendKeys("userinvalid");
-        waitInputElementByName("password").sendKeys("passw0rd");
-        waitElementById("kc-login").click();
-        waitElementById("input-error-username");
     }
 
     @Test

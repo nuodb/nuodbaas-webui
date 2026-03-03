@@ -50,7 +50,7 @@ public class SeleniumTestHelper {
 
     @BeforeAll
     public static void beforeAll() throws IOException, InterruptedException {
-        URL hubUrl = new URL("http://localhost/selenium/wd/hub");
+        URL hubUrl = new URL("http://localhost:4444/wd/hub");
         ChromeOptions options = new ChromeOptions();
         if("true".equals(System.getProperty(SHOW_CHROME_DEVTOOLS)) || "true".equals(System.getenv(SHOW_CHROME_DEVTOOLS))) {
             options.addArguments("--auto-open-devtools-for-tabs", "--no-sandbox", "--disable-dev-shm-usage");

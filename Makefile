@@ -235,15 +235,15 @@ undeploy-cas-server: $(KUBECTL) ## Undeploy CAS service from the K8s cluster spe
 	fi
 
 .PHONY: deploy-selenium
-deploy-selenium: $(KUBECTL) $(KIND) ## Deploy Selenium service to the K8s cluster specified in ~/.kube/config.
-	$(KUBECTL) apply -n default -f selenium-tests/selenium.yaml
-	$(KUBECTL) wait pod -n default -l app.kubernetes.io/name=selenium --for=condition=ready --timeout=120s
+deploy-selenium: ## Deploy Selenium service to the K8s cluster specified in ~/.kube/config.
+	docker run -d --rm --name selenium-standalone-chrome --shm-size=2gb \
+		-e SE_VNC_NO_PASSWORD=true --net=host \
+		--add-host ingress-nginx-controller.ingress-nginx.svc.cluster.local:127.0.0.1 \
+		selenium/standalone-chrome:131.0
 
 .PHONY: undeploy-selenium
 undeploy-selenium: $(KUBECTL) ## Undeploy Selenium service from the K8s cluster specified in ~/.kube/config.
-	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
-		$(KUBECTL) delete -n default -f selenium-tests/selenium.yaml --ignore-not-found=true; \
-	fi
+	docker stop selenium-standalone-chrome || true
 
 .PHONY: build-sql
 build-sql:
