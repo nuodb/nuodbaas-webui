@@ -4,6 +4,7 @@
         "advanced": "Advanced",
         "create": "Create",
         "create.resource": "New {{resource}}",
+        "add": "Add",
         "delete": "Delete",
         "view": "View",
         "edit": "Edit",

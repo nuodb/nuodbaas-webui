@@ -40,7 +40,7 @@ function Settings(props: PageProps) {
             </textarea>
             <div style={{ color: "red" }}>{error}</div>
             <div className="NuoRow">
-                <Button onClick={() => {
+                <Button data-testid="button.save" onClick={() => {
                     if (settings === "") {
                         localStorage.removeItem(LOCAL_USER_SETTINGS);
                         window.location.href = "/ui";
@@ -54,7 +54,7 @@ function Settings(props: PageProps) {
                         setError("Invalid JSON input: " + ex);
                     }
                 }}>{t("button.save")}</Button>&nbsp;
-                <Button onClick={() => {
+                <Button data-testid="button.cancel" onClick={() => {
                     navigate("/ui");
                 }}>{t("button.cancel")}</Button>
             </div>
