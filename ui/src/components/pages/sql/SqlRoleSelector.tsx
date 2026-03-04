@@ -1,4 +1,4 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { SqlType } from "../../../utils/SqlSocket";
 import { sqlString } from "./SqlUtils";
@@ -58,7 +58,7 @@ export default function SqlRoleSelector({roles, setRoles}: RoleSelectorProps) {
         <tbody>
             {Object.keys(roles).map(roleKey => <tr key={roleKey}>
                 <td>
-                    <input type="checkbox" name={roleKey} checked={roles[roleKey] !== "disabled"} onChange={() => {
+                    <input data-testid={"user-roles-" + roleKey} type="checkbox" name={roleKey} checked={roles[roleKey] !== "disabled"} onChange={() => {
                         let newRoles = {...roles};
                         if (roles[roleKey] === "disabled") {
                             newRoles[roleKey] = "enabled";
@@ -71,7 +71,7 @@ export default function SqlRoleSelector({roles, setRoles}: RoleSelectorProps) {
                     {roleKey}
                 </td>
                 <td>
-                    <input type="checkbox" name={roleKey} checked={roles[roleKey] === "grant"} onChange={() => {
+                    <input data-testid={"grant-option-" + roleKey} type="checkbox" name={roleKey} checked={roles[roleKey] === "grant"} onChange={() => {
                         let newRoles = {...roles};
                         if (newRoles[roleKey] === "enabled") {
                             newRoles[roleKey] = "grant";

@@ -125,6 +125,10 @@ public class SeleniumTestHelper {
         driver.get(url);
     }
 
+    public String getCurrentUrl() {
+        return driver.getCurrentUrl();
+    }
+
     public String getTitle() {
         return driver.getTitle();
     }

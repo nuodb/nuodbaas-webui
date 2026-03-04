@@ -3,6 +3,7 @@
 package com.nuodb.selenium.basic;
 
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.nuodb.selenium.TestRoutines;
@@ -34,6 +35,12 @@ public class UserTest extends TestRoutines {
         // Open "Create New User" form
         WebElement createButton = waitElement("list_resource__create_button_" + Resource.users);
         createButton.click();
+
+        // go from "General" tab to "Access Control" tab and back using cursor keys
+        waitElement("section-0").sendKeys(Keys.ARROW_RIGHT);
+        waitElementById("accessRule.allow.0");
+        waitElement("section-title-access-deny-rules").sendKeys(Keys.ARROW_LEFT);
+        waitInputElementByName("name");
 
         // Fill in Fields with one non-org access rule
         replaceInputElementByName("organization", TEST_ORGANIZATION);
@@ -169,4 +176,15 @@ public class UserTest extends TestRoutines {
                                 projectName, text);
         });
    }
+
+    @Test
+    public void testColumnSorter() {
+        loginRest();
+        clickMenu("users");
+
+        waitElement("$ref").click();
+        waitElementById("accessRule.deny").sendKeys(Keys.ARROW_UP);
+        waitElementById("accessRule").sendKeys(Keys.ARROW_DOWN);
+    }
+
 }
