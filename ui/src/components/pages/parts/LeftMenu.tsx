@@ -11,6 +11,15 @@ import CloudSyncIcon from '@mui/icons-material/CloudSync';
 import StorageIcon from '@mui/icons-material/Storage';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import TrolleyIcon from '@mui/icons-material/Trolley';
+import TopicIcon from '@mui/icons-material/Topic';
+import DiscFullIcon from '@mui/icons-material/DiscFull';
+import FeaturedPlayListIcon from '@mui/icons-material/FeaturedPlayList';
+import RememberMeIcon from '@mui/icons-material/RememberMe';
+import EqualizerIcon from '@mui/icons-material/Equalizer';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import RecentActorsIcon from '@mui/icons-material/RecentActors';
+import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt';
 import ComboBox from "../../controls/ComboBox";
 
 interface OrganizationProps extends PageProps {
@@ -86,6 +95,15 @@ function TOC(props: MenuProps) {
         "backups": <BackupIcon />,
         "backuppolicies": <CloudSyncIcon />,
         "users": <GroupIcon />,
+        "cluster/canaryrollouts": <TrolleyIcon />,
+        "cluster/canaryrollouttemplates": <TopicIcon />,
+        "cluster/databasequotas": <DiscFullIcon />,
+        "cluster/helmfeatures": <FeaturedPlayListIcon />,
+        "cluster/identityproviders": <RememberMeIcon />,
+        "cluster/metrics": <EqualizerIcon />,
+        "cluster/metricsources": <AssessmentIcon />,
+        "cluster/roletemplates": <RecentActorsIcon />,
+        "cluster/servicetiers": <SignalCellularAltIcon />,
     }
 
     return <>{Object.keys(data).map(key => <div className="details" key={key}>

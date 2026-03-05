@@ -148,7 +148,7 @@ public class TestRoutines extends SeleniumTestHelper {
      * @param prefix if null, use "s"
      * @return shortened unique name
      */
-    public String shortUnique(String prefix) {
+    public static String shortUnique(String prefix) {
         final String chars = "abcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder sb = new StringBuilder();
         if(prefix == null) {

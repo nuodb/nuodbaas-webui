@@ -97,7 +97,7 @@ export class Rest extends React.Component<{ isRecording: boolean, setIsRecording
         return this.state.pendingRequests > 0 ?
             <CircularProgress className="RestSpinner" color="inherit" />
             :
-            <div data-testid="rest_spinner__complete" className="RestSpinner">&nbsp;</div>;
+            <div data-testid="rest_spinner__complete" className="RestSpinner" style={{ zIndex: "-1" }}>&nbsp;</div>;
     }
 
     static async get(path: string) {

@@ -3,6 +3,7 @@
 package com.nuodb.selenium.advanced;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebElement;
 
@@ -86,6 +87,7 @@ public class SqlTests extends TestRoutines {
         waitRestComplete();
     }
 
+    @Disabled //window.showOpenFilePicker is unavailable for http://hostname/ URL's (requires https:// or http://localhost/)
     @Test
     public void testSqlPage() {
         loginSqlEditor();
