@@ -361,7 +361,8 @@
         "editForResource": "Edit {{resources_one}}",
         "newResource": "New {{resources_one}}",
         "noData": "No Data",
-        "more": "More"
+        "more": "More",
+        "less": "Less"
     },
     "section": {
         "title": {

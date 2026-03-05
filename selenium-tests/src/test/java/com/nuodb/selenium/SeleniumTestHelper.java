@@ -43,7 +43,7 @@ import com.google.common.base.Strings;
 @ExtendWith(TestResultLogger.class)
 public class SeleniumTestHelper {
     private static final String SHOW_CHROME_DEVTOOLS = "SHOW_CHROME_DEVTOOLS";
-    public static final String URL_BASE = Strings.isNullOrEmpty(System.getenv("URL_BASE")) ? "http://localhost" : System.getenv("URL_BASE");
+    public static final String URL_BASE = Strings.isNullOrEmpty(System.getenv("URL_BASE")) ? "http://ingress-nginx-controller.ingress-nginx.svc.cluster.local" : System.getenv("URL_BASE");
     private static final Duration waitTimeout = Duration.ofSeconds(15);
     private static WebDriver driver = null;
     private TestInfo testInfo;
@@ -62,7 +62,7 @@ public class SeleniumTestHelper {
     }
 
     @AfterAll
-    public static void afterAll() {
+    public static void afterAll() throws IOException, InterruptedException {
         driver.quit();
     }
 
@@ -186,6 +186,14 @@ public class SeleniumTestHelper {
         By testId = By.xpath("//input[@name='" + name + "'] | //textarea[@name='" + name + "']");
         WebDriverWait wait = new WebDriverWait(driver, waitTimeout);
         return wait.until(ExpectedConditions.presenceOfElementLocated(testId));
+    }
+
+    public boolean hasText(String text) {
+        WebElement bodyElement = driver.findElement(By.tagName("body"));
+        if(bodyElement == null) {
+            return false;
+        }
+        return bodyElement.getText().contains(text);
     }
 
     public WebElement getParent(WebElement element) {

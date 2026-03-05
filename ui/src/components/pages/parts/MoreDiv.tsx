@@ -35,9 +35,9 @@ export default function MoreDiv({ children, maxHeight, t} : MoreDivProps) {
       >
         {children}
       </div>
-      {isOverflowing && !isExpanded && (
-        <button onClick={()=>setIsExpanded(true)} style={{ background: 'none', border: 'none', color: 'blue', cursor: 'pointer', padding: 0 }}>
-          {t("text.more")}
+      {isOverflowing && (
+        <button onClick={() => setIsExpanded(!isExpanded)} style={{ background: 'none', border: 'none', color: 'blue', cursor: 'pointer', padding: 0, boxShadow: "none" }}>
+          {isExpanded ? t("text.less") : t("text.more")}
         </button>
       )}
     </div>

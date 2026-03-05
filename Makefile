@@ -209,6 +209,43 @@ undeploy-monitoring:
 		$(HELM) uninstall -n default kube-prometheus-stack; \
 	fi
 
+.PHONY: deploy-keycloak
+deploy-keycloak: $(KUBECTL) $(KIND) ## Deploy Keycloak service to the K8s cluster specified in ~/.kube/config.
+	docker build -t nuokeycloak selenium-tests/keycloak
+	$(KIND) load docker-image nuokeycloak:latest;
+	$(KUBECTL) apply -n default -f selenium-tests/keycloak/keycloak.yaml
+	$(KUBECTL) wait pod -n default -l app.kubernetes.io/name=keycloak --for=condition=ready --timeout=120s
+
+.PHONY: undeploy-keycloak
+undeploy-keycloak: $(KUBECTL) ## Undeploy Keycloak service from the K8s cluster specified in ~/.kube/config.
+	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
+		$(KUBECTL) delete -n default -f selenium-tests/keycloak/keycloak.yaml --ignore-not-found=true; \
+	fi
+
+.PHONY: deploy-cas-server
+deploy-cas-server: $(KUBECTL) $(KIND) ## Deploy CAS service to the K8s cluster specified in ~/.kube/config.
+	docker build -t cas-server selenium-tests/cas-server
+	$(KIND) load docker-image cas-server:latest;
+	$(KUBECTL) apply -n default -f selenium-tests/cas-server/cas-server.yaml
+	$(KUBECTL) wait pod -n default -l app.kubernetes.io/name=cas-server --for=condition=ready --timeout=120s
+
+.PHONY: undeploy-cas-server
+undeploy-cas-server: $(KUBECTL) ## Undeploy CAS service from the K8s cluster specified in ~/.kube/config.
+	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
+		$(KUBECTL) delete -n default -f selenium-tests/cas-server/cas-server.yaml --ignore-not-found=true; \
+	fi
+
+.PHONY: deploy-selenium
+deploy-selenium: ## Deploy Selenium service
+	docker run -d --rm --name selenium-standalone-chrome --shm-size=2gb \
+		-e SE_VNC_NO_PASSWORD=true --net=host \
+		--add-host ingress-nginx-controller.ingress-nginx.svc.cluster.local:127.0.0.1 \
+		selenium/standalone-chrome:131.0
+
+.PHONY: undeploy-selenium
+undeploy-selenium: $(KUBECTL) ## Undeploy Selenium service
+	docker stop selenium-standalone-chrome || true
+
 .PHONY: build-sql
 build-sql:
 	@if [ -f ../nuodbaas-sql/Makefile ] ; then \
@@ -282,7 +319,7 @@ setup-nginx-default-conf:
 	fi
 
 .PHONY: setup-integration-tests
-setup-integration-tests: $(KUBECTL) setup-nginx-default-conf install-crds deploy-monitoring deploy-cp deploy-operator deploy-sql deploy-webui ## setup containers before running integration tests
+setup-integration-tests: $(KUBECTL) setup-nginx-default-conf install-crds deploy-monitoring deploy-cp deploy-operator deploy-sql deploy-keycloak deploy-cas-server deploy-selenium deploy-webui ## setup containers before running integration tests
 	@if [ "$(ARCH)" = "arm64" ] ; then \
 		docker pull seleniarm/standalone-chromium && \
 		docker tag seleniarm/standalone-chromium selenium-standalone; \
@@ -291,7 +328,6 @@ setup-integration-tests: $(KUBECTL) setup-nginx-default-conf install-crds deploy
 		docker tag selenium/standalone-chrome:131.0 selenium-standalone; \
 	fi
 
-	@docker compose -f selenium-tests/compose.yaml up --wait
 	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-rest" -o name) -- bash -c "curl \
 		http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true \
 		--data-binary \
@@ -310,8 +346,7 @@ setup-integration-tests: $(KUBECTL) setup-nginx-default-conf install-crds deploy
 	@$(KUBECTL) get pods -A
 
 .PHONY: teardown-integration-tests
-teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-operator undeploy-cp undeploy-monitoring uninstall-crds ## clean up containers used by integration tests
-	@docker compose -f selenium-tests/compose.yaml down
+teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-selenium undeploy-cas-server undeploy-keycloak undeploy-operator undeploy-cp undeploy-monitoring uninstall-crds ## clean up containers used by integration tests
 	@if [ -f $(PREVIOUS_CONTEXT) ] ; then \
 		cat $(PREVIOUS_CONTEXT) | xargs -r $(KUBECTL) config use-context; \
 		rm $(PREVIOUS_CONTEXT) ; \

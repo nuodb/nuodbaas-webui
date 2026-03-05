@@ -1,19 +1,37 @@
-# (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+# (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 apiVersion: cp.nuodb.com/v1beta1
 kind: IdentityProvider
 metadata:
   annotations:
-    description: Central Authentication Service
-  name: cas-idp
+    description: CAS Keycloak
+  name: cas-keycloak
 spec:
   cas:
-    serverUrl: https://127.0.0.1/cas
+    serverUrl: http://ingress-nginx-controller.ingress-nginx.svc.cluster.local/keycloak/realms/test/protocol/cas
   provisionUser:
     accessRule:
       value: |
-        {"allow": ["read:ds"]}
+        {"allow": ["read:acme"]}
     name:
       jsonPath: $.user
     organization:
-      value: ds
+      value: acme
+---
+apiVersion: cp.nuodb.com/v1beta1
+kind: IdentityProvider
+metadata:
+  annotations:
+    description: CAS Simple
+  name: cas-simple
+spec:
+  cas:
+    serverUrl: http://ingress-nginx-controller.ingress-nginx.svc.cluster.local/cas-server
+  provisionUser:
+    accessRule:
+      value: |
+        {"allow": ["read:acme"]}
+    name:
+      jsonPath: $.user
+    organization:
+      value: acme
