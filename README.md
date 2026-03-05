@@ -46,3 +46,19 @@ make teardown-integration-tests
 The Integration tests are regular JUnit tests going against the Selenium container, which can be run in debug mode in your IDE as well. Location: `selenium-tests/src/test/java/com/nuodb/selenium`. Make sure you run `make setup-integration-tests` beforehand.
 
 To monitor the UI while the tests are running, go to this URL: `http://localhost:7900/?autoconnect=1&resize=scale&password=secret⁠`
+
+## Run new E2E tests via Playwright
+```
+cd ui
+docker run -p 3001:3001 --rm --init -it --workdir /home/pwuser --user pwuser mcr.microsoft.com/playwright:v1.58.2-noble /bin/sh \
+    -c "npx -y playwright@1.58.2 run-server --port 3001 --host 0.0.0.0"
+
+PW_TEST_CONNECT_WS_ENDPOINT=ws://127.0.0.1:3001/ \
+E2E_BASE_URL=http://localhost \
+TEST_ORGANIZATION=integrationtest \
+TEST_ADMIN_USER=admin \
+TEST_ADMIN_PASSWORD=passw0rd \
+CP_URL=http://localhost/api \
+PLAYWRIGHT_HTML_HOST=0.0.0.0 \
+npm run e2e -- --project=chromium
+```
