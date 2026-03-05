@@ -21,7 +21,7 @@ spec:
         image: nuokeycloak
         imagePullPolicy: Never
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         args:
         - "start-dev"
         - "--http-relative-path"

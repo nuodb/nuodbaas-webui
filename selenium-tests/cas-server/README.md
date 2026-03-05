@@ -7,8 +7,7 @@ Endpoints:
 - `GET /login?service=...` - show a simple login form
 - `POST /login` - accept `username`, `password`, and optional `service` form values. It issues a ticket and redirects to the `service` URL with `ticket=...` appended.
 - `GET /validate?ticket=...` - simple CAS v1-style validation; response is two lines: `yes`/`no` then username (or blank).
- - `GET /validate?ticket=...` - simple CAS v1-style validation; response is two lines: `yes`/`no` then username (or blank).
- - `GET /serviceValidate?service=...&ticket=...` - CAS XML `serviceValidate` response. Returns XML with `<cas:authenticationSuccess>` and `<cas:user>` when ticket is valid, or `<cas:authenticationFailure>` when invalid.
+- `GET /serviceValidate?service=...&ticket=...` - CAS XML `serviceValidate` response. Returns XML with `<cas:authenticationSuccess>` and `<cas:user>` when ticket is valid, or `<cas:authenticationFailure>` when invalid.
 
 Run locally:
 

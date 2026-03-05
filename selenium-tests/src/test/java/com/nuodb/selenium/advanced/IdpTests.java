@@ -19,8 +19,6 @@ import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -42,13 +40,13 @@ public class IdpTests extends TestRoutines {
     public static void beforeAll() throws IOException, InterruptedException {
         TestRoutines.beforeAll();
         accessToken = kcLogin();
-        kcCreateRealm(REALM);
-        kcRegisterCasClient(REALM);
+        kcCreateRealm();
+        kcRegisterCasClient();
     }
 
     @AfterAll
     public static void afterAll() throws IOException, InterruptedException {
-        kcDeleteRealm(REALM);
+        kcDeleteRealm();
         TestRoutines.afterAll();
     }
 
@@ -59,8 +57,6 @@ public class IdpTests extends TestRoutines {
         // validate invalid credentials
         get("/ui");
         waitRestComplete();
-        String user = shortUnique("u");
-        kcCreateUser(REALM, user, "first", "last", user + "@example.com", "passw0rd");
         waitElement("login_cas-keycloak").click();
         waitInputElementByName("username").sendKeys("userinvalid");
         waitInputElementByName("password").sendKeys("passw0rd");
@@ -70,8 +66,8 @@ public class IdpTests extends TestRoutines {
         // validate credentials
         get("/ui");
         waitRestComplete();
-        user = shortUnique("u");
-        kcCreateUser(REALM, user, "first", "last", "user@example.com", "passw0rd");
+        String user = shortUnique("u");
+        kcCreateUser(user, "first", "last", "user@example.com", "passw0rd");
         waitElement("login_cas-keycloak").click();
         waitInputElementByName("username").sendKeys(user);
         waitInputElementByName("password").sendKeys("passw0rd");
@@ -111,16 +107,15 @@ public class IdpTests extends TestRoutines {
             .POST(HttpRequest.BodyPublishers.ofString("username=admin&password=passw0rd&grant_type=password&client_id=admin-cli"))
             .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if(response.statusCode() != HttpStatus.SC_OK) {
-            throw new IOException("Unable to create Keycloak access token");
-        }
+        assertEquals(HttpStatus.SC_OK, response.statusCode(), "Unable to create Keycloak access token: " + response.body());
+
         ObjectNode body = (ObjectNode)mapper.readTree(response.body());
         return body.get("access_token").asText();
     }
 
-    private static void kcCreateRealm(String realm) throws IOException, InterruptedException {
+    private static void kcCreateRealm() throws IOException, InterruptedException {
         ObjectNode body = mapper.createObjectNode();
-        body.put("realm", realm);
+        body.put("realm", REALM);
         body.put("enabled", true);
 
         HttpClient client = HttpClient.newHttpClient();
@@ -129,12 +124,10 @@ public class IdpTests extends TestRoutines {
             .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(body)))
             .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if(response.statusCode() != HttpStatus.SC_CREATED) {
-            throw new IOException("Unable to create Keycloak realm");
-        }
+        assertEquals(HttpStatus.SC_CREATED, response.statusCode(), "Unable to create Keycloak realm. " + response.body());
     }
 
-    private static void kcCreateUser(String realm, String username, String firstName, String lastName, String email, String password) throws IOException, InterruptedException {
+    private static void kcCreateUser(String username, String firstName, String lastName, String email, String password) throws IOException, InterruptedException {
         ObjectNode body = mapper.createObjectNode();
         body.put("username", username);
         body.put("enabled", true);
@@ -152,28 +145,24 @@ public class IdpTests extends TestRoutines {
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = newHttpRequestBuilder()
-            .uri(URI.create(KC_BASE_URL + "/admin/realms/" + URLEncoder.encode(realm, StandardCharsets.UTF_8) + "/users"))
+            .uri(URI.create(KC_BASE_URL + "/admin/realms/" + URLEncoder.encode(REALM, StandardCharsets.UTF_8) + "/users"))
             .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(body)))
             .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if(response.statusCode() != HttpStatus.SC_CREATED) {
-            throw new IOException("Unable to create Keycloak user");
-        }
+        assertEquals(HttpStatus.SC_CREATED, response.statusCode(), "Unable to create Keycloak user: " + response.body());
     }
 
-    private static void kcDeleteRealm(String realm) throws IOException, InterruptedException {
+    private static void kcDeleteRealm() throws IOException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = newHttpRequestBuilder()
-            .uri(URI.create(KC_BASE_URL + "/admin/realms/" + URLEncoder.encode(realm, StandardCharsets.UTF_8)))
+            .uri(URI.create(KC_BASE_URL + "/admin/realms/" + URLEncoder.encode(REALM, StandardCharsets.UTF_8)))
             .DELETE()
             .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if(response.statusCode() != HttpStatus.SC_NO_CONTENT) {
-            throw new IOException("Unable to delete realm");
-        }
+        assertEquals(HttpStatus.SC_NO_CONTENT, response.statusCode(), "Unable to delete realm: " + response.body());
     }
 
-    private static void kcRegisterCasClient(String realm) throws IOException, InterruptedException {
+    private static void kcRegisterCasClient() throws IOException, InterruptedException {
         ObjectNode body = mapper.createObjectNode();
         body.put("protocol", "cas");
         body.put("clientId", "cas");
@@ -184,7 +173,7 @@ public class IdpTests extends TestRoutines {
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(KC_BASE_URL + "/admin/realms/" + URLEncoder.encode(realm, StandardCharsets.UTF_8) + "/clients"))
+            .uri(URI.create(KC_BASE_URL + "/admin/realms/" + URLEncoder.encode(REALM, StandardCharsets.UTF_8) + "/clients"))
             .header("Content-Type", "application/json")
             .header("Authorization", "Bearer " + accessToken)
             .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(body)))
@@ -192,9 +181,7 @@ public class IdpTests extends TestRoutines {
             .version(HttpClient.Version.HTTP_1_1)
             .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if(response.statusCode() != HttpStatus.SC_CREATED) {
-            throw new IOException("Unable to create CAS client");
-        }
+        assertEquals(HttpStatus.SC_CREATED, response.statusCode(), "Unable to create CAS client: " + response.body());
     }
 
     private static Builder newHttpRequestBuilder() {
