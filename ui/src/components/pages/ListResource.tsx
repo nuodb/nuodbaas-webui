@@ -289,7 +289,7 @@ function ListResource(props: PageProps) {
                             sort={sort}
                             setSort={setSort}
                         />
-                        {renderPaging(data ? data.length : 0)}
+                        {renderPaging(searchFiltered ? searchFiltered.length : 0)}
                     </div>
                 </div>
             </PageLayout>

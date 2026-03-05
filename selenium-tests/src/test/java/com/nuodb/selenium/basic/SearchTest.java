@@ -3,6 +3,7 @@
 package com.nuodb.selenium.basic;
 
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
@@ -32,7 +33,11 @@ public class SearchTest extends TestRoutines {
         // Setup users
         String name = shortUnique("u");
         String labelName = "l" + name.substring(1);
-        for(int i=10; i<=99; i++) {
+        int MIN_INDEX = 10;
+        int MAX_INDEX = 99;
+        int PAGE_SIZE = 20;
+
+        for(int i=MIN_INDEX; i<=MAX_INDEX; i++) {
             System.out.println("Creating user /" + TEST_ORGANIZATION + "/" + (name + i));
             createResourceRest(Resource.users, "/" + TEST_ORGANIZATION + "/" + (name + i), body.replaceAll("%%%NAME%%%", name + i).replaceAll("%%%VALUE2%%%", (labelName + (i%10))));
         }
@@ -45,6 +50,15 @@ public class SearchTest extends TestRoutines {
             List<WebElement> nameCell = waitTableElements("list_resource__table", "name", null, "name");
             assertEquals(20, nameCell.size());
         });
+
+        // search all created users and check that we have Math.Ceil(totalUsers/20) pages
+        replaceInputElementByName("search", name + "*");
+        waitInputElementByName("search").sendKeys(Keys.RETURN);
+        waitRestComplete();
+
+        WebElement pagination = waitElement("pagination");
+        List<WebElement> paginationButtons = pagination.findElement(By.tagName("ul")).findElements(By.tagName("button"));
+        assertEquals((int)Math.ceil(((double)MAX_INDEX - (double)MIN_INDEX + (double)1)/(double)PAGE_SIZE), paginationButtons.size() - 2); // subtract "2" for the previous/next buttons
 
         // search users starting with "1" index and check that 10 users are returned
         replaceInputElementByName("search", name + "1*");

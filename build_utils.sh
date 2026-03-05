@@ -6,14 +6,15 @@ CHART_FILE="charts/${REPOSITORY}/Chart.yaml"
 VALUES_FILE="charts/${REPOSITORY}/values.yaml"
 APP_VERSION="$(sed -n -E 's/^appVersion: *"?([^ "]*)"?.*/\1/p' "$CHART_FILE")"
 VERSION="$(sed -n -E 's/^version: *"?([^ "]*)"?.*/\1/p' "$CHART_FILE")"
+VERSION_MAJOR_MINOR="$(echo "${VERSION}" | cut -d . -f1,2)"
 GIT_HASH="$(git rev-parse --short HEAD)"
 GIT_DOCKER_IMAGE_RELEASE="ghcr.io/nuodb/${REPOSITORY}:${VERSION}"
 GIT_DOCKER_IMAGE_SHA="${GIT_DOCKER_IMAGE_RELEASE}-${GIT_HASH}"
 AWS_DOCKER_IMAGE_RELEASE="${ECR_ACCOUNT_URL}/${REPOSITORY}-docker:${VERSION}"
 AWS_DOCKER_IMAGE_SHA="${AWS_DOCKER_IMAGE_RELEASE}-${GIT_HASH}"
 
-if [[ "${BRANCH}" == rel/* ]] ; then
-    RELEASE_BRANCH_VERSION="$(echo "${BRANCH}" | cut -d / -f2)"
+if [[ "${BRANCH}" == v* ]] ; then
+    RELEASE_BRANCH_VERSION="$(echo "${BRANCH}" | cut -b 2- | cut -d '-' -f1)"
     RELEASE_BRANCH_MAJOR_MINOR="$(echo "${RELEASE_BRANCH_VERSION}" | cut -d . -f1,2)"
 else
     RELEASE_BRANCH_VERSION=""
@@ -61,11 +62,11 @@ function createHelmPackage() {
     rm -rf build/charts
     cp -r charts build/
     if [ ! -z ${RELEASE_BRANCH_VERSION} ] ; then
-        if [ "${RELEASE_BRANCH_MAJOR_MINOR}" != "${VERSION}" ] ; then
+        if [ "${RELEASE_BRANCH_MAJOR_MINOR}" != "${VERSION_MAJOR_MINOR}" ] ; then
             fail "Helm Chart version ${VERSION} must match with major/minor version of branch name ${RELEASE_BRANCH_MAJOR_MINOR}"
         fi
     elif [ "${BRANCH}" != "main" ] ; then
-        echo "Not a main or rel/* branch - ${BRANCH} - not publishing chart"
+        echo "Not a main or v* branch - ${BRANCH} - not publishing chart"
         return 0
     fi
 
