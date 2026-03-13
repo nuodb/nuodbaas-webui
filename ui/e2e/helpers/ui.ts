@@ -18,11 +18,11 @@ import {
 /** Waits for the REST spinner "complete" indicator to appear. */
 export async function waitRestComplete(
   page: Page,
-  timeout = 30_000,
+  timeout = 10_000,
 ): Promise<void> {
   await page
     .getByTestId("rest_spinner__complete")
-    .waitFor({ timeout });
+    .waitFor({ state: 'hidden', timeout });
 }
 
 /**
@@ -147,6 +147,22 @@ export async function hasNotPopupMenu(
 // Input helpers
 // ---------------------------------------------------------------------------
 
+export async function getInputOrTextareaByName(page: Page, name: string) {
+  let input:Locator = page.locator(`input[name="${name}"]`);
+  for(let i=0; i<10; i++) {
+    input = page.locator(`input[name="${name}"]`);
+    if ((await input.count()) > 0) {
+      return input;
+    }
+    input = page.locator(`textarea[name="${name}"]`);
+    if((await input.count()) > 0) {
+      return input;
+    }
+    await sleep(100);;
+  }
+  return input;
+}
+
 /**
  * Fills a named input, handling both plain <input> fields and MUI Select
  * components (which render a hidden native input + a visible combobox div).
@@ -176,12 +192,26 @@ export async function replaceInputByName(
     return;
   }
   // Regular input
-  const input = await page.locator(`input[name="${name}"]`);
+  let input = await getInputOrTextareaByName(page, name);
   input.waitFor({state: "visible", timeout: 10_000});
   if(await input.inputValue() !== value) {
     await input.fill(value);
   }
 }
+
+export async function waitForTestId(page: Page, id: string) {
+  let element: Locator = page.getByTestId(id);
+  await element.waitFor({ state: "visible", timeout: 10_000 });
+  return element;
+}
+
+export async function waitForTestIdHidden(page: Page, id: string) {
+  let element: Locator = page.getByTestId(id);
+  await element.waitFor({ state: "hidden", timeout: 10_000 });
+  return element;
+}
+
+
 
 // ---------------------------------------------------------------------------
 // Table helpers
@@ -209,35 +239,45 @@ export async function waitTableElements(
   const table = page.getByTestId(tableId);
   await table.waitFor({ state: "visible", timeout });
 
-  // Build header-testid → column index map
-  const headerEls = await table.locator("thead tr th[data-testid]").all();
-  const headerIds = await Promise.all(
-    headerEls.map((h) => h.getAttribute("data-testid")),
-  );
+  for(let retry=0; retry<10; retry++) {
+    // Build header-testid → column index map
+    const headerEls = await table.locator("thead tr th[data-testid]").all();
+    const headerIds = await Promise.all(
+      headerEls.map((h) => h.getAttribute("data-testid")),
+    );
 
-  function tdIndex(colId: string): number {
-    if (/^\d+$/.test(colId)) return parseInt(colId, 10);
-    const i = headerIds.indexOf(colId);
-    return i >= 0 ? i : -1;
-  }
+    function tdIndex(colId: string): number {
+      if (/^\d+$/.test(colId)) return parseInt(colId, 10);
+      const i = headerIds.indexOf(colId);
+      return i >= 0 ? i : -1;
+    }
 
-  const searchIdx = tdIndex(searchColumn);
-  const resultIdx = tdIndex(resultColumn);
+    const searchIdx = tdIndex(searchColumn);
+    const resultIdx = tdIndex(resultColumn);
 
-  const rows = await table.locator("tbody tr").all();
-  const results: Locator[] = [];
+    const rows = await table.locator("tbody tr").all();
+    const results: Locator[] = [];
 
-  for (const row of rows) {
-    const cells = await row.locator("td").all();
-    if (searchIdx < 0 || searchIdx >= cells.length) continue;
-    const text = (await cells[searchIdx].textContent()) ?? "";
-    if (searchValue === null || text.includes(searchValue)) {
-      if (resultIdx >= 0 && resultIdx < cells.length) {
-        results.push(cells[resultIdx]);
+    for (const row of rows) {
+      const cells = await row.locator("td").all();
+      if (searchIdx < 0 || searchIdx >= cells.length) continue;
+      const text = (await cells[searchIdx].textContent()) ?? "";
+      if (searchValue === null || text.includes(searchValue)) {
+        if (resultIdx >= 0 && resultIdx < cells.length) {
+          results.push(cells[resultIdx]);
+        }
       }
     }
+
+    if (headerEls.length === (await table.locator("thead tr th[data-testid]").all()).length) {
+      return results;
+    }
+    else {
+      // DOM was modified while we parsed the table - retry parsing table.
+      sleep(50);
+    }
   }
-  return results;
+  throw Error("Unable to parse table after all retries");
 }
 
 // ---------------------------------------------------------------------------
@@ -364,4 +404,8 @@ export async function createBackupUI(
     ["name", n],
   ]);
   return n;
+}
+
+export function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }

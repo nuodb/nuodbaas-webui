@@ -7,6 +7,7 @@ import {
   createDatabaseUI,
   createBackupUI,
   deleteResourceUI,
+  sleep,
 } from "../helpers/ui";
 
 test.describe("ResourcesTest (smoke)", () => {
@@ -18,6 +19,8 @@ test.describe("ResourcesTest (smoke)", () => {
     const project = await createProjectUI(page);
     const db = await createDatabaseUI(page, project);
     const backup = await createBackupUI(page, project, db);
+
+    sleep(1000);
 
     // Delete in reverse dependency order
     await deleteResourceUI(page, "backups", backup);

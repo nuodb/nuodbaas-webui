@@ -1,19 +1,21 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 // Converted from: selenium-tests/…/basic/LoginTest.java
-import { test, expect } from "@playwright/test";
+import { test, expect, Page } from "@playwright/test";
 import {
   loginViaUI,
   TEST_ORGANIZATION,
   TEST_ADMIN_USER,
   TEST_ADMIN_PASSWORD,
 } from "./fixtures";
+import { waitRestComplete } from "./helpers/ui";
 
 /** Reveals the login form whether or not an SSO provider list is shown. */
-async function revealLoginForm(page: import("@playwright/test").Page) {
+async function revealLoginForm(page: Page) {
+  waitRestComplete(page);
   const showBtn = page.getByTestId("show_login_button");
-  if (await showBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
-    await showBtn.click();
-  }
+  await showBtn.waitFor({ state: "visible", timeout: 3_000 });
+  await showBtn.click();
+  await page.getByTestId("organization").locator("input").waitFor({timeout: 3_000});
 }
 
 test.describe("LoginTest", () => {

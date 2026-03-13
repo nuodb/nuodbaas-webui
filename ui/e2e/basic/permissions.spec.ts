@@ -15,6 +15,7 @@ import {
   hasNotPopupMenu,
   createUserUI,
   createProjectUI,
+  sleep,
 } from "../helpers/ui";
 import {
   loginRest,
@@ -85,7 +86,10 @@ test.describe("PermissionsTest", () => {
     await clickPopupMenu(page, menuCells[0], "view_button");
 
     // In the view popup: show.databases present, edit absent
-    await page.getByTestId("resource-popup-menu").click();
+    sleep(1000);
+    const popupMenu = page.locator("[data-testid=resource-popup-menu]");
+    popupMenu.first().waitFor({state: "visible"});
+    popupMenu.first().click();
     await hasElement(page, "popupmenu-button.show.databases");
     await hasNotElement(page, "popupmenu-edit_button", 1_000);
   });

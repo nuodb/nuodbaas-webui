@@ -7,6 +7,7 @@ import {
   waitTableElements,
   retry,
   createBackupUI,
+  sleep,
 } from "../helpers/ui";
 import {
   createProjectRest,
@@ -18,6 +19,9 @@ test.describe("BackupTest", () => {
   test("testCreateBackup", async ({ restPage: page }) => {
     const projectName = await createProjectRest();
     const databaseName = await createDatabaseRest(projectName);
+    sleep(1000);
+    page.reload();
+    page.goto("/ui/");
     await createBackupUI(page, projectName, databaseName);
 
     const rows = await waitTableElements(

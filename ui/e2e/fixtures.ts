@@ -7,6 +7,7 @@ import {
   TEST_ADMIN_USER,
   TEST_ADMIN_PASSWORD,
 } from "./helpers/api";
+import { waitRestComplete } from "./helpers/ui";
 
 // ---------------------------------------------------------------------------
 // Environment-based credentials for UI login tests (may differ from API creds)
@@ -34,11 +35,11 @@ export async function loginViaUI(
   password = E2E_PASSWORD,
 ): Promise<void> {
   await page.goto("/ui/login");
+  waitRestComplete(page);
 
   const showLoginBtn = page.getByTestId("show_login_button");
-  if (await showLoginBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
-    await showLoginBtn.click();
-  }
+  await showLoginBtn.waitFor({ state: "visible", timeout: 3_000 });
+  await showLoginBtn.click();
 
   await page.getByTestId("organization").locator("input").fill(org);
   await page.getByTestId("username").locator("input").fill(user);

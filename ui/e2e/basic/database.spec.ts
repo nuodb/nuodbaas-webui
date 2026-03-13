@@ -10,6 +10,7 @@ import {
   hasPopupMenu,
   retry,
   createDatabaseUI,
+  sleep,
 } from "../helpers/ui";
 import {
   createProjectRest,
@@ -116,12 +117,15 @@ test.describe("DatabaseTest", () => {
     await clickPopupMenu(page, menuCells[0], "view_button");
 
     // Open change-password dialog, cancel
-    await page.getByTestId("resource-popup-menu").click();
+    await sleep(1000); //TODO(agr22) wait for page to fully render
+    page.getByTestId("resource-popup-menu").click();
     await page.getByTestId("popupmenu-button.db.changeDbaPassword").click();
     await page.getByTestId("button.cancel").click();
 
     // Change password to "db1"
-    await page.getByTestId("resource-popup-menu").click();
+    let popupMenu = page.getByTestId("resource-popup-menu");
+    await popupMenu.waitFor({state: "visible"});
+    popupMenu.click();
     await page.getByTestId("popupmenu-button.db.changeDbaPassword").click();
     await page.locator('input[name="oldPassword"]').fill("passw0rd");
     await page.locator('input[name="newPassword1"]').fill("db1");
@@ -170,10 +174,11 @@ test.describe("DatabaseTest", () => {
     await waitRestComplete(page);
 
     // Start database (retry – may need to wait for state transition)
-    await retry(
-      async () => {
-        await clickMenu(page, "projects");
-        await clickMenu(page, "databases");
+    // await retry(
+    //   async () => {
+//        await clickMenu(page, "projects");
+    page.goto("/ui/");
+    await clickMenu(page, "databases");
         const cells = await waitTableElements(
           page,
           "list_resource__table",
@@ -183,10 +188,10 @@ test.describe("DatabaseTest", () => {
         );
         expect(cells.length).toBe(1);
         await clickPopupMenu(page, cells[0], "confirm.start.database.title");
-      },
-      60,
-      1_000,
-    );
+    //   },
+    //   60,
+    //   1_000,
+    // );
     await page.getByTestId("dialog_button_yes").click();
     await waitRestComplete(page);
 

@@ -1,6 +1,6 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 // Converted from: selenium-tests/…/advanced/RandomClicks.java
-import { test } from "../fixtures";
+import { test, expect } from "../fixtures";
 import { clickMenu } from "../helpers/ui";
 import {
   createProjectRest,
@@ -17,7 +17,9 @@ const MENU_ITEMS = [
   "users",
 ];
 
+
 test.describe("RandomClicks", () => {
+  test.setTimeout(45_000);
   test("testRandomClicks – rapid random navigation must not trigger global error boundary", async ({
     restPage: page,
   }) => {

@@ -12,6 +12,7 @@ import {
   createUserUI,
   createProjectUI,
   createDatabaseUI,
+  getInputOrTextareaByName,
 } from "../helpers/ui";
 import {
   createProjectRest,
@@ -126,7 +127,7 @@ test.describe("UserTest", () => {
 
     // organization and name must be disabled in edit mode
     for (const fieldName of ["organization", "name"]) {
-      await expect(page.locator(`input[name="${fieldName}"]`)).toBeDisabled();
+      await expect(await getInputOrTextareaByName(page, fieldName)).toBeDisabled();
     }
 
     // Add label
@@ -178,7 +179,7 @@ test.describe("UserTest", () => {
     // Fill role params – read key from UI, set matching value
     const paramKeys = ["database", "organization", "project"];
     for (let i = 0; i < paramKeys.length; i++) {
-      const keyInput = page.locator(`input[name="roles.0.params.${i}.key"]`);
+      const keyInput = await getInputOrTextareaByName(page, `roles.0.params.${i}.key`);
       await keyInput.waitFor({ state: "visible" });
       const key = await keyInput.inputValue();
       let value = TEST_ORGANIZATION;
@@ -215,7 +216,7 @@ test.describe("UserTest", () => {
     // Click the $ref (menu) column header to trigger sort UI
     await page.getByTestId("$ref").click();
     // Keyboard navigation on sort dropdowns
-    await page.locator('[id="accessRule.deny"]').press("ArrowUp");
-    await page.locator('[id="accessRule"]').press("ArrowDown");
+    await page.locator('div[id="accessRule.deny"]').press("ArrowUp");
+    await page.locator('div[id="accessRule"]').press("ArrowDown");
   });
 });
