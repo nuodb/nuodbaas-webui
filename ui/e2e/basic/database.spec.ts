@@ -6,7 +6,7 @@ import {
   clickPopupMenu,
   waitRestComplete,
   waitTableElements,
-  replaceInputByName,
+  replaceInputOrTextareaByName,
   hasPopupMenu,
   retry,
   createDatabaseUI,
@@ -117,7 +117,7 @@ test.describe("DatabaseTest", () => {
     await clickPopupMenu(page, menuCells[0], "view_button");
 
     // Open change-password dialog, cancel
-    await sleep(1000); //TODO(agr22) wait for page to fully render
+    await sleep(100); //TODO(agr22) wait for page to fully render
     page.getByTestId("resource-popup-menu").click();
     await page.getByTestId("popupmenu-button.db.changeDbaPassword").click();
     await page.getByTestId("button.cancel").click();

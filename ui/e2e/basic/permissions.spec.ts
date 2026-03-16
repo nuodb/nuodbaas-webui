@@ -86,7 +86,7 @@ test.describe("PermissionsTest", () => {
     await clickPopupMenu(page, menuCells[0], "view_button");
 
     // In the view popup: show.databases present, edit absent
-    sleep(1000);
+    await sleep(100); // TODO(agr22)
     const popupMenu = page.locator("[data-testid=resource-popup-menu]");
     popupMenu.first().waitFor({state: "visible"});
     popupMenu.first().click();

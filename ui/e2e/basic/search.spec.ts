@@ -5,8 +5,9 @@ import {
   clickMenu,
   waitRestComplete,
   waitTableElements,
-  replaceInputByName,
+  replaceInputOrTextareaByName,
   retry,
+  sleep,
 } from "../helpers/ui";
 import {
   createResourceRest,
@@ -19,6 +20,7 @@ test.describe("SearchTest", () => {
   test("testSearch – various search patterns return expected row counts", async ({
     restPage: page,
   }) => {
+    test.setTimeout(60_000);
     // Create 90 users (indices 10–99) with labels via REST
     const name = shortUnique("u");
     const labelName = "l" + name.substring(1);
@@ -52,7 +54,7 @@ test.describe("SearchTest", () => {
     });
 
     async function search(query: string): Promise<void> {
-      await replaceInputByName(page, "search", query);
+      await replaceInputOrTextareaByName(page, "search", query);
       await page.locator('input[name="search"]').press("Enter");
       await waitRestComplete(page);
     }

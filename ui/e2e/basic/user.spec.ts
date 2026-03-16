@@ -6,7 +6,7 @@ import {
   clickPopupMenu,
   waitRestComplete,
   waitTableElements,
-  replaceInputByName,
+  replaceInputOrTextareaByName,
   hasElement,
   retry,
   createUserUI,
@@ -44,9 +44,9 @@ test.describe("UserTest", () => {
 
     // Fill form
     const name = `u${Date.now().toString(36).slice(-6)}`;
-    await replaceInputByName(page, "organization", TEST_ORGANIZATION);
-    await replaceInputByName(page, "name", name);
-    await replaceInputByName(
+    await replaceInputOrTextareaByName(page, "organization", TEST_ORGANIZATION);
+    await replaceInputOrTextareaByName(page, "name", name);
+    await replaceInputOrTextareaByName(
       page,
       "password",
       process.env.TEST_ADMIN_PASSWORD ?? "passw0rd",
@@ -54,12 +54,12 @@ test.describe("UserTest", () => {
 
     // Open access rules section and fill two allow rules
     await page.getByTestId("section-title-access-deny-rules").click();
-    await replaceInputByName(
+    await replaceInputOrTextareaByName(
       page,
       "accessRule.allow.0",
       `all:${TEST_ORGANIZATION}`,
     );
-    await replaceInputByName(
+    await replaceInputOrTextareaByName(
       page,
       "accessRule.allow.1",
       `all:${TEST_ORGANIZATION}2`,
@@ -174,7 +174,7 @@ test.describe("UserTest", () => {
 
     // Expand Advanced section and set role
     await page.getByTestId("section-title-advanced").click();
-    await replaceInputByName(page, "roles.0.name", "database-admin");
+    await replaceInputOrTextareaByName(page, "roles.0.name", "database-admin");
 
     // Fill role params – read key from UI, set matching value
     const paramKeys = ["database", "organization", "project"];

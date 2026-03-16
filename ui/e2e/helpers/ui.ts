@@ -54,6 +54,7 @@ export async function retry(
 /** Clicks the left-menu button for `resource` and waits for REST to complete. */
 export async function clickMenu(page: Page, resource: string): Promise<void> {
   await page.getByTestId(`menu-button-${resource}`).click();
+  await sleep(100); // TODO(agr22)
   await waitRestComplete(page);
 }
 
@@ -158,7 +159,7 @@ export async function getInputOrTextareaByName(page: Page, name: string) {
     if((await input.count()) > 0) {
       return input;
     }
-    await sleep(100);;
+    await sleep(100); // TODO(agr22)
   }
   return input;
 }
@@ -168,7 +169,7 @@ export async function getInputOrTextareaByName(page: Page, name: string) {
  * components (which render a hidden native input + a visible combobox div).
  * Mirrors TestRoutines.replaceInputElementByName().
  */
-export async function replaceInputByName(
+export async function replaceInputOrTextareaByName(
   page: Page,
   name: string,
   value: string,
@@ -192,6 +193,18 @@ export async function replaceInputByName(
     return;
   }
   // Regular input
+  let input = await getInputOrTextareaByName(page, name);
+  input.waitFor({state: "visible", timeout: 10_000});
+  if(await input.inputValue() !== value) {
+    await input.fill(value);
+  }
+}
+
+export async function replaceInputByName(
+  page: Page,
+  name: string,
+  value: string,
+): Promise<void> {
   let input = await getInputOrTextareaByName(page, name);
   input.waitFor({state: "visible", timeout: 10_000});
   if(await input.inputValue() !== value) {
@@ -295,7 +308,9 @@ export async function createResourceUI(
   name: string,
   fields: [string, string][],
 ): Promise<void> {
+  await sleep(100); // TODO(agr22)
   await clickMenu(page, resource);
+  await sleep(100); // TODO(agr22)
   await page.getByTestId(`list_resource__create_button_${resource}`).click();
 
   for (const [fieldName, value] of fields) {
@@ -305,7 +320,7 @@ export async function createResourceUI(
         await section.click();
       }
     }
-    await replaceInputByName(page, fieldName, value);
+    await replaceInputOrTextareaByName(page, fieldName, value);
   }
 
   await page.getByTestId("create_resource__create_button").click();

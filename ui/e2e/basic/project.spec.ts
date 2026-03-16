@@ -6,7 +6,7 @@ import {
   clickPopupMenu,
   waitRestComplete,
   waitTableElements,
-  replaceInputByName,
+  replaceInputOrTextareaByName,
   retry,
   createProjectUI,
 } from "../helpers/ui";
@@ -71,10 +71,10 @@ test.describe("ProjectTest", () => {
         expect(menuCells.length).toBe(1);
         await clickPopupMenu(page, menuCells[0], "edit_button");
 
-        await replaceInputByName(page, "tier", "n0.small");
+        await replaceInputOrTextareaByName(page, "tier", "n0.small");
         await page.getByTestId("section-title-advanced").click();
         await page.getByTestId("section-maintenance").click();
-        await replaceInputByName(page, "maintenance.expiresIn", "30d");
+        await replaceInputOrTextareaByName(page, "maintenance.expiresIn", "30d");
         await page.getByTestId("create_resource__save_button").click();
         await waitRestComplete(page);
 

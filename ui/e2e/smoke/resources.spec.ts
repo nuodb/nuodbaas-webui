@@ -20,7 +20,7 @@ test.describe("ResourcesTest (smoke)", () => {
     const db = await createDatabaseUI(page, project);
     const backup = await createBackupUI(page, project, db);
 
-    sleep(1000);
+    await sleep(100); // TODO(agr22)
 
     // Delete in reverse dependency order
     await deleteResourceUI(page, "backups", backup);

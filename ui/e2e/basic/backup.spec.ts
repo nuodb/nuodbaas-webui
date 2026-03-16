@@ -8,6 +8,7 @@ import {
   retry,
   createBackupUI,
   sleep,
+  clickMenu,
 } from "../helpers/ui";
 import {
   createProjectRest,
@@ -19,7 +20,7 @@ test.describe("BackupTest", () => {
   test("testCreateBackup", async ({ restPage: page }) => {
     const projectName = await createProjectRest();
     const databaseName = await createDatabaseRest(projectName);
-    sleep(1000);
+    await sleep(100); // TODO(agr22)
     page.reload();
     page.goto("/ui/");
     await createBackupUI(page, projectName, databaseName);
@@ -39,30 +40,32 @@ test.describe("BackupTest", () => {
     const databaseName = await createDatabaseRest(projectName);
     const backupName = await createBackupUI(page, projectName, databaseName);
 
-    await retry(async () => {
-      const menuCells = await waitTableElements(
-        page,
-        "list_resource__table",
-        "name",
-        backupName,
-        "$ref",
-      );
-      expect(menuCells.length).toBe(1);
-      await clickPopupMenu(page, menuCells[0], "delete_button");
-      await page.getByTestId("dialog_button_yes").click();
-    });
+    await sleep(100); // TODO(agr22)
+    await clickMenu(page, "backups");
+    await sleep(100); // TODO(agr22)
+
+    const menuCells = await waitTableElements(
+      page,
+      "list_resource__table",
+      "name",
+      backupName,
+      "$ref",
+    );
+    expect(menuCells.length).toBe(1);
+    await clickPopupMenu(page, menuCells[0], "delete_button");
+    await page.getByTestId("dialog_button_yes").click();
 
     await waitRestComplete(page);
-    await retry(async () => {
-      const cells = await waitTableElements(
-        page,
-        "list_resource__table",
-        "name",
-        backupName,
-        "$ref",
-      );
-      expect(cells.length).toBe(0);
-    });
+
+    await sleep(100); // TODO(agr22)
+    const cells = await waitTableElements(
+      page,
+      "list_resource__table",
+      "name",
+      backupName,
+      "$ref",
+    );
+    expect(cells.length).toBe(0);
   });
 
   test("testEditBackup – add label and verify", async ({ restPage: page }) => {
