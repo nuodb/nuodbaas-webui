@@ -74,41 +74,10 @@ jobs:
             fi
       - run:
           name: Run Integration Tests for Code Coverage
-          command: COVERAGE=true make run-integration-tests
+          command: make run-integration-tests
       - store_artifacts:
           path: ui-e2e/target/coverage-reports
           destination: code_coverage_report
-      - store_artifacts:
-          path: ui-e2e/target/playwright-report
-          destination: playwright_report
-  integration_tests:
-    executor: ubuntu_vm
-    machine:
-      image: ubuntu-2404:2025.09.1
-    resource_class: large
-    steps:
-      - checkout
-      - run:
-          name: Checking if Docker image exists already
-          command: |
-            if [ "$(./build_utils.sh doesImageExist)" == "yes" ] ; then
-                echo "Docker Image exists already - no need to run integration tests."
-                circleci-agent step halt
-            else
-              echo "Running integration tests."
-            fi
-      - run:
-          name: Run Integration Tests on Production Build
-          command: make run-integration-tests
-      - run:
-          name: Save Docker image to workspace
-          command: |
-            mkdir -p circleci_workspace
-            docker image save -o "circleci_workspace/nuodbaas-webui" "nuodbaas-webui:latest"
-      - persist_to_workspace:
-          root: .
-          paths:
-            - circleci_workspace
       - store_artifacts:
           path: ui-e2e/target/playwright-report
           destination: playwright_report
@@ -282,12 +251,6 @@ workflows:
             - common-config
       - coverage_tests:
           name: "Coverage Tests"
-          requires:
-            - "Unit Tests"
-          context:
-            - common-config
-      - integration_tests:
-          name: "Integration Tests"
           requires:
             - "Unit Tests"
           context:

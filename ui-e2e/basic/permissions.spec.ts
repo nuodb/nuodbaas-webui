@@ -5,13 +5,11 @@ import {
   clickMenu,
   clickPopupMenu,
   clickUserMenu,
-  waitRestComplete,
   waitTableElements,
   hasElement,
   hasNotElement,
   hasMenu,
   hasNotMenu,
-  hasPopupMenu,
   hasNotPopupMenu,
   createUserUI,
   createProjectUI,
@@ -21,7 +19,6 @@ import {
   loginRest,
   loginViaUI,
   TEST_ORGANIZATION,
-  TEST_ADMIN_USER,
   TEST_ADMIN_PASSWORD,
 } from "../fixtures";
 import {

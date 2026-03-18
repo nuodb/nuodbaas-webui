@@ -3,7 +3,6 @@
  * UI helper utilities for Playwright tests.
  * Mirrors SeleniumTestHelper.java / TestRoutines.java utility methods.
  */
-const fs = require("fs");
 import { expect, type Locator, type Page } from "@playwright/test";
 import {
   TEST_ADMIN_PASSWORD,

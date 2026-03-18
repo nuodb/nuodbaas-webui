@@ -7,16 +7,13 @@ import {
   waitRestComplete,
   waitTableElements,
   replaceInputOrTextareaByName,
-  hasElement,
   retry,
   createUserUI,
-  createProjectUI,
   createDatabaseUI,
   getInputOrTextareaByName,
 } from "../helpers/ui";
 import {
   createProjectRest,
-  createDatabaseRest,
   TEST_ORGANIZATION,
 } from "../helpers/api";
 

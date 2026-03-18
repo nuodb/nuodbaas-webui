@@ -21,7 +21,6 @@ import {
   getOrCreateProject,
   getOrCreateDatabase,
   TEST_ORGANIZATION,
-  cleanupResources,
   restApi,
 } from "../helpers/api";
 import { TestInfo, type Page } from "@playwright/test";
@@ -179,7 +178,7 @@ test.describe("SqlTests", () => {
     await waitRestComplete(page);
 
     // Export
-    if(false) { // TODO(agr22) disabled due to missing "save" dialog
+    if(false) { // TODO(agr22) disabled due to missing "save" dialog in Playwright
       await page.getByTestId("export").click();
       await page.getByTestId("perform.export").click();
       await retry(

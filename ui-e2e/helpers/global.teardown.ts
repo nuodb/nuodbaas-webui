@@ -7,8 +7,7 @@ const { Readable } = require('stream');
 const { finished } = require('stream/promises');
 
 test.describe('global teardown', () => {
-  test('teardown coverage', async ({ page }) => {
-    console.log("TEARDOWN COVERAGE");
+  test('teardown coverage', async () => {
     const mcr = MCR({
         name: 'Coverage Report',
         outputDir: './target/coverage-reports',

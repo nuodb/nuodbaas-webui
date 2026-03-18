@@ -13,7 +13,6 @@ import {
 import {
   createProjectRest,
   createDatabaseRest,
-  TEST_ORGANIZATION,
 } from "../helpers/api";
 
 test.describe("BackupTest", () => {

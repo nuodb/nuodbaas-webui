@@ -7,7 +7,6 @@ import {
   waitTableElements,
   replaceInputOrTextareaByName,
   retry,
-  sleep,
 } from "../helpers/ui";
 import {
   createResourceRest,

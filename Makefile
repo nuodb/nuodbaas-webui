@@ -3,7 +3,6 @@
 PROJECT_DIR := $(shell pwd)
 BIN_DIR ?= $(PROJECT_DIR)/bin
 export PATH := $(BIN_DIR):$(PATH)
-COVERAGE ?= "false"
 
 OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ARCH := $(shell uname -m | sed "s/x86_64/amd64/g" | sed "s/aarch64/arm64/g")
@@ -240,26 +239,9 @@ undeploy-sql: $(KIND) $(HELM) build-sql
 .PHONY: deploy-webui
 deploy-webui: $(HELM) $(KIND)  ## deploy WebUI
 	@if [ -d charts/nuodbaas-webui ] ; then \
-		if [ "${COVERAGE}" = "true" ] ; then \
-			${MAKE} build-coverage && \
-			$(KIND) load docker-image nuodbaas-webui:coverage && \
-			$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=coverage --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api && \
-			mkdir -p selenium-tests/target && \
-			for i in `seq 1 10`; do if [ ! -d selenium-tests/target/build_js ] ; then \
-				curl http://localhost/ui/build_js.tgz | tar -C selenium-tests/target -xzf -; \
-				if [ ! -d selenium-tests/target/build_js ] ; then \
-					sleep 10; \
-				fi; \
-			fi; done; \
-			if [ ! -d selenium-tests/target/build_js ] ; then \
-				echo "Unable to download Javascript sources"; \
-				exit 1; \
-			fi; \
-		else \
-			${MAKE} build-image && \
-			$(KIND) load docker-image nuodbaas-webui:latest && \
-			$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=latest --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api; \
-		fi \
+		${MAKE} build-image && \
+		$(KIND) load docker-image nuodbaas-webui:latest && \
+		$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=latest --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api; \
 	fi
 
 .PHONY: undeploy-webui

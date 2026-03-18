@@ -15,7 +15,6 @@ import {
 import {
   createProjectRest,
   createDatabaseRest,
-  TEST_ORGANIZATION,
 } from "../helpers/api";
 
 test.describe("DatabaseTest", () => {
@@ -173,10 +172,6 @@ test.describe("DatabaseTest", () => {
     await page.getByTestId("dialog_button_yes").click();
     await waitRestComplete(page);
 
-    // Start database (retry – may need to wait for state transition)
-    // await retry(
-    //   async () => {
-//        await clickMenu(page, "projects");
     page.goto("/ui/");
     await clickMenu(page, "databases");
         const cells = await waitTableElements(
@@ -188,10 +183,7 @@ test.describe("DatabaseTest", () => {
         );
         expect(cells.length).toBe(1);
         await clickPopupMenu(page, cells[0], "confirm.start.database.title");
-    //   },
-    //   60,
-    //   1_000,
-    // );
+
     await page.getByTestId("dialog_button_yes").click();
     await waitRestComplete(page);
 

@@ -1,6 +1,6 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 const fs = require("fs");
 
 test.describe('global setup', () => {
