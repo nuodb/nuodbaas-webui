@@ -267,7 +267,7 @@ workflows:
       - deploy_image:
           name: "Deploy Image"
           requires:
-            - "Integration Tests"
+            - "Integration Tests with Coverage"
           context:
             - common-config
       - promote_build:
