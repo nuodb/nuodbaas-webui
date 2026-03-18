@@ -56,7 +56,7 @@ jobs:
           name: Run Unit tests (+ coverage)
           command: make run-unit-tests
 
-  coverage_tests:
+  integration_tests:
     executor: ubuntu_vm
     machine:
       image: ubuntu-2404:2025.09.1
@@ -75,6 +75,15 @@ jobs:
       - run:
           name: Run Integration Tests for Code Coverage
           command: make run-integration-tests
+      - run:
+          name: Save Docker image to workspace
+          command: |
+            mkdir -p circleci_workspace
+            docker image save -o "circleci_workspace/nuodbaas-webui" "nuodbaas-webui:latest"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - circleci_workspace
       - store_artifacts:
           path: ui-e2e/target/coverage-reports
           destination: code_coverage_report
@@ -249,8 +258,8 @@ workflows:
           name: "Unit Tests"
           context:
             - common-config
-      - coverage_tests:
-          name: "Coverage Tests"
+      - integration_tests:
+          name: "Integration Tests with Coverage"
           requires:
             - "Unit Tests"
           context:
@@ -258,7 +267,7 @@ workflows:
       - deploy_image:
           name: "Deploy Image"
           requires:
-            - "Coverage Tests"
+            - "Integration Tests"
           context:
             - common-config
       - promote_build:
