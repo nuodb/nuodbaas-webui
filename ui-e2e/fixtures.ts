@@ -8,6 +8,7 @@ import {
   TEST_ADMIN_PASSWORD,
 } from "./helpers/api";
 import { waitRestComplete } from "./helpers/ui";
+const fs = require("fs");
 
 // ---------------------------------------------------------------------------
 // Environment-based credentials for UI login tests (may differ from API creds)
@@ -79,20 +80,33 @@ type Fixtures = {
   authedPage: Page;
   /** Page authenticated via REST (localStorage) + after-each REST cleanup. */
   restPage: Page;
+  coverageHook: void;
 };
 
 export const test = base.extend<Fixtures>({
-  authedPage: async ({ page }, use) => {
-    await loginViaUI(page);
-    await use(page);
-  },
+    coverageHook: [
+      async ({page}, use) => {
+        await page.coverage.startJSCoverage();
 
-  restPage: async ({ page }, use) => {
-    await loginRest(page);
-    await use(page);
-    // Clean up all non-keep, non-admin resources created during the test
-    await cleanupResources();
-  },
+        await use();
+
+        let coverage = await page.coverage.stopJSCoverage();
+        fs.mkdirSync("target/coverage-data", {recursive: true});
+        fs.writeFileSync("target/coverage-data/" + (Date.now()/1000) + ".json", JSON.stringify(coverage, null, 2));
+      },
+      { auto: true },
+    ],
+    authedPage: async ({ page }, use) => {
+      await loginViaUI(page);
+      await use(page);
+    },
+
+    restPage: async ({ page }, use) => {
+      await loginRest(page);
+      await use(page);
+      // Clean up all non-keep, non-admin resources created during the test
+      await cleanupResources();
+    },
 });
 
 export { expect };

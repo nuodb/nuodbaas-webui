@@ -222,6 +222,7 @@ test.describe("DatabaseTest", () => {
   }) => {
     const projectName = await createProjectRest();
     const databaseName = await createDatabaseRest(projectName);
+    waitRestComplete(page);
 
     await clickMenu(page, "databases");
     let menuCells = await waitTableElements(

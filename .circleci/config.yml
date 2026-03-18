@@ -76,23 +76,11 @@ jobs:
           name: Run Integration Tests for Code Coverage
           command: COVERAGE=true make run-integration-tests
       - store_artifacts:
-          path: selenium-tests/target/coverage
+          path: ui-e2e/target/coverage-reports
           destination: code_coverage_report
-      - run:
-          name: Save test results
-          command: |
-            mkdir -p ~/test-results/junit/
-            find ./selenium-tests/target/test-reports -type f -name "*.xml" -exec cp {} ~/test-results/junit/ \;
-          when: always
-      - store_test_results:
-          path: ~/test-results
-      - run:
-          name: Compress Test Results
-          when: always
-          command: tar -cvzf selenium-test-results.tar.gz -C selenium-tests/target/test-results .
       - store_artifacts:
-          path: selenium-test-results.tar.gz
-          destination: selenium_test_results
+          path: ui-e2e/target/playwright-report
+          destination: playwright_report
   integration_tests:
     executor: ubuntu_vm
     machine:
@@ -127,15 +115,9 @@ jobs:
             mkdir -p ~/test-results/junit/
             find ./selenium-tests/target/test-reports -type f -name "*.xml" -exec cp {} ~/test-results/junit/ \;
           when: always
-      - store_test_results:
-          path: ~/test-results
-      - run:
-          name: Compress Test Results
-          when: always
-          command: tar -cvzf selenium-test-results.tar.gz -C selenium-tests/target/test-results .
       - store_artifacts:
-          path: selenium-test-results.tar.gz
-          destination: selenium_test_results
+          path: ui-e2e/target/playwright-report
+          destination: playwright_report
   deploy_image:
     executor: ubuntu_vm
     machine:

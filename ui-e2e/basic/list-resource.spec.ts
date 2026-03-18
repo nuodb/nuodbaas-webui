@@ -7,6 +7,7 @@ import {
   waitTableElements,
   retry,
   createUserUI,
+  sleep,
 } from "../helpers/ui";
 
 test.describe("ListResourceTest", () => {
@@ -55,6 +56,7 @@ test.describe("ListResourceTest", () => {
     await page.getByTestId("dialog_button_yes").click();
 
     await waitRestComplete(page);
+    await sleep(100);
     await retry(async () => {
       for (const userName of userNames) {
         const cells = await waitTableElements(

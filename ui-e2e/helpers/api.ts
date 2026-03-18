@@ -1,20 +1,12 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 /**
  * REST API helper utilities – mirrors the Java TestRoutines REST methods.
- *
- * Credentials / endpoints are configured via environment variables:
- *   TEST_ORGANIZATION    (default: integrationtest)
- *   TEST_ADMIN_USER      (default: admin)
- *   TEST_ADMIN_PASSWORD  (default: passw0rd)
- *   CP_URL               (default: http://localhost/api)
  */
 
-export const TEST_ORGANIZATION =
-  process.env.TEST_ORGANIZATION ?? "integrationtest";
-export const TEST_ADMIN_USER = process.env.TEST_ADMIN_USER ?? "admin";
-export const TEST_ADMIN_PASSWORD =
-  process.env.TEST_ADMIN_PASSWORD ?? "passw0rd";
-export const CP_URL = process.env.CP_URL ?? "http://localhost/api";
+export const TEST_ORGANIZATION = "integrationtest";
+export const TEST_ADMIN_USER = "admin";
+export const TEST_ADMIN_PASSWORD = "passw0rd";
+export const CP_URL = "http://localhost/api";
 
 export type Resource = "users" | "projects" | "databases" | "backups";
 

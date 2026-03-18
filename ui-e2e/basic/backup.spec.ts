@@ -21,8 +21,6 @@ test.describe("BackupTest", () => {
     const projectName = await createProjectRest();
     const databaseName = await createDatabaseRest(projectName);
     await sleep(100); // TODO(agr22)
-    page.reload();
-    page.goto("/ui/");
     await createBackupUI(page, projectName, databaseName);
 
     const rows = await waitTableElements(

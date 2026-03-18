@@ -24,7 +24,7 @@ import {
   cleanupResources,
   restApi,
 } from "../helpers/api";
-import { type Page } from "@playwright/test";
+import { TestInfo, type Page } from "@playwright/test";
 
 const DB_USERNAME = "dba";
 const DB_PASSWORD = "passw0rd";

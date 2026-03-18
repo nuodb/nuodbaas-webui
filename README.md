@@ -54,11 +54,6 @@ docker run -p 3001:3001 --rm --init -it --workdir /home/pwuser --user pwuser mcr
     -c "npx -y playwright@1.58.2 run-server --port 3001 --host 0.0.0.0"
 
 PW_TEST_CONNECT_WS_ENDPOINT=ws://127.0.0.1:3001/ \
-E2E_BASE_URL=http://localhost \
-TEST_ORGANIZATION=integrationtest \
-TEST_ADMIN_USER=admin \
-TEST_ADMIN_PASSWORD=passw0rd \
-CP_URL=http://localhost/api \
 PLAYWRIGHT_HTML_HOST=0.0.0.0 \
 npm run e2e -- --project=chromium
 ```
