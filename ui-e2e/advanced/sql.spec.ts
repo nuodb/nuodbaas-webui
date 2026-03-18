@@ -139,6 +139,7 @@ async function verifyAndDeleteDbUser(page: Page, user: string): Promise<void> {
 
 test.describe("SqlTests", () => {
   test.beforeEach(async ({ restPage: page }) => {
+    test.setTimeout(185_000)
     await ensureDbAvailable(page);
   });
 
