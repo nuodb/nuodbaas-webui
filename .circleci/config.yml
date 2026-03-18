@@ -109,12 +109,6 @@ jobs:
           root: .
           paths:
             - circleci_workspace
-      - run:
-          name: Save test results
-          command: |
-            mkdir -p ~/test-results/junit/
-            find ./selenium-tests/target/test-reports -type f -name "*.xml" -exec cp {} ~/test-results/junit/ \;
-          when: always
       - store_artifacts:
           path: ui-e2e/target/playwright-report
           destination: playwright_report
