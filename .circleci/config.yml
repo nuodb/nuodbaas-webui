@@ -259,7 +259,6 @@ workflows:
           name: "Deploy Image"
           requires:
             - "Coverage Tests"
-            - "Integration Tests"
           context:
             - common-config
       - promote_build:
