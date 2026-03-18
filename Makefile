@@ -283,13 +283,7 @@ setup-nginx-default-conf:
 
 .PHONY: setup-integration-tests
 setup-integration-tests: $(KUBECTL) setup-nginx-default-conf install-crds deploy-monitoring deploy-cp deploy-operator deploy-sql deploy-webui ## setup containers before running integration tests
-	@if [ "$(ARCH)" = "arm64" ] ; then \
-		docker pull seleniarm/standalone-chromium && \
-		docker tag seleniarm/standalone-chromium selenium-standalone; \
-	else \
-		docker pull selenium/standalone-chrome:131.0 && \
-		docker tag selenium/standalone-chrome:131.0 selenium-standalone; \
-	fi
+	@npx playwright install || true
 
 	@docker compose -f selenium-tests/compose.yaml up --wait
 	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-rest" -o name) -- bash -c "curl \
