@@ -1,8 +1,8 @@
 ^\./copyright_ignore.txt$
-^\./ui-e2e/node_modules/
-^\./ui-e2e/target/
-^\./ui-e2e/package-lock.json
-^\./ui-e2e/test-results/
+^\./ui-test/node_modules/
+^\./ui-test/target/
+^\./ui-test/package-lock.json
+^\./ui-test/test-results/
 ^\./ui/node_modules/
 ^\./ui/coverage/
 ^\./.git/

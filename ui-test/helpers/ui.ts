@@ -9,6 +9,8 @@ import {
   TEST_ORGANIZATION,
   type Resource,
   shortUnique,
+  TEST_ADMIN_USER,
+  getCredentials,
 } from "./api";
 
 // ---------------------------------------------------------------------------
@@ -140,7 +142,7 @@ export async function hasNotPopupMenu(
   await menuToggle.click();
   await expect(
     page.getByTestId("menu-popup").getByTestId(dataTestId),
-  ).not.toBeVisible({ timeout: 1_000 });
+  ).not.toBeVisible();
   await page.keyboard.press("Escape");
 }
 
@@ -194,7 +196,7 @@ export async function replaceInputOrTextareaByName(
   }
   // Regular input
   let input = await getInputOrTextareaByName(page, name);
-  input.waitFor({state: "visible", timeout: 10_000});
+  input.waitFor({state: "visible"});
   if(await input.inputValue() !== value) {
     await input.fill(value);
   }
@@ -206,7 +208,7 @@ export async function replaceInputByName(
   value: string,
 ): Promise<void> {
   let input = await getInputOrTextareaByName(page, name);
-  input.waitFor({state: "visible", timeout: 10_000});
+  input.waitFor({state: "visible"});
   if(await input.inputValue() !== value) {
     await input.fill(value);
   }
@@ -214,13 +216,13 @@ export async function replaceInputByName(
 
 export async function waitForTestId(page: Page, id: string) {
   let element: Locator = page.getByTestId(id);
-  await element.waitFor({ state: "visible", timeout: 10_000 });
+  await element.waitFor({ state: "visible" });
   return element;
 }
 
 export async function waitForTestIdHidden(page: Page, id: string) {
   let element: Locator = page.getByTestId(id);
-  await element.waitFor({ state: "hidden", timeout: 10_000 });
+  await element.waitFor({ state: "hidden" });
   return element;
 }
 
@@ -316,7 +318,7 @@ export async function createResourceUI(
   for (const [fieldName, value] of fields) {
     if (fieldName.startsWith("accessRule")) {
       const section = page.getByTestId("section-title-access-deny-rules");
-      if (await section.isVisible({ timeout: 500 }).catch(() => false)) {
+      if (await section.isVisible().catch(() => false)) {
         await section.click();
       }
     }
@@ -423,4 +425,66 @@ export async function createBackupUI(
 
 export function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ---------------------------------------------------------------------------
+// Environment-based credentials for UI login tests (may differ from API creds)
+// ---------------------------------------------------------------------------
+export const E2E_ORG = process.env.E2E_ORG ?? TEST_ORGANIZATION;
+export const E2E_USER = process.env.E2E_USER ?? TEST_ADMIN_USER;
+export const E2E_PASSWORD = process.env.E2E_PASSWORD ?? TEST_ADMIN_PASSWORD;
+
+// Re-export for convenience in test files
+export { TEST_ORGANIZATION, TEST_ADMIN_USER, TEST_ADMIN_PASSWORD };
+
+
+// ---------------------------------------------------------------------------
+// Login helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Logs in via the UI login form (org, username, password fields).
+ * Handles the optional "Show Login" button that appears when SSO providers
+ * are configured (mirrors SeleniumTestHelper.login()).
+ */
+export async function loginViaUI(
+  page: Page,
+  org = E2E_ORG,
+  user = E2E_USER,
+  password = E2E_PASSWORD,
+): Promise<void> {
+  await page.goto("/ui/login");
+  await waitRestComplete(page);
+
+  const showLoginBtn = page.getByTestId("show_login_button");
+  await showLoginBtn.waitFor({ state: "visible" });
+  await showLoginBtn.click();
+
+  await page.getByTestId("organization").locator("input").fill(org);
+  await page.getByTestId("username").locator("input").fill(user);
+  await page.getByTestId("password").locator("input").fill(password);
+  await page.getByTestId("login_button").click();
+  await page.waitForURL(/\/ui(?!\/login)/);
+}
+
+/**
+ * Logs in via REST API (no UI interaction): POSTs to /login, stores the JWT
+ * in localStorage["credentials"], then navigates to /ui/.
+ * Mirrors TestRoutines.loginRest().
+ */
+export async function loginRest(
+  page: Page,
+  org = TEST_ORGANIZATION,
+  user = TEST_ADMIN_USER,
+  password = TEST_ADMIN_PASSWORD,
+): Promise<void> {
+  const creds = await getCredentials(org, user, password);
+  // Navigate to /ui/ first so we can set localStorage on the right origin
+  await page.goto("/ui/");
+  await page.evaluate((c) => {
+    localStorage.clear();
+    localStorage.setItem("credentials", JSON.stringify(c));
+  }, creds);
+  await page.goto("/ui/");
+  await page.waitForURL(/\/ui(?!\/login)/);
 }

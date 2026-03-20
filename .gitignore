@@ -4,9 +4,9 @@ ui/node_modules
 ui/package-lock.json
 ui/build
 ui/coverage
-ui-e2e/node_modules
-ui-e2e/target
-ui-e2e/test-results
+ui-test/node_modules
+ui-test/target
+ui-test/test-results
 selenium-tests/files/kubeconfig
 selenium-tests/node_modules
 bin/

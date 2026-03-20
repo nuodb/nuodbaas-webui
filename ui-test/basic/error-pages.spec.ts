@@ -1,6 +1,7 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 // Converted from: selenium-tests/…/basic/ErrorPagesTest.java
-import { test, expect } from "../fixtures";
+import { expect } from "@playwright/test";
+import { test } from "../fixtures";
 
 test.describe("ErrorPagesTest", () => {
   test("testNotFound – unknown UI path shows 404 page then redirects on OK", async ({
@@ -35,7 +36,6 @@ test.describe("ErrorPagesTest", () => {
     await page.goto("/ui/error?crashme=true");
     await expect(page.getByTestId("error-message")).toHaveText(
       "Error: Simulate crash",
-      { timeout: 15_000 },
     );
     await page.getByTestId("button.ok").click();
     await page

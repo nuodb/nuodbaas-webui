@@ -1,6 +1,7 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 // Converted from: selenium-tests/…/basic/ListResourceTest.java
-import { test, expect } from "../fixtures";
+import { expect } from "@playwright/test";
+import { test } from "../fixtures";
 import {
   clickMenu,
   waitRestComplete,

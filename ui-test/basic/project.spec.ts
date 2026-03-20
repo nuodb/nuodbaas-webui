@@ -1,6 +1,6 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 // Converted from: selenium-tests/…/basic/ProjectTest.java
-import { test, expect } from "../fixtures";
+import { test } from "../fixtures";
 import {
   clickMenu,
   clickPopupMenu,
@@ -11,6 +11,7 @@ import {
   createProjectUI,
 } from "../helpers/ui";
 import { createProjectRest, TEST_ORGANIZATION } from "../helpers/api";
+import { expect } from "@playwright/test";
 
 test.describe("ProjectTest", () => {
   test("testCreateProject", async ({ restPage: page }) => {

@@ -1,12 +1,13 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 // Converted from: selenium-tests/…/advanced/RandomClicks.java
-import { test, expect } from "../fixtures";
+import { test } from "../fixtures";
 import { clickMenu } from "../helpers/ui";
 import {
   createProjectRest,
   createDatabaseRest,
   createBackupRest,
 } from "../helpers/api";
+import { expect } from "@playwright/test";
 
 /** Left-menu items expected to be clickable – mirrors BannerTest.expectedMenuItems. */
 const MENU_ITEMS = [
@@ -40,8 +41,6 @@ test.describe("RandomClicks", () => {
     // If the Global Error Boundary fired, an "error-message" element would be visible.
     // Playwright will also fail if any uncaught exception is thrown with page.on('pageerror').
     // Simply verify no error message appeared.
-    await expect(page.getByTestId("error-message")).not.toBeVisible({
-      timeout: 1_000,
-    });
+    await expect(page.getByTestId("error-message")).not.toBeVisible();
   });
 });

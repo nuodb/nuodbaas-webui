@@ -5,7 +5,7 @@
 // The project and database are created if they don't exist, then reused across
 // all SQL tests (the "keep" prefix prevents cleanup in afterEach).
 // Set DB_READY_TIMEOUT_S env var to override the default 180-second wait.
-import { test, expect } from "../fixtures";
+import { test } from "../fixtures";
 import {
   clickMenu,
   clickPopupMenu,
@@ -23,7 +23,7 @@ import {
   TEST_ORGANIZATION,
   restApi,
 } from "../helpers/api";
-import { TestInfo, type Page } from "@playwright/test";
+import { expect, TestInfo, type Page } from "@playwright/test";
 
 const DB_USERNAME = "dba";
 const DB_PASSWORD = "passw0rd";

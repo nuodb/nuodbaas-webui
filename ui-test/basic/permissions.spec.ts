@@ -1,6 +1,6 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 // Converted from: selenium-tests/…/basic/PermissionsTest.java
-import { test, expect } from "../fixtures";
+import { test } from "../fixtures";
 import {
   clickMenu,
   clickPopupMenu,
@@ -14,20 +14,17 @@ import {
   createUserUI,
   createProjectUI,
   sleep,
-} from "../helpers/ui";
-import {
   loginRest,
   loginViaUI,
-  TEST_ORGANIZATION,
-  TEST_ADMIN_PASSWORD,
-} from "../fixtures";
+} from "../helpers/ui";
 import {
-  createUserRest,
   createResourceRest,
   shortUnique,
   TEST_ADMIN_PASSWORD as ADMIN_PWD,
+  TEST_ORGANIZATION,
+  TEST_ADMIN_PASSWORD,
 } from "../helpers/api";
-import { type Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 /** Creates a limited user via UI then logs in as that user. */
 async function createAndLoginUser(

@@ -73,7 +73,7 @@ jobs:
               echo "Running Code coverage tests."
             fi
       - run:
-          name: Run Integration Tests for Code Coverage
+          name: Run Integration Tests with Code Coverage
           command: make run-integration-tests
       - run:
           name: Save Docker image to workspace
@@ -85,10 +85,10 @@ jobs:
           paths:
             - circleci_workspace
       - store_artifacts:
-          path: ui-e2e/target/coverage-reports
+          path: ui-test/target/coverage-reports
           destination: code_coverage_report
       - store_artifacts:
-          path: ui-e2e/target/playwright-report
+          path: ui-test/target/playwright-report
           destination: playwright_report
   deploy_image:
     executor: ubuntu_vm

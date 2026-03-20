@@ -1,6 +1,6 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 // Converted from: selenium-tests/…/basic/BackupTest.java
-import { test, expect } from "../fixtures";
+import { test } from "../fixtures";
 import {
   clickPopupMenu,
   waitRestComplete,
@@ -14,19 +14,20 @@ import {
   createProjectRest,
   createDatabaseRest,
 } from "../helpers/api";
+import { expect } from "@playwright/test";
 
 test.describe("BackupTest", () => {
   test("testCreateBackup", async ({ restPage: page }) => {
     const projectName = await createProjectRest();
     const databaseName = await createDatabaseRest(projectName);
     await sleep(100); // TODO(agr22)
-    await createBackupUI(page, projectName, databaseName);
+    const backupName = await createBackupUI(page, projectName, databaseName);
 
     const rows = await waitTableElements(
       page,
       "list_resource__table",
       "name",
-      null,
+      backupName,
       "name",
     );
     expect(rows.length).toBeGreaterThanOrEqual(1);

@@ -1,6 +1,6 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 // Converted from: selenium-tests/…/basic/DatabaseTest.java
-import { test, expect } from "../fixtures";
+import { test } from "../fixtures";
 import {
   clickMenu,
   clickPopupMenu,
@@ -16,6 +16,7 @@ import {
   createProjectRest,
   createDatabaseRest,
 } from "../helpers/api";
+import { expect } from "@playwright/test";
 
 test.describe("DatabaseTest", () => {
   test("testCreateDatabase", async ({ restPage: page }) => {
@@ -174,16 +175,25 @@ test.describe("DatabaseTest", () => {
 
     page.goto("/ui/");
     await clickMenu(page, "databases");
-        const cells = await waitTableElements(
-          page,
-          "list_resource__table",
-          "name",
-          databaseName,
-          "$ref",
-        );
-        expect(cells.length).toBe(1);
-        await clickPopupMenu(page, cells[0], "confirm.start.database.title");
+    const cells = await waitTableElements(
+      page,
+      "list_resource__table",
+      "name",
+      databaseName,
+      "$ref",
+    );
+    expect(cells.length).toBe(1);
+    const status = await waitTableElements(
+      page,
+      "list_resource__table",
+      "name",
+      databaseName,
+      "status",
+    );
+    expect(status.length).toBe(1);
+    expect(status[0]).toContainText("Shutdown");
 
+    await clickPopupMenu(page, cells[0], "confirm.start.database.title");
     await page.getByTestId("dialog_button_yes").click();
     await waitRestComplete(page);
 

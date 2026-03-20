@@ -1,6 +1,6 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 // Converted from: selenium-tests/…/basic/SearchTest.java
-import { test, expect } from "../fixtures";
+import { test } from "../fixtures";
 import {
   clickMenu,
   waitRestComplete,
@@ -14,6 +14,7 @@ import {
   TEST_ORGANIZATION,
   TEST_ADMIN_PASSWORD,
 } from "../helpers/api";
+import { expect } from "@playwright/test";
 
 test.describe("SearchTest", () => {
   test("testSearch – various search patterns return expected row counts", async ({

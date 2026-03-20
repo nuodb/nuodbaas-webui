@@ -331,7 +331,7 @@ teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-seleniu
 
 .PHONY: run-integration-tests-only
 run-integration-tests-only: ## integration tests without setup/teardown
-	@cd ui-e2e && npm install && npm run e2e -- --workers 1 && cd ..
+	@cd ui-test && npm install && npm run e2e -- --workers 1 && cd ..
 
 .PHONY: run-unit-tests
 run-unit-tests: ## run unit tests
@@ -339,12 +339,12 @@ run-unit-tests: ## run unit tests
 
 .PHONY: show-e2e-report
 show-e2e-report: ## show E2E report
-	@npx playwright show-report --host 0.0.0.0 ui-e2e/target/playwright-report
+	@npx playwright show-report --host 0.0.0.0 ui-test/target/playwright-report
 
 .PHONY: show-coverage-report
 show-coverage-report: ## show Coverage report
-	@cd ui-e2e && npm install && npm run e2e -- --workers 1 --project "teardown coverage"
-	@cd ui-e2e && npx http-server -p 8081 target/coverage-reports
+	@cd ui-test && npm install && npm run e2e -- --workers 1 --project "teardown coverage"
+	@cd ui-test && npx http-server -p 8081 target/coverage-reports
 
 .PHONY: build-integration-tests-docker
 build-integration-tests-docker:

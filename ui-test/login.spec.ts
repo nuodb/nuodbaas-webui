@@ -1,21 +1,15 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 // Converted from: selenium-tests/…/basic/LoginTest.java
 import { test, expect, Page } from "@playwright/test";
-import {
-  loginViaUI,
-  TEST_ORGANIZATION,
-  TEST_ADMIN_USER,
-  TEST_ADMIN_PASSWORD,
-} from "./fixtures";
-import { waitRestComplete } from "./helpers/ui";
+import { loginViaUI, TEST_ADMIN_PASSWORD, TEST_ADMIN_USER, TEST_ORGANIZATION, waitRestComplete } from "./helpers/ui";
 
 /** Reveals the login form whether or not an SSO provider list is shown. */
 async function revealLoginForm(page: Page) {
-  waitRestComplete(page);
+  await waitRestComplete(page);
   const showBtn = page.getByTestId("show_login_button");
-  await showBtn.waitFor({ state: "visible", timeout: 3_000 });
+  await showBtn.waitFor({ state: "visible" });
   await showBtn.click();
-  await page.getByTestId("organization").locator("input").waitFor({timeout: 3_000});
+  await page.getByTestId("organization").locator("input").waitFor();
 }
 
 test.describe("LoginTest", () => {
@@ -37,7 +31,7 @@ test.describe("LoginTest", () => {
       .fill("invalid_password");
     await page.getByTestId("login_button").click();
     const error = page.getByTestId("error_message");
-    await expect(error).toBeVisible({ timeout: 15_000 });
+    await expect(error).toBeVisible();
     await expect(error).toContainText(/Bad credentials/i);
   });
 
@@ -57,8 +51,8 @@ test.describe("LoginTest", () => {
     await page.goto("/ui/login");
     const btnKeycloak = page.getByTestId("login_cas-keycloak");
     const btnSimple = page.getByTestId("login_cas-simple");
-    await expect(btnKeycloak).toBeVisible({ timeout: 15_000 });
-    await expect(btnSimple).toBeVisible({ timeout: 15_000 });
+    await expect(btnKeycloak).toBeVisible();
+    await expect(btnSimple).toBeVisible();
     await expect(btnKeycloak).toHaveText("Login With CAS Keycloak");
     await expect(btnSimple).toHaveText("Login With CAS Simple");
   });
@@ -69,11 +63,9 @@ test.describe("LoginTest", () => {
     await page.goto("/ui/login?provider=bogus");
     await expect(page.getByTestId("progress_message")).toHaveText(
       "Logging in with bogus...",
-      { timeout: 15_000 },
     );
     await expect(page.getByTestId("error_message")).toHaveText(
       "Login failed: No provider named bogus",
-      { timeout: 15_000 },
     );
   });
 
@@ -83,11 +75,9 @@ test.describe("LoginTest", () => {
     await page.goto("/ui/login?provider=cas-simple");
     await expect(page.getByTestId("progress_message")).toHaveText(
       "Logging in with cas-simple...",
-      { timeout: 15_000 },
     );
     await expect(page.getByTestId("error_message")).toHaveText(
       "Login failed: Query parameter 'ticket' not supplied",
-      { timeout: 15_000 },
     );
   });
 
@@ -97,11 +87,9 @@ test.describe("LoginTest", () => {
     await page.goto("/ui/login?provider=cas-simple&ticket=ST-123");
     await expect(page.getByTestId("progress_message")).toHaveText(
       "Logging in with cas-simple...",
-      { timeout: 15_000 },
     );
     await expect(page.getByTestId("error_message")).toHaveText(
       "Login failed: Unable to authenticate user with CAS provider cas-simple",
-      { timeout: 15_000 },
     );
   });
 });

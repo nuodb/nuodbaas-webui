@@ -1,6 +1,6 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 // Converted from: selenium-tests/…/basic/UserTest.java
-import { test, expect } from "../fixtures";
+import { test } from "../fixtures";
 import {
   clickMenu,
   clickPopupMenu,
@@ -16,6 +16,7 @@ import {
   createProjectRest,
   TEST_ORGANIZATION,
 } from "../helpers/api";
+import { expect } from "@playwright/test";
 
 test.describe("UserTest", () => {
   test("testCreateUser", async ({ restPage: page }) => {

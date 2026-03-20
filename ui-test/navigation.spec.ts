@@ -1,6 +1,7 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 // Converted from: selenium-tests/…/basic/BannerTest.java
-import { test, expect } from "./fixtures";
+import { expect } from "@playwright/test";
+import { test } from "./fixtures";
 import { hasMenu, clickUserMenu, waitRestComplete } from "./helpers/ui";
 
 /** All left-menu items expected to appear for an admin user. */
@@ -25,7 +26,7 @@ test.describe("BannerTest", () => {
     restPage: page,
   }) => {
     await clickUserMenu(page, "logout");
-    await expect(page).toHaveURL(/\/ui\/login/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/\/ui\/login/);
   });
 });
 
