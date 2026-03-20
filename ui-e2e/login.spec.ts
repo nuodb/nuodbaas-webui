@@ -56,7 +56,7 @@ test.describe("LoginTest", () => {
   test("testIdp – CAS IdP button label", async ({ page }) => {
     await page.goto("/ui/login");
     const btnKeycloak = page.getByTestId("login_cas-keycloak");
-    const btnSimple = page.getByTestId("login_cas-keycloak");
+    const btnSimple = page.getByTestId("login_cas-simple");
     await expect(btnKeycloak).toBeVisible({ timeout: 15_000 });
     await expect(btnSimple).toBeVisible({ timeout: 15_000 });
     await expect(btnKeycloak).toHaveText("Login With CAS Keycloak");
