@@ -57,7 +57,8 @@ test.describe("LoginTest", () => {
     await page.goto("/ui/login");
     const btn = page.getByTestId("login_cas-idp");
     await expect(btn).toBeVisible({ timeout: 15_000 });
-    await expect(btn).toHaveText("Login With Central Authentication Service");
+    await expect(btn).toHaveText("Login With CAS Keycloak");
+    await expect(btn).toHaveText("Login With CAS Simple");
   });
 
   test("testNonExistentIdp – unknown provider shows error", async ({
@@ -77,9 +78,9 @@ test.describe("LoginTest", () => {
   test("testInvalidIdpLoginRequest – missing ticket param", async ({
     page,
   }) => {
-    await page.goto("/ui/login?provider=cas-idp");
+    await page.goto("/ui/login?provider=cas-simple");
     await expect(page.getByTestId("progress_message")).toHaveText(
-      "Logging in with cas-idp...",
+      "Logging in with cas-simple...",
       { timeout: 15_000 },
     );
     await expect(page.getByTestId("error_message")).toHaveText(
@@ -91,13 +92,13 @@ test.describe("LoginTest", () => {
   test("testUnsuccessfulIdpLogin – invalid ticket causes 500 error", async ({
     page,
   }) => {
-    await page.goto("/ui/login?provider=cas-idp&ticket=ST-123");
+    await page.goto("/ui/login?provider=cas-simple&ticket=ST-123");
     await expect(page.getByTestId("progress_message")).toHaveText(
-      "Logging in with cas-idp...",
+      "Logging in with cas-simple...",
       { timeout: 15_000 },
     );
     await expect(page.getByTestId("error_message")).toHaveText(
-      "Login failed: Request failed with status code 500",
+      "Login failed: Unable to authenticate user with CAS provider cas-simple",
       { timeout: 15_000 },
     );
   });
