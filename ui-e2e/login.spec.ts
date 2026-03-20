@@ -55,10 +55,12 @@ test.describe("LoginTest", () => {
 
   test("testIdp – CAS IdP button label", async ({ page }) => {
     await page.goto("/ui/login");
-    const btn = page.getByTestId("login_cas-idp");
-    await expect(btn).toBeVisible({ timeout: 15_000 });
-    await expect(btn).toHaveText("Login With CAS Keycloak");
-    await expect(btn).toHaveText("Login With CAS Simple");
+    const btnKeycloak = page.getByTestId("login_cas-keycloak");
+    const btnSimple = page.getByTestId("login_cas-keycloak");
+    await expect(btnKeycloak).toBeVisible({ timeout: 15_000 });
+    await expect(btnSimple).toBeVisible({ timeout: 15_000 });
+    await expect(btnKeycloak).toHaveText("Login With CAS Keycloak");
+    await expect(btnSimple).toHaveText("Login With CAS Simple");
   });
 
   test("testNonExistentIdp – unknown provider shows error", async ({
