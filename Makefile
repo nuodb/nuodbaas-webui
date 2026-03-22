@@ -3,7 +3,6 @@
 PROJECT_DIR := $(shell pwd)
 BIN_DIR ?= $(PROJECT_DIR)/bin
 export PATH := $(BIN_DIR):$(PATH)
-COVERAGE ?= "false"
 
 OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ARCH := $(shell uname -m | sed "s/x86_64/amd64/g" | sed "s/aarch64/arm64/g")
@@ -277,26 +276,9 @@ undeploy-sql: $(KIND) $(HELM) build-sql
 .PHONY: deploy-webui
 deploy-webui: $(HELM) $(KIND)  ## deploy WebUI
 	@if [ -d charts/nuodbaas-webui ] ; then \
-		if [ "${COVERAGE}" = "true" ] ; then \
-			${MAKE} build-coverage && \
-			$(KIND) load docker-image nuodbaas-webui:coverage && \
-			$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=coverage --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api && \
-			mkdir -p selenium-tests/target && \
-			for i in `seq 1 10`; do if [ ! -d selenium-tests/target/build_js ] ; then \
-				curl http://localhost/ui/build_js.tgz | tar -C selenium-tests/target -xzf -; \
-				if [ ! -d selenium-tests/target/build_js ] ; then \
-					sleep 10; \
-				fi; \
-			fi; done; \
-			if [ ! -d selenium-tests/target/build_js ] ; then \
-				echo "Unable to download Javascript sources"; \
-				exit 1; \
-			fi; \
-		else \
-			${MAKE} build-image && \
-			$(KIND) load docker-image nuodbaas-webui:latest && \
-			$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=latest --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api; \
-		fi \
+		${MAKE} build-image && \
+		$(KIND) load docker-image nuodbaas-webui:latest && \
+		$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=latest --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api; \
 	fi
 
 .PHONY: undeploy-webui
@@ -319,14 +301,8 @@ setup-nginx-default-conf:
 	fi
 
 .PHONY: setup-integration-tests
-setup-integration-tests: $(KUBECTL) setup-nginx-default-conf install-crds deploy-monitoring deploy-cp deploy-operator deploy-sql deploy-keycloak deploy-cas-server deploy-selenium deploy-webui ## setup containers before running integration tests
-	@if [ "$(ARCH)" = "arm64" ] ; then \
-		docker pull seleniarm/standalone-chromium && \
-		docker tag seleniarm/standalone-chromium selenium-standalone; \
-	else \
-		docker pull selenium/standalone-chrome:131.0 && \
-		docker tag selenium/standalone-chrome:131.0 selenium-standalone; \
-	fi
+setup-integration-tests: $(KUBECTL) setup-nginx-default-conf install-crds deploy-monitoring deploy-cp deploy-operator deploy-sql deploy-keycloak deploy-cas-server deploy-webui ## setup containers before running integration tests
+	@npx playwright install || true
 
 	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-rest" -o name) -- bash -c "curl \
 		http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true \
@@ -353,24 +329,22 @@ teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-seleniu
 		$(KIND) delete cluster 2> /dev/null || true ; \
 	fi
 
-.PHONY: create-coverage-report
-create-coverage-report: ## create coverage report
-		cd selenium-tests && \
-		npx nyc report -r text --cwd target && \
-		npx nyc report -r html --cwd target --report-dir coverage && \
-		cd ..
-
 .PHONY: run-integration-tests-only
 run-integration-tests-only: ## integration tests without setup/teardown
-	@rm -rf selenium-tests/target/.nyc_output
-	@cd selenium-tests && mvn test && cd ..
-	@if [ "${COVERAGE}" = "true" ] ; then \
-		${MAKE} create-coverage-report; \
-	fi
+	@cd ui-test && npm install && npm run e2e -- --workers 1 && cd ..
 
 .PHONY: run-unit-tests
 run-unit-tests: ## run unit tests
 	@cd ui && npm install && npm run coverage && cd ..
+
+.PHONY: show-e2e-report
+show-e2e-report: ## show E2E report
+	@npx playwright show-report --host 0.0.0.0 ui-test/target/playwright-report
+
+.PHONY: show-coverage-report
+show-coverage-report: ## show Coverage report
+	@cd ui-test && npm install && npm run e2e -- --workers 1 --project "teardown coverage"
+	@cd ui-test && npx http-server -p 8081 target/coverage-reports
 
 .PHONY: build-integration-tests-docker
 build-integration-tests-docker:

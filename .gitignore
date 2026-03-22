@@ -4,6 +4,9 @@ ui/node_modules
 ui/package-lock.json
 ui/build
 ui/coverage
+ui-test/node_modules
+ui-test/target
+ui-test/test-results
 selenium-tests/files/kubeconfig
 selenium-tests/node_modules
 bin/
@@ -16,3 +19,5 @@ docker/development/default.conf
 nuodb-control-plane/
 nuodb.lic
 circleci_workspace
+ui/test-results
+ui/playwright-report

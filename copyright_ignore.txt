@@ -1,4 +1,8 @@
 ^\./copyright_ignore.txt$
+^\./ui-test/node_modules/
+^\./ui-test/target/
+^\./ui-test/package-lock.json
+^\./ui-test/test-results/
 ^\./ui/node_modules/
 ^\./ui/coverage/
 ^\./.git/

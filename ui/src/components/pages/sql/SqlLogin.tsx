@@ -1,4 +1,4 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { useState } from 'react';
 import { useParams } from "react-router"
@@ -93,7 +93,7 @@ function SqlLogin({ setSqlConnection, showRegistration }: SqlLoginProps) {
                     setError(t("form.sqleditor.label.allFieldsRequired"))
                 }
             }}>{t("form.sqleditor.button.login")}</Button>
-            {showRegistration && <Button data-testid="sql.login.button" variant="outlined" onClick={async () => {
+            {showRegistration && <Button data-testid="sql.setupLogin.button" variant="outlined" onClick={async () => {
                 setShowRegisterUserDialog(true);
             }}>{t("form.sqleditor.button.setupLogin")}</Button>}
         </div>
