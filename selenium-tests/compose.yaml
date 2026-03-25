@@ -1,0 +1,23 @@
+# (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
+services:
+  playwright:
+    image: "mcr.microsoft.com/playwright:v1.58.2-noble"
+    shm_size: '2gb'
+    init: true
+    working_dir: "/home/pwuser"
+    user: "pwuser"
+    command:
+    - "/bin/sh"
+    - "-c"
+    - "npx -y playwright@1.58.2 run-server --port 3001 --host 0.0.0.0"
+    network_mode: host
+    healthcheck:
+      test: curl --fail http://localhost:3001/
+      interval: 5s
+      timeout: 30s
+      retries: 3
+      start_period: 60s
+networks:
+  kind:
+    name: kind
+    external: true

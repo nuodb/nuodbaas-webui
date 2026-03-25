@@ -47,7 +47,6 @@ The Integration tests are regular JUnit tests going against the Selenium contain
 
 To monitor the UI while the tests are running, go to this URL: `http://localhost:7900/?autoconnect=1&resize=scale&password=secret⁠`
 
-
 ## Add Open Telemetry to the Control Plane
 To add Open Telementry to the control plane, insert following lines before the "USER" line in `nuodb-control-plane/docker/Dockerfile`:
 
@@ -75,3 +74,14 @@ public @interface OtelTrace {
 Add `@OtelTrace` to each method in `nuodb-control-plane/rest-service/src/main/java/com/nuodb/controlplane/client/ResourceManagerImpl.java` or other desired locations
 
 - To search for traces or metrics, go to the URL: `/ui/monitoring` and select appropriate service.
+
+## Run new E2E tests via Playwright
+```
+cd ui
+docker run -p 3001:3001 --rm --init -it --workdir /home/pwuser --user pwuser mcr.microsoft.com/playwright:v1.58.2-noble /bin/sh \
+    -c "npx -y playwright@1.58.2 run-server --port 3001 --host 0.0.0.0"
+
+PW_TEST_CONNECT_WS_ENDPOINT=ws://127.0.0.1:3001/ \
+PLAYWRIGHT_HTML_HOST=0.0.0.0 \
+npm run e2e -- --project=chromium
+```
