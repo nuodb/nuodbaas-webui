@@ -46,3 +46,32 @@ make teardown-integration-tests
 The Integration tests are regular JUnit tests going against the Selenium container, which can be run in debug mode in your IDE as well. Location: `selenium-tests/src/test/java/com/nuodb/selenium`. Make sure you run `make setup-integration-tests` beforehand.
 
 To monitor the UI while the tests are running, go to this URL: `http://localhost:7900/?autoconnect=1&resize=scale&password=secret⁠`
+
+
+## Add Open Telemetry to the Control Plane
+To add Open Telementry to the control plane, insert following lines before the "USER" line in `nuodb-control-plane/docker/Dockerfile`:
+
+```
+RUN curl -L -O https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar -o /opentelemetry-javaagent.jar
+ENV JAVA_TOOL_OPTIONS="-Dotel.instrumentation.external.annotations.include=com.nuodb.controlplane.util.OtelTrace -javaagent:/opentelemetry-javaagent.jar"
+ENV OTEL_TRACES_EXPORTER=otlp
+ENV OTEL_METRICS_EXPORTER=otlp
+ENV OTEL_LOGS_EXPORTER=otlp
+ENV OTEL_METRIC_EXPORT_INTERVAL=15000
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger.default.svc.cluster.local:4318
+ENV OTEL_SERVICE_NAME=nuodb-cp
+```
+
+Create file `nuodb-control-plane/rest-service/src/main/java/com/nuodb/controlplane/util/OtelTrace.java`:
+
+```
+package com.nuodb.controlplane.util;
+
+public @interface OtelTrace {
+
+}
+```
+
+Add `@OtelTrace` to each method in `nuodb-control-plane/rest-service/src/main/java/com/nuodb/controlplane/client/ResourceManagerImpl.java` or other desired locations
+
+- To search for traces or metrics, go to the URL: `/ui/monitoring` and select appropriate service.
