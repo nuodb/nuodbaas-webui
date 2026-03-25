@@ -1,4 +1,4 @@
-/* (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved. */
+/* (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved. */
 
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -19,11 +19,12 @@ import {
 
 export default function JaegerPage() {
     // ----- state --------------------------------------------------------------
+    const now = new Date().getTime();
     const [services, setServices] = useState<string[]>([]);
     const [serviceName, setServiceName] = useState<string>("");
     const [operationName, setOperationName] = useState<string>("");
-    const [startTimeMin, setStartTimeMin] = useState<string>("1970-01-01T00:00:00Z");
-    const [startTimeMax, setStartTimeMax] = useState<string>("2100-12-31T23:59:59Z");
+    const [startTimeMin, setStartTimeMin] = useState<string>(new Date(now - 3600 * 1000).toISOString());
+    const [startTimeMax, setStartTimeMax] = useState<string>(new Date(now).toISOString());
     const [durationMin, setDurationMin] = useState<string>("0ms");
     const [durationMax, setDurationMax] = useState<string>("1000s");
     const [searchDepth, setSearchDepth] = useState<string>("50");
