@@ -154,7 +154,6 @@ export default function JaegerPage() {
                             "&query.search_depth=" + encodeURIComponent(searchDepth) +
                             "&query.raw_traces=" + encodeURIComponent(rawTraces)
                         );
-                        console.log("response", response);
                         setResult(response.data);
                     }}
                 >
