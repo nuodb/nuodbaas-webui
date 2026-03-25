@@ -201,9 +201,11 @@ undeploy-operator: $(KIND) $(HELM)
 deploy-monitoring:
 	helm repo add prometheus-community "https://prometheus-community.github.io/helm-charts"
 	helm upgrade --install -n default kube-prometheus-stack prometheus-community/kube-prometheus-stack --wait
+	$(KUBECTL) apply -n default -f docker/development/monitoring.yaml
 
 .PHONY: undeploy-monitoring
 undeploy-monitoring:
+	@kubectl delete -n default -f docker/development/monitoring.yaml || true
 	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
 		$(HELM) uninstall -n default kube-prometheus-stack; \
 	fi
