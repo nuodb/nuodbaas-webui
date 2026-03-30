@@ -7,8 +7,8 @@ export default function MonitoringPage() {
 
     return <div className="NuoColumn">
         <button className="NuoFieldContainer" onClick={()=>{
-            navigate("/ui/monitoring/jaeger")
-        }}>Perform Jaeger queries</button>
+            navigate("/ui/monitoring/grafana-tempo")
+        }}>Perform Grafana Tempo queries</button>
         <button className="NuoFieldContainer" onClick={()=>{
             navigate("/ui/monitoring/prometheus")
         }}>perform Prometheus queries</button>

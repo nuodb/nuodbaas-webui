@@ -13,8 +13,12 @@ server {
     proxy_pass %%%NUODB_CP_URL_BASE%%%/;
   }
 
-  location /jaeger/ {
-    proxy_pass http://localhost/jaeger/;
+  location /grafana-tempo/ {
+    proxy_pass http://localhost/grafana-tempo/;
+  }
+
+  location /redpanda-console/ {
+    proxy_pass http://localhost/redpanda-console/;
   }
 
   location /prometheus/ {

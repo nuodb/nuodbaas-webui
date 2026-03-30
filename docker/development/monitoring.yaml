@@ -35,49 +35,136 @@ spec:
             port:
               number: 80
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-tempo
+data:
+  tempo.yaml: |
+    partition_ring_live_store: true
+    stream_over_http_enabled: true
+
+    server:
+      http_listen_port: 3200
+      log_level: info
+
+    distributor:
+      receivers:
+        otlp:
+          protocols:
+            grpc:
+              endpoint: "0.0.0.0:4317"
+            http:
+              endpoint: "0.0.0.0:4318"
+      #log_received_spans:
+      #    enabled: true
+      #  log_discarded_spans:
+      #    enabled: true
+
+    backend_scheduler:
+      provider:
+        compaction:
+          compaction:
+            block_retention: 1h
+
+    backend_worker:
+      backend_scheduler_addr: backend-scheduler:3200
+      compaction:
+        block_retention: 1h
+      ring:
+        kvstore:
+          store: grafana-tempo-memberlist
+
+    querier:
+      query_live_store: true
+
+    metrics_generator:
+      registry:
+        external_labels:
+          source: tempo
+          cluster: docker-compose
+      storage:
+        path: /var/tempo/generator/wal
+        remote_write:
+          - url: http://kube-prometheus-stack-prometheus:9090/api/v1/write
+            send_exemplars: true
+
+    query_frontend:
+      rf1_after: "1999-01-01T00:00:00Z"
+      mcp_server:
+        enabled: false
+
+    storage:
+      trace:
+        backend: s3
+        s3:
+          bucket: tempo
+          endpoint: minio:9000
+          access_key: tempo
+          secret_key: supersecret
+          insecure: true
+        wal:
+          path: /var/tempo/wal # where to store the wal locally
+
+    overrides:
+      defaults:
+        metrics_generator:
+          processors: ["span-metrics", "service-graphs"]
+          generate_native_histograms: both
+
+    ingest:
+      enabled: true
+      kafka:
+        address: redpanda:9092
+        topic: tempo-ingest
+
+    block_builder:
+      consume_cycle_duration: 30s
+
+    usage_report:
+      reporting_enabled: false
+  redpanda-console.yaml: |
+    kafka:
+      brokers:
+        - redpanda:9092
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-tempo-memberlist
+  labels:
+    app: grafana-tempo
+spec:
+  selector:
+    app: grafana-tempo
+  ports:
+    - name: gossip
+      port: 7946
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: jaeger
+  name: grafana-tempo
   labels:
-    app: jaeger
+    app: grafana-tempo
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: jaeger
+      app: grafana-tempo
   template:
     metadata:
       labels:
-        app: jaeger
+        app: grafana-tempo
     spec:
       containers:
-      - name: jaeger
-        image: jaegertracing/all-in-one:latest
+      - name: grafana-tempo
+        image: grafana/tempo:2.10.3
         args:
-        - --query.base-path
-        - /jaeger
+        - "-config.file=/etc-tempo/tempo.yaml"
         ports:
-        - name: port-5775
-          containerPort: 5775
-          protocol: UDP
-        - name: port-6831
-          containerPort: 6831
-          protocol: UDP
-        - name: port-6832
-          containerPort: 6832
-          protocol: UDP
-        - name: port-5778
-          containerPort: 5778
-          protocol: TCP
-        - name: port-16686
-          containerPort: 16686
-          protocol: TCP
-        - name: port-14268
-          containerPort: 14268
-          protocol: TCP
-        - name: port-14250
-          containerPort: 14250
+        - name: port-3200
+          containerPort: 3200
           protocol: TCP
         - name: port-4317
           containerPort: 4317
@@ -86,54 +173,36 @@ spec:
           containerPort: 4318
           protocol: TCP
         livenessProbe:
-          httpGet:
-            path: /
-            port: 16686
-          initialDelaySeconds: 3
+          tcpSocket:
+            port: 3200
+          initialDelaySeconds: 30
           periodSeconds: 3
         readinessProbe:
-          httpGet:
-            path: /
-            port: 16686
-          initialDelaySeconds: 3
+          tcpSocket:
+            port: 3200
+          initialDelaySeconds: 30
           periodSeconds: 3
+        volumeMounts:
+        - name: grafana-tempo
+          mountPath: "/etc-tempo"
+          readOnly: true
+      volumes:
+      - name: grafana-tempo
+        configMap:
+          name: grafana-tempo
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: jaeger
+  name: grafana-tempo
 spec:
   selector:
-    app: jaeger
+    app: grafana-tempo
   ports:
-    - name: port-5775
-      protocol: UDP
-      port: 5775
-      targetPort: 5775
-    - name: port-6831
-      protocol: UDP
-      port: 6831
-      targetPort: 6831
-    - name: port-6832
-      protocol: UDP
-      port: 6832
-      targetPort: 6832
-    - name: port-5778
+    - name: port-3200
       protocol: TCP
-      port: 5778
-      targetPort: 5778
-    - name: port-16686
-      protocol: TCP
-      port: 16686
-      targetPort: 16686
-    - name: port-14268
-      protocol: TCP
-      port: 14268
-      targetPort: 14268
-    - name: port-14250
-      protocol: TCP
-      port: 14250
-      targetPort: 14250
+      port: 3200
+      targetPort: 3200
     - name: port-4317
       protocol: TCP
       port: 4317
@@ -146,17 +215,214 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: jaeger
+  name: grafana-tempo
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /jaeger$1$2
+    nginx.ingress.kubernetes.io/rewrite-target: $1$2
 spec:
   rules:
   - http:
       paths:
       - pathType: ImplementationSpecific
-        path: /jaeger(/|$)(.*)
+        path: /grafana-tempo(/|$)(.*)
         backend:
           service:
-            name: jaeger
+            name: grafana-tempo
             port:
-              number: 16686
+              number: 3200
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  labels:
+    app: minio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      containers:
+      - name: minio
+        image: minio/minio:latest
+        env:
+          - name: MINIO_ACCESS_KEY
+            value: tempo
+          - name: MINIO_SECRET_KEY
+            value: supersecret
+        ports:
+        - name: port-9000
+          containerPort: 9000
+          protocol: TCP
+        - name: port-9001
+          containerPort: 9001
+          protocol: TCP
+        command: [ "sh" ]
+        args:
+          - "-euc"
+          - "mkdir -p /data/tempo && minio server /data --console-address ':9001'"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 9001
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 9001
+          initialDelaySeconds: 3
+          periodSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+spec:
+  selector:
+    app: minio
+  ports:
+    - name: port-9000
+      protocol: TCP
+      port: 9000
+      targetPort: 9000
+    - name: port-9001
+      protocol: TCP
+      port: 9001
+      targetPort: 9001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redpanda
+  labels:
+    app: redpanda
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redpanda
+  template:
+    metadata:
+      labels:
+        app: redpanda
+    spec:
+      containers:
+      - name: redpanda
+        image: redpandadata/redpanda:latest
+        args:
+        - redpanda
+        - start
+        - --overprovisioned
+        - --mode=dev-container
+        - --kafka-addr=PLAINTEXT://0.0.0.0:9092
+        - --advertise-kafka-addr=PLAINTEXT://redpanda:9092
+        ports:
+        - name: port-9092
+          containerPort: 9092
+          protocol: TCP
+        livenessProbe:
+          tcpSocket:
+            port: 9092
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        readinessProbe:
+          tcpSocket:
+            port: 9092
+          initialDelaySeconds: 3
+          periodSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redpanda
+spec:
+  selector:
+    app: redpanda
+  ports:
+    - name: port-9092
+      protocol: TCP
+      port: 9092
+      targetPort: 9092
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redpanda-console
+  labels:
+    app: redpanda-console
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redpanda-console
+  template:
+    metadata:
+      labels:
+        app: redpanda-console
+    spec:
+      containers:
+      - name: redpanda-console
+        image: docker.redpanda.com/redpandadata/console:v3.5.0@sha256:b2cbdd93dee412142f95a61488118f33b8e31ea576bfb3ce625fbaffbdf0803a
+        env:
+        - name: CONFIG_FILEPATH
+          value: /etc-redpanda/redpanda-console.yaml
+        - name: SERVER_BASEPATH
+          value: /redpanda-console
+        ports:
+        - name: port-8080
+          containerPort: 8080
+          protocol: TCP
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        volumeMounts:
+        - name: redpanda-console
+          mountPath: "/etc-redpanda"
+          readOnly: true
+      volumes:
+      - name: redpanda-console
+        configMap:
+          name: grafana-tempo
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redpanda-console
+spec:
+  selector:
+    app: redpanda-console
+  ports:
+    - name: port-8080
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: redpanda-console
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: $1$2
+spec:
+  rules:
+  - http:
+      paths:
+      - pathType: ImplementationSpecific
+        path: /redpanda-console(/|$)(.*)
+        backend:
+          service:
+            name: redpanda-console
+            port:
+              number: 8080

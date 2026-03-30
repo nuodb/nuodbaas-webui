@@ -26,7 +26,7 @@ import BackgroundTasks, { BackgroundTaskType } from './utils/BackgroundTasks';
 import { withTranslation } from 'react-i18next';
 import Redirect from './components/pages/Redirect';
 import DefaultPage from './components/pages/DefaultPage';
-import JaegerPage from './components/pages/JaegerPage';
+import GrafanaTempoPage from './components/pages/GrafanaTempoPage';
 import PrometheusPage from './components/pages/PrometheusPage';
 import MonitoringPage from './components/pages/MonitoringPage';
 
@@ -130,7 +130,7 @@ function App({ t }: { t: any }) {
                   <Route path="/ui/login" element={<DefaultPage />} />
                   <Route path="/webui" element={<Navigate to="/ui" />} />
                   <Route path="/webui/*" element={<Redirect baseUrl="/ui" />} />
-                  <Route path="/ui/monitoring/jaeger" element={<JaegerPage />} />
+                  <Route path="/ui/monitoring/grafana-tempo" element={<GrafanaTempoPage />} />
                   <Route path="/ui/monitoring/prometheus" element={<PrometheusPage />} />
                   <Route path="/ui/monitoring" element={<MonitoringPage />} />
                   <Route path="/*" element={<NotFound {...pageProps} />} />
@@ -140,7 +140,7 @@ function App({ t }: { t: any }) {
               <Routes>
                 <Route path="/ui/login" element={<LoginForm setIsLoggedIn={setIsLoggedIn} />} />
                 <Route path="/ui/error" element={<ErrorPage {...pageProps} />} />
-                <Route path="/ui/monitoring/jaeger" element={<JaegerPage />} />
+                <Route path="/ui/monitoring/grafana-tempo" element={<GrafanaTempoPage />} />
                 <Route path="/ui/monitoring/prometheus" element={<PrometheusPage />} />
                 <Route path="/ui/monitoring" element={<MonitoringPage />} />
                 <Route path="/*" element={<Navigate to={"/ui/login?redirect=" + encodeURIComponent(window.location.pathname)} />} />

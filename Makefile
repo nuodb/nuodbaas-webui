@@ -200,14 +200,22 @@ undeploy-operator: $(KIND) $(HELM)
 .PHONY: deploy-monitoring
 deploy-monitoring:
 	helm repo add prometheus-community "https://prometheus-community.github.io/helm-charts"
-	helm upgrade --install -n default kube-prometheus-stack prometheus-community/kube-prometheus-stack --wait
+	helm upgrade --install -n default kube-prometheus-stack prometheus-community/kube-prometheus-stack --wait --set grafana\\.ini.server.root_url=/grafana/
 	$(KUBECTL) apply -n default -f docker/development/monitoring.yaml
+# 	helm repo add grafana https://grafana.github.io/helm-charts
+# 	helm repo update
+# 	helm upgrade -n default --install tempo grafana/tempo
+# 	helm upgrade -n default -f docker/development/grafana-single-binary-values.yaml --install grafana grafana/grafana
+# 	kubectl apply -n default -f docker/development/grafana-single-binary-extras.yaml
+
 
 .PHONY: undeploy-monitoring
 undeploy-monitoring:
 	@kubectl delete -n default -f docker/development/monitoring.yaml || true
+# 	kubectl delete -n default -f docker/development/grafana-single-binary-extras.yaml || true
+# 	helm uninstall -n default grafana || true
 	@if [ "`$(KIND) get clusters`" = "kind" ] ; then \
-		$(HELM) uninstall -n default kube-prometheus-stack; \
+		$(HELM) uninstall -n default kube-prometheus-stack || true; \
 	fi
 
 .PHONY: deploy-keycloak

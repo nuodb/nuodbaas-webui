@@ -17,7 +17,7 @@ import {
     Typography,
 } from "@mui/material";
 
-export default function JaegerPage() {
+export default function GrafanaTempoPage() {
     // ----- state --------------------------------------------------------------
     const now = new Date().getTime();
     const [services, setServices] = useState<string[]>([]);
@@ -33,7 +33,7 @@ export default function JaegerPage() {
 
     // ----- load services -------------------------------------------------------
     useEffect(() => {
-        axios.get("/jaeger/api/v3/services").then((response) => {
+        axios.get("/grafana-tempo/api/v3/services").then((response) => {
             if (response.data?.services) {
                 setServices(response.data.services);
                 if (response.data.services.length > 0) {
@@ -50,7 +50,7 @@ export default function JaegerPage() {
     return (
         <Box sx={{ p: 2 }}>
             <Typography variant="h5" gutterBottom>
-                Jaeger
+                Grafana Tempo
             </Typography>
 
             <Stack spacing={2} maxWidth={700}>
@@ -144,7 +144,7 @@ export default function JaegerPage() {
                     disabled={isSearchDisabled}
                     onClick={async () => {
                         const response = await axios.get(
-                            "/jaeger/api/v3/traces" +
+                            "/grafana-tempo/api/v3/traces" +
                             "?query.service_name=" + encodeURIComponent(serviceName) +
                             "&query.operation_name=" + encodeURIComponent(operationName) +
                             "&query.start_time_min=" + encodeURIComponent(startTimeMin) +
