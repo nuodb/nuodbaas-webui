@@ -13,7 +13,53 @@ import { withTranslation } from "react-i18next";
 import Search from "./parts/Search";
 import ResourceHeader from "./parts/ResourceHeader";
 import Toast from "../controls/Toast";
-import { getValue } from "../fields/utils";
+
+/**
+ * Convert a user‑provided search expression into a back‑end‑compatible
+ * case‑insensitive regular‑expression string.
+ *
+ * The UI lets users type filter clauses separated by commas and asterisks, e.g.
+ *   "name=aDMI*"
+ *
+ * The back‑end expects:
+ *   • “=” to be a case‑insensitive regex match (prefixed with `~(?i)`).
+ *   • `*` wildcards to behave like `.*` in regular expressions.
+ *
+ * @param search  Raw search string entered by the user.
+ * @returns       A string ready to be URL‑encoded and sent as `fieldFilter`.
+ */
+function rewriteCaseInsensitiveWithWildcards(search: string): string {
+    // Split the overall filter into individual clauses (comma‑separated)
+    let parts = search.split(",");
+
+    // Process each clause independently
+    for (let p = 0; p < parts.length; p++) {
+        // Locate the first "=" character – this marks a simple equality filter
+        const posEquals = parts[p].indexOf("=");
+
+        // If we have an "=" that is **not** part of a comparison operator
+        // (<=, >=, !=) we replace it with a case‑insensitive regex marker.
+        // Example: "name=Admin" → "name~(?i)Admin"
+        if (
+            posEquals > 0 &&                     // there is something before "="
+            parts[p][posEquals - 1] !== "<" &&   // not a "<=" style operator
+            parts[p][posEquals - 1] !== ">" &&   // not a ">=" style operator
+            parts[p][posEquals - 1] !== "!"      // not a "!=" style operator
+        ) {
+            parts[p] =
+                parts[p].substring(0, posEquals) + // left side (field name)
+                "~(?i)" +                           // case‑insensitive regex flag
+                parts[p].substring(posEquals + 1); // right side (value)
+        }
+
+        // Replace any user‑friendly wildcard '*' with the regex equivalent '.*'
+        // This allows patterns like "Adm*" to match "Admin", etc.
+        parts[p] = parts[p].split("*").join(".*");
+    }
+
+    // Re‑assemble the transformed clauses into a single comma‑separated string
+    return parts.join(",");
+}
 
 type ItemsAndPathProps = {
     items: [] | null,
@@ -74,8 +120,14 @@ function ListResource(props: PageProps) {
         if ("get" in resourcesByPath_) {
             Rest.get(path + "?listAccessible=true").then((data: TempAny) => {
                 setAllItems(data.items);
+                let url = path + "?listAccessible=true&expand=true&offset=" + ((page - 1) * pageSize) + "&limit=" + pageSize;
+                if (sort.column) {
+                    url += "&sortBy=" + encodeURIComponent(sort.column);
+                    url += "&reverse=" + String(sort.direction === "desc");
+                }
+                url += "&fieldFilter=" + encodeURIComponent(rewriteCaseInsensitiveWithWildcards(search));
                 setAbortController(
-                    getResourceEvents(schema, path + "?listAccessible=true&expand=true&offset=0&limit=1000000", (data: TempAny) => {
+                    getResourceEvents(schema, url, (data: TempAny) => {
                         if (data.items) {
                             setItemsAndPath({ items: data.items, path });
                             setAllFieldNames(makeFieldnameList("", data.items));
@@ -131,151 +183,15 @@ function ListResource(props: PageProps) {
         return [...filterValues];
     }
 
-    /* compares both values. value2 can have asterisks ("*") at the beginning, end or both as wildcards.
-       - "value1" or "value2" can be string, null or undefined values
-       - if "value1" or "value2" are objects or arrays, they are converted to JSON text and then used for comparison
-       - the match is case-insensitive
-    */
-    function isMatch(value1: any, value2: any) {
-        if (value1 === null && value2 === null || value1 === undefined && value2 === undefined) {
-            return true;
-        }
-        if (value1 === null || value2 === null || value1 === undefined || value2 === undefined) {
-            return false;
-        }
-
-        if (typeof value1 === "object") {
-            value1 = JSON.stringify(value1);
-        }
-        if (typeof value2 === "object") {
-            value2 = JSON.stringify(value2);
-        }
-
-        value1 = String(value1).trim().toUpperCase();
-        value2 = String(value2).trim().toUpperCase();
-
-        if (value2 === "*") {
-            return true;
-        }
-        else if (value2.startsWith("*")) {
-            if (value2.endsWith("*")) {
-                return value1.includes(value2.substring(1, value2.length - 1));
-            }
-            else {
-                return value1.endsWith(value2.substring(1));
-            }
-        }
-        else if (value2.endsWith("*")) {
-            return value1.startsWith(value2.substring(0, value2.length - 1));
-        }
-        else {
-            return value1 === value2;
-        }
-    }
-
-    /* check if value is in the entry
-       There are multiple scenarios:
-       - the last element of "value.split("=")" can have asterisks("*") at the beginning and/or end to do a partial search
-       - "value" has no equal sign: check if any value in the "entry" object matches (hierarchically)
-           Example: entry={"tier":"n0.nano"} value="n0.nano"
-                    entry={"labels":{"key1":"value1"}} value="value1"
-       - "value" has a single equal sign:
-           value.split("=")[0] contains the field identifier in the object (periods in the field identifier do a hierarchical field lookup)
-           value.split("=")[1] contains the value to search in that field. If the field is an object, it will match the key in the object
-           Example: entry={"tier":"n0.nano"} value="tier=n0.nano"
-                    entry={"labels":{"key1":"value1", "key2":"value2"}} value="labels=key1"
-       - "value" has two equal signs:
-           value.split("=")[0] contains the field identifier pointing to a Map object (periods in the field identifier do a hierarchical field lookup)
-           - if it is not a Map object, it returns "false"
-           value.split("=")[1] contains the key to search in that field's Map Object
-           value.split("=")[2] contains the value to search in that Map Object's field
-           Example: entry={"a":{"b":{"c":{"d":"e"}}}} value="a.b.c=d=e"
-                    entry={"labels":{"key1":"value1","key2":"value2"}} value="labels=key2=value2"
-    */
-    function includesValue(entry: any, value: string): boolean {
-        const splitEqual = value.split("=");
-        if (splitEqual.length === 1) {
-            if (typeof entry === "object") {
-                const keys = Object.keys(entry);
-                for (let i = 0; i < keys.length; i++) {
-                    if (includesValue(entry[keys[i]], value)) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-            else {
-                return isMatch(entry, value);
-            }
-        }
-        else if (splitEqual.length === 2 || splitEqual.length === 3) {
-            const splitPeriod = splitEqual[0].split(".");
-            for (let i = 0; i < splitPeriod.length; i++) {
-                entry = entry[splitPeriod[i]];
-                if (!entry) {
-                    return false;
-                }
-            }
-
-            if (splitEqual.length === 2) {
-                if (typeof entry === "object" && !Array.isArray(entry)) {
-                    return !!Object.keys(entry).find(k => isMatch(k, splitEqual[1]));
-                }
-                return isMatch(entry, splitEqual[1]);
-            }
-            else if (typeof entry === "object") {
-                const key = Object.keys(entry).find(k => isMatch(k, splitEqual[1]));
-                if (key && isMatch(entry[key], splitEqual[2])) {
-                    return true;
-                }
-                else {
-                    return false;
-                }
-            }
-            return false;
-        }
-        return false;
-    }
-
     if (itemsAndPath.items) {
-        const dataNotDeleted = itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true);
-        const sorted = (sort.column && sort.direction !== "none") ?
-            dataNotDeleted.sort((item1: any, item2: any) => {
-                const value1 = getValue(item1, sort.column);
-                const value2 = getValue(item2, sort.column);
-                let asc;
-                if (typeof value1 === "number" && typeof value2 === "number") {
-                    asc = value1 - value2;
-                }
-                else if (typeof value1 === "object" && typeof value2 === "object") {
-                    asc = JSON.stringify(value1).localeCompare(JSON.stringify(value2));
-                }
-                else {
-                    asc = String(value1).localeCompare(String(value2));
-                }
-                return sort.direction === "asc" ? asc : -asc;
-            }) : dataNotDeleted;
-
-        const searchFiltered = sorted.filter(entry => {
-            const searchParts = search.split(" ");
-            for (let i = 0; i < searchParts.length; i++) {
-                if (searchParts[i] && !includesValue(entry, searchParts[i])) {
-                    return false;
-                }
-            }
-            return true;
-        });
-
-        const pageData = searchFiltered.filter((s, index) => index >= (page - 1) * pageSize && index < page * pageSize);
-
-        const data = pageData;
+        const data = itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true);
 
         return (
             <PageLayout {...props} >
                 <ResourceHeader schema={schema} path={path} type="list" filterValues={getFilterValues()} onAction={() => navigate("/ui/resource/create" + path)} />
                 <div className="NuoTableContainer">
                     <div className="NuoTableOptions">
-                        <Search fieldNames={allFieldNames} search={search} setSearch={(search: string) => {
+                        <Search path={path} fieldNames={allFieldNames} search={search} setSearch={(search: string) => {
                             setPage(1);
                             setSearch(search);
                         }} />
@@ -289,7 +205,7 @@ function ListResource(props: PageProps) {
                             sort={sort}
                             setSort={setSort}
                         />
-                        {renderPaging(searchFiltered ? searchFiltered.length : 0)}
+                        {renderPaging(allItems.length)}
                     </div>
                 </div>
             </PageLayout>
