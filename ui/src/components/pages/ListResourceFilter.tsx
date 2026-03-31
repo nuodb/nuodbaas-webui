@@ -17,36 +17,7 @@ import { TempAny } from '../../utils/types';
 
 type FilterType = "NON_NULL" | "NULL" | "=" | "!=" | ">=" | "<=" | "~";
 
-const filterOptions: { id: FilterType, label: string}[] = [
-    {
-        id: "NON_NULL",
-        label: "exists",
-    },
-    {
-        id: "NULL",
-        label: "does not exist",
-    },
-    {
-        id: "=",
-        label: "equals",
-    },
-    {
-        id: "!=",
-        label: "not equals",
-    },
-    {
-        id: ">=",
-        label: "greater or equal to",
-    },
-    {
-        id: "<=",
-        label: "less or equal to",
-    },
-    {
-        id: "~",
-        label: "regular expression",
-    },
-];
+const filterOptions: FilterType[] = ["NON_NULL", "NULL", "=", "!=", ">=", "<=", "~"];
 
 function getFieldsByPath(schema: TempAny, path: string) {
     function getFields(definition: any, prefix: string, outFields: {[key:string]:string}) {
@@ -165,15 +136,15 @@ function ListResourceFilter({path, show, setShow, search, setSearch}: ListResour
     })
 
     return <DialogMaterial open={true}>
-        <DialogTitle>Search Filter</DialogTitle>
+        <DialogTitle>{t("dialog.searchFilter.title")}</DialogTitle>
     <DialogContent>
 
 <Table>
         <TableHead>
             <TableRow>
-                <TableTh>{t("form.sqleditor.label.fieldName")}</TableTh>
-                <TableTh>{t("form.sqleditor.label.condition")}</TableTh>
-                <TableTh>{t("form.sqleditor.label.value")}</TableTh>
+                        <TableTh>{t("dialog.searchFilter.label.fieldName")}</TableTh>
+                        <TableTh>{t("dialog.searchFilter.label.condition")}</TableTh>
+                        <TableTh>{t("dialog.searchFilter.label.value")}</TableTh>
                 <TableTh></TableTh>
             </TableRow>
         </TableHead>
@@ -181,23 +152,23 @@ function ListResourceFilter({path, show, setShow, search, setSearch}: ListResour
             {editFilter.map((ef, index: number) => <TableRow key={ef.name}>
                 <TableCell>{ef.name}</TableCell>
                 <TableCell>
-                    <Select id={ef.name} value={ef.type} onChange={(event: ChangeEvent<HTMLSelectElement>)=>{
+                    <Select id={"condition." + ef.name} value={ef.type} onChange={(event: ChangeEvent<HTMLSelectElement>) => {
                         let f: ListResourceFilterType[] = [...editFilter];
                         f[index].type = event.target.value as FilterType;
                         setEditFilter(f);
                     }}>
-                        {filterOptions.map(fo => <SelectOption value={fo.id}>{fo.label}</SelectOption>)}
+                        {filterOptions.map(fo => <SelectOption value={fo}>{t("dialog.searchFilter.options." + fo)}</SelectOption>)}
                     </Select>
                 </TableCell>
                 <TableCell>
-                    <TextField id={ef.name} label="" value={ef.value || ""} onChange={(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+                    <TextField id={"value." + ef.name} label="" value={ef.value || ""} onChange={(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                         let f = [ ...editFilter ];
                         f[index].value = event.currentTarget.value;
                         setEditFilter(f);
                     }} />
                 </TableCell>
                 <TableCell>
-                    <div className="NuoColumn" onClick={()=>{
+                    <div data-testid={"search.filter.delete." + ef.name} className="NuoColumn" onClick={() => {
                         let f = [...editFilter];
                         f.splice(index, 1);
                         setEditFilter(f);
@@ -206,20 +177,18 @@ function ListResourceFilter({path, show, setShow, search, setSearch}: ListResour
                     </div>
                 </TableCell>
             </TableRow>)}
-            <TableRow><TableCell>
-                <div className="NuoRow">
-                    Add Field:
-                    <Select id="new.resource.filter" value="" onChange={(event: ChangeEvent<HTMLSelectElement>)=>{
-                        let f: ListResourceFilterType[] = [...editFilter];
-                        f.push({name: event.target.value, type: "=", value: ""});
-                        setEditFilter(f);
-                    }}>
-                        {Array.from(unusedFields).map(field => <SelectOption value={field}>{field}</SelectOption>)}
-                    </Select>
-                </div>
-            </TableCell></TableRow>
-        </TableBody>
-    </Table>
+                </TableBody>
+            </Table>
+            <div className="NuoRow NuoFieldContainer">
+                <div style={{ whiteSpace: "nowrap" }}>{t("dialog.searchFilter.label.addField")}</div>
+                <Select id="new.resource.filter" value="" onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+                    let f: ListResourceFilterType[] = [...editFilter];
+                    f.push({ name: event.target.value, type: "=", value: "" });
+                    setEditFilter(f);
+                }}>
+                    {Array.from(unusedFields).map(field => <SelectOption value={field}>{field}</SelectOption>)}
+                </Select>
+            </div>
     </DialogContent>
     <DialogActions>
         <Button

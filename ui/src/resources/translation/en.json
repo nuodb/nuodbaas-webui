@@ -351,8 +351,25 @@
             "confirmPassword": "Confirm new Password",
             "noMatch": "Passwords don't match",
             "fieldRequired": "Field is required"
+        },
+        "searchFilter": {
+            "title": "Search Filter",
+            "label": {
+                "addField": "Add field:",
+                "fieldName": "Field name",
+                "condition": "Condition",
+                "value": "Value"
+            },
+            "options": {
+                "NON_NULL": "exists",
+                "NULL": "does not exist",
+                "=": "equals",
+                "!=": "not equals",
+                ">=": "greater than or equal to",
+                "<=": "less than or equal to",
+                "~": "regular expression"
+            }
         }
-
     },
     "text": {
         "editEntryForPath": "Edit entry for {{path}}",

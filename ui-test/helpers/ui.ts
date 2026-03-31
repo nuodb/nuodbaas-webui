@@ -166,17 +166,8 @@ export async function getInputOrTextareaByName(page: Page, name: string) {
   return input;
 }
 
-/**
- * Fills a named input, handling both plain <input> fields and MUI Select
- * components (which render a hidden native input + a visible combobox div).
- * Mirrors TestRoutines.replaceInputElementByName().
- */
-export async function replaceInputOrTextareaByName(
-  page: Page,
-  name: string,
-  value: string,
-): Promise<void> {
-  // MUI Select: a hidden <input class="MuiSelect-nativeInput" name="…"> exists
+export async function selectMuiCombo(page: Page, name: string, value: string): Promise<boolean> {
+    // MUI Select: a hidden <input class="MuiSelect-nativeInput" name="…"> exists
   const muiHidden = page.locator(`input.MuiSelect-nativeInput[name="${name}"]`);
   if ((await muiHidden.count()) > 0) {
     // Click the visible combobox trigger
@@ -192,6 +183,22 @@ export async function replaceInputOrTextareaByName(
       .or(page.getByRole("option", { name: value, exact: true }))
       .first()
       .click();
+    return Promise.resolve(true);
+  }
+  return Promise.resolve(false);
+}
+
+/**
+ * Fills a named input, handling both plain <input> fields and MUI Select
+ * components (which render a hidden native input + a visible combobox div).
+ * Mirrors TestRoutines.replaceInputElementByName().
+ */
+export async function replaceInputOrTextareaByName(
+  page: Page,
+  name: string,
+  value: string,
+): Promise<void> {
+  if(await selectMuiCombo(page, name, value)) {
     return;
   }
   // Regular input
