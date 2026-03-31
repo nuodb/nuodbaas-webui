@@ -5,6 +5,7 @@
 ^\./ui-test/test-results/
 ^\./ui/node_modules/
 ^\./ui/coverage/
+^\./ui/test-results/\.last-run.json
 ^\./.git/
 ^\./selenium-tests/target/
 ^\./selenium-tests/files/kubeconfig
