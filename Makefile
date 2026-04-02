@@ -302,8 +302,6 @@ setup-nginx-default-conf:
 
 .PHONY: setup-integration-tests
 setup-integration-tests: $(KUBECTL) setup-nginx-default-conf install-crds deploy-monitoring deploy-cp deploy-operator deploy-sql deploy-keycloak deploy-cas-server deploy-webui ## setup containers before running integration tests
-	@npx playwright install || true
-
 	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-rest" -o name) -- bash -c "curl \
 		http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true \
 		--data-binary \
@@ -331,7 +329,7 @@ teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-seleniu
 
 .PHONY: run-integration-tests-only
 run-integration-tests-only: ## integration tests without setup/teardown
-	@cd ui-test && npm install && npm run e2e -- --workers 1 && cd ..
+	@cd ui-test && npm install && npx playwright install && npm run e2e -- --workers 1 && cd ..
 
 .PHONY: run-unit-tests
 run-unit-tests: ## run unit tests
