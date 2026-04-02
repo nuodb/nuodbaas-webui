@@ -154,11 +154,11 @@ export async function getInputOrTextareaByName(page: Page, name: string) {
   let input:Locator = page.locator(`input[name="${name}"]`);
   for(let i=0; i<10; i++) {
     input = page.locator(`input[name="${name}"]`);
-    if ((await input.count()) > 0) {
+    if ((await input.count()) > 0 && await input.isVisible()) {
       return input;
     }
     input = page.locator(`textarea[name="${name}"]`);
-    if((await input.count()) > 0) {
+    if((await input.count()) > 0 && await input.isVisible()) {
       return input;
     }
     await sleep(100); // TODO(agr22)
@@ -203,7 +203,6 @@ export async function replaceInputOrTextareaByName(
   }
   // Regular input
   let input = await getInputOrTextareaByName(page, name);
-  input.waitFor({state: "visible"});
   if(await input.inputValue() !== value) {
     await input.fill(value);
   }
@@ -215,7 +214,6 @@ export async function replaceInputByName(
   value: string,
 ): Promise<void> {
   let input = await getInputOrTextareaByName(page, name);
-  input.waitFor({state: "visible"});
   if(await input.inputValue() !== value) {
     await input.fill(value);
   }
