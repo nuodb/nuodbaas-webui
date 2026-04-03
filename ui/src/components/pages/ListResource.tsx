@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Table from "./parts/Table";
-import { getResourceEvents, getResourceByPath, getFilterField } from "../../utils/schema";
+import { getResourceEvents, getResourceByPath, getFilterField, Feature } from "../../utils/schema";
 import { Rest } from "./parts/Rest";
 import PageLayout from './parts/PageLayout'
 import Auth from "../../utils/auth"
@@ -13,6 +13,7 @@ import { withTranslation } from "react-i18next";
 import Search from "./parts/Search";
 import ResourceHeader from "./parts/ResourceHeader";
 import Toast from "../controls/Toast";
+import { getValue } from "../fields/utils";
 
 /**
  * Convert a user‑provided search expression into a back‑end‑compatible
@@ -120,12 +121,15 @@ function ListResource(props: PageProps) {
         if ("get" in resourcesByPath_) {
             Rest.get(path + "?listAccessible=true").then((data: TempAny) => {
                 setAllItems(data.items);
-                let url = path + "?listAccessible=true&expand=true&offset=" + ((page - 1) * pageSize) + "&limit=" + pageSize;
-                if (sort.column) {
-                    url += "&sortBy=" + encodeURIComponent(sort.column);
-                    url += "&reverse=" + String(sort.direction === "desc");
+                let url = path + "?listAccessible=true&expand=true&offset=0&limit=1000000";
+                if (Feature.FILTER_ON_SERVER) {
+                    url = path + "?listAccessible=true&expand=true&offset=" + ((page - 1) * pageSize) + "&limit=" + pageSize;
+                    if (sort.column) {
+                        url += "&sortBy=" + encodeURIComponent(sort.column);
+                        url += "&reverse=" + String(sort.direction === "desc");
+                    }
+                    url += "&fieldFilter=" + encodeURIComponent(rewriteCaseInsensitiveWithWildcards(search));
                 }
-                url += "&fieldFilter=" + encodeURIComponent(rewriteCaseInsensitiveWithWildcards(search));
                 setAbortController(
                     getResourceEvents(schema, url, (data: TempAny) => {
                         if (data.items) {
@@ -183,9 +187,145 @@ function ListResource(props: PageProps) {
         return [...filterValues];
     }
 
-    if (itemsAndPath.items) {
-        const data = itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true);
+    /* compares both values. value2 can have asterisks ("*") at the beginning, end or both as wildcards.
+       - "value1" or "value2" can be string, null or undefined values
+       - if "value1" or "value2" are objects or arrays, they are converted to JSON text and then used for comparison
+       - the match is case-insensitive
+    */
+    function isMatch(value1: any, value2: any) {
+        if (value1 === null && value2 === null || value1 === undefined && value2 === undefined) {
+            return true;
+        }
+        if (value1 === null || value2 === null || value1 === undefined || value2 === undefined) {
+            return false;
+        }
 
+        if (typeof value1 === "object") {
+            value1 = JSON.stringify(value1);
+        }
+        if (typeof value2 === "object") {
+            value2 = JSON.stringify(value2);
+        }
+
+        value1 = String(value1).trim().toUpperCase();
+        value2 = String(value2).trim().toUpperCase();
+
+        if (value2 === "*") {
+            return true;
+        }
+        else if (value2.startsWith("*")) {
+            if (value2.endsWith("*")) {
+                return value1.includes(value2.substring(1, value2.length - 1));
+            }
+            else {
+                return value1.endsWith(value2.substring(1));
+            }
+        }
+        else if (value2.endsWith("*")) {
+            return value1.startsWith(value2.substring(0, value2.length - 1));
+        }
+        else {
+            return value1 === value2;
+        }
+    }
+
+    /* check if value is in the entry
+       There are multiple scenarios:
+       - the last element of "value.split("=")" can have asterisks("*") at the beginning and/or end to do a partial search
+       - "value" has no equal sign: check if any value in the "entry" object matches (hierarchically)
+           Example: entry={"tier":"n0.nano"} value="n0.nano"
+                    entry={"labels":{"key1":"value1"}} value="value1"
+       - "value" has a single equal sign:
+           value.split("=")[0] contains the field identifier in the object (periods in the field identifier do a hierarchical field lookup)
+           value.split("=")[1] contains the value to search in that field. If the field is an object, it will match the key in the object
+           Example: entry={"tier":"n0.nano"} value="tier=n0.nano"
+                    entry={"labels":{"key1":"value1", "key2":"value2"}} value="labels=key1"
+       - "value" has two equal signs:
+           value.split("=")[0] contains the field identifier pointing to a Map object (periods in the field identifier do a hierarchical field lookup)
+           - if it is not a Map object, it returns "false"
+           value.split("=")[1] contains the key to search in that field's Map Object
+           value.split("=")[2] contains the value to search in that Map Object's field
+           Example: entry={"a":{"b":{"c":{"d":"e"}}}} value="a.b.c=d=e"
+                    entry={"labels":{"key1":"value1","key2":"value2"}} value="labels=key2=value2"
+    */
+    function includesValue(entry: any, value: string): boolean {
+        const splitEqual = value.split("=");
+        if (splitEqual.length === 1) {
+            if (typeof entry === "object") {
+                const keys = Object.keys(entry);
+                for (let i = 0; i < keys.length; i++) {
+                    if (includesValue(entry[keys[i]], value)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            else {
+                return isMatch(entry, value);
+            }
+        }
+        else if (splitEqual.length === 2 || splitEqual.length === 3) {
+            const splitPeriod = splitEqual[0].split(".");
+            for (let i = 0; i < splitPeriod.length; i++) {
+                entry = entry[splitPeriod[i]];
+                if (!entry) {
+                    return false;
+                }
+            }
+
+            if (splitEqual.length === 2) {
+                if (typeof entry === "object" && !Array.isArray(entry)) {
+                    return !!Object.keys(entry).find(k => isMatch(k, splitEqual[1]));
+                }
+                return isMatch(entry, splitEqual[1]);
+            }
+            else if (typeof entry === "object") {
+                const key = Object.keys(entry).find(k => isMatch(k, splitEqual[1]));
+                if (key && isMatch(entry[key], splitEqual[2])) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            return false;
+        }
+        return false;
+    }
+
+    if (itemsAndPath.items) {
+        let searchFiltered: any = undefined;
+        let data = itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true);
+        if (!Feature.FILTER_ON_SERVER) {
+            const sorted = (sort.column && sort.direction !== "none") ?
+                data.sort((item1: any, item2: any) => {
+                    const value1 = getValue(item1, sort.column);
+                    const value2 = getValue(item2, sort.column);
+                    let asc;
+                    if (typeof value1 === "number" && typeof value2 === "number") {
+                        asc = value1 - value2;
+                    }
+                    else if (typeof value1 === "object" && typeof value2 === "object") {
+                        asc = JSON.stringify(value1).localeCompare(JSON.stringify(value2));
+                    }
+                    else {
+                        asc = String(value1).localeCompare(String(value2));
+                    }
+                    return sort.direction === "asc" ? asc : -asc;
+                }) : data;
+
+            searchFiltered = sorted.filter(entry => {
+                const searchParts = search.split(" ");
+                for (let i = 0; i < searchParts.length; i++) {
+                    if (searchParts[i] && !includesValue(entry, searchParts[i])) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+            data = searchFiltered.filter((s, index: number) => index >= (page - 1) * pageSize && index < page * pageSize);
+        }
         return (
             <PageLayout {...props} >
                 <ResourceHeader schema={schema} path={path} type="list" filterValues={getFilterValues()} onAction={() => navigate("/ui/resource/create" + path)} />
@@ -205,7 +345,7 @@ function ListResource(props: PageProps) {
                             sort={sort}
                             setSort={setSort}
                         />
-                        {renderPaging(allItems.length)}
+                        {renderPaging(searchFiltered ? searchFiltered.length : allItems.length)}
                     </div>
                 </div>
             </PageLayout>

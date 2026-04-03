@@ -9,7 +9,12 @@ import { TempAny } from "./types";
 interface Credentials {
     token: string,
     expiresAtTime: string,
-    username: string
+    username: string,
+    accessRule?: any,
+}
+
+export function isBrowser() {
+    return typeof window !== "undefined";
 }
 
 export default class Auth {
@@ -38,7 +43,12 @@ export default class Auth {
             path = path.substring(1);
         }
 
-        return prefixPath + "/" + path;
+        if(isBrowser()) {
+            return prefixPath + "/" + path;
+        }
+        else {
+            return "http://localhost/api/" + path;
+        }
     }
 
     static async login(username:string, password:string) {
@@ -46,12 +56,12 @@ export default class Auth {
             axios.post(Auth.getNuodbCpRestUrl("login"), { "expiresIn": "24h" }, { auth: { username, password }, headers: { "Content-Type": "application/json" } })
                 .then((response) => {
                     if(response.data && response.data.token && response.data.expiresAtTime) {
-                        localStorage.setItem("credentials", JSON.stringify({
+                        this.setCredentials({
                             token: response.data.token,
                             expiresAtTime: response.data.expiresAtTime,
                             accessRule: response.data.accessRule,
                             username
-                        }));
+                        });
                         resolve(null);
                     }
                 })
@@ -141,7 +151,7 @@ export default class Auth {
     }
 
     static logout() {
-        localStorage.removeItem("credentials");
+        this.setCredentials(null);
     }
 
     static getAvatarText() {
@@ -158,12 +168,35 @@ export default class Auth {
         return null;
     }
 
+    static inMemoryCredentials : Credentials|null = null;
+
     static getCredentials() : Credentials|null {
-        const lcCredentials = localStorage.getItem("credentials");
-        if(!lcCredentials) {
-            return null;
+        if (isBrowser()) {
+            const lcCredentials = localStorage.getItem("credentials");
+            if(!lcCredentials) {
+                return null;
+            }
+            return JSON.parse(lcCredentials);
         }
-        return JSON.parse(lcCredentials);
+        else {
+            // fallback for non-browser environments (i.e. Playwright tests)
+            return this.inMemoryCredentials;
+        }
+    }
+
+    static setCredentials(credentials: Credentials | null) {
+        if (isBrowser()) {
+            if(credentials) {
+                localStorage.setItem("credentials", JSON.stringify(credentials));
+            }
+            else {
+                localStorage.removeItem("credentials");
+            }
+        }
+        else {
+            // fallback for non-browser environments (i.e. Playwright tests)
+            this.inMemoryCredentials = credentials;
+        }
     }
 
     static getHeaders(): TempAny {
@@ -179,13 +212,15 @@ export default class Auth {
     static handle401Error(error:TempAny) {
         if(error.response && error.response.status === 401) {
             Auth.logout();
-            window.location.href = "/ui/login?redirect=" + encodeURIComponent(window.location.pathname);
+            if(isBrowser()) {
+                window.location.href = "/ui/login?redirect=" + encodeURIComponent(window.location.pathname);
+            }
         }
     }
 
     static getAccessRule() : {allow:[allow:string],deny:[deny:string]} {
-        const credentials = JSON.parse(localStorage.getItem("credentials") || "{}");
-        const accessRule = credentials.accessRule || {};
+        const credentials = this.getCredentials();
+        const accessRule = credentials?.accessRule || {};
         return {allow: accessRule.allow || ["all:*"], deny: accessRule.deny || []};
     }
 }

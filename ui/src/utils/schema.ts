@@ -1,10 +1,15 @@
 // (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
+import axios from "axios";
 import Toast from "../components/controls/Toast";
 import { Rest } from "../components/pages/parts/Rest";
-import Auth from "./auth"
+import Auth, { isBrowser } from "./auth"
 import { FieldValuesType, TempAny, SchemaType, FieldParametersType } from "./types";
 let schema : TempAny = null;
+
+export const Feature: {FILTER_ON_SERVER: boolean|undefined} = {
+    FILTER_ON_SERVER: undefined
+};
 
 /**
  * Pulls OpenAPI spec schema and parses it
@@ -13,10 +18,16 @@ let schema : TempAny = null;
 export async function getSchema() {
     if(!schema) {
         try {
-            schema = await Rest.get("openapi");
+            if(isBrowser()) {
+                schema = await Rest.get("openapi");
+            }
+            else {
+                schema = (await axios.get(Auth.getNuodbCpRestUrl("openapi"), { headers: Auth.getHeaders() })).data;
+            }
             parseSchema(schema, schema, []);
             schema = schema["paths"];
             schema = filterAccessPaths(schema);
+            Feature.FILTER_ON_SERVER = schema["/users"]?.get?.parameters?.find((p: { name: string; }) => p.name === "fieldFilter") && true || false;
         }
         catch(error) {
             console.log("ERROR", error);
