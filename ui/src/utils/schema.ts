@@ -11,6 +11,21 @@ export const Feature: {FILTER_ON_SERVER: boolean|undefined} = {
     FILTER_ON_SERVER: undefined
 };
 
+function compareSemVer(semver1: string, semver2: string) : number | null {
+    const parts1 = semver1.split(".");
+    const parts2 = semver2.split(".");
+    for(let i=0; i<parts1.length && i<parts2.length; i++) {
+        const val1 = parseInt(parts1[i]);
+        const val2 = parseInt(parts2[i]);
+        if(isNaN(val1) || isNaN(val2)) {
+            return null;
+        }
+        if(val1 < val2) return -1;
+        if(val1 > val2) return 1;
+    }
+    return 0;
+}
+
 /**
  * Pulls OpenAPI spec schema and parses it
  * @returns schema or null on error
@@ -25,9 +40,10 @@ export async function getSchema() {
                 schema = (await axios.get(Auth.getNuodbCpRestUrl("openapi"), { headers: Auth.getHeaders() })).data;
             }
             parseSchema(schema, schema, []);
+            const version = schema.info?.version || "1.0.0";
             schema = schema["paths"];
             schema = filterAccessPaths(schema);
-            Feature.FILTER_ON_SERVER = schema["/users"]?.get?.parameters?.find((p: { name: string; }) => p.name === "fieldFilter") && true || false;
+            Feature.FILTER_ON_SERVER = (compareSemVer(version, "2.12.0") || 0) >= 0 && schema["/users"]?.get?.parameters?.find((p: { name: string; }) => p.name === "fieldFilter") && true || false;
         }
         catch(error) {
             console.log("ERROR", error);
