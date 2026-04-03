@@ -154,11 +154,11 @@ export async function getInputOrTextareaByName(page: Page, name: string) {
   let input:Locator = page.locator(`input[name="${name}"]`);
   for(let i=0; i<10; i++) {
     input = page.locator(`input[name="${name}"]`);
-    if ((await input.count()) > 0) {
+    if ((await input.count()) > 0 && await input.isVisible()) {
       return input;
     }
     input = page.locator(`textarea[name="${name}"]`);
-    if((await input.count()) > 0) {
+    if((await input.count()) > 0 && await input.isVisible()) {
       return input;
     }
     await sleep(100); // TODO(agr22)
@@ -166,17 +166,8 @@ export async function getInputOrTextareaByName(page: Page, name: string) {
   return input;
 }
 
-/**
- * Fills a named input, handling both plain <input> fields and MUI Select
- * components (which render a hidden native input + a visible combobox div).
- * Mirrors TestRoutines.replaceInputElementByName().
- */
-export async function replaceInputOrTextareaByName(
-  page: Page,
-  name: string,
-  value: string,
-): Promise<void> {
-  // MUI Select: a hidden <input class="MuiSelect-nativeInput" name="…"> exists
+export async function selectMuiCombo(page: Page, name: string, value: string): Promise<boolean> {
+    // MUI Select: a hidden <input class="MuiSelect-nativeInput" name="…"> exists
   const muiHidden = page.locator(`input.MuiSelect-nativeInput[name="${name}"]`);
   if ((await muiHidden.count()) > 0) {
     // Click the visible combobox trigger
@@ -192,11 +183,26 @@ export async function replaceInputOrTextareaByName(
       .or(page.getByRole("option", { name: value, exact: true }))
       .first()
       .click();
+    return Promise.resolve(true);
+  }
+  return Promise.resolve(false);
+}
+
+/**
+ * Fills a named input, handling both plain <input> fields and MUI Select
+ * components (which render a hidden native input + a visible combobox div).
+ * Mirrors TestRoutines.replaceInputElementByName().
+ */
+export async function replaceInputOrTextareaByName(
+  page: Page,
+  name: string,
+  value: string,
+): Promise<void> {
+  if(await selectMuiCombo(page, name, value)) {
     return;
   }
   // Regular input
   let input = await getInputOrTextareaByName(page, name);
-  input.waitFor({state: "visible"});
   if(await input.inputValue() !== value) {
     await input.fill(value);
   }
@@ -208,7 +214,6 @@ export async function replaceInputByName(
   value: string,
 ): Promise<void> {
   let input = await getInputOrTextareaByName(page, name);
-  input.waitFor({state: "visible"});
   if(await input.inputValue() !== value) {
     await input.fill(value);
   }
