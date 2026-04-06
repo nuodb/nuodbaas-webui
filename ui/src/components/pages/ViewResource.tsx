@@ -37,7 +37,7 @@ function ViewResource(props: PageProps) {
                 setError(error);
                 Auth.handle401Error(error);
                 setData({});
-            });
+            }, 1000);
         }
         else {
             setData({});
