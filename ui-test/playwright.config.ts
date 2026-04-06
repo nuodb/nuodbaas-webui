@@ -16,7 +16,7 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Reporter to use */
-  reporter: [['html', { outputFolder: 'target/playwright-report' }]],
+  reporter: [['list'],['html', { outputFolder: 'target/playwright-report' }]],
   use: {
     /* Base URL */
     baseURL: "http://localhost",
