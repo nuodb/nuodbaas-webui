@@ -16,7 +16,7 @@ import {
   TEST_ADMIN_USER,
   TEST_ORGANIZATION,
 } from "../helpers/api";
-import { expect } from "@playwright/test";
+import { expect, Locator } from "@playwright/test";
 import net from "net";
 
 const tcpConnections = new Set<net.Socket>();
@@ -109,14 +109,17 @@ test.describe("UserTest", () => {
 
     // verify user exists
     await clickMenu(page, "users");
-    let cells = await waitTableElements(
-      page,
-      "list_resource__table",
-      "name",
-      userName,
-      "$ref",
-    );
-    expect(cells.length).toBe(1);
+    let cells: Locator[];
+    await retry(async ()=>{
+      cells = await waitTableElements(
+        page,
+        "list_resource__table",
+        "name",
+        userName,
+        "$ref",
+      );
+      expect(cells.length).toBe(1);
+    });
 
     // delete the user
     deleteResourceRest("users", "integrationtest/" + userName);

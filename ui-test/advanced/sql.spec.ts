@@ -41,6 +41,8 @@ let databaseName: string | null = null;
 async function ensureDbAvailable(page: Page): Promise<void> {
   if (projectName !== null && databaseName !== null) return;
 
+  test.setTimeout(185_000);
+
   projectName = await getOrCreateProject(KEEP_PROJECT);
   databaseName = await getOrCreateDatabase(KEEP_PROJECT, KEEP_DATABASE);
 
@@ -140,10 +142,6 @@ test.describe("SqlTests", () => {
   test.beforeEach(async ({ restPage: page }) => {
     await ensureDbAvailable(page);
   });
-
-  test("allow database setup (with long timeout)", async () => {
-    test.setTimeout(185_000);
-  })
 
   test("testSqlPage – execute SQL, export data, verify downloaded content", async ({
     restPage: page,
