@@ -138,16 +138,20 @@ async function verifyAndDeleteDbUser(page: Page, user: string): Promise<void> {
 
 test.describe("SqlTests", () => {
   test.beforeEach(async ({ restPage: page }) => {
-    test.setTimeout(185_000)
     await ensureDbAvailable(page);
   });
+
+  test("allow database setup (with long timeout)", async () => {
+    test.setTimeout(185_000);
+  })
 
   test("testSqlPage – execute SQL, export data, verify downloaded content", async ({
     restPage: page,
   }) => {
     await loginSqlEditor(page);
 
-    await page.waitForLoadState('networkidle');
+    await waitRestComplete(page);
+    await sleep(1000);
 
     // Run DDL + DML + SELECT
     await page.getByTestId("query").click();
@@ -158,8 +162,6 @@ test.describe("SqlTests", () => {
     );
     await page.getByTestId("submitSql").click();
     await waitRestComplete(page);
-
-    await page.waitForLoadState('networkidle');
 
     await page.getByTestId("query").click();
     await sleep(1000); // TODO(agr22)

@@ -363,7 +363,7 @@ let lastSetTimeout_getResourceEvents: any = undefined;
  * @param {*} retryIntervalMS - milliseconds for the next retry (which will be doubled each time). Set to <= 0 to disable retries.
  * @returns AbortController - use ret.abort() to abort
  */
-export function getResourceEvents(schema: any, path: string, multiResolve: TempAny, multiReject: TempAny, retryIntervalMS: number = 0) : void {
+export function getResourceEvents(schema: any, path: string, multiResolve: TempAny, multiReject: TempAny, retryIntervalMS: number = 0) {
     if(lastSetTimeout_getResourceEvents) {
         clearTimeout(lastSetTimeout_getResourceEvents);
     }
@@ -517,6 +517,8 @@ export function getResourceEvents(schema: any, path: string, multiResolve: TempA
       .finally(()=>{
         monitoredPaths.delete(path.split("?")[0]);
       });
+
+      return eventsAbortController;
 }
 
 /**
