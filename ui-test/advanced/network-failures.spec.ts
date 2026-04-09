@@ -125,6 +125,7 @@ test.describe("UserTest", () => {
     deleteResourceRest("users", "integrationtest/" + userName);
 
     // verify user no longer shows in UI (due to SSE update)
+    await retry(async ()=> {
     cells = await waitTableElements(
       page,
       "list_resource__table",
@@ -133,6 +134,7 @@ test.describe("UserTest", () => {
       "$ref",
     );
     expect(cells.length).toBe(0);
+    });
 
     // create another user and verify user shows up in the UI
     userName = await createUserRest();
