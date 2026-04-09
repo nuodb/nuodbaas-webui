@@ -41,6 +41,8 @@ let databaseName: string | null = null;
 async function ensureDbAvailable(page: Page): Promise<void> {
   if (projectName !== null && databaseName !== null) return;
 
+  test.setTimeout(185_000);
+
   projectName = await getOrCreateProject(KEEP_PROJECT);
   databaseName = await getOrCreateDatabase(KEEP_PROJECT, KEEP_DATABASE);
 
@@ -138,7 +140,6 @@ async function verifyAndDeleteDbUser(page: Page, user: string): Promise<void> {
 
 test.describe("SqlTests", () => {
   test.beforeEach(async ({ restPage: page }) => {
-    test.setTimeout(185_000)
     await ensureDbAvailable(page);
   });
 
@@ -147,7 +148,8 @@ test.describe("SqlTests", () => {
   }) => {
     await loginSqlEditor(page);
 
-    await page.waitForLoadState('networkidle');
+    await waitRestComplete(page);
+    await sleep(1000);
 
     // Run DDL + DML + SELECT
     await page.getByTestId("query").click();
@@ -158,8 +160,6 @@ test.describe("SqlTests", () => {
     );
     await page.getByTestId("submitSql").click();
     await waitRestComplete(page);
-
-    await page.waitForLoadState('networkidle');
 
     await page.getByTestId("query").click();
     await sleep(1000); // TODO(agr22)
