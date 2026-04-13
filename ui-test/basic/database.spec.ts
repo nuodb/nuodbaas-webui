@@ -6,8 +6,6 @@ import {
   clickPopupMenu,
   waitRestComplete,
   waitTableElements,
-  replaceInputOrTextareaByName,
-  hasPopupMenu,
   retry,
   createDatabaseUI,
   sleep,

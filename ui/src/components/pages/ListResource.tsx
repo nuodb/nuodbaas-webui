@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Table from "./parts/Table";
-import { getResourceEvents, getResourceByPath, getFilterField } from "../../utils/schema";
+import { getResourceEvents, getResourceByPath, getFilterField, Feature } from "../../utils/schema";
 import { Rest } from "./parts/Rest";
 import PageLayout from './parts/PageLayout'
 import Auth from "../../utils/auth"
@@ -14,6 +14,53 @@ import Search from "./parts/Search";
 import ResourceHeader from "./parts/ResourceHeader";
 import Toast from "../controls/Toast";
 import { getValue } from "../fields/utils";
+
+/**
+ * Convert a user‑provided search expression into a back‑end‑compatible
+ * case‑insensitive regular‑expression string.
+ *
+ * The UI lets users type filter clauses separated by commas and asterisks, e.g.
+ *   "name=aDMI*"
+ *
+ * The back‑end expects:
+ *   • “=” to be a case‑insensitive regex match (prefixed with `~(?i)`).
+ *   • `*` wildcards to behave like `.*` in regular expressions.
+ *
+ * @param search  Raw search string entered by the user.
+ * @returns       A string ready to be URL‑encoded and sent as `fieldFilter`.
+ */
+function rewriteCaseInsensitiveWithWildcards(search: string): string {
+    // Split the overall filter into individual clauses (comma‑separated)
+    let parts = search.split(",");
+
+    // Process each clause independently
+    for (let p = 0; p < parts.length; p++) {
+        // Locate the first "=" character – this marks a simple equality filter
+        const posEquals = parts[p].indexOf("=");
+
+        // If we have an "=" that is **not** part of a comparison operator
+        // (<=, >=, !=) we replace it with a case‑insensitive regex marker.
+        // Example: "name=Admin" → "name~(?i)Admin"
+        if (
+            posEquals > 0 &&                     // there is something before "="
+            parts[p][posEquals - 1] !== "<" &&   // not a "<=" style operator
+            parts[p][posEquals - 1] !== ">" &&   // not a ">=" style operator
+            parts[p][posEquals - 1] !== "!"      // not a "!=" style operator
+        ) {
+            parts[p] =
+                parts[p].substring(0, posEquals) + // left side (field name)
+                "~(?i)" +                           // case‑insensitive regex flag
+                parts[p].substring(posEquals + 1); // right side (value)
+        }
+
+        // Replace any user‑friendly wildcard '*' with the regex equivalent '.*'
+        // This allows patterns like "Adm*" to match "Admin", etc.
+        parts[p] = parts[p].split("*").join(".*");
+    }
+
+    // Re‑assemble the transformed clauses into a single comma‑separated string
+    return parts.join(",");
+}
 
 type ItemsAndPathProps = {
     items: [] | null,
@@ -74,8 +121,17 @@ function ListResource(props: PageProps) {
         if ("get" in resourcesByPath_) {
             Rest.get(path + "?listAccessible=true").then((data: TempAny) => {
                 setAllItems(data.items);
+                let url = path + "?listAccessible=true&expand=true&offset=0&limit=1000000";
+                if (Feature.FILTER_ON_SERVER) {
+                    url = path + "?listAccessible=true&expand=true&offset=" + ((page - 1) * pageSize) + "&limit=" + pageSize;
+                    if (sort.column) {
+                        url += "&sortBy=" + encodeURIComponent(sort.column);
+                        url += "&reverse=" + String(sort.direction === "desc");
+                    }
+                    url += "&fieldFilter=" + encodeURIComponent(rewriteCaseInsensitiveWithWildcards(search));
+                }
                 setAbortController(
-                    getResourceEvents(schema, path + "?listAccessible=true&expand=true&offset=0&limit=1000000", (data: TempAny) => {
+                    getResourceEvents(schema, url, (data: TempAny) => {
                         if (data.items) {
                             setItemsAndPath({ items: data.items, path });
                             setAllFieldNames(makeFieldnameList("", data.items));
@@ -238,44 +294,44 @@ function ListResource(props: PageProps) {
     }
 
     if (itemsAndPath.items) {
-        const dataNotDeleted = itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true);
-        const sorted = (sort.column && sort.direction !== "none") ?
-            dataNotDeleted.sort((item1: any, item2: any) => {
-                const value1 = getValue(item1, sort.column);
-                const value2 = getValue(item2, sort.column);
-                let asc;
-                if (typeof value1 === "number" && typeof value2 === "number") {
-                    asc = value1 - value2;
-                }
-                else if (typeof value1 === "object" && typeof value2 === "object") {
-                    asc = JSON.stringify(value1).localeCompare(JSON.stringify(value2));
-                }
-                else {
-                    asc = String(value1).localeCompare(String(value2));
-                }
-                return sort.direction === "asc" ? asc : -asc;
-            }) : dataNotDeleted;
+        let searchFiltered: any = undefined;
+        let data = itemsAndPath.items.filter((d: TempAny) => d.__deleted__ !== true);
+        if (!Feature.FILTER_ON_SERVER) {
+            const sorted = (sort.column && sort.direction !== "none") ?
+                data.sort((item1: any, item2: any) => {
+                    const value1 = getValue(item1, sort.column);
+                    const value2 = getValue(item2, sort.column);
+                    let asc;
+                    if (typeof value1 === "number" && typeof value2 === "number") {
+                        asc = value1 - value2;
+                    }
+                    else if (typeof value1 === "object" && typeof value2 === "object") {
+                        asc = JSON.stringify(value1).localeCompare(JSON.stringify(value2));
+                    }
+                    else {
+                        asc = String(value1).localeCompare(String(value2));
+                    }
+                    return sort.direction === "asc" ? asc : -asc;
+                }) : data;
 
-        const searchFiltered = sorted.filter(entry => {
-            const searchParts = search.split(" ");
-            for (let i = 0; i < searchParts.length; i++) {
-                if (searchParts[i] && !includesValue(entry, searchParts[i])) {
-                    return false;
+            searchFiltered = sorted.filter(entry => {
+                const searchParts = search.split(" ");
+                for (let i = 0; i < searchParts.length; i++) {
+                    if (searchParts[i] && !includesValue(entry, searchParts[i])) {
+                        return false;
+                    }
                 }
-            }
-            return true;
-        });
+                return true;
+            });
 
-        const pageData = searchFiltered.filter((s, index) => index >= (page - 1) * pageSize && index < page * pageSize);
-
-        const data = pageData;
-
+            data = searchFiltered.filter((s, index: number) => index >= (page - 1) * pageSize && index < page * pageSize);
+        }
         return (
             <PageLayout {...props} >
                 <ResourceHeader schema={schema} path={path} type="list" filterValues={getFilterValues()} onAction={() => navigate("/ui/resource/create" + path)} />
                 <div className="NuoTableContainer">
                     <div className="NuoTableOptions">
-                        <Search fieldNames={allFieldNames} search={search} setSearch={(search: string) => {
+                        <Search path={path} fieldNames={allFieldNames} search={search} setSearch={(search: string) => {
                             setPage(1);
                             setSearch(search);
                         }} />
@@ -289,7 +345,7 @@ function ListResource(props: PageProps) {
                             sort={sort}
                             setSort={setSort}
                         />
-                        {renderPaging(searchFiltered ? searchFiltered.length : 0)}
+                        {renderPaging(searchFiltered ? searchFiltered.length : allItems.length)}
                     </div>
                 </div>
             </PageLayout>
