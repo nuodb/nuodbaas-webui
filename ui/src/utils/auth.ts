@@ -218,9 +218,17 @@ export default class Auth {
         }
     }
 
-    static getAccessRule() : {allow:[allow:string],deny:[deny:string]} {
+    static getAccessRule() : {allow:string[], deny:string[]} {
         const credentials = this.getCredentials();
         const accessRule = credentials?.accessRule || {};
-        return {allow: accessRule.allow || ["all:*"], deny: accessRule.deny || []};
+        let allow = accessRule.allow || ["all:*"];
+        if(allow.length === 0) {
+            // There should be at least one allow rule but there is none provided.
+            // As a fallback, enable the UI to show all resources, so the UI is at least functional.
+            // It may show additional buttons in the UI, but the Control Plane REST service will prevent
+            // operations if the user doesn't have access.
+            allow = ["all:*"];
+        }
+        return {allow, deny: accessRule.deny || []};
     }
 }
