@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { JSX, useEffect, useState } from 'react';
 import Button from './Button';
@@ -101,7 +101,7 @@ function MenuItems({ items, setItems, defaultItem, draggable, selected, clearAnc
         }
     }, []);
 
-    return items.map((item: MenuItemProps, index: number) => <div style={{ zIndex: 102 }}
+    return items.map((item: MenuItemProps, index: number) => <div style={{ zIndex: 102, borderTop: item.hasSeparator ? "2px solid lightgray" : undefined }}
         id={item.id}
         data-testid={(defaultItem ? "popupmenu-" : "") + item["data-testid"]}
         ref={refs[index]}
