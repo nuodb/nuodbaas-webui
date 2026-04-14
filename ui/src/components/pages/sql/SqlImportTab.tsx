@@ -13,6 +13,7 @@ import { concatChunks } from '../../../utils/schema';
 import { TempAny } from '../../../utils/types';
 import Toast from '../../controls/Toast';
 import BackgroundTaskStatus from '../../../utils/BackgroundTaskStatus';
+import Auth from '../../../utils/auth';
 
 type SqlImportTabProps = {
     tasks: BackgroundTaskType[];
@@ -66,7 +67,7 @@ function SqlImportTab({ sqlConnection, dbTable, tasks, setTasks }: SqlImportTabP
     async function setProgress(task: BackgroundTaskType): Promise<string> {
         return new Promise((resolve, reject) => {
             let headers = { Authorization: "Basic " + btoa(sqlConnection.getDbUsername() + ":" + sqlConnection.getDbPassword()) }
-            Rest.getStream("/api/sql/progress/sqlimport", headers, progressAbortController)
+            Rest.getStream(Auth.getNuodbSqlRestUrl("/progress/sqlimport"), headers, progressAbortController)
                 .then(async (response: TempAny) => {
                     let buffer = Uint8Array.of();
                     let gotProgressKey = false;
