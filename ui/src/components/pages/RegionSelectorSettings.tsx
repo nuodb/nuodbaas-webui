@@ -33,7 +33,6 @@ function RegionSelectorSettings(props: PageProps) {
         else if(url.startsWith("/")) {
             url = window.location.protocol + "//" + window.location.host + url;
         }
-        console.log("URL", url);
         if(!url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")) {
             return false;
         }
@@ -86,8 +85,9 @@ function RegionSelectorSettings(props: PageProps) {
                     newErrors.sql = "Must be valid URL";
                 }
                 else {
+                    const sql = fields.sql.endsWith("/") ? fields.sql : fields.sql + "/";
                     try {
-                        const sqlResponse = await axios.get(fields.sql);
+                        const sqlResponse = await axios.get(sql);
                         if(!sqlResponse.data || !sqlResponse.data.includes("NuoDB SQL service")) {
                             newErrors.sql = "Backend URL is not an SQL service";
                         }
@@ -99,7 +99,6 @@ function RegionSelectorSettings(props: PageProps) {
             }
         }
 
-        console.log("VALIDATE", newErrors);
         setErrors(newErrors);
 
         return Object.keys(newErrors).length === 0;
@@ -176,7 +175,7 @@ function RegionSelectorSettings(props: PageProps) {
                         {t("button.cancel")}
                 </Button>
                 {!isNew && (
-                    <button className="deleteButton" onClick={()=>{
+                    <button data-testid="button.delete" className="deleteButton" onClick={() => {
                         let regions = Auth.getRegions();
                         regions.splice(showEntry, 1);
                         Auth.setRegions(regions);
@@ -228,7 +227,7 @@ function RegionSelectorSettings(props: PageProps) {
                                 {setting.sql}
                             </TableCell>
                             <TableCell>
-                                {setting.active ? t("form.editRegionSettings.label.active") : <button onClick={()=>{
+                                {setting.active ? t("form.editRegionSettings.label.active") : <button data-testid={"make-active-" + setting.name} onClick={() => {
                                     Auth.setRegions(Auth.getRegions().map((region, idx) => ({...region, active: index === idx})));
                                     window.location.reload();
                                 }}>{t("form.editRegionSettings.label.makeActive")}</button>}
