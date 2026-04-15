@@ -339,10 +339,10 @@ setup-integration-tests: $(KUBECTL) setup-nginx-default-conf install-crds deploy
 	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-rest" -o name) -- bash -c " \
 		RETRY=0; \
 		while [ $$RETRY -lt 36 ] ; do \
-			echo "Waiting for Database to become available ($$RETRY/36)"; \
+			echo \"Waiting for Database to become available ($$RETRY/36)\"; \
 			AVAILABLE=$$(curl https://localhost:8080/api/databases/integrationtest/keepproject/keepdb1 -H \"Content-Type: application/json\" 2> /dev/null | grep -e AVAILABLE); \
 			if [ \"$$AVAILABLE\" = \"Available\" ] ; then
-				echo "Database is available"; \
+				echo \"Database is available\"; \
 				exit 0; \
 			else \
 				sleep 5; \
