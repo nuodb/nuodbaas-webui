@@ -376,7 +376,7 @@ teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-seleniu
 .PHONY: run-integration-tests-only
 run-integration-tests-only: ## integration tests without setup/teardown
 	@cd ui && npm install && cd ..
-	@cd ui-test && npm install && npx playwright install && npm run e2e -- --workers 1 && cd
+	@cd ui-test && npm install && npx playwright install && npm run e2e -- --workers 1 && cd ..
 
 .PHONY: run-unit-tests
 run-unit-tests: ## run unit tests
