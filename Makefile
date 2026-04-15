@@ -326,6 +326,30 @@ setup-integration-tests: $(KUBECTL) setup-nginx-default-conf install-crds deploy
 		--data-binary \
             '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"integrationtest\", \"accessRule\":{\"allow\": [\"all:integrationtest\",\"all:integrationtest2\",\"all:/cluster/*\"]}}' \
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
+	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-rest" -o name) -- bash -c "curl \
+		https://localhost:8080/api/projects/integrationtest/keepproject \
+		--data-binary \
+			'{\"sla\": \"dev\", \"tier\": \"n0.small\"}' \
+		-X PUT -H \"Content-Type: application/json\"" > /dev/null"
+	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-rest" -o name) -- bash -c "curl \
+		https://localhost:8080/api/databases/integrationtest/keepproject/keepdb1 \
+		--data-binary \
+			'{"dbaPassword": "passw0rd"}' \
+		-X PUT -H \"Content-Type: application/json\" > /dev/null"
+	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-rest" -o name) -- bash -c " \
+		RETRY=0; \
+		while [ $$RETRY -lt 36 ] ; do \
+			echo "Waiting for Database to become available ($$RETRY/36)"; \
+			AVAILABLE=$$(curl https://localhost:8080/api/databases/integrationtest/keepproject/keepdb1 -H \"Content-Type: application/json\" 2> /dev/null | grep -e AVAILABLE); \
+			if [ \"$$AVAILABLE\" = \"Available\" ] ; then
+				echo "Database is available"; \
+				exit 0; \
+			else \
+				sleep 5; \
+				((RETRY++)); \
+			fi; \
+		done; \
+		exit 1"
 	$(KUBECTL) apply -n default -f selenium-tests/files/cas-idp.yaml
 	$(KUBECTL) apply -n default -f selenium-tests/files/nuodb-cp-image-versions.yaml
 	@docker ps

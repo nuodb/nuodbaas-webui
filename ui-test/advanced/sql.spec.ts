@@ -37,43 +37,6 @@ const DB_READY_TIMEOUT =
 let projectName: string | null = null;
 let databaseName: string | null = null;
 
-/** Waits until the "keepdb1" database is "Available". */
-async function ensureDbAvailable(page: Page): Promise<void> {
-  if (projectName !== null && databaseName !== null) return;
-
-  test.setTimeout(185_000);
-
-  projectName = await getOrCreateProject(KEEP_PROJECT);
-  databaseName = await getOrCreateDatabase(KEEP_PROJECT, KEEP_DATABASE);
-
-  const deadline = Date.now() + DB_READY_TIMEOUT;
-  while (Date.now() < deadline) {
-    try {
-      const data = await restApi(
-        "GET",
-        `/databases/${TEST_ORGANIZATION}/${projectName}/${databaseName}`,
-      );
-      if (data?.status?.state === "Available") break;
-    } catch {
-      /* keep waiting */
-    }
-    await new Promise((r) => setTimeout(r, 1_000));
-  }
-
-  // Confirm via UI
-  await clickMenu(page, "projects");
-  await clickMenu(page, "databases");
-  const statusCols = await waitTableElements(
-    page,
-    "list_resource__table",
-    "name",
-    databaseName,
-    "status.state",
-  );
-  expect(statusCols.length).toBe(1);
-  expect(await statusCols[0].textContent()).toBe("Available");
-}
-
 /** Opens the SQL editor for the shared database and logs in. */
 async function loginSqlEditor(page: Page): Promise<void> {
   await clickMenu(page, "databases");
@@ -139,9 +102,6 @@ async function verifyAndDeleteDbUser(page: Page, user: string): Promise<void> {
 }
 
 test.describe("SqlTests", () => {
-  test.beforeEach(async ({ restPage: page }) => {
-    await ensureDbAvailable(page);
-  });
 
   test("testSqlPage – execute SQL, export data, verify downloaded content", async ({
     restPage: page,
