@@ -315,7 +315,7 @@ setup-nginx-default-conf:
 	fi
 
 .PHONY: setup-integration-tests
-setup-integration-tests: $(KUBECTL) setup-nginx-default-conf install-crds deploy-monitoring deploy-cp deploy-operator deploy-sql deploy-keycloak deploy-cas-server deploy-webui ## setup containers before running integration tests
+setup-integration-tests: $(KUBECTL)  ## setup containers before running integration tests
 	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-rest" -o name) -- bash -c "curl \
 		http://localhost:8080/users/acme/admin?allowCrossOrganizationAccess=true \
 		--data-binary \
@@ -330,7 +330,7 @@ setup-integration-tests: $(KUBECTL) setup-nginx-default-conf install-crds deploy
 		https://localhost:8080/api/projects/integrationtest/keepproject \
 		--data-binary \
 			'{\"sla\": \"dev\", \"tier\": \"n0.small\"}' \
-		-X PUT -H \"Content-Type: application/json\"" > /dev/null"
+		-X PUT -H \"Content-Type: application/json\" > /dev/null"
 	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-rest" -o name) -- bash -c "curl \
 		https://localhost:8080/api/databases/integrationtest/keepproject/keepdb1 \
 		--data-binary \
