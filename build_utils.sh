@@ -197,7 +197,7 @@ if [ "$1" == "createProjectAndDatabase" ] ; then
         echo "Unable to find Control Plane Pod"
         exit 1
     fi
-	./bin/kubectl exec -n default -it ${CP_POD} -- nuodb-cp project create integrationtest/keepproject --sla=dev --tier=n0.small || true
+	./bin/kubectl exec -n default -it ${CP_POD} -- nuodb-cp project create integrationtest/keepproject --sla=dev --tier=n0.nano || true
 	./bin/kubectl exec -n default -it ${CP_POD} -- nuodb-cp database create integrationtest/keepproject/keepdb1 --dba-password=passw0rd || true
     for i in {1..36}; do
         STATE=$(./bin/kubectl exec -n default -it ${CP_POD} -- nuodb-cp database get integrationtest/keepproject/keepdb1 | grep -e "\"state\"") || true
