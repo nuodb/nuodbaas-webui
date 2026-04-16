@@ -190,7 +190,7 @@ deploy-operator-from-aws: aws-login $(KIND) $(HELM)
 	$(HELM_OPERATOR_SETTINGS)
 
 .PHONY: deploy-operator
-deploy-operator: build-cp nuodb.lic $(HELM) $(KIND)
+deploy-operator: build-cp nuodb.lic $(KUBECTL) $(HELM) $(KIND)
 	@if [ -d $(NUODB_CP_REPO)/charts/nuodb-cp-operator ] ; then \
 		$(KIND) load docker-image nuodb/nuodb-control-plane:latest; \
 		$(HELM) dependency update $(NUODB_CP_REPO)/charts/nuodb-cp-operator; \
@@ -204,6 +204,7 @@ deploy-operator: build-cp nuodb.lic $(HELM) $(KIND)
 		$(HELM) upgrade --install --wait -n default nuodb-operator nuodb-cp-operator --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION) \
         $(HELM_OPERATOR_SETTINGS); \
 	fi
+	-$(KUBECTL) apply -n default -f docker/production/nano-resources.yaml
 
 .PHONY: undeploy-operator
 undeploy-operator: $(KIND) $(HELM)
