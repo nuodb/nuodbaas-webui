@@ -211,6 +211,7 @@ if [ "$1" == "createProjectAndDatabase" ] ; then
         fi
     done;
 	./bin/kubectl describe pods -A
+    ./bin/kubectl get pods -A -o=custom-columns="NAME:.metadata.name,NAMESPACE:.metadata.namespace,LIMITS:.spec.containers[*].resources.limits,REQUESTS:.spec.containers[*].resources.requests"
     ./bin/kubectl get pvc -A
     ./bin/kubectl get pv -A
 	./bin/kubectl get pods -A
