@@ -191,6 +191,28 @@ if [ "$1" == "createRelease" ] && [ "$2" != "" ] ; then
     fi
 fi
 
+if [ "$1" == "createProjectAndDatabase" ] ; then
+    CP_POD=$(./bin/kubectl get pod -n default -l "app=nuodb-cp-rest" -o name)
+    if [ "$CP_POD" = "" ] ; then
+        echo "Unable to find Control Plane Pod"
+        exit 1
+    fi
+	./bin/kubectl exec -n default -it ${CP_POD} -- nuodb-cp project create integrationtest/keepproject --sla=dev --tier=n0.small || true
+	./bin/kubectl exec -n default -it ${CP_POD} -- nuodb-cp database create integrationtest/keepproject/keepdb1 --dba-password=passw0rd || true
+    for i in {1..36}; do
+        STATE=$(./bin/kubectl exec -n default -it ${CP_POD} -- nuodb-cp database get integrationtest/keepproject/keepdb1 | grep -e "\"state\"") || true
+        AVAILABLE=$(echo "$STATE" | grep -e "Available") || true
+        if [ "$AVAILABLE" != "" ] ; then
+            echo "Database is available"
+            exit 0
+        else
+            echo "Waiting for Database to become available ($i/36). ${STATE}"
+           sleep 5
+        fi
+    done;
+    exit 1
+fi
+
 if [ "$1" != "" ] ; then
     echo "Invalid first argument: \"$1\""
 fi
@@ -199,3 +221,4 @@ echo "$0 doesImageExist"
 echo "$0 createAndUploadHelmPackage"
 echo "$0 deployDockerImages"
 echo "$0 createRelease <version number>"
+echo "$0 createProjectAndDatabase"

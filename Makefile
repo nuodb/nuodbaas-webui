@@ -121,9 +121,9 @@ pull-cp-from-ecr: aws-login
 
 .PHONY: pull-nuodb-from-ecr
 pull-nuodb-from-ecr: aws-login
-	docker pull --platform linux/amd64 --platform linux/arm64 ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb:$(NUODB_VERSION) \
+	docker pull --platform linux/${ARCH} ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb:$(NUODB_VERSION) \
 	&& docker tag ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb:$(NUODB_VERSION) nuodb/nuodb:$(NUODB_VERSION) \
-	&& docker pull --platform linux/amd64 --platform linux/arm64 ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION) \
+	&& docker pull --platform linux/${ARCH} ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION) \
 	&& docker tag ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION) nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION)
 
 .PHONY: deploy-nuodb-to-k8s
@@ -326,36 +326,9 @@ setup-integration-tests: $(KUBECTL) setup-nginx-default-conf install-crds deploy
 		--data-binary \
             '{\"password\":\"passw0rd\", \"name\":\"admin\", \"organization\": \"integrationtest\", \"accessRule\":{\"allow\": [\"all:integrationtest\",\"all:integrationtest2\",\"all:/cluster/*\"]}}' \
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
-	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-rest" -o name) -- bash -c "curl \
-		https://localhost:8080/api/projects/integrationtest/keepproject \
-		--data-binary \
-			'{\"sla\": \"dev\", \"tier\": \"n0.small\"}' \
-		-X PUT -H \"Content-Type: application/json\" > /dev/null"
-	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-rest" -o name) -- bash -c "curl \
-		https://localhost:8080/api/databases/integrationtest/keepproject/keepdb1 \
-		--data-binary \
-			'{"dbaPassword": "passw0rd"}' \
-		-X PUT -H \"Content-Type: application/json\" > /dev/null"
-	@$(KUBECTL) exec -n default -it $(shell ${KUBECTL} get pod -n default -l "app=nuodb-cp-rest" -o name) -- bash -c " \
-		RETRY=0; \
-		while [ $$RETRY -lt 36 ] ; do \
-			echo \"Waiting for Database to become available ($$RETRY/36)\"; \
-			AVAILABLE=$$(curl https://localhost:8080/api/databases/integrationtest/keepproject/keepdb1 -H \"Content-Type: application/json\" 2> /dev/null | grep -e AVAILABLE); \
-			if [ \"$$AVAILABLE\" = \"Available\" ] ; then
-				echo \"Database is available\"; \
-				exit 0; \
-			else \
-				sleep 5; \
-				((RETRY++)); \
-			fi; \
-		done; \
-		exit 1"
 	$(KUBECTL) apply -n default -f selenium-tests/files/cas-idp.yaml
 	$(KUBECTL) apply -n default -f selenium-tests/files/nuodb-cp-image-versions.yaml
 	@docker ps
-	@$(KUBECTL) describe ingress -A
-	@$(KUBECTL) describe pods -A
-	@$(KUBECTL) get pods -A
 	@if [ "${AWS_REGION}" != "" ] && [ "${AWS_ACCESS_KEY_ID}" != "" ] && [ "${AWS_SECRET_ACCESS_KEY}" != "" ] ; then \
 		${MAKE} deploy-nuodb-to-k8s; \
 	else \
@@ -364,6 +337,10 @@ setup-integration-tests: $(KUBECTL) setup-nginx-default-conf install-crds deploy
 		echo "* Falling back to docker.io download (which may block due to too many requests)        *"; \
 		echo "****************************************************************************************"; \
 	fi
+	./build_utils.sh createProjectAndDatabase
+	@$(KUBECTL) describe ingress -A
+	@$(KUBECTL) describe pods -A
+	@$(KUBECTL) get pods -A
 
 .PHONY: teardown-integration-tests
 teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-selenium undeploy-cas-server undeploy-keycloak undeploy-operator undeploy-cp undeploy-monitoring uninstall-crds ## clean up containers used by integration tests
