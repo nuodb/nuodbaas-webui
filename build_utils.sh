@@ -210,6 +210,11 @@ if [ "$1" == "createProjectAndDatabase" ] ; then
            sleep 5
         fi
     done;
+	./bin/kubectl describe pods -A
+    ./bin/kubectl get pvc -A
+    ./bin/kubectl get pv -A
+	./bin/kubectl get pods -A
+
     exit 1
 fi
 
