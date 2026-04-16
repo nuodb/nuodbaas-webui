@@ -202,10 +202,16 @@ export async function replaceInputOrTextareaByName(
     return;
   }
   // Regular input
-  let input = await getInputOrTextareaByName(page, name);
-  if(await input.inputValue() !== value) {
-    await input.fill(value);
-  }
+  await retry(async ()=> {
+    // MUI Input field is weird - it initially creates a textarea (non-visible) and then an input field or the other way around ...
+    let input = await getInputOrTextareaByName(page, name);
+    if(!await input.isVisible()) {
+      throw new Error("input/textarea field not visible"); //retry
+    }
+    if(await input.inputValue() !== value) {
+      await input.fill(value);
+    }
+  });
 }
 
 export async function replaceInputByName(

@@ -1,0 +1,34 @@
+# (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
+apiVersion: cp.nuodb.com/v1beta1
+kind: HelmFeature
+metadata:
+  name: nano-resources
+spec:
+  values:
+    admin:
+      resources:
+        limits:
+          cpu: 250m
+          memory: 500Mi
+        requests:
+          cpu: 250m
+          memory: 500Mi
+    database:
+      sm:
+        resources:
+          limits:
+            cpu: 250m
+            memory: 500Mi
+          requests:
+            cpu: 250m
+            memory: 500Mi
+        memoryOption: 500Mi
+      te:
+        resources:
+          limits:
+            cpu: 250m
+            memory: 500Mi
+          requests:
+            cpu: 250m
+            memory: 500Mi
+        memoryOption: 500Mi

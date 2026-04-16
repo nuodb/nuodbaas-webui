@@ -142,7 +142,7 @@ function ListResource(props: PageProps) {
                     }, (error: TempAny) => {
                         Auth.handle401Error(error);
                         setItemsAndPath({ items: [], path });
-                    })
+                    }, 1000)
                 );
             }).catch((reason) => {
                 Toast.show("Unable to get resource in " + path, reason);

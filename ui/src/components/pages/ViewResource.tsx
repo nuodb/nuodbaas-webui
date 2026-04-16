@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { ReactNode, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -37,7 +37,7 @@ function ViewResource(props: PageProps) {
                 setError(error);
                 Auth.handle401Error(error);
                 setData({});
-            });
+            }, 1000);
         }
         else {
             setData({});

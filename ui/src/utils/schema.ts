@@ -380,14 +380,20 @@ export function hasMonitoredPath(path: string) : boolean {
     return monitoredPaths.has(path.split("?")[0]);
 }
 
+let lastSetTimeout_getResourceEvents: any = undefined;
+
 /**
  * Gets event streaming resource by path (fall back to non-streaming resource on failure)
  * @param {*} path
  * @param {*} multiResolve - returns response
  * @param {*} multiReject - returns error
+ * @param {*} retryIntervalMS - milliseconds for the next retry (which will be doubled each time). Set to <= 0 to disable retries.
  * @returns AbortController - use ret.abort() to abort
  */
-export function getResourceEvents(schema: any, path: string, multiResolve: TempAny, multiReject: TempAny) {
+export function getResourceEvents(schema: any, path: string, multiResolve: TempAny, multiReject: TempAny, retryIntervalMS: number = 0) {
+    if(lastSetTimeout_getResourceEvents) {
+        clearTimeout(lastSetTimeout_getResourceEvents);
+    }
     //only one event stream is supported - close prior one if it exists.
     let eventsAbortController = new AbortController();
 
@@ -525,11 +531,14 @@ export function getResourceEvents(schema: any, path: string, multiResolve: TempA
                 .then(data => multiResolve(data))
                 .catch(reason => multiReject(reason));
         }
-        else if(error.status) {
-            Toast.show("Cannot retrieve resource for path " + path, error.status + " " + error.message);
-        }
         else {
-            //request was aborted. Ignore.
+            // request failed. Retry incrementally.
+            if(retryIntervalMS > 0) {
+                // reconnect - server/proxy might disconnect due to a timeout
+                lastSetTimeout_getResourceEvents = setTimeout(()=> {
+                    getResourceEvents(schema, path, multiResolve, multiReject, retryIntervalMS * 1.3); //retry with a 30% delay (exponential backoff)
+                }, retryIntervalMS);
+            }
         }
       })
       .finally(()=>{
