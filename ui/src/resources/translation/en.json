@@ -353,21 +353,26 @@
             "fieldRequired": "Field is required"
         },
         "searchFilter": {
-            "title": "Search Filter",
+            "title": "Add Filter",
             "label": {
                 "addField": "Add field:",
                 "fieldName": "Field name",
                 "condition": "Condition",
-                "value": "Value"
+                "value": "Value",
+                "ignoreCase": "Ignore case"
             },
             "options": {
-                "NON_NULL": "exists",
-                "NULL": "does not exist",
+                "contains": "contains",
+                "startsWith": "starts with",
+                "endsWith": "ends with",
+                "exists": "exists",
+                "notExists": "does not exist",
                 "=": "equals",
                 "!=": "not equals",
                 ">=": "greater than or equal to",
                 "<=": "less than or equal to",
-                "~": "regular expression"
+                "~": "regular expression",
+                "raw": "raw JSONPath"
             }
         }
     },

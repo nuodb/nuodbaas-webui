@@ -6,215 +6,179 @@ import { withTranslation } from 'react-i18next';
 import Select, { SelectOption } from '../controls/Select';
 import TextField from '../controls/TextField';
 import Button from '../controls/Button';
-import DeleteIcon from '@mui/icons-material/Delete';
 import DialogMaterial from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import DialogTitle from '@mui/material/DialogTitle';
 import { t } from 'i18next';
-import { getChild, getCreatePath, getResourceByPath, getSchema, getSchemaPath } from '../../utils/schema';
-import { TempAny } from '../../utils/types';
+import Checkboxes from '../controls/Checkboxes';
 
-type FilterType = "NON_NULL" | "NULL" | "=" | "!=" | ">=" | "<=" | "~";
+const filterOptions = ["contains", "startsWith", "endsWith", "exists", "notExists", "=", "!=", ">=", "<=", "~", "raw"] as const;
+export type FilterCondition = typeof filterOptions[number];
 
-const filterOptions: FilterType[] = ["NON_NULL", "NULL", "=", "!=", ">=", "<=", "~"];
+export type SearchType = {
+    field: string;
+    condition: FilterCondition;
+    value: string;
+    ignoreCase: boolean;
+};
 
-function getFieldsByPath(schema: TempAny, path: string) {
-    function getFields(definition: any, prefix: string, outFields: {[key:string]:string}) {
-        Object.keys(definition).forEach(key => {
-            const type = definition[key].type;
-            if(type === "object") {
-                if(definition[key].additionalProperties) {
-                    const apType = definition[key].additionalProperties.type;
-                    if(apType === "string" || apType === "boolean" || apType === "integer") {
-                        outFields[prefix + key] = apType;
-                    }
-                    else {
-                        console.log("INVALID additionalProperties type", definition[key], key, type);
-                    }
-                }
-                else if(definition[key].properties) {
-                    getFields(definition[key].properties, key + ".", outFields);
-                }
-                else {
-                    console.log("INVALID OBJECT", definition, prefix, path);
-                }
-            }
-            else if(type === "string" || type === "boolean" || type === "integer") {
-                outFields[prefix + key] = type;
-            }
-            else {
-                console.log("INVALID TYPE", definition, key, prefix, definition[key].type);
-            }
-        })
-    }
-
-    let fields: {[key:string]:string} = {};
-    const resource = getResourceByPath(schema, getCreatePath(schema, path));
-    if(resource["put"]) {
-        const formParams = getChild(resource["get"], ["responses", "200", "content", "application/json", "schema", "properties"])
-        getFields(formParams, "", fields);
-    }
-    return fields;
+function escapeRegex(value: string) {
+    // Matches all special regex characters and prepends them with a backslash
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-export type ListResourceFilterType = {
-    name: string;
-    type: FilterType;
-    value: string;
-};
+export function getFieldFilter(search: SearchType) {
+    const fieldRegex = "{" + escapeRegex(search.field) + "}";
+    const namePrefix = fieldRegex + "~" + (search.ignoreCase ? "(?i)" : "");
+    switch (search.condition) {
+        case "contains":
+            return namePrefix + ".*" + escapeRegex(search.value) + ".*";
+        case "startsWith":
+            return namePrefix + escapeRegex(search.value) + ".*";
+        case "endsWith":
+            return namePrefix + ".*" + escapeRegex(search.value);
+        case "exists":
+            return search.field;
+        case "notExists":
+            return "!" + search.field;
+        case "=":
+            return namePrefix + escapeRegex(search.value);
+        case "!=":
+        case ">=":
+        case "<=":
+            if (search.ignoreCase) {
+                return fieldRegex + search.condition + "(?!(?i)" + escapeRegex(search.value) + "$)";
+            }
+            else {
+                return fieldRegex + search.condition + escapeRegex(search.value);
+            }
+        case "~":
+            return namePrefix + search.value;
+        case "raw":
+            return search.value;
+    }
+}
+
+export function getFieldFilterLabel(search: SearchType) {
+    switch (search.condition) {
+        case "contains":
+            return search.field + "=*" + search.value + "*";
+        case "startsWith":
+            return search.field + "=" + search.value + "*";
+        case "endsWith":
+            return search.field + "=*" + search.value;
+        case "exists":
+            return "exists(" + search.field + ")";
+        case "notExists":
+            return "notExists(" + search.field + ")";
+        case "=":
+        case "!=":
+        case ">=":
+        case "<=":
+        case "~":
+            return search.field + search.condition + search.value;
+        case "raw":
+            return "fieldFilter(" + search.value + ")";
+    }
+}
 
 type ListResourceFilterProps = {
-    path: string;
-    show: boolean;
-    setShow: (show: boolean) => void;
-    search: string;
-    setSearch: (filter: string) => void;
+    editIndexOrNewField: string | number | null;
+    search: SearchType[];
+    setSearch: (filter: SearchType[] | null) => void;
 };
 
-function ListResourceFilter({path, show, setShow, search, setSearch}: ListResourceFilterProps) {
-    const [editFilter, setEditFilter] = useState<ListResourceFilterType[]>([]);
-    const [fields, setFields] = useState<string[]>([]);
+function ListResourceFilter({ editIndexOrNewField, search, setSearch }: ListResourceFilterProps) {
+    const [editSearch, setEditSearch] = useState<SearchType[]>([{ field: "", condition: "contains", value: "=", ignoreCase: true }]);
+    const [editIndex, setEditIndex] = useState<number>(0);
 
     useEffect(()=>{
-        getSchema().then(schema => {
-            let fields = getFieldsByPath(schema, path);
-            setFields(Object.keys(fields));
-        });
-    },[]);
-
-    useEffect(()=>{
-        const comparators: FilterType[] = [">=",">=","!=", "=", "~"];
-        let editFilter: ListResourceFilterType[] = [];
-        const parts = search.split(",");
-        for(let s=0; s<parts.length; s++) {
-            const part = parts[s].trim();
-            if(!part) {
-                continue;
-            }
-            let found = false;
-            for(let c=0; c<comparators.length; c++) {
-                const comparator = comparators[c];
-                if(part.includes(comparator)) {
-                    found = true;
-                    const pos = part.indexOf(comparator);
-                    editFilter.push({
-                        name: part.substring(0, pos),
-                        type: comparator,
-                        value: part.substring(pos + comparator.length)
-                    });
-                    break;
-                }
-            }
-            if(!found) {
-                if(part.startsWith("!")) {
-                    editFilter.push({
-                        name: part.substring(1),
-                        type: "NULL",
-                        value: ""
-                    });
-                }
-                else {
-                    editFilter.push({
-                        name: part,
-                        type: "NON_NULL",
-                        value: ""
-                    });
-                }
-            }
+        if (editIndexOrNewField === null) {
+            return;
         }
-        setEditFilter(editFilter);
-    }, [search])
+        if (typeof editIndexOrNewField === "number") {
+            setEditSearch(search);
+            setEditIndex(editIndexOrNewField);
+        }
+        else {
+            setEditSearch([...search, { field: editIndexOrNewField, condition: "contains", value: "", ignoreCase: true }]);
+            setEditIndex(search.length);
+        }
+    }, [search, editIndexOrNewField]);
 
-    if(!show) {
+    if (editIndexOrNewField === null) {
         return null;
     }
 
-    let unusedFields: Set<string> = new Set(fields);
-    editFilter.forEach(ef => {
-        unusedFields.delete(ef.name);
-    })
-
-    return <DialogMaterial open={true}>
-        <DialogTitle>{t("dialog.searchFilter.title")}</DialogTitle>
-    <DialogContent>
-
-<Table>
-        <TableHead>
-            <TableRow>
-                        <TableTh>{t("dialog.searchFilter.label.fieldName")}</TableTh>
-                        <TableTh>{t("dialog.searchFilter.label.condition")}</TableTh>
-                        <TableTh>{t("dialog.searchFilter.label.value")}</TableTh>
-                <TableTh></TableTh>
-            </TableRow>
-        </TableHead>
-        <TableBody>
-            {editFilter.map((ef, index: number) => <TableRow key={ef.name}>
-                <TableCell>{ef.name}</TableCell>
-                <TableCell>
-                    <Select id={"condition." + ef.name} value={ef.type} onChange={(event: ChangeEvent<HTMLSelectElement>) => {
-                        let f: ListResourceFilterType[] = [...editFilter];
-                        f[index].type = event.target.value as FilterType;
-                        setEditFilter(f);
-                    }}>
-                        {filterOptions.map(fo => <SelectOption value={fo}>{t("dialog.searchFilter.options." + fo)}</SelectOption>)}
-                    </Select>
-                </TableCell>
-                <TableCell>
-                    <TextField id={"value." + ef.name} label="" value={ef.value || ""} onChange={(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-                        let f = [ ...editFilter ];
-                        f[index].value = event.currentTarget.value;
-                        setEditFilter(f);
-                    }} />
-                </TableCell>
-                <TableCell>
-                    <div data-testid={"search.filter.delete." + ef.name} className="NuoColumn" onClick={() => {
-                        let f = [...editFilter];
-                        f.splice(index, 1);
-                        setEditFilter(f);
-                    }}>
-                        <DeleteIcon />
-                    </div>
-                </TableCell>
-            </TableRow>)}
-                </TableBody>
-            </Table>
-            <div className="NuoRow NuoFieldContainer">
-                <div style={{ whiteSpace: "nowrap" }}>{t("dialog.searchFilter.label.addField")}</div>
-                <Select id="new.resource.filter" value="" onChange={(event: ChangeEvent<HTMLSelectElement>) => {
-                    let f: ListResourceFilterType[] = [...editFilter];
-                    f.push({ name: event.target.value, type: "=", value: "" });
-                    setEditFilter(f);
-                }}>
-                    {Array.from(unusedFields).map(field => <SelectOption value={field}>{field}</SelectOption>)}
-                </Select>
-            </div>
+    return (
+        <DialogMaterial open={true}>
+            <DialogTitle>{t("dialog.searchFilter.title")}</DialogTitle>
+            <DialogContent style={{ width: "90%" }}>
+                <Table>
+                    <TableHead>
+                    </TableHead>
+                    <TableBody>
+                        <TableRow>
+                            <TableCell>{t("dialog.searchFilter.label.fieldName")}</TableCell>
+                            <TableCell>
+                                {editSearch[editIndex].field}
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell>{t("dialog.searchFilter.label.condition")}</TableCell>
+                            <TableCell>
+                                <Select id="condition" value={editSearch[editIndex].condition} onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+                                    let newEditSearch: SearchType[] = [...editSearch];
+                                    newEditSearch[editIndex].condition = event.target.value as FilterCondition;
+                                    setEditSearch(newEditSearch);
+                                }}>
+                                    {filterOptions.map(fo => <SelectOption value={fo}>{t("dialog.searchFilter.options." + fo)}</SelectOption>)}
+                                </Select>
+                            </TableCell>
+                        </TableRow>
+                        {editSearch[editIndex].condition !== "raw" && <TableRow>
+                            <TableCell>{t("dialog.searchFilter.label.ignoreCase")}</TableCell>
+                            <TableCell>
+                                <Checkboxes
+                                    items={[{
+                                        id: 'ignoreCase',
+                                        selected: editSearch[editIndex].ignoreCase
+                                    }]}
+                                    setItems={(items: { id: string; label?: string; selected?: boolean; }[]) => {
+                                        let newEditSearch = [...editSearch];
+                                        newEditSearch[editIndex].ignoreCase = !items[0].selected;
+                                        setEditSearch(newEditSearch);
+                                    }} />
+                            </TableCell>
+                        </TableRow>}
+                        <TableRow>
+                            <TableCell>{t("dialog.searchFilter.label.value")}</TableCell>
+                            <TableCell>
+                                <TextField id="value" label="" value={editSearch[editIndex].value || ""} onChange={(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+                                    let newEditSearch = [...editSearch];
+                                    newEditSearch[editIndex].value = event.currentTarget.value;
+                                    setEditSearch(newEditSearch);
+                                }} />
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
     </DialogContent>
     <DialogActions>
         <Button
             data-testid={"dialog_button_ok"}
             onClick={() => {
-                let search: string[] = [];
-                editFilter.map((ef,index)=>{
-                    if(ef.type === "NULL") {
-                        search.push("!" + ef.name);
-                    }
-                    else if(ef.type === "NON_NULL") {
-                        search.push(ef.name);
-                    }
-                    else if(ef.value !== "") {
-                        search.push(ef.name + ef.type + ef.value);
-                    }
-                })
-                setSearch(search.join(","));
-                setShow(false);
+                setSearch(editSearch);
             }}
         >
                 {t("button.ok")}
         </Button>
-            <Button data-testid={"dialog_button_cancel"} onClick={() => { setShow(false)}}>{t("button.cancel")}</Button>
+                <Button data-testid={"dialog_button_cancel"} onClick={() => {
+                    setSearch(null);
+                }}>Cancel</Button>
         </DialogActions>
-</DialogMaterial>;
+        </DialogMaterial>);
 }
 
 export default withTranslation()(ListResourceFilter);

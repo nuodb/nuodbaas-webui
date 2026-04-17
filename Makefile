@@ -290,12 +290,12 @@ undeploy-webui: $(KIND) $(HELM)
 .PHONY: setup-nginx-default-conf
 setup-nginx-default-conf:
 	@if [ "$(NUODB_CP_URL_BASE)" = "" ] ; then \
-		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_URL_BASE%%%#http://localhost:8081#g" > docker/development/default.conf; \
+		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_URL_BASE%%%#http://localhost/api#g" > docker/development/default.conf; \
 	else \
 		cat docker/development/default.conf.template | sed "s#%%%NUODB_CP_URL_BASE%%%#$(NUODB_CP_URL_BASE)#g" > docker/development/default.conf; \
 	fi
 	@if [ "$(NUODB_SQL_URL_BASE)" = "" ] ; then \
-		sed -i "s#%%%NUODB_SQL_URL_BASE%%%#http://localhost#g" docker/development/default.conf; \
+		sed -i "s#%%%NUODB_SQL_URL_BASE%%%#http://localhost/api#g" docker/development/default.conf; \
 	else \
 		sed -i "s#%%%NUODB_SQL_URL_BASE%%%#$(NUODB_SQL_URL_BASE)#g" docker/development/default.conf; \
 	fi
