@@ -10,6 +10,8 @@ ARCH := $(shell uname -m | sed "s/x86_64/amd64/g" | sed "s/aarch64/arm64/g")
 KIND_VERSION ?= 0.27.0
 KUBECTL_VERSION ?= 1.28.3
 HELM_VERSION ?= 3.16.2
+NUODB_VERSION ?= 7.0.2
+NUODB_COLLECTOR_VERSION ?= 2.0.0
 NUODB_CP_VERSION ?= 2.10.0
 NUODB_SQL_VERSION ?= 1.1.0
 PROMETHEUS_VERSION ?= 79.6.1
@@ -117,6 +119,18 @@ pull-cp-from-ecr: aws-login
 	docker pull ${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane:$(NUODB_CP_VERSION)-main-latest \
 	&& docker tag ${ECR_ACCOUNT_URL}/nuodb/nuodb-control-plane:$(NUODB_CP_VERSION)-main-latest nuodb/nuodb-control-plane
 
+.PHONY: pull-nuodb-from-ecr
+pull-nuodb-from-ecr: aws-login
+	docker pull --platform linux/${ARCH} ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb:$(NUODB_VERSION) \
+	&& docker tag ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb:$(NUODB_VERSION) nuodb/nuodb:$(NUODB_VERSION) \
+	&& docker pull --platform linux/${ARCH} ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION) \
+	&& docker tag ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION) nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION)
+
+.PHONY: deploy-nuodb-to-k8s
+deploy-nuodb-to-k8s: pull-nuodb-from-ecr
+	$(KIND) load docker-image nuodb/nuodb:$(NUODB_VERSION) \
+	&& $(KIND) load docker-image nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION)
+
 .PHONY: build-cp
 build-cp:
 	# Build / Pull nuodb-control-plane image
@@ -176,7 +190,7 @@ deploy-operator-from-aws: aws-login $(KIND) $(HELM)
 	$(HELM_OPERATOR_SETTINGS)
 
 .PHONY: deploy-operator
-deploy-operator: build-cp nuodb.lic $(HELM) $(KIND)
+deploy-operator: build-cp nuodb.lic $(KUBECTL) $(HELM) $(KIND)
 	@if [ -d $(NUODB_CP_REPO)/charts/nuodb-cp-operator ] ; then \
 		$(KIND) load docker-image nuodb/nuodb-control-plane:latest; \
 		$(HELM) dependency update $(NUODB_CP_REPO)/charts/nuodb-cp-operator; \
@@ -190,6 +204,7 @@ deploy-operator: build-cp nuodb.lic $(HELM) $(KIND)
 		$(HELM) upgrade --install --wait -n default nuodb-operator nuodb-cp-operator --repo https://nuodb.github.io/nuodb-cp-releases/charts --version $(NUODB_CP_VERSION) \
         $(HELM_OPERATOR_SETTINGS); \
 	fi
+	-$(KUBECTL) apply -n default -f docker/production/nano-resources.yaml
 
 .PHONY: undeploy-operator
 undeploy-operator: $(KIND) $(HELM)
@@ -315,6 +330,15 @@ setup-integration-tests: $(KUBECTL) setup-nginx-default-conf install-crds deploy
 	$(KUBECTL) apply -n default -f selenium-tests/files/cas-idp.yaml
 	$(KUBECTL) apply -n default -f selenium-tests/files/nuodb-cp-image-versions.yaml
 	@docker ps
+	@if [ "${AWS_REGION}" != "" ] && [ "${AWS_ACCESS_KEY_ID}" != "" ] && [ "${AWS_SECRET_ACCESS_KEY}" != "" ] ; then \
+		${MAKE} deploy-nuodb-to-k8s; \
+	else \
+		echo "****************************************************************************************"; \
+		echo "* WARNING: AWS secret keys not specified. Cannot download nuodb docker image from ECR. *"; \
+		echo "* Falling back to docker.io download (which may block due to too many requests)        *"; \
+		echo "****************************************************************************************"; \
+	fi
+	./build_utils.sh createProjectAndDatabase
 	@$(KUBECTL) describe ingress -A
 	@$(KUBECTL) describe pods -A
 	@$(KUBECTL) get pods -A

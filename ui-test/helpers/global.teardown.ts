@@ -35,7 +35,7 @@ test.describe('global teardown', () => {
                     const urlParts = cov.url.split("/");
                     const destFile = "target/" + urlParts[urlParts.length-1] + ".map";
                     if(!fs.existsSync(destFile)) {
-                        const res = await fetch(cov.url + ".map");
+                        const res = await fetch(cov.url.replace(":8089", "") + ".map");
                         if (res.ok) {
                             const fileStream = fs.createWriteStream(destFile, { flags: 'wx' });
                             await finished(Readable.fromWeb(res.body).pipe(fileStream));
