@@ -1,4 +1,4 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { useEffect, useState } from 'react';
 import { withTranslation } from "react-i18next";
@@ -14,6 +14,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Button from '../../controls/Button';
 import { SqlType } from '../../../utils/SqlSocket';
 import { Checkbox } from '../../controls/Checkboxes';
+import Auth from '../../../utils/auth';
 
 type SqlExportTabProps = {
     tasks: BackgroundTaskType[];
@@ -129,7 +130,7 @@ function SqlExportTab({ tasks, setTasks, sqlConnection }: SqlExportTabProps) {
             suggestedName: sqlConnection.getOrgProjDbSchemaUrl().substring("/".length).replaceAll("/", "_") + "_" + nowYYYYMMDD_HHMMSS() + ".sql"
         });
 
-        const url = new URL(location.protocol + location.host + "/api/sql/export/sql" + sqlConnection.getOrgProjDbSchemaUrl());
+        const url = Auth.getNuodbSqlRestUrl("/export/sql" + sqlConnection.getOrgProjDbSchemaUrl());
         const body = {
             includeDdl,
             includeData,

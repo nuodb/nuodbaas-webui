@@ -14,7 +14,6 @@ import PageviewIcon from '@mui/icons-material/Pageview';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import Icon from "./Icon";
 import Auth from "../../../utils/auth";
-import { useEffect, useState } from "react";
 
 type ResourcePopupMenuProps = {
     row: any;

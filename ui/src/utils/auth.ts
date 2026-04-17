@@ -1,6 +1,6 @@
 // (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 import axios from "axios";
-import { TempAny } from "./types";
+import { RegionSettings, TempAny } from "./types";
 
 /**
  * Authenticates users and stores info in localStorage "credentials".
@@ -17,7 +17,20 @@ export default class Auth {
         return this.getCredentials() ? true : false;
     }
 
-    static getNuodbCpRestUrl(path:string) {
+    static getRegions() : RegionSettings {
+        try {
+            return JSON.parse(localStorage.getItem("regions") || "[]");
+        }
+        catch(exc) {
+            return [];
+        }
+    }
+
+    static setRegions(regions: RegionSettings) {
+        localStorage.setItem("regions", JSON.stringify(regions));
+    }
+
+    static getDefaultPrefixPath() : string {
         // The default for the NuoDB REST Control Plane prefix is "/nuodb-cp", which can be overwritten by the
         // environment variable NUODB_CP_REST_URL in the Docker container or Helm Chart config.
         //
@@ -28,6 +41,35 @@ export default class Auth {
         let prefixPath = "/nuodb-cp"
         if ("___NUODB_CP_REST_URL___" !== "___NUODB_CP" + (Date.now() > 0 ? "_REST_URL___" : "")) {
             prefixPath = "___NUODB_CP_REST_URL___";
+        }
+        return prefixPath;
+    }
+
+    static getNuodbCpRestUrl(path:string) {
+        let prefixPath = Auth.getDefaultPrefixPath();
+
+        const currentRegion = Auth.getRegions().find(region => region.active === true);
+        if(currentRegion && currentRegion.cp) {
+            prefixPath = currentRegion.cp;
+        }
+
+        while(prefixPath.endsWith("/")) {
+            prefixPath.substring(0, prefixPath.length-1);
+        }
+
+        while(path.startsWith("/")) {
+            path = path.substring(1);
+        }
+
+        return prefixPath + "/" + path;
+    }
+
+    static getNuodbSqlRestUrl(path:string) {
+        let prefixPath = Auth.getDefaultPrefixPath();
+
+        const currentRegion = Auth.getRegions().find(region => region.active === true);
+        if(currentRegion && currentRegion.sql) {
+            prefixPath = currentRegion.sql;
         }
 
         while(prefixPath.endsWith("/")) {

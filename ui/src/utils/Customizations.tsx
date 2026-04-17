@@ -5,6 +5,7 @@ import { TempAny } from "./types";
 import { getValue } from "../components/fields/utils";
 import { matchesPath } from "./schema";
 import React, { JSX, useEffect, useState } from "react";
+import Auth from "./auth";
 
 export const LOCAL_USER_SETTINGS = "nuodbaas_webui_userSettings";
 
@@ -312,7 +313,7 @@ export default function Customizations(props: CustomizationsProps): JSX.Element 
         const themeJson = (await axios.get("/ui/theme/" + themeType + ".json")).data || {};
 
         try {
-            hasSqlEditorService = ((await axios.get("/api/sql/")).data || "").includes("NuoDB SQL service");
+            hasSqlEditorService = ((await axios.get(Auth.getNuodbSqlRestUrl("/"))).data || "").includes("NuoDB SQL service");
         }
         catch (ex) {
             hasSqlEditorService = false;

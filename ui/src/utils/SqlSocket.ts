@@ -1,7 +1,8 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import axios from "axios";
 import { Rest } from "../components/pages/parts/Rest";
+import Auth from "./auth";
 
 export type SqlOperationType =
     "SET_CREDENTIALS"|
@@ -77,7 +78,7 @@ export default function SqlSocket(organization: string, project: string, databas
         try {
             Rest.incrementPending();
             const response = await axios.post(
-                "/api/sql/query" + getOrgProjDbSchemaUrl(),
+                Auth.getNuodbSqlRestUrl("/query" + getOrgProjDbSchemaUrl()),
                 request,
                 {
                     headers:{
@@ -114,7 +115,7 @@ export default function SqlSocket(organization: string, project: string, databas
 
     async function sqlImport(file: File, progressKey: string, abortController: AbortController | undefined) : Promise<SqlImportResponseType> {
         try {
-            const response = await axios.post('/api/sql/import/sql/' + getOrgProjDbSchemaUrl() + "?progressKey=" + progressKey, file, {
+            const response = await axios.post(Auth.getNuodbSqlRestUrl('/import/sql/' + getOrgProjDbSchemaUrl() + "?progressKey=" + progressKey), file, {
                 headers: {
                     "Authorization": "Basic " + btoa(dbUsername + ":" + dbPassword),
                     'Content-Type': file.type
@@ -136,7 +137,7 @@ export default function SqlSocket(organization: string, project: string, databas
 
     async function sqlSimpleImport(body: string) : Promise<SqlImportResponseType> {
         try {
-            const response = await axios.post('/api/sql/import/sql/' + getOrgProjDbSchemaUrl(), body, {
+            const response = await axios.post(Auth.getNuodbSqlRestUrl('/import/sql/' + getOrgProjDbSchemaUrl()), body, {
                 headers: {
                     "Authorization": "Basic " + btoa(dbUsername + ":" + dbPassword),
                     'Content-Type': "text/sql"

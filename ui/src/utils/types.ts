@@ -49,6 +49,7 @@ export type MenuItemProps = {
     label: ReactNode,
     selected?: boolean,
     disabled?: boolean,
+    hasSeparator?: boolean,
     onClick?: () => boolean
     onKeyDown?: (event: React.KeyboardEvent<HTMLDivElement>) => void
 }
@@ -90,3 +91,10 @@ export type SortColumnDirectionType = {
     column: string;
     direction: "none" | "asc" | "desc";
 };
+
+export type RegionSettings = {
+    active?: boolean;
+    name: string;
+    cp: string;
+    sql: string;
+}[];
