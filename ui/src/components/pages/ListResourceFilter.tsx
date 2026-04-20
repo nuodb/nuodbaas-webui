@@ -13,7 +13,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { t } from 'i18next';
 import Checkboxes from '../controls/Checkboxes';
 
-const filterOptions = ["contains", "startsWith", "endsWith", "exists", "notExists", "=", "!=", ">=", "<=", "~", "raw"] as const;
+const filterOptions = ["search", "contains", "startsWith", "endsWith", "exists", "notExists", "=", "!=", ">=", "<=", "~", "raw"] as const;
 export type FilterCondition = typeof filterOptions[number];
 
 export type SearchType = {
@@ -21,7 +21,17 @@ export type SearchType = {
     condition: FilterCondition;
     value: string;
     ignoreCase: boolean;
+    label?: string;
 };
+
+export function isSameSearch(s1: SearchType, s2: SearchType): boolean {
+    if (s1.field !== s2.field) return false;
+    if (s1.condition !== s2.condition) return false;
+    if (s1.value !== s2.value) return false;
+    if (s1.ignoreCase !== s2.ignoreCase) return false;
+    if (s1.label !== s2.label) return false;
+    return true;
+}
 
 function escapeRegex(value: string) {
     // Matches all special regex characters and prepends them with a backslash
@@ -32,6 +42,13 @@ export function getFieldFilter(search: SearchType) {
     const fieldRegex = "{" + escapeRegex(search.field) + "}";
     const namePrefix = fieldRegex + "~" + (search.ignoreCase ? "(?i)" : "");
     switch (search.condition) {
+        case "search":
+            if (search.ignoreCase) {
+                return "{$.*}~(?i).*" + escapeRegex(search.value) + ".*";
+            }
+            else {
+                return "{$.*}~.*" + escapeRegex(search.value) + ".*";
+            }
         case "contains":
             return namePrefix + ".*" + escapeRegex(search.value) + ".*";
         case "startsWith":
@@ -62,6 +79,8 @@ export function getFieldFilter(search: SearchType) {
 
 export function getFieldFilterLabel(search: SearchType) {
     switch (search.condition) {
+        case "search":
+            return "search(" + search.value + ")";
         case "contains":
             return search.field + "=*" + search.value + "*";
         case "startsWith":
@@ -85,11 +104,12 @@ export function getFieldFilterLabel(search: SearchType) {
 
 type ListResourceFilterProps = {
     editIndexOrNewField: string | number | null;
+    fields: { [fieldName: string]: string };
     search: SearchType[];
     setSearch: (filter: SearchType[] | null) => void;
 };
 
-function ListResourceFilter({ editIndexOrNewField, search, setSearch }: ListResourceFilterProps) {
+function ListResourceFilter({ editIndexOrNewField, fields, search, setSearch }: ListResourceFilterProps) {
     const [editSearch, setEditSearch] = useState<SearchType[]>([{ field: "", condition: "contains", value: "=", ignoreCase: true }]);
     const [editIndex, setEditIndex] = useState<number>(0);
 
@@ -111,57 +131,85 @@ function ListResourceFilter({ editIndexOrNewField, search, setSearch }: ListReso
         return null;
     }
 
+    function renderCondition() {
+        return <TableRow>
+            <TableCell>{t("dialog.searchFilter.label.condition")}</TableCell>
+            <TableCell>
+                <Select id="condition" value={editSearch[editIndex].condition} onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+                    let newEditSearch: SearchType[] = [...editSearch];
+                    newEditSearch[editIndex].condition = event.target.value as FilterCondition;
+                    setEditSearch(newEditSearch);
+                }}>
+                    {filterOptions.map(fo => <SelectOption value={fo}>{t("dialog.searchFilter.options." + fo)}</SelectOption>)}
+                </Select>
+            </TableCell>
+        </TableRow>
+    }
+
+    function renderField() {
+        if (editSearch[editIndex].condition === "raw") {
+            return null;
+        }
+        return <TableRow>
+            <TableCell>{t("dialog.searchFilter.label.forField")}</TableCell>
+            <TableCell>
+                <Select id="field" value={editSearch[editIndex].field} onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+                    let newEditSearch: SearchType[] = [...editSearch];
+                    newEditSearch[editIndex].field = event.target.value;
+                    setEditSearch(newEditSearch);
+                }}>
+                    {Object.keys(fields).map(fo => <SelectOption value={fo}>{fo}</SelectOption>)}
+                </Select>
+            </TableCell>
+        </TableRow>
+    }
+
+    function renderIgnoreCase() {
+        if (editSearch[editIndex].condition === "raw") {
+            return null;
+        }
+        return <TableRow>
+            <TableCell>{t("dialog.searchFilter.label.ignoreCase")}</TableCell>
+            <TableCell>
+                <Checkboxes
+                    items={[{
+                        id: 'ignoreCase',
+                        selected: editSearch[editIndex].ignoreCase
+                    }]}
+                    setItems={(items: { id: string; label?: string; selected?: boolean; }[]) => {
+                        let newEditSearch = [...editSearch];
+                        newEditSearch[editIndex].ignoreCase = !newEditSearch[editIndex].ignoreCase;
+                        setEditSearch(newEditSearch);
+                    }} />
+            </TableCell>
+        </TableRow>;
+    }
+
+    function renderValue() {
+        return <TableRow>
+            <TableCell>{t("dialog.searchFilter.label.value")}</TableCell>
+            <TableCell>
+                <TextField id="value" label="" value={editSearch[editIndex].value || ""} onChange={(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+                    let newEditSearch = [...editSearch];
+                    newEditSearch[editIndex].value = event.currentTarget.value;
+                    setEditSearch(newEditSearch);
+                }} />
+            </TableCell>
+        </TableRow>
+    }
+
     return (
         <DialogMaterial open={true}>
-            <DialogTitle>{t("dialog.searchFilter.title")}</DialogTitle>
+            <DialogTitle>{typeof editIndexOrNewField === "number" ? t("dialog.searchFilter.editTitle") : t("dialog.searchFilter.addTitle")}</DialogTitle>
             <DialogContent style={{ width: "90%" }}>
                 <Table>
                     <TableHead>
                     </TableHead>
                     <TableBody>
-                        <TableRow>
-                            <TableCell>{t("dialog.searchFilter.label.fieldName")}</TableCell>
-                            <TableCell>
-                                {editSearch[editIndex].field}
-                            </TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell>{t("dialog.searchFilter.label.condition")}</TableCell>
-                            <TableCell>
-                                <Select id="condition" value={editSearch[editIndex].condition} onChange={(event: ChangeEvent<HTMLSelectElement>) => {
-                                    let newEditSearch: SearchType[] = [...editSearch];
-                                    newEditSearch[editIndex].condition = event.target.value as FilterCondition;
-                                    setEditSearch(newEditSearch);
-                                }}>
-                                    {filterOptions.map(fo => <SelectOption value={fo}>{t("dialog.searchFilter.options." + fo)}</SelectOption>)}
-                                </Select>
-                            </TableCell>
-                        </TableRow>
-                        {editSearch[editIndex].condition !== "raw" && <TableRow>
-                            <TableCell>{t("dialog.searchFilter.label.ignoreCase")}</TableCell>
-                            <TableCell>
-                                <Checkboxes
-                                    items={[{
-                                        id: 'ignoreCase',
-                                        selected: editSearch[editIndex].ignoreCase
-                                    }]}
-                                    setItems={(items: { id: string; label?: string; selected?: boolean; }[]) => {
-                                        let newEditSearch = [...editSearch];
-                                        newEditSearch[editIndex].ignoreCase = !items[0].selected;
-                                        setEditSearch(newEditSearch);
-                                    }} />
-                            </TableCell>
-                        </TableRow>}
-                        <TableRow>
-                            <TableCell>{t("dialog.searchFilter.label.value")}</TableCell>
-                            <TableCell>
-                                <TextField id="value" label="" value={editSearch[editIndex].value || ""} onChange={(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-                                    let newEditSearch = [...editSearch];
-                                    newEditSearch[editIndex].value = event.currentTarget.value;
-                                    setEditSearch(newEditSearch);
-                                }} />
-                            </TableCell>
-                        </TableRow>
+                        {renderCondition()}
+                        {renderField()}
+                        {renderIgnoreCase()}
+                        {renderValue()}
                     </TableBody>
                 </Table>
     </DialogContent>

@@ -353,15 +353,17 @@
             "fieldRequired": "Field is required"
         },
         "searchFilter": {
-            "title": "Add Filter",
+            "addTitle": "Add Filter",
+            "editTitle": "Edit Filter",
             "label": {
                 "addField": "Add field:",
-                "fieldName": "Field name",
+                "forField": "for Field",
                 "condition": "Condition",
                 "value": "Value",
                 "ignoreCase": "Ignore case"
             },
             "options": {
+                "search": "search",
                 "contains": "contains",
                 "startsWith": "starts with",
                 "endsWith": "ends with",

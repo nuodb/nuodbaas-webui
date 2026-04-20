@@ -14,6 +14,7 @@ import Search from "./parts/Search";
 import ResourceHeader from "./parts/ResourceHeader";
 import Toast from "../controls/Toast";
 import { getValue } from "../fields/utils";
+import { getFieldFilter, SearchType } from "./ListResourceFilter";
 
 /**
  * Convert a user‑provided search expression into a back‑end‑compatible
@@ -80,7 +81,7 @@ function ListResource(props: PageProps) {
     const [allItems, setAllItems] = useState([]);
     const [allFieldNames, setAllFieldNames] = useState<string[]>([]);
     const [abortController, setAbortController] = useState<TempAny>(null);
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState<SearchType[]>([]);
     const [sort, setSort] = useState<SortColumnDirectionType>({ column: "", direction: "none" });
 
     const navigate = useNavigate();
@@ -128,7 +129,9 @@ function ListResource(props: PageProps) {
                         url += "&sortBy=" + encodeURIComponent(sort.column);
                         url += "&reverse=" + String(sort.direction === "desc");
                     }
-                    url += "&fieldFilter=" + encodeURIComponent(rewriteCaseInsensitiveWithWildcards(search));
+                    search.forEach(s => {
+                        url += "&fieldFilter=" + encodeURIComponent(getFieldFilter(s));
+                    })
                 }
                 setAbortController(
                     getResourceEvents(schema, url, (data: TempAny) => {
@@ -155,7 +158,7 @@ function ListResource(props: PageProps) {
     }, [path, schema, search]);
 
     useEffect(() => {
-        setSearch("");
+        setSearch([]);
     }, [path, schema]);
 
     useEffect(() => {
@@ -315,23 +318,22 @@ function ListResource(props: PageProps) {
                 }) : data;
 
             searchFiltered = sorted.filter(entry => {
-                const searchParts = search.split(" ");
-                for (let i = 0; i < searchParts.length; i++) {
-                    if (searchParts[i] && !includesValue(entry, searchParts[i])) {
+                for (let i = 0; i < search.length; i++) {
+                    if (search[i] && !includesValue(entry, search[i].value)) {
                         return false;
                     }
                 }
                 return true;
             });
 
-            data = searchFiltered.filter((s, index: number) => index >= (page - 1) * pageSize && index < page * pageSize);
+            data = searchFiltered.filter((_: any, index: number) => index >= (page - 1) * pageSize && index < page * pageSize);
         }
         return (
             <PageLayout {...props} >
                 <ResourceHeader schema={schema} path={path} type="list" filterValues={getFilterValues()} onAction={() => navigate("/ui/resource/create" + path)} />
                 <div className="NuoTableContainer">
                     <div className="NuoTableOptions">
-                        <Search path={path} fieldNames={allFieldNames} search={search} setSearch={(search: string) => {
+                        <Search path={path} fieldNames={allFieldNames} search={search} setSearch={(search: SearchType[]) => {
                             setPage(1);
                             setSearch(search);
                         }} />

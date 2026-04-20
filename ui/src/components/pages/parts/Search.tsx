@@ -6,17 +6,16 @@ import { TempAny } from "../../../utils/types"
 import { Feature, getChild, getCreatePath, getResourceByPath, getSchema } from "../../../utils/schema";
 import CreatableSelect from 'react-select/creatable';
 import {
-    StylesConfig,
     components as RSComponents,
     ActionMeta,
     FormatOptionLabelMeta,
 } from "react-select";
-import ListResourceFilter, { FilterCondition, getFieldFilterLabel, SearchType } from "../ListResourceFilter";
+import ListResourceFilter, { FilterCondition, getFieldFilterLabel, isSameSearch, SearchType } from "../ListResourceFilter";
 
 type SearchProps = {
     path: string;
-    search: string;
-    setSearch: (search: string) => void;
+    search: SearchType[];
+    setSearch: (search: SearchType[]) => void;
     fieldNames?: string[];
     t: TempAny;
 }
@@ -61,7 +60,6 @@ function getFieldsByPath(schema: TempAny, path: string) {
 }
 
 function Search({ path, search, setSearch, fieldNames, t }: SearchProps) {
-    const [searchFields, setSearchFields] = useState<SearchType[]>([]);
     const [editIndexOrNewField, setEditIndexOrNewField] = useState<string | number | null>(null);
     const [fields, setFields] = useState<{ [fieldname: string]: string }>({});
 
@@ -71,21 +69,16 @@ function Search({ path, search, setSearch, fieldNames, t }: SearchProps) {
         });
     }, [search]);
 
-    const colorStyles: StylesConfig = {
-        multiValue: (styles, { data }: any) => {
-            return {
-                ...styles,
-                border: "3px solid#c7b08d",
-            };
-        },
-    };
-
     // Custom MultiValue to allow user edits (for person field only)
-    const MultiValue = (mprops: any) => {
+    const CustomOption = (mprops: any) => {
         const child = (
             <span
                 onDoubleClick={(e) => {
                     e.stopPropagation();
+                    const index = search.findIndex(s => isSameSearch(s, mprops.data));
+                    if (index >= 0) {
+                        setEditIndexOrNewField(index);
+                    }
                 }}
                 role="button"
                 aria-label="edit"
@@ -99,33 +92,44 @@ function Search({ path, search, setSearch, fieldNames, t }: SearchProps) {
         );
     };
 
+    const selectOptions = Object.keys(fields).map(field => ({
+        value: field, // needed for field search
+        label: field, // needed for field search
+        field: field,
+        condition: "contains" as FilterCondition,
+        ignoreCase: true
+    }));
 
     return <div style={{ display: "flex", flexDirection: "row", flex: "1 1 auto", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1100 }}>
-        <ListResourceFilter editIndexOrNewField={editIndexOrNewField} search={searchFields} setSearch={(search: SearchType[] | null) => {
-            if (search) {
-                setSearchFields(search);
-            }
+        <ListResourceFilter editIndexOrNewField={editIndexOrNewField} fields={fields} search={search} setSearch={(search: SearchType[] | null) => {
             setEditIndexOrNewField(null);
-            //setSearch(search);
+            if (search !== null) {
+                setSearch(search);
+            }
         }} />
         <CreatableSelect
             className="NuoColumn"
             inputId={"select-search"}
-            value={searchFields}
+            value={search}
             isMulti={true}
             isClearable={false}
-            options={Object.keys(fields).map(field => ({ field: field, value: "", condition: "contains" as FilterCondition, ignoreCase: true }))}
+            options={selectOptions}
             onChange={(newValue: any, actionMeta: ActionMeta<SearchType>) => {
+                console.log("onChange", newValue, actionMeta);
                 if (actionMeta.action === "select-option" && actionMeta.option) {
                     setEditIndexOrNewField(actionMeta.option.field);
                 }
+                else if (actionMeta.action === "remove-value") {
+                    setSearch(search.filter(s => !isSameSearch(s, actionMeta.removedValue)));
+                }
                 else {
-                    setSearchFields(newValue);
+                    setSearch(newValue);
                 }
             }}
+            formatCreateLabel={(inputValue) => `search("${inputValue}")`}
             formatOptionLabel={(data: SearchType, meta: FormatOptionLabelMeta<SearchType>) => {
                 if (meta.context === "menu") {
-                    return data.field;
+                    return data.label;
                 }
                 else {
                     return getFieldFilterLabel(data);
@@ -133,11 +137,17 @@ function Search({ path, search, setSearch, fieldNames, t }: SearchProps) {
             }}
             menuPortalTarget={undefined}
             onCreateOption={(value) => {
+                setSearch([...search, {
+                    field: "",
+                    condition: "search",
+                    value: value,
+                    ignoreCase: true
+                }]);
             }}
             components={{
                 DropdownIndicator: () => null,
                 IndicatorSeparator: () => null, // Optional: also removes the vertical separator line
-                MultiValue,
+                MultiValue: CustomOption,
             }}
         />
     </div>;
