@@ -16,53 +16,6 @@ import Toast from "../controls/Toast";
 import { getValue } from "../fields/utils";
 import { getFieldFilter, SearchType } from "./ListResourceFilter";
 
-/**
- * Convert a user‑provided search expression into a back‑end‑compatible
- * case‑insensitive regular‑expression string.
- *
- * The UI lets users type filter clauses separated by commas and asterisks, e.g.
- *   "name=aDMI*"
- *
- * The back‑end expects:
- *   • “=” to be a case‑insensitive regex match (prefixed with `~(?i)`).
- *   • `*` wildcards to behave like `.*` in regular expressions.
- *
- * @param search  Raw search string entered by the user.
- * @returns       A string ready to be URL‑encoded and sent as `fieldFilter`.
- */
-function rewriteCaseInsensitiveWithWildcards(search: string): string {
-    // Split the overall filter into individual clauses (comma‑separated)
-    let parts = search.split(",");
-
-    // Process each clause independently
-    for (let p = 0; p < parts.length; p++) {
-        // Locate the first "=" character – this marks a simple equality filter
-        const posEquals = parts[p].indexOf("=");
-
-        // If we have an "=" that is **not** part of a comparison operator
-        // (<=, >=, !=) we replace it with a case‑insensitive regex marker.
-        // Example: "name=Admin" → "name~(?i)Admin"
-        if (
-            posEquals > 0 &&                     // there is something before "="
-            parts[p][posEquals - 1] !== "<" &&   // not a "<=" style operator
-            parts[p][posEquals - 1] !== ">" &&   // not a ">=" style operator
-            parts[p][posEquals - 1] !== "!"      // not a "!=" style operator
-        ) {
-            parts[p] =
-                parts[p].substring(0, posEquals) + // left side (field name)
-                "~(?i)" +                           // case‑insensitive regex flag
-                parts[p].substring(posEquals + 1); // right side (value)
-        }
-
-        // Replace any user‑friendly wildcard '*' with the regex equivalent '.*'
-        // This allows patterns like "Adm*" to match "Admin", etc.
-        parts[p] = parts[p].split("*").join(".*");
-    }
-
-    // Re‑assemble the transformed clauses into a single comma‑separated string
-    return parts.join(",");
-}
-
 type ItemsAndPathProps = {
     items: [] | null,
     path: string,
@@ -232,66 +185,73 @@ function ListResource(props: PageProps) {
         }
     }
 
-    /* check if value is in the entry
-       There are multiple scenarios:
-       - the last element of "value.split("=")" can have asterisks("*") at the beginning and/or end to do a partial search
-       - "value" has no equal sign: check if any value in the "entry" object matches (hierarchically)
-           Example: entry={"tier":"n0.nano"} value="n0.nano"
-                    entry={"labels":{"key1":"value1"}} value="value1"
-       - "value" has a single equal sign:
-           value.split("=")[0] contains the field identifier in the object (periods in the field identifier do a hierarchical field lookup)
-           value.split("=")[1] contains the value to search in that field. If the field is an object, it will match the key in the object
-           Example: entry={"tier":"n0.nano"} value="tier=n0.nano"
-                    entry={"labels":{"key1":"value1", "key2":"value2"}} value="labels=key1"
-       - "value" has two equal signs:
-           value.split("=")[0] contains the field identifier pointing to a Map object (periods in the field identifier do a hierarchical field lookup)
-           - if it is not a Map object, it returns "false"
-           value.split("=")[1] contains the key to search in that field's Map Object
-           value.split("=")[2] contains the value to search in that Map Object's field
-           Example: entry={"a":{"b":{"c":{"d":"e"}}}} value="a.b.c=d=e"
-                    entry={"labels":{"key1":"value1","key2":"value2"}} value="labels=key2=value2"
-    */
-    function includesValue(entry: any, value: string): boolean {
-        const splitEqual = value.split("=");
-        if (splitEqual.length === 1) {
-            if (typeof entry === "object") {
-                const keys = Object.keys(entry);
-                for (let i = 0; i < keys.length; i++) {
-                    if (includesValue(entry[keys[i]], value)) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-            else {
-                return isMatch(entry, value);
-            }
+    function toString(value: any, toUpper: boolean): string {
+        let ret;
+        if(!value) {
+            ret = "";
         }
-        else if (splitEqual.length === 2 || splitEqual.length === 3) {
-            const splitPeriod = splitEqual[0].split(".");
-            for (let i = 0; i < splitPeriod.length; i++) {
-                entry = entry[splitPeriod[i]];
-                if (!entry) {
-                    return false;
-                }
-            }
+        else if(typeof value === "object") {
+            ret = JSON.stringify(value);
+        }
+        else {
+            ret = String(value);
+        }
+        if(toUpper) {
+            return ret.toUpperCase();
+        }
+        else {
+            return ret;
+        }
+    }
 
-            if (splitEqual.length === 2) {
-                if (typeof entry === "object" && !Array.isArray(entry)) {
-                    return !!Object.keys(entry).find(k => isMatch(k, splitEqual[1]));
-                }
-                return isMatch(entry, splitEqual[1]);
-            }
-            else if (typeof entry === "object") {
-                const key = Object.keys(entry).find(k => isMatch(k, splitEqual[1]));
-                if (key && isMatch(entry[key], splitEqual[2])) {
-                    return true;
-                }
-                else {
-                    return false;
-                }
-            }
-            return false;
+    function getAllValues(obj:any): string[] {
+        if (obj !== null && typeof obj === 'object') {
+            return Object.values(obj).flatMap(getAllValues);
+        }
+        if(obj) {
+            return [String(obj)];
+        }
+        else {
+            return [];
+        }
+    };
+
+
+    /* check if value is in the entry
+    */
+    function includesValue(entry: any, search: SearchType): boolean {
+        const entryValueRaw = getValue(entry, search.field);
+        const entryValue: string = toString(entryValueRaw, search.ignoreCase);
+        const searchValue: string = toString(search.value, search.ignoreCase);
+        switch(search.condition) {
+            case "!=":
+                return entryValue !== searchValue;
+            case "<=":
+                return entryValue <= searchValue;
+            case "=":
+                return entryValue === searchValue;
+            case ">=":
+                return entryValue >= searchValue;
+            case "contains":
+                return entryValue.includes(searchValue);
+            case "startsWith":
+                return entryValue.startsWith(searchValue);
+            case "endsWith":
+                return entryValue.endsWith(searchValue);
+            case "exists":
+                return !!entryValueRaw;
+            case "notExists":
+                return !entryValueRaw;
+            case "search":
+                const allValues = getAllValues(entry);
+                for(let i=0; i<allValues.length; i++) {
+                    if(search.ignoreCase) {
+                        if(allValues[i].toUpperCase().includes(search.value.toUpperCase())) {
+                            return true;
+                        }
+                    }
+                };
+                return false;
         }
         return false;
     }
@@ -319,7 +279,7 @@ function ListResource(props: PageProps) {
 
             searchFiltered = sorted.filter(entry => {
                 for (let i = 0; i < search.length; i++) {
-                    if (search[i] && !includesValue(entry, search[i].value)) {
+                    if (search[i] && !includesValue(entry, search[i])) {
                         return false;
                     }
                 }

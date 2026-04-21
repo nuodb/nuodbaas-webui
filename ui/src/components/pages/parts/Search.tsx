@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react"
 import { withTranslation } from "react-i18next";
 import { TempAny } from "../../../utils/types"
-import { Feature, getChild, getCreatePath, getResourceByPath, getSchema } from "../../../utils/schema";
+import { getChild, getCreatePath, getResourceByPath, getSchema } from "../../../utils/schema";
 import CreatableSelect from 'react-select/creatable';
 import {
     components as RSComponents,
@@ -44,8 +44,33 @@ function getFieldsByPath(schema: TempAny, path: string) {
             else if (type === "string" || type === "boolean" || type === "integer") {
                 outFields[prefix + key] = type;
             }
+            else if (type === "array") {
+                if (definition[key].items?.type === "string") {
+                    outFields[prefix + key + "[]"] = type;
+                }
+                else if (definition[key].items?.type === "object") {
+                    if (definition[key].items.additionalProperties) {
+                        const apType = definition[key].items.additionalProperties.type;
+                        if (apType === "string" || apType === "boolean" || apType === "integer") {
+                            outFields[prefix + key] = apType;
+                        }
+                        else {
+                            console.log("INVALID INNER additionalProperties type", definition[key], key, type);
+                        }
+                    }
+                    else if (definition[key].items.properties) {
+                        getFields(definition[key].items.properties, key + ".", outFields);
+                    }
+                    else {
+                        console.log("INVALID INNER OBJECT", definition, prefix, path);
+                    }
+                }
+                else {
+                    console.log("ARRAY TYPE", type, definition, key, prefix, definition[key].type);
+                }
+            }
             else {
-                console.log("INVALID TYPE", definition, key, prefix, definition[key].type);
+                console.log("INVALID TYPE", type, definition, key, prefix, definition[key].type);
             }
         })
     }
@@ -53,7 +78,8 @@ function getFieldsByPath(schema: TempAny, path: string) {
     let fields: { [key: string]: string } = {};
     const resource = getResourceByPath(schema, getCreatePath(schema, path));
     if (resource["put"]) {
-        const formParams = getChild(resource["get"], ["responses", "200", "content", "application/json", "schema", "properties"])
+        const formParams = getChild(resource["get"], ["responses", "200", "content", "application/json", "schema", "properties"]);
+        console.log("formParams", formParams);
         getFields(formParams, "", fields);
     }
     return fields;
@@ -66,6 +92,7 @@ function Search({ path, search, setSearch, fieldNames, t }: SearchProps) {
     useEffect(() => {
         getSchema().then(schema => {
             setFields(getFieldsByPath(schema, path));
+            console.log("getFieldsByPath", getCreatePath(schema, path), getFieldsByPath(schema, path), schema);
         });
     }, [search]);
 
@@ -115,7 +142,6 @@ function Search({ path, search, setSearch, fieldNames, t }: SearchProps) {
             isClearable={false}
             options={selectOptions}
             onChange={(newValue: any, actionMeta: ActionMeta<SearchType>) => {
-                console.log("onChange", newValue, actionMeta);
                 if (actionMeta.action === "select-option" && actionMeta.option) {
                     setEditIndexOrNewField(actionMeta.option.field);
                 }

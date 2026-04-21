@@ -360,7 +360,8 @@
                 "forField": "for Field",
                 "condition": "Condition",
                 "value": "Value",
-                "ignoreCase": "Ignore case"
+                "ignoreCase": "Ignore case",
+                "arrayFieldRequiresContainsCondition": "Array field requires the \"contains\" condition."
             },
             "options": {
                 "search": "search",
@@ -374,7 +375,7 @@
                 ">=": "greater than or equal to",
                 "<=": "less than or equal to",
                 "~": "regular expression",
-                "raw": "raw JSONPath"
+                "raw": "raw Field Filter"
             }
         }
     },

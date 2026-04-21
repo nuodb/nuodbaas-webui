@@ -12,6 +12,8 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogTitle from '@mui/material/DialogTitle';
 import { t } from 'i18next';
 import Checkboxes from '../controls/Checkboxes';
+import { Feature } from '../../utils/schema';
+import Dialog from './parts/Dialog';
 
 const filterOptions = ["search", "contains", "startsWith", "endsWith", "exists", "notExists", "=", "!=", ">=", "<=", "~", "raw"] as const;
 export type FilterCondition = typeof filterOptions[number];
@@ -39,7 +41,8 @@ function escapeRegex(value: string) {
 }
 
 export function getFieldFilter(search: SearchType) {
-    const fieldRegex = "{" + escapeRegex(search.field) + "}";
+    const fieldName = search.field.replaceAll("[]", "");
+    const fieldRegex = "{" + fieldName + "}";
     const namePrefix = fieldRegex + "~" + (search.ignoreCase ? "(?i)" : "");
     switch (search.condition) {
         case "search":
@@ -56,9 +59,9 @@ export function getFieldFilter(search: SearchType) {
         case "endsWith":
             return namePrefix + ".*" + escapeRegex(search.value);
         case "exists":
-            return search.field;
+            return fieldName;
         case "notExists":
-            return "!" + search.field;
+            return "!" + fieldName;
         case "=":
             return namePrefix + escapeRegex(search.value);
         case "!=":
@@ -132,6 +135,10 @@ function ListResourceFilter({ editIndexOrNewField, fields, search, setSearch }: 
     }
 
     function renderCondition() {
+        let conditions = [...filterOptions];
+        if (!Feature.FILTER_ON_SERVER) {
+            conditions = filterOptions.filter(fo => fo !== "raw" && fo !== "~");
+        }
         return <TableRow>
             <TableCell>{t("dialog.searchFilter.label.condition")}</TableCell>
             <TableCell>
@@ -140,14 +147,14 @@ function ListResourceFilter({ editIndexOrNewField, fields, search, setSearch }: 
                     newEditSearch[editIndex].condition = event.target.value as FilterCondition;
                     setEditSearch(newEditSearch);
                 }}>
-                    {filterOptions.map(fo => <SelectOption value={fo}>{t("dialog.searchFilter.options." + fo)}</SelectOption>)}
+                    {conditions.map(fo => <SelectOption value={fo}>{t("dialog.searchFilter.options." + fo)}</SelectOption>)}
                 </Select>
             </TableCell>
         </TableRow>
     }
 
     function renderField() {
-        if (editSearch[editIndex].condition === "raw") {
+        if (["search", "raw"].includes(editSearch[editIndex].condition)) {
             return null;
         }
         return <TableRow>
@@ -160,12 +167,13 @@ function ListResourceFilter({ editIndexOrNewField, fields, search, setSearch }: 
                 }}>
                     {Object.keys(fields).map(fo => <SelectOption value={fo}>{fo}</SelectOption>)}
                 </Select>
+                {editSearch[editIndex].field.indexOf("[]") !== -1 && editSearch[editIndex].condition !== "contains"}
             </TableCell>
         </TableRow>
     }
 
     function renderIgnoreCase() {
-        if (editSearch[editIndex].condition === "raw") {
+        if (["search", "raw", "exists", "notExists"].includes(editSearch[editIndex].condition)) {
             return null;
         }
         return <TableRow>
@@ -186,6 +194,9 @@ function ListResourceFilter({ editIndexOrNewField, fields, search, setSearch }: 
     }
 
     function renderValue() {
+        if (["exists", "notExists"].includes(editSearch[editIndex].condition)) {
+            return null;
+        }
         return <TableRow>
             <TableCell>{t("dialog.searchFilter.label.value")}</TableCell>
             <TableCell>
@@ -193,15 +204,25 @@ function ListResourceFilter({ editIndexOrNewField, fields, search, setSearch }: 
                     let newEditSearch = [...editSearch];
                     newEditSearch[editIndex].value = event.currentTarget.value;
                     setEditSearch(newEditSearch);
+                }} onKeyDown={event => {
+                    if (event.key === "Enter") {
+                        setSearch(editSearch);
+                    }
                 }} />
             </TableCell>
         </TableRow>
     }
 
+    function getError() {
+        if (["startsWith", "endsWith", "=", "!=", ">=", "<=", "~"].includes(editSearch[editIndex].condition) && editSearch[editIndex].field.indexOf("[]") !== -1) {
+            return t("dialog.searchFilter.label.arrayFieldRequiresContainsCondition");
+        }
+    }
+
     return (
-        <DialogMaterial open={true}>
+        <DialogMaterial open={true} maxWidth="xl">
             <DialogTitle>{typeof editIndexOrNewField === "number" ? t("dialog.searchFilter.editTitle") : t("dialog.searchFilter.addTitle")}</DialogTitle>
-            <DialogContent style={{ width: "90%" }}>
+            <DialogContent>
                 <Table>
                     <TableHead>
                     </TableHead>
@@ -212,11 +233,13 @@ function ListResourceFilter({ editIndexOrNewField, fields, search, setSearch }: 
                         {renderValue()}
                     </TableBody>
                 </Table>
+                <div style={{ color: "red", fontWeight: "bold" }}>{getError()}</div>
     </DialogContent>
     <DialogActions>
         <Button
+                    disabled={!!getError()}
             data-testid={"dialog_button_ok"}
-            onClick={() => {
+                    onClick={async () => {
                 setSearch(editSearch);
             }}
         >
