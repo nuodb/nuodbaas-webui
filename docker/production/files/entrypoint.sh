@@ -14,6 +14,12 @@ if [ "${NUODB_CP_REST_URL}" != "" ] ; then
     done
 fi
 
+if [ "${NUODB_SQL_REST_URL}" != "" ] ; then
+    find /usr/share/nginx/html -type f | while read line; do
+        sed -i "s#___NUODB_SQL_REST_URL___#${NUODB_SQL_REST_URL}#g" ${line}
+    done
+fi
+
 if [ "${NUODBAAS_WEBUI_PATH_PREFIX}" != "" ] ; then
     find /usr/share/nginx/html -type f | while read line; do
         sed "s:\"/ui/:\"/${NUODBAAS_WEBUI_PATH_PREFIX}/:g" "${line}" \

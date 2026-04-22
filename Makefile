@@ -121,9 +121,11 @@ pull-cp-from-ecr: aws-login
 
 .PHONY: pull-nuodb-from-ecr
 pull-nuodb-from-ecr: aws-login
-	docker pull --platform linux/${ARCH} ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb:$(NUODB_VERSION) \
+	docker pull --platform linux/arm64 ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb:$(NUODB_VERSION) \
+	&& docker pull --platform linux/amd64 ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb:$(NUODB_VERSION) \
 	&& docker tag ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb:$(NUODB_VERSION) nuodb/nuodb:$(NUODB_VERSION) \
-	&& docker pull --platform linux/${ARCH} ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION) \
+	&& docker pull --platform linux/arm64 ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION) \
+	&& docker pull --platform linux/amd64 ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION) \
 	&& docker tag ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION) nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION)
 
 .PHONY: deploy-nuodb-to-k8s
