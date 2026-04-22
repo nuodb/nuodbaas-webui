@@ -18,7 +18,7 @@ import {
   TEST_ADMIN_USER,
 } from "../helpers/api";
 import { expect, Page } from "@playwright/test";
-import { getSchema } from "../../ui/src/utils/schema"
+import { Feature, getSchema } from "../../ui/src/utils/schema"
 import Auth from "../../ui/src/utils/auth";
 import { FilterCondition } from "../../ui/src/components/pages/ListResourceFilter"
 
@@ -121,7 +121,7 @@ async function expectCount(page,
     await expectCount(page, 20, "expecting full page");
 
     const labelName = "l" + name.substring(1);
-    const checks: SearchQueryType[] = [
+    let checks: SearchQueryType[] = [
       {
         items: [{
           condition: "startsWith",
@@ -232,27 +232,32 @@ async function expectCount(page,
         expect: 9,
         message: "label2=labelName8"
       },
-      {
-        items: [
-          {
-            condition: "=",
-            fieldName: "labels.*",
-            ignoreCase: true,
-            key: "label2",
-            value: labelName + "8"
-          },
-          {
-            condition: "~",
-            fieldName: "name",
-            ignoreCase: undefined,
-            key: undefined,
-            value: name + "1.*"
-          }
-        ],
-        expect: 1,
-        message: "label2=labelName8 AND name prefix 1*"
-      }
     ];
+
+    if(Feature.FILTER_ON_SERVER) {
+      checks.push(
+        {
+          items: [
+            {
+              condition: "=",
+              fieldName: "labels.*",
+              ignoreCase: true,
+              key: "label2",
+              value: labelName + "8"
+            },
+            {
+              condition: "~",
+              fieldName: "name",
+              ignoreCase: undefined,
+              key: undefined,
+              value: name + "1.*"
+            }
+          ],
+          expect: 1,
+          message: "label2=labelName8 AND name prefix 1*"
+        }
+      );
+    }
 
     for(let c=0; c<checks.length; c++) {
       const check = checks[c];
