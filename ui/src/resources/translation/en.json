@@ -359,9 +359,11 @@
                 "addField": "Add field:",
                 "forField": "for Field",
                 "condition": "Condition",
+                "key": "Key for {{fieldname}}",
                 "value": "Value",
                 "ignoreCase": "Ignore case",
-                "arrayFieldRequiresContainsCondition": "Array field requires the \"contains\" condition."
+                "arrayFieldRequiresContainsCondition": "Array field requires the \"contains\" condition.",
+                "mapFieldRequiresContainsCondition": "Map field requires the \"contains\" condition if a key is not provided."
             },
             "options": {
                 "search": "search",

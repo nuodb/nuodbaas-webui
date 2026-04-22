@@ -13,17 +13,17 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { t } from 'i18next';
 import Checkboxes from '../controls/Checkboxes';
 import { Feature } from '../../utils/schema';
-import Dialog from './parts/Dialog';
 
 const filterOptions = ["search", "contains", "startsWith", "endsWith", "exists", "notExists", "=", "!=", ">=", "<=", "~", "raw"] as const;
 export type FilterCondition = typeof filterOptions[number];
 
 export type SearchType = {
-    field: string;
-    condition: FilterCondition;
-    value: string;
-    ignoreCase: boolean;
-    label?: string;
+    field: string;              //field name. "[]" postfix indicates an array field, ".*" postfix indicates a map
+    condition: FilterCondition; // comparator
+    key: string;                // used for a "map" field to search keys
+    value: string;              // value to search for. Unused for "exists" and "notExists" conditions
+    ignoreCase: boolean;        // ignore case
+    label?: string;             // stores the label shown in the list of the react-select control
 };
 
 export function isSameSearch(s1: SearchType, s2: SearchType): boolean {
@@ -41,7 +41,10 @@ function escapeRegex(value: string) {
 }
 
 export function getFieldFilter(search: SearchType) {
-    const fieldName = search.field.replaceAll("[]", "");
+    let fieldName = search.field.replaceAll(/\[\]|(\.\*)$/g, "");
+    if (search.field.endsWith(".*")) {
+        fieldName += "." + search.key;
+    }
     const fieldRegex = "{" + fieldName + "}";
     const namePrefix = fieldRegex + "~" + (search.ignoreCase ? "(?i)" : "");
     switch (search.condition) {
@@ -85,7 +88,7 @@ export function getFieldFilterLabel(search: SearchType) {
         case "search":
             return "search(" + search.value + ")";
         case "contains":
-            return search.field + "=*" + search.value + "*";
+            return search.field.replaceAll(/\.\*$/g, search.key ? ("." + search.key) : "") + "=*" + search.value + "*";
         case "startsWith":
             return search.field + "=" + search.value + "*";
         case "endsWith":
@@ -113,7 +116,7 @@ type ListResourceFilterProps = {
 };
 
 function ListResourceFilter({ editIndexOrNewField, fields, search, setSearch }: ListResourceFilterProps) {
-    const [editSearch, setEditSearch] = useState<SearchType[]>([{ field: "", condition: "contains", value: "=", ignoreCase: true }]);
+    const [editSearch, setEditSearch] = useState<SearchType[]>([{ field: "", condition: "contains", key: "", value: "=", ignoreCase: true }]);
     const [editIndex, setEditIndex] = useState<number>(0);
 
     useEffect(()=>{
@@ -125,7 +128,7 @@ function ListResourceFilter({ editIndexOrNewField, fields, search, setSearch }: 
             setEditIndex(editIndexOrNewField);
         }
         else {
-            setEditSearch([...search, { field: editIndexOrNewField, condition: "contains", value: "", ignoreCase: true }]);
+            setEditSearch([...search, { field: editIndexOrNewField, condition: "contains", key: "", value: "", ignoreCase: true }]);
             setEditIndex(search.length);
         }
     }, [search, editIndexOrNewField]);
@@ -172,6 +175,26 @@ function ListResourceFilter({ editIndexOrNewField, fields, search, setSearch }: 
         </TableRow>
     }
 
+    function renderKey() {
+        if (!editSearch[editIndex].field.endsWith(".*")) {
+            return null;
+        }
+        return <TableRow>
+            <TableCell>{t("dialog.searchFilter.label.key", { fieldname: editSearch[editIndex].field })}</TableCell>
+            <TableCell>
+                <TextField id="key" label="" value={editSearch[editIndex].key || ""} onChange={(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+                    let newEditSearch = [...editSearch];
+                    newEditSearch[editIndex].key = event.currentTarget.value;
+                    setEditSearch(newEditSearch);
+                }} onKeyDown={event => {
+                    if (event.key === "Enter") {
+                        setSearch(editSearch);
+                    }
+                }} />
+            </TableCell>
+        </TableRow>
+    }
+
     function renderIgnoreCase() {
         if (["search", "raw", "exists", "notExists"].includes(editSearch[editIndex].condition)) {
             return null;
@@ -182,6 +205,7 @@ function ListResourceFilter({ editIndexOrNewField, fields, search, setSearch }: 
                 <Checkboxes
                     items={[{
                         id: 'ignoreCase',
+                        label: " ",
                         selected: editSearch[editIndex].ignoreCase
                     }]}
                     setItems={(items: { id: string; label?: string; selected?: boolean; }[]) => {
@@ -214,9 +238,15 @@ function ListResourceFilter({ editIndexOrNewField, fields, search, setSearch }: 
     }
 
     function getError() {
-        if (["startsWith", "endsWith", "=", "!=", ">=", "<=", "~"].includes(editSearch[editIndex].condition) && editSearch[editIndex].field.indexOf("[]") !== -1) {
-            return t("dialog.searchFilter.label.arrayFieldRequiresContainsCondition");
+        if (["startsWith", "endsWith", "=", "!=", ">=", "<=", "~"].includes(editSearch[editIndex].condition)) {
+            if (editSearch[editIndex].field.endsWith("[]")) {
+                return t("dialog.searchFilter.label.arrayFieldRequiresContainsCondition");
+            }
+            else if (editSearch[editIndex].field.endsWith(".*") && !editSearch[editIndex].key) {
+                return t("dialog.searchFilter.label.mapFieldRequiresContainsCondition");
+            }
         }
+        return "";
     }
 
     return (
@@ -229,8 +259,9 @@ function ListResourceFilter({ editIndexOrNewField, fields, search, setSearch }: 
                     <TableBody>
                         {renderCondition()}
                         {renderField()}
-                        {renderIgnoreCase()}
+                        {renderKey()}
                         {renderValue()}
+                        {renderIgnoreCase()}
                     </TableBody>
                 </Table>
                 <div style={{ color: "red", fontWeight: "bold" }}>{getError()}</div>

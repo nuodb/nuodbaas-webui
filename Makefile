@@ -7,8 +7,8 @@ export PATH := $(BIN_DIR):$(PATH)
 OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 ARCH := $(shell uname -m | sed "s/x86_64/amd64/g" | sed "s/aarch64/arm64/g")
 
-KIND_VERSION ?= 0.27.0
-KUBECTL_VERSION ?= 1.28.3
+KIND_VERSION ?= 0.31.0
+KUBECTL_VERSION ?= 1.35.4
 HELM_VERSION ?= 3.16.2
 NUODB_VERSION ?= 7.0.2
 NUODB_COLLECTOR_VERSION ?= 2.0.0
@@ -121,9 +121,11 @@ pull-cp-from-ecr: aws-login
 
 .PHONY: pull-nuodb-from-ecr
 pull-nuodb-from-ecr: aws-login
-	docker pull --platform linux/${ARCH} ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb:$(NUODB_VERSION) \
+	docker pull --platform linux/arm64 ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb:$(NUODB_VERSION) \
+	&& docker pull --platform linux/amd64 ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb:$(NUODB_VERSION) \
 	&& docker tag ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb:$(NUODB_VERSION) nuodb/nuodb:$(NUODB_VERSION) \
-	&& docker pull --platform linux/${ARCH} ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION) \
+	&& docker pull --platform linux/arm64 ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION) \
+	&& docker pull --platform linux/amd64 ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION) \
 	&& docker tag ${ECR_ACCOUNT_URL}/docker-hub/nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION) nuodb/nuodb-collector:$(NUODB_COLLECTOR_VERSION)
 
 .PHONY: deploy-nuodb-to-k8s
@@ -420,7 +422,7 @@ $(KIND):
 
 $(KUBECTL):
 	mkdir -p $(shell dirname ${KUBECTL})
-	curl -L -s https://storage.googleapis.com/kubernetes-release/release/v$(KUBECTL_VERSION)/bin/$(OS)/$(ARCH)/kubectl -o $(KUBECTL)
+	curl -L -s https://dl.k8s.io/release/v$(KUBECTL_VERSION)/bin/$(OS)/$(ARCH)/kubectl -o $(KUBECTL)
 	chmod +x $(KUBECTL)
 
 $(HELM):

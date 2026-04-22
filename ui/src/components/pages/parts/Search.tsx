@@ -28,7 +28,7 @@ function getFieldsByPath(schema: TempAny, path: string) {
                 if (definition[key].additionalProperties) {
                     const apType = definition[key].additionalProperties.type;
                     if (apType === "string" || apType === "boolean" || apType === "integer") {
-                        outFields[prefix + key] = apType;
+                        outFields[prefix + key + ".*"] = apType;
                     }
                     else {
                         console.log("INVALID additionalProperties type", definition[key], key, type);
@@ -123,6 +123,7 @@ function Search({ path, search, setSearch, fieldNames, t }: SearchProps) {
         value: field, // needed for field search
         label: field, // needed for field search
         field: field,
+        key: "",
         condition: "contains" as FilterCondition,
         ignoreCase: true
     }));
@@ -167,6 +168,7 @@ function Search({ path, search, setSearch, fieldNames, t }: SearchProps) {
                     field: "",
                     condition: "search",
                     value: value,
+                    key: "",
                     ignoreCase: true
                 }]);
             }}
