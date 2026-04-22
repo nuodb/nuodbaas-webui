@@ -1,5 +1,5 @@
 #!/bin/sh
-# (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+# (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 if [ "$1" == "tgz_static" ] ; then
     echo "Extract static files from image" 1>&2
