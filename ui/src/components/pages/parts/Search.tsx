@@ -79,7 +79,6 @@ function getFieldsByPath(schema: TempAny, path: string) {
     const resource = getResourceByPath(schema, getCreatePath(schema, path));
     if (resource["put"]) {
         const formParams = getChild(resource["get"], ["responses", "200", "content", "application/json", "schema", "properties"]);
-        console.log("formParams", formParams);
         getFields(formParams, "", fields);
     }
     return fields;
@@ -92,7 +91,6 @@ function Search({ path, search, setSearch, fieldNames, t }: SearchProps) {
     useEffect(() => {
         getSchema().then(schema => {
             setFields(getFieldsByPath(schema, path));
-            console.log("getFieldsByPath", getCreatePath(schema, path), getFieldsByPath(schema, path), schema);
         });
     }, [search]);
 
