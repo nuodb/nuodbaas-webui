@@ -30,7 +30,7 @@ export default class Auth {
         localStorage.setItem("regions", JSON.stringify(regions));
     }
 
-    static getDefaultPrefixPath() : string {
+    static getDefaultCpPrefixPath() : string {
         // The default for the NuoDB REST Control Plane prefix is "/nuodb-cp", which can be overwritten by the
         // environment variable NUODB_CP_REST_URL in the Docker container or Helm Chart config.
         //
@@ -45,8 +45,23 @@ export default class Auth {
         return prefixPath;
     }
 
+    static getDefaultSqlPrefixPath() : string {
+        // The default for the NuoDB SQL prefix is "/api/sql", which can be overwritten by the
+        // environment variable NUODB_SQL_REST_URL in the Docker container or Helm Chart config.
+        //
+        // When the Docker container starts up, it will replace "___NUODB_SQL_REST_URL___" in the
+        // built client with the custom URL using string replacement. I had to prevent the JavaScript
+        // optimizer / webpack to optimize the next line, that's why I split the constant and made it
+        // dependent on the current time (it will always be after January 1, 1970)
+        let prefixPath = "/api/sql"
+        if ("___NUODB_SQL_REST_URL___" !== "___NUODB_SQL" + (Date.now() > 0 ? "_REST_URL___" : "")) {
+            prefixPath = "___NUODB_SQL_REST_URL___";
+        }
+        return prefixPath;
+    }
+
     static getNuodbCpRestUrl(path:string) {
-        let prefixPath = Auth.getDefaultPrefixPath();
+        let prefixPath = Auth.getDefaultCpPrefixPath();
 
         const currentRegion = Auth.getRegions().find(region => region.active === true);
         if(currentRegion && currentRegion.cp) {
@@ -65,17 +80,7 @@ export default class Auth {
     }
 
     static getNuodbSqlRestUrl(path:string) {
-        // The default for the NuoDB SQL prefix is "/api/sql", which can be overwritten by the
-        // environment variable NUODB_SQL_REST_URL in the Docker container or Helm Chart config.
-        //
-        // When the Docker container starts up, it will replace "___NUODB_SQL_REST_URL___" in the
-        // built client with the custom URL using string replacement. I had to prevent the JavaScript
-        // optimizer / webpack to optimize the next line, that's why I split the constant and made it
-        // dependent on the current time (it will always be after January 1, 1970)
-        let prefixPath = "/api/sql"
-        if ("___NUODB_SQL_REST_URL___" !== "___NUODB_SQL" + (Date.now() > 0 ? "_REST_URL___" : "")) {
-            prefixPath = "___NUODB_SQL_REST_URL___";
-        }
+        let prefixPath = Auth.getDefaultSqlPrefixPath();
 
         const currentRegion = Auth.getRegions().find(region => region.active === true);
         if(currentRegion && currentRegion.sql) {

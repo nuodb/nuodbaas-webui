@@ -196,11 +196,9 @@ function RegionSelectorSettings(props: PageProps) {
         <div className="NuoTableNoData">
             <div className="NuoRow" style={{justifyContent: "space-between", alignItems: "center"}}>
                 <h3>{t("form.editRegionSettings.title")}</h3>
-                <Button onClick={async () => {
-                    setShowEntry(settings.length);
-                }}>
-                    {t("button.add")}
-                </Button>
+                <Button onClick={(): void => {
+                    navigate(-1);
+                }}>{t("button.close")}</Button>
             </div>
             <Table>
                 <TableHead>
@@ -212,6 +210,24 @@ function RegionSelectorSettings(props: PageProps) {
                     </TableRow>
                 </TableHead>
                 <TableBody>
+                    <TableRow>
+                        <TableCell>
+                            {t("form.editRegionSettings.label.defaultRegion")}
+                        </TableCell>
+                        <TableCell>
+                            {Auth.getDefaultCpPrefixPath()}
+                        </TableCell>
+                        <TableCell>
+                            {Auth.getNuodbSqlRestUrl("")}
+                        </TableCell>
+                        <TableCell>
+                            {!settings.find(setting => setting.active) ? t("form.editRegionSettings.label.active") : <button data-testid={"make-active-default"} onClick={(event) => {
+                                event.preventDefault();
+                                Auth.setRegions(Auth.getRegions().map((region, idx) => ({ ...region, active: false })));
+                                window.location.reload();
+                            }}>{t("form.editRegionSettings.label.makeActive")}</button>}
+                        </TableCell>
+                    </TableRow>
                     {settings.map((setting, index) => {
                         return <TableRow key={index}>
                             <TableCell>
@@ -229,7 +245,8 @@ function RegionSelectorSettings(props: PageProps) {
                                 {setting.sql}
                             </TableCell>
                             <TableCell>
-                                {setting.active ? t("form.editRegionSettings.label.active") : <button data-testid={"make-active-" + setting.name} onClick={() => {
+                                {setting.active ? t("form.editRegionSettings.label.active") : <button data-testid={"make-active-" + setting.name} onClick={(event) => {
+                                    event.preventDefault();
                                     Auth.setRegions(Auth.getRegions().map((region, idx) => ({...region, active: index === idx})));
                                     window.location.reload();
                                 }}>{t("form.editRegionSettings.label.makeActive")}</button>}
@@ -239,9 +256,11 @@ function RegionSelectorSettings(props: PageProps) {
                 </TableBody>
             </Table>
             <div style={{ display: "flex", justifyContent: "center", margin: "10px 0 0 0" }}>
-                <Button onClick={(): void => {
-                    navigate(-1);
-                }}>{t("button.close")}</Button>
+                <Button onClick={async () => {
+                    setShowEntry(settings.length);
+                }}>
+                    {t("button.add")}
+                </Button>
             </div>
         </div>
     </PageLayout>
