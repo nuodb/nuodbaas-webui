@@ -14,9 +14,7 @@ import Button from "../../controls/Button";
 import MenuIcon from '@mui/icons-material/Menu';
 import { useState } from "react";
 import LeftMenu from "./LeftMenu";
-import PublicIcon from '@mui/icons-material/Public';
-import CheckIcon from '@mui/icons-material/Check';
-import EditIcon from '@mui/icons-material/Edit';
+import RegionSettingsMenu from "../RegionSettingsMenu";
 
 interface Props extends PageProps {
   schema: SchemaType,
@@ -95,50 +93,7 @@ function Banner(props: Props) {
             </IconButton>
           </Tooltip>
         </Menu>
-        {localStorage.getItem("regions") && <Menu data-testid="region.menu"
-          align="right"
-          items={[
-            {
-              label: t("form.editRegionSettings.label.defaultRegion"),
-              icon: !Auth.getRegions().find(region => region.active) ? <CheckIcon /> : undefined,
-              id: "region.default",
-              "data-testid": "region.default",
-              onClick: () => {
-                Auth.setRegions(Auth.getRegions().map((region) => ({ ...region, active: false })));
-                window.location.reload();
-                return true;
-              }
-            },
-            ...Auth.getRegions().map((region, index) => ({
-              label: region.name,
-              icon: region.active ? <CheckIcon /> : undefined,
-              id: region.name,
-              "data-testid": region.name,
-              onClick: () => {
-                Auth.setRegions(Auth.getRegions().map((region, idx) => ({ ...region, active: idx === index })));
-                window.location.reload();
-                return true;
-              }
-            })),
-            {
-              label: t("form.editRegionSettings.label.editRegions"),
-              icon: <EditIcon />,
-              id: "edit.region.selector",
-              "data-testid": "edit.region.selector",
-              hasSeparator: true,
-              onClick: () => {
-                navigate("/ui/region-selector-settings");
-                return true;
-              }
-            }
-          ]}
-        >
-          <Tooltip title={t("hint.regionSelector")}>
-            <IconButton>
-              <PublicIcon fontSize="large" />
-            </IconButton>
-          </Tooltip>
-        </Menu>}
+        <RegionSettingsMenu />
       </div>
     </div>
     {showMobileMenu && <div><div

@@ -13,12 +13,14 @@ import { Table, TableBody, TableCell, TableHead, TableRow, TableTh } from "../co
 import DeleteIcon from '@mui/icons-material/Delete';
 import axios from "axios";
 import Auth from "../../utils/auth";
+import { useNavigate } from "react-router-dom";
 
 function RegionSelectorSettings(props: PageProps) {
     const {t} = props;
     const [showEntry, setShowEntry] = useState<number>(-1);
     const [fields, setFields] = useState<{[field: string]:string}>({});
     const [errors, setErrors] = useState<{[field: string]:string}>({});
+    const navigate = useNavigate();
 
     function closeDialog() {
         setShowEntry(-1);
@@ -236,6 +238,11 @@ function RegionSelectorSettings(props: PageProps) {
                     })}
                 </TableBody>
             </Table>
+            <div style={{ display: "flex", justifyContent: "center", margin: "10px 0 0 0" }}>
+                <Button onClick={(): void => {
+                    navigate(-1);
+                }}>{t("button.close")}</Button>
+            </div>
         </div>
     </PageLayout>
 }

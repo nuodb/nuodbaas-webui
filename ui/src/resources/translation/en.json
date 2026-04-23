@@ -322,7 +322,7 @@
             "title": "Edit Regions",
             "label": {
                 "name": "Name",
-                "cpBaseUrl": "CP Base UR",
+                "cpBaseUrl": "CP Base URL",
                 "sqlBaseUrl": "SQL Base URL",
                 "makeActive": "Make active",
                 "active": "Active",
