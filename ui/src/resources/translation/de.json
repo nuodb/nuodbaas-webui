@@ -271,7 +271,8 @@
             "noWriteRequests": "Keine Änderungen aufgenommen."
         },
         "searchFilter": {
-            "title": "Suche filtern",
+            "addTitle": "Filter hinzufügen",
+            "editTitle": "Filter bearbeiten",
             "label": {
                 "addField": "Suchfeld hinzufügen",
                 "fieldName": "Feld name",

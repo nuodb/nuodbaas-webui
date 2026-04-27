@@ -12,6 +12,8 @@ export const Feature: {FILTER_ON_SERVER: boolean|undefined} = {
 };
 
 function compareSemVer(semver1: string, semver2: string) : number | null {
+    semver1 = semver1.split("-")[0].split("+")[0];
+    semver2 = semver2.split("-")[0].split("+")[0];
     const parts1 = semver1.split(".");
     const parts2 = semver2.split(".");
     for(let i=0; i<parts1.length && i<parts2.length; i++) {
@@ -23,6 +25,8 @@ function compareSemVer(semver1: string, semver2: string) : number | null {
         if(val1 < val2) return -1;
         if(val1 > val2) return 1;
     }
+    if(semver1.length < semver2.length) return -1;
+    if(semver1.length > semver2.length) return 1;
     return 0;
 }
 
@@ -374,13 +378,13 @@ export function concatChunks(chunk1: Uint8Array<ArrayBuffer>, chunk2: Uint8Array
     return ret;
 }
 
-let monitoredPaths = new Set<string>();
+let eventTransaction = 0;
+
+let monitoredPaths = new Map<string, {abort: AbortController, transactionNumber: number}>();
 
 export function hasMonitoredPath(path: string) : boolean {
     return monitoredPaths.has(path.split("?")[0]);
 }
-
-let lastSetTimeout_getResourceEvents: any = undefined;
 
 /**
  * Gets event streaming resource by path (fall back to non-streaming resource on failure)
@@ -390,16 +394,13 @@ let lastSetTimeout_getResourceEvents: any = undefined;
  * @param {*} retryIntervalMS - milliseconds for the next retry (which will be doubled each time). Set to <= 0 to disable retries.
  * @returns AbortController - use ret.abort() to abort
  */
-export function getResourceEvents(schema: any, path: string, multiResolve: TempAny, multiReject: TempAny, retryIntervalMS: number = 0) {
-    if(lastSetTimeout_getResourceEvents) {
-        clearTimeout(lastSetTimeout_getResourceEvents);
-    }
+export function getResourceEvents(schema: any, path: string, multiResolve: TempAny, multiReject: TempAny, retryIntervalMS: number = 0, transactionNumber: number = -1) {
     //only one event stream is supported - close prior one if it exists.
     let eventsAbortController = new AbortController();
 
     let hasEventsAccess = false;
     Object.keys(schema).forEach(schemaPath => {
-        if(matchesPath("/events" + path, schemaPath)) {
+        if(matchesPath("/events" + path.split("?")[0], schemaPath)) {
             hasEventsAccess = true;
         }
     })
@@ -411,9 +412,20 @@ export function getResourceEvents(schema: any, path: string, multiResolve: TempA
         return;
     }
 
+    // increment transaction number and abort existing ones on same path
+    const monitoredPath = monitoredPaths.get(path.split("?")[0]);
+    if(monitoredPath && monitoredPath.transactionNumber !== transactionNumber) {
+        // this is a different request on the same resource - abort the prior one
+        monitoredPath.abort.abort();
+    }
+    eventTransaction++;
+    if(transactionNumber === -1) {
+        transactionNumber = eventTransaction;
+    }
+
     Rest.getStream(Auth.getNuodbCpRestUrl("events" + path), Auth.getHeaders(), eventsAbortController)
       .then(async (response: TempAny) => {
-        monitoredPaths.add(path.split("?")[0]);
+        monitoredPaths.set(path.split("?")[0], {abort: eventsAbortController, transactionNumber});
         let event = null;
         let data = null;
         let id = null;
@@ -531,12 +543,19 @@ export function getResourceEvents(schema: any, path: string, multiResolve: TempA
                 .then(data => multiResolve(data))
                 .catch(reason => multiReject(reason));
         }
+        else if(error.status === 400) {
+            multiReject(error)
+        }
         else {
             // request failed. Retry incrementally.
             if(retryIntervalMS > 0) {
                 // reconnect - server/proxy might disconnect due to a timeout
-                lastSetTimeout_getResourceEvents = setTimeout(()=> {
-                    getResourceEvents(schema, path, multiResolve, multiReject, retryIntervalMS * 1.3); //retry with a 30% delay (exponential backoff)
+                setTimeout(()=> {
+                    const monitoredPath = monitoredPaths.get(path.split("?")[0]);
+                    if(monitoredPath && monitoredPath.transactionNumber === transactionNumber) {
+                        // only retry if the event stream for the specified path is not superseded by another one
+                        getResourceEvents(schema, path, multiResolve, multiReject, retryIntervalMS * 1.3, transactionNumber); //retry with a 30% delay (exponential backoff)
+                    }
                 }, retryIntervalMS);
             }
         }

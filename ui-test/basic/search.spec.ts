@@ -263,6 +263,7 @@ async function expectCount(page,
       const check = checks[c];
       console.log("[" + String(c+1) + "/" + String(checks.length) + "] Running check for " + check.message);
       await setSearchQuery(page, check);
+      expectCount(page, check.expect, "Invalid row count for: " + check.message);
     }
   });
 });

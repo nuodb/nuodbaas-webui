@@ -97,6 +97,7 @@ function ListResource(props: PageProps) {
                         }
                     }, (error: TempAny) => {
                         Auth.handle401Error(error);
+                        Toast.show("Error retrieving entry", error);
                         setItemsAndPath({ items: [], path });
                     }, 1000)
                 );
