@@ -64,7 +64,7 @@ export function getFieldFilter(search: SearchType) {
   let fieldName = search.field.replaceAll(/\[\]|(\.\*)$/g, "");
   if (search.field.endsWith(".*") && !!search.key) {
     fieldName +=
-      "['" + search.key.replaceAll("'", "\\'").replaceAll("\\", "\\\\") + "']";
+      "['" + search.key.replaceAll("\\", "\\\\").replaceAll("'", "\\'") + "']";
   }
   const fieldRegex = "{" + fieldName + "}";
   const namePrefix = fieldRegex + "~" + (search.ignoreCase ? "(?i)" : "");

@@ -25,8 +25,8 @@ function compareSemVer(semver1: string, semver2: string) : number | null {
         if(val1 < val2) return -1;
         if(val1 > val2) return 1;
     }
-    if(semver1.length < semver2.length) return -1;
-    if(semver1.length > semver2.length) return 1;
+    if(parts1.length < parts2.length) return -1;
+    if(parts1.length > parts2.length) return 1;
     return 0;
 }
 
@@ -380,7 +380,7 @@ export function concatChunks(chunk1: Uint8Array<ArrayBuffer>, chunk2: Uint8Array
 
 let eventTransaction = 0;
 
-let monitoredPaths = new Map<string, {abort: AbortController, transactionNumber: number}>();
+const monitoredPaths = new Map<string, {abort: AbortController, transactionNumber: number}>();
 
 export function hasMonitoredPath(path: string) : boolean {
     return monitoredPaths.has(path.split("?")[0]);
@@ -413,7 +413,8 @@ export function getResourceEvents(schema: any, path: string, multiResolve: TempA
     }
 
     // increment transaction number and abort existing ones on same path
-    const monitoredPath = monitoredPaths.get(path.split("?")[0]);
+    const monitoredKey = path.split("?")[0];
+    const monitoredPath = monitoredPaths.get(monitoredKey);
     if(monitoredPath && monitoredPath.transactionNumber !== transactionNumber) {
         // this is a different request on the same resource - abort the prior one
         monitoredPath.abort.abort();
@@ -425,7 +426,7 @@ export function getResourceEvents(schema: any, path: string, multiResolve: TempA
 
     Rest.getStream(Auth.getNuodbCpRestUrl("events" + path), Auth.getHeaders(), eventsAbortController)
       .then(async (response: TempAny) => {
-        monitoredPaths.set(path.split("?")[0], {abort: eventsAbortController, transactionNumber});
+        monitoredPaths.set(monitoredKey, {abort: eventsAbortController, transactionNumber});
         let event = null;
         let data = null;
         let id = null;
@@ -535,6 +536,10 @@ export function getResourceEvents(schema: any, path: string, multiResolve: TempA
                 }
             }
         }
+        const monitoredPath = monitoredPaths.get(monitoredKey);
+        if(monitoredPath && monitoredPath.transactionNumber === transactionNumber) {
+            monitoredPaths.delete(monitoredKey);
+        }
       })
       .catch((error) => {
         if(error.status === 404) {
@@ -551,7 +556,7 @@ export function getResourceEvents(schema: any, path: string, multiResolve: TempA
             if(retryIntervalMS > 0) {
                 // reconnect - server/proxy might disconnect due to a timeout
                 setTimeout(()=> {
-                    const monitoredPath = monitoredPaths.get(path.split("?")[0]);
+                    const monitoredPath = monitoredPaths.get(monitoredKey);
                     if(monitoredPath && monitoredPath.transactionNumber === transactionNumber) {
                         // only retry if the event stream for the specified path is not superseded by another one
                         getResourceEvents(schema, path, multiResolve, multiReject, retryIntervalMS * 1.3, transactionNumber); //retry with a 30% delay (exponential backoff)
@@ -560,9 +565,6 @@ export function getResourceEvents(schema: any, path: string, multiResolve: TempA
             }
         }
       })
-      .finally(()=>{
-        monitoredPaths.delete(path.split("?")[0]);
-      });
 
       return eventsAbortController;
 }
