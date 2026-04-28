@@ -21,6 +21,7 @@ type Fixtures = {
 export const test = base.extend<Fixtures>({
     coverageHook: [
       async ({page}, use) => {
+        page.on('console', msg => console.log(msg.text()));
         await page.coverage.startJSCoverage();
 
         await use();

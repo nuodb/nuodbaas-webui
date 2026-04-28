@@ -178,7 +178,6 @@ test.describe("UserTest", () => {
     const paramKeys = ["database", "organization", "project"];
     for (let i = 0; i < paramKeys.length; i++) {
       const keyInput = await getInputOrTextareaByName(page, `roles.0.params.${i}.key`);
-      await keyInput.waitFor({ state: "visible" });
       const key = await keyInput.inputValue();
       let value = TEST_ORGANIZATION;
       if (key === "database") value = databaseName;

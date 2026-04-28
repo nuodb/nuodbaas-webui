@@ -1,4 +1,4 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { Component } from 'react';
 
@@ -19,9 +19,19 @@ export default class Toast extends Component<IProps, IState> {
         s_instance = this;
     }
 
-    static show = (msg: string, error: any) => {
-        if (error?.response?.data?.detail) {
-            msg += "\n" + error.response.data.detail;
+    static async show(msg: string, error: any) {
+        let data = error?.response?.data;
+        if (data instanceof ReadableStream) {
+            const text = await (new Response(error.response.data)).text();
+            try {
+                data = JSON.parse(text);
+            }
+            catch (e) {
+                data = { detail: text };
+            }
+        }
+        if (data?.detail) {
+            msg += "\n" + data.detail;
         }
         else {
             console.log("Toast", msg, error);
