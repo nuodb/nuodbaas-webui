@@ -380,10 +380,9 @@ export function concatChunks(chunk1: Uint8Array<ArrayBuffer>, chunk2: Uint8Array
 
 let eventTransaction = 0;
 
-const monitoredPaths = new Map<string, {abort: AbortController, transactionNumber: number}>();
-
-export function hasMonitoredPath(path: string) : boolean {
-    return monitoredPaths.has(path.split("?")[0]);
+let monitored: undefined | {abort: AbortController, transactionNumber: number} = undefined;
+export function hasActiveStream() : boolean {
+    return !!monitored;
 }
 
 /**
@@ -413,20 +412,18 @@ export function getResourceEvents(schema: any, path: string, multiResolve: TempA
     }
 
     // increment transaction number and abort existing ones on same path
-    const monitoredKey = path.split("?")[0];
-    const monitoredPath = monitoredPaths.get(monitoredKey);
-    if(monitoredPath && monitoredPath.transactionNumber !== transactionNumber) {
+    if(monitored && monitored.transactionNumber !== transactionNumber) {
         // this is a different request on the same resource - abort the prior one
-        monitoredPath.abort.abort();
+        monitored.abort.abort();
     }
-    eventTransaction++;
     if(transactionNumber === -1) {
+        eventTransaction++;
         transactionNumber = eventTransaction;
     }
 
     Rest.getStream(Auth.getNuodbCpRestUrl("events" + path), Auth.getHeaders(), eventsAbortController)
       .then(async (response: TempAny) => {
-        monitoredPaths.set(monitoredKey, {abort: eventsAbortController, transactionNumber});
+        monitored = {abort: eventsAbortController, transactionNumber};
         let event = null;
         let data = null;
         let id = null;
@@ -536,9 +533,8 @@ export function getResourceEvents(schema: any, path: string, multiResolve: TempA
                 }
             }
         }
-        const monitoredPath = monitoredPaths.get(monitoredKey);
-        if(monitoredPath && monitoredPath.transactionNumber === transactionNumber) {
-            monitoredPaths.delete(monitoredKey);
+        if(monitored && monitored.transactionNumber === transactionNumber) {
+            monitored = undefined;
         }
       })
       .catch((error) => {
@@ -556,8 +552,7 @@ export function getResourceEvents(schema: any, path: string, multiResolve: TempA
             if(retryIntervalMS > 0) {
                 // reconnect - server/proxy might disconnect due to a timeout
                 setTimeout(()=> {
-                    const monitoredPath = monitoredPaths.get(monitoredKey);
-                    if(monitoredPath && monitoredPath.transactionNumber === transactionNumber) {
+                    if(monitored && monitored.transactionNumber === transactionNumber) {
                         // only retry if the event stream for the specified path is not superseded by another one
                         getResourceEvents(schema, path, multiResolve, multiReject, retryIntervalMS * 1.3, transactionNumber); //retry with a 30% delay (exponential backoff)
                     }
