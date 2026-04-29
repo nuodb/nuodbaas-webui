@@ -1,4 +1,4 @@
-# (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+# (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 apiVersion: apps/v1
 kind: Deployment
@@ -43,6 +43,8 @@ spec:
           env:
             - name: NUODB_CP_REST_URL
               value: {{ .Values.nuodbaasWebui.cpUrl }}
+            - name: NUODB_SQL_REST_URL
+              value: {{ .Values.nuodbaasWebui.sqlUrl }}
             - name: NUODBAAS_WEBUI_PATH_PREFIX
               value: {{ .Values.nuodbaasWebui.ingress.pathPrefix }}
             - name: NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE

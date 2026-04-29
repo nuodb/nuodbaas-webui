@@ -12,311 +12,308 @@ import { withTranslation } from "react-i18next";
 import { TempAny } from "../../utils/types";
 import { Rest } from "./parts/Rest";
 import axios from "axios";
+import RegionSettingsMenu from "./RegionSettingsMenu";
 
 interface Props {
-    setIsLoggedIn: (isLoggedIn: boolean) => void;
-    t: TempAny;
+  setIsLoggedIn: (isLoggedIn: boolean) => void;
+  t: TempAny;
 }
 interface Provider {
-    name: string;
-    description: string;
-    url?: string;
-    organization?: string;
+  name: string;
+  description: string;
+  url?: string;
+  organization?: string;
 }
 interface ProvidersResponse {
-    items?: Provider[];
+  items?: Provider[];
 }
 /**
  * Provides Login form storing credentials (currently username/password) in "credentials" local storage
  * @returns
  */
 function LoginForm({ setIsLoggedIn, t }: Props) {
-    const [searchParams] = useSearchParams();
-    const navigate = useNavigate();
-    const queryParams = new URLSearchParams(window.location.search);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const queryParams = new URLSearchParams(window.location.search);
 
-    const [organization, setOrganization] = useState("");
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const [providers, setProviders] = useState<Provider[] | undefined>(
-        undefined
+  const [organization, setOrganization] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [providers, setProviders] = useState<Provider[] | undefined>(undefined);
+  const [progressMessage, setProgressMessage] = useState("");
+  const [authHeader, setAuthHeader] = useState("");
+  const [showLoginForm, setShowLoginForm] = useState(false);
+  // Specify redirect URL so that provider name is supplied as query parameter
+  let queryRedirect =
+    queryParams.get("redirect") || queryParams.get("redirectUrl") || "";
+  const redirectUrl = encodeURIComponent(
+    window.location.protocol +
+      "//" +
+      window.location.host +
+      "/ui/login?provider={name}&redirectUrl=" +
+      window.location.protocol +
+      "//" +
+      window.location.host +
+      queryRedirect,
+  );
+
+  useEffect(() => {
+    handleInitialLoad();
+  }, []);
+
+  async function handleInitialLoad() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const provider = urlParams.get("provider");
+
+    if (provider) {
+      setProgressMessage(`Logging in with ${provider}...`);
+      try {
+        const data = await Rest.get(
+          `/login/providers/${encodeURIComponent(provider)}/token${
+            window.location.search
+          }`,
+        );
+        handleLoginSuccess(data);
+      } catch (error: any) {
+        loginFailed(error);
+      }
+    } else {
+      fetchProviders();
+      fetchAuthHeader();
+    }
+  }
+
+  async function fetchProviders() {
+    try {
+      const data = (await Rest.get(
+        `/login/providers?redirectUrl=${redirectUrl}`,
+      )) as ProvidersResponse | undefined;
+      if (data?.items) {
+        setProviders(data.items);
+      }
+    } catch (err: any) {
+      console.error("Failed to fetch providers", err);
+    }
+  }
+
+  /**
+   * The purpose of this function is to attempt to log in with invalid credentials
+   * and then capture the www-authenticate header from the response.
+   * Ensure that the auth Header contains the "Basic" authentication method to render local login form.
+   * */
+  async function fetchAuthHeader() {
+    try {
+      await axios.post(
+        Auth.getNuodbCpRestUrl("login"),
+        { expiresIn: "24h" },
+        {
+          auth: { username: "__INVALID__", password: "__INVALID__" },
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    } catch (error: any) {
+      if (error.response?.headers["www-authenticate"]) {
+        setAuthHeader(error.response.headers["www-authenticate"]);
+      }
+    }
+  }
+
+  function handleLoginSuccess(data: TempAny) {
+    localStorage.setItem(
+      "credentials",
+      JSON.stringify({
+        token: data.token,
+        expiresAtTime: data.expiresAtTime,
+        username: data.username,
+        accessRule: data.accessRule,
+      }),
     );
-    const [progressMessage, setProgressMessage] = useState("");
-    const [authHeader, setAuthHeader] = useState("");
-    const [showLoginForm, setShowLoginForm] = useState(false);
-    // Specify redirect URL so that provider name is supplied as query parameter
-    let queryRedirect = queryParams.get("redirect") || queryParams.get("redirectUrl") || "";
-    const redirectUrl = encodeURIComponent(
-        window.location.protocol +
-            "//" +
-            window.location.host +
-        "/ui/login?provider={name}&redirectUrl=" + window.location.protocol + "//" + window.location.host + queryRedirect
-    );
+    window.location.href = queryParams.get("redirectUrl") || "/ui";
+  }
 
-    useEffect(() => {
-        handleInitialLoad();
-    }, []);
+  function loginFailed(err: any) {
+    console.error("Login Failed", err);
+    var detailMsg = err?.response?.data?.detail;
+    if (!detailMsg) {
+      detailMsg = err.message;
+    }
+    setError("Login failed: " + detailMsg);
+  }
 
-    async function handleInitialLoad() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const provider = urlParams.get("provider");
-
-        if (provider) {
-            setProgressMessage(`Logging in with ${provider}...`);
-            try {
-                const data = await Rest.get(
-                    `/login/providers/${encodeURIComponent(provider)}/token${
-                        window.location.search
-                    }`
-                );
-                handleLoginSuccess(data);
-            } catch (error: any) {
-                loginFailed(error);
-            }
-        } else {
-            fetchProviders();
-            fetchAuthHeader();
-        }
+  async function handleLogin() {
+    if (!organization.trim() || !username.trim() || !password.trim()) {
+      setError("All fields are required");
+      return;
     }
 
-    async function fetchProviders() {
-        try {
-            const data = (await Rest.get(
-                `/login/providers?redirectUrl=${redirectUrl}`
-            )) as ProvidersResponse | undefined;
-            if (data?.items) {
-                setProviders(data.items);
-            }
-        } catch (err: any) {
-            console.error("Failed to fetch providers", err);
-        }
+    const err = await Auth.login(`${organization}/${username}`, password);
+    if (!err) {
+      setIsLoggedIn(true);
+      navigate(searchParams.get("redirect") || "/ui");
+    } else {
+      loginFailed(err);
     }
+  }
 
-    /**
-     * The purpose of this function is to attempt to log in with invalid credentials
-     * and then capture the www-authenticate header from the response.
-     * Ensure that the auth Header contains the "Basic" authentication method to render local login form.
-     * */
-    async function fetchAuthHeader() {
-        try {
-            await axios.post(
-                Auth.getNuodbCpRestUrl("login"),
-                { expiresIn: "24h" },
-                {
-                    auth: { username: "__INVALID__", password: "__INVALID__" },
-                    headers: { "Content-Type": "application/json" },
-                }
-            );
-        } catch (error: any) {
-            if (error.response?.headers["www-authenticate"]) {
-                setAuthHeader(error.response.headers["www-authenticate"]);
-            }
-        }
-    }
-
-    function handleLoginSuccess(data: TempAny) {
-        localStorage.setItem(
-            "credentials",
-            JSON.stringify({
-                token: data.token,
-                expiresAtTime: data.expiresAtTime,
-                username: data.username,
-                accessRule: data.accessRule,
-            })
-        );
-        window.location.href = queryParams.get("redirectUrl") || "/ui";
-    }
-
-    function loginFailed(err: any) {
-        console.error("Login Failed", err);
-        var detailMsg = err?.response?.data?.detail;
-        if (!detailMsg) {
-            detailMsg = err.message;
-        }
-        setError("Login failed: " + detailMsg);
-    }
-
-    async function handleLogin() {
-
-        if (!organization.trim() || !username.trim() || !password.trim()) {
-            setError("All fields are required");
-            return;
-        }
-
-        const err = await Auth.login(`${organization}/${username}`, password);
-        if (!err) {
-            setIsLoggedIn(true);
-            navigate(searchParams.get("redirect") || "/ui");
-        } else {
-            loginFailed(err);
-        }
-    }
-
-    //Rendering helpers
-    function renderProgressUI() {
-        return (
-            <center>
-                <Box sx={{ width: "fit-content" }}>
-                    {error ? (
-                        <CircularProgress
-                            variant="determinate"
-                            color="error"
-                            value={100}
-                        />
-                    ) : (
-                        <CircularProgress color="inherit" />
-                    )}
-                    <div data-testid="progress_message">{progressMessage}</div>
-                </Box>
-                {error && (
-                    <div>
-                        <h3
-                            data-testid="error_message"
-                            style={{ color: "red" }}
-                        >
-                            {error}
-                        </h3>
-                        <Button
-                            data-testid="back_button"
-                            variant="contained"
-                            onClick={() => {
-                                window.location.href = "/ui/login";
-                            }}
-                        >
-                            Back to Login
-                        </Button>
-                    </div>
-                )}
-            </center>
-        );
-    }
-
-    const handleGoBack = () => {
-        setOrganization("");
-        setUsername("");
-        setPassword("");
-        setShowLoginForm(false); // Assuming setShowLoginForm controls visibility of login form
-    };
-
-    function renderLoginForm() {
-        return (
-            <>
-            <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
-                <TextField
-                    required
-                    data-testid="organization"
-                    id="organization"
-                        label={t("field.label.organization")}
-                    value={organization}
-                    onChange={(e) => setOrganization(e.target.value)}
-                />
-                <TextField
-                    required
-                    data-testid="username"
-                    id="username"
-                        label={t("field.label.username")}
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
-                <TextField
-                    required
-                    data-testid="password"
-                    id="password"
-                    type="password"
-                        label={t("field.label.password")}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-                {error && (
-                    <h3 data-testid="error_message" style={{ color: "red" }}>
-                        {error}
-                    </h3>
-                )}
-                <div
-                    style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}
-                >
-                    <Button
-                        data-testid="login_button"
-                        variant="contained"
-                        type="submit"
-                        onClick={handleLogin}
-                    >
-                        {t("form.login.label.login")}
-                    </Button>
-                    {providers && providers.length > 0 && (
-                        <Button
-                            data-testid="back_button"
-                            variant="outlined"
-                            onClick={handleGoBack}
-                        >
-                            {t("form.login.label.goBack")}
-                        </Button>
-                    )}
-                </div>
-            </form>
-            </>
-        );
-    }
-
-    function renderLoginButtons() {
-        return (
-            <>
-                {authHeader.split(",").includes("Basic") && !showLoginForm && (
-                    <Button
-                        data-testid="show_login_button"
-                        variant="contained"
-                        onClick={() => setShowLoginForm(true)}
-                    >
-                        {t("form.login.label.login")}
-                    </Button>
-                )}
-
-                {providers &&
-                    providers
-                        .filter((provider) => provider.description)
-                        .map((provider) => (
-                            <Button
-                                key={provider.name}
-                                data-testid={`login_${provider.name}`}
-                                variant="contained"
-                                onClick={() =>
-                                    (window.location.href = `${provider.url}&redirectUrl=${redirectUrl}`)
-                                }
-                            >
-                                {t("form.login.label.loginWith", {
-                                    providerDesc: provider.description,
-                                })}
-                            </Button>
-                        ))}
-            </>
-        );
-    }
-
+  //Rendering helpers
+  function renderProgressUI() {
     return (
-        <>
-            <div className="NuoLoginForm">
-                <img alt="" />
-                {progressMessage ? (
-                    renderProgressUI()
-                ) : (
-                    <div className="fields">
-                        {providers === undefined ? (
-                            <CircularProgress
-                                className="RestSpinner"
-                                color="inherit"
-                            />
-                        ) : providers.length === 0 || showLoginForm ? (
-                            renderLoginForm()
-                        ) : (
-                            renderLoginButtons()
-                        )}
-                    </div>
-                )}
-            </div>
-            <BuildNumber className="AbsoluteBottomRight BuildNumber" />
-        </>
+      <center>
+        <Box sx={{ width: "fit-content" }}>
+          {error ? (
+            <CircularProgress variant="determinate" color="error" value={100} />
+          ) : (
+            <CircularProgress color="inherit" />
+          )}
+          <div data-testid="progress_message">{progressMessage}</div>
+        </Box>
+        {error && (
+          <div>
+            <h3 data-testid="error_message" style={{ color: "red" }}>
+              {error}
+            </h3>
+            <Button
+              data-testid="back_button"
+              variant="contained"
+              onClick={() => {
+                window.location.href = "/ui/login";
+              }}
+            >
+              Back to Login
+            </Button>
+          </div>
+        )}
+      </center>
     );
+  }
+
+  const handleGoBack = () => {
+    setOrganization("");
+    setUsername("");
+    setPassword("");
+    setShowLoginForm(false); // Assuming setShowLoginForm controls visibility of login form
+  };
+
+  function renderLoginForm() {
+    return (
+      <>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleLogin();
+          }}
+        >
+          <TextField
+            required
+            data-testid="organization"
+            id="organization"
+            label={t("field.label.organization")}
+            value={organization}
+            onChange={(e) => setOrganization(e.target.value)}
+          />
+          <TextField
+            required
+            data-testid="username"
+            id="username"
+            label={t("field.label.username")}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <TextField
+            required
+            data-testid="password"
+            id="password"
+            type="password"
+            label={t("field.label.password")}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          {error && (
+            <h3 data-testid="error_message" style={{ color: "red" }}>
+              {error}
+            </h3>
+          )}
+          <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
+            <Button
+              data-testid="login_button"
+              variant="contained"
+              type="submit"
+              onClick={handleLogin}
+            >
+              {t("form.login.label.login")}
+            </Button>
+            {providers && providers.length > 0 && (
+              <Button
+                data-testid="back_button"
+                variant="outlined"
+                onClick={handleGoBack}
+              >
+                {t("form.login.label.goBack")}
+              </Button>
+            )}
+          </div>
+        </form>
+      </>
+    );
+  }
+
+  function renderLoginButtons() {
+    return (
+      <>
+        {authHeader.split(",").includes("Basic") && !showLoginForm && (
+          <Button
+            data-testid="show_login_button"
+            variant="contained"
+            onClick={() => setShowLoginForm(true)}
+          >
+            {t("form.login.label.login")}
+          </Button>
+        )}
+
+        {providers &&
+          providers
+            .filter((provider) => provider.description)
+            .map((provider) => (
+              <Button
+                key={provider.name}
+                data-testid={`login_${provider.name}`}
+                variant="contained"
+                onClick={() =>
+                  (window.location.href = `${provider.url}&redirectUrl=${redirectUrl}`)
+                }
+              >
+                {t("form.login.label.loginWith", {
+                  providerDesc: provider.description,
+                })}
+              </Button>
+            ))}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <RegionSettingsMenu />
+      <div className="NuoLoginForm">
+        <img alt="" />
+        {progressMessage ? (
+          renderProgressUI()
+        ) : (
+          <div className="fields">
+            {providers === undefined ? (
+              <CircularProgress className="RestSpinner" color="inherit" />
+            ) : providers.length === 0 || showLoginForm ? (
+              renderLoginForm()
+            ) : (
+              renderLoginButtons()
+            )}
+          </div>
+        )}
+      </div>
+      <BuildNumber className="AbsoluteBottomRight BuildNumber" />
+    </>
+  );
 }
 
 export default withTranslation()(LoginForm);

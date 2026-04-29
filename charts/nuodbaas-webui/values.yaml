@@ -1,4 +1,4 @@
-# (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+# (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 # Default values for nuodbaas-webui.
 
@@ -36,6 +36,7 @@ nuodbaasWebui:
   # NuoDB Operator pod replicas
   replicas: 1
   cpUrl: /nuodb-cp
+  sqlUrl: /api/sql
 
   # Pod labels useful for integrating 3rd party products. Map value will pass
   # through to the pod as supplied. String value will be templated and the
