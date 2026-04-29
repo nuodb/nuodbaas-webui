@@ -1,7 +1,7 @@
 // (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
-import React, { useEffect, useState } from "react";
-import "./utils/i18n";
+import React, { useEffect, useState } from 'react';
+import './utils/i18n';
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import LoginForm from "./components/pages/LoginForm";
 import ListResource from "./components/pages/ListResource";
@@ -11,25 +11,22 @@ import ViewResource from "./components/pages/ViewResource";
 import ErrorPage from "./components/pages/ErrorPage";
 import SqlPage from "./components/pages/SqlPage";
 import Schema from "./components/pages/parts/Schema";
-import CssBaseline from "@mui/material/CssBaseline";
+import CssBaseline from '@mui/material/CssBaseline';
 import NotFound from "./components/pages/NotFound";
 import Dialog from "./components/pages/parts/Dialog";
 import GlobalErrorBoundary from "./components/GlobalErrorBoundary";
 import Auth from "./utils/auth";
-import Settings from "./components/pages/Settings";
-import Automation from "./components/pages/Automation";
-import Customizations, { evaluate } from "./utils/Customizations";
-import {
-  NUODBAAS_WEBUI_ISRECORDING,
-  Rest,
-} from "./components/pages/parts/Rest";
-import { getOrgFromPath } from "./utils/schema";
-import Toast from "./components/controls/Toast";
-import BackgroundTasks, { BackgroundTaskType } from "./utils/BackgroundTasks";
-import { withTranslation } from "react-i18next";
-import Redirect from "./components/pages/Redirect";
-import DefaultPage from "./components/pages/DefaultPage";
-import RegionSettingsSelector from "./components/pages/RegionSettingsSelector";
+import Settings from './components/pages/Settings';
+import Automation from './components/pages/Automation';
+import Customizations, { evaluate } from './utils/Customizations';
+import { NUODBAAS_WEBUI_ISRECORDING, Rest } from './components/pages/parts/Rest';
+import { getOrgFromPath } from './utils/schema';
+import Toast from './components/controls/Toast';
+import BackgroundTasks, { BackgroundTaskType } from './utils/BackgroundTasks';
+import { withTranslation } from 'react-i18next';
+import Redirect from './components/pages/Redirect';
+import DefaultPage from './components/pages/DefaultPage';
+import RegionSettingsSelector from './components/pages/RegionSettingsSelector';
 
 /**
  * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
@@ -38,20 +35,12 @@ import RegionSettingsSelector from "./components/pages/RegionSettingsSelector";
 function App({ t }: { t: any }) {
   const [schema, setSchema] = useState<any>();
   const [isLoggedIn, setIsLoggedIn] = useState(Auth.isLoggedIn());
-  const [isRecording, setIsRecording] = useState(
-    sessionStorage.getItem(NUODBAAS_WEBUI_ISRECORDING) === "true",
-  );
+  const [isRecording, setIsRecording] = useState(sessionStorage.getItem(NUODBAAS_WEBUI_ISRECORDING) === "true");
   const [org, setOrg] = useState("");
   const [orgs, setOrgs] = useState<string[]>([]);
   const [tasks, setTasks] = useState<BackgroundTaskType[]>([]);
   const pageProps = {
-    schema,
-    isRecording,
-    org,
-    setOrg,
-    orgs,
-    tasks,
-    setTasks: setTasks,
+    schema, isRecording, org, setOrg, orgs, tasks, setTasks: setTasks
   };
 
   useEffect(() => {
@@ -60,14 +49,8 @@ function App({ t }: { t: any }) {
     }
 
     // get orgs by scanning all accessible users and projects
-    Promise.all([
-      Rest.get("/users?listAccessible=true"),
-      Rest.get("/projects?listAccessible=true"),
-    ]).then((usersAndProjects: any[]) => {
-      const data: any = [
-        ...usersAndProjects[0].items,
-        ...usersAndProjects[1].items,
-      ];
+    Promise.all([Rest.get("/users?listAccessible=true"), Rest.get("/projects?listAccessible=true")]).then((usersAndProjects: any[]) => {
+      const data: any = [...usersAndProjects[0].items, ...usersAndProjects[1].items];
       let orgs: string[] = [];
       data.forEach((item: string) => {
         let org = item.split("/")[0];
@@ -88,36 +71,32 @@ function App({ t }: { t: any }) {
         }
       }
       setOrg(org);
+
     });
   }, [schema, isLoggedIn]);
 
   useEffect(() => {
     const onUnload = (event: BeforeUnloadEvent) => {
       const ABORT_MESSAGE = "Background tasks are still in progress.";
-      const pendingTasks = tasks.filter(
-        (t) => t.status === "in_progress" || t.status === "not_started",
-      );
+      const pendingTasks = tasks.filter(t => t.status === "in_progress" || t.status === "not_started");
       if (pendingTasks.length > 0) {
-        Dialog.ok(
-          ABORT_MESSAGE,
+        Dialog.ok(ABORT_MESSAGE,
           <div className="NuoColumn">
-            {pendingTasks.map((task) => (
-              <div>{task.label}</div>
-            ))}
+            {pendingTasks.map(task => <div>{task.label}</div>)}
           </div>,
-          t,
-        );
+          t);
         event.preventDefault();
         return ABORT_MESSAGE;
-      } else {
+      }
+      else {
         return null;
       }
     };
 
-    window.addEventListener("beforeunload", onUnload);
+    window.addEventListener('beforeunload', onUnload);
 
     return () => {
-      window.removeEventListener("beforeunload", onUnload); // Clean up the event listener
+      window.removeEventListener('beforeunload', onUnload); // Clean up the event listener
     };
   }, [tasks]);
 
@@ -131,49 +110,21 @@ function App({ t }: { t: any }) {
           <Toast />
           <Rest isRecording={isRecording} setIsRecording={setIsRecording} />
           <BrowserRouter>
-            {isLoggedIn ? (
+            {isLoggedIn
+              ?
               <React.Fragment>
                 <Schema setSchema={setSchema} />
                 <Routes>
                   <Route path="/" element={<Navigate to="/ui" />} />
-                  <Route
-                    path="/ui/error"
-                    element={<ErrorPage {...pageProps} />}
-                  />
-                  <Route
-                    path="/ui/resource/list/*"
-                    element={<ListResource {...pageProps} />}
-                  />
-                  <Route
-                    path="/ui/resource/create/*"
-                    element={<CreateResource {...pageProps} />}
-                  />
-                  <Route
-                    path="/ui/resource/edit/*"
-                    element={<EditResource {...pageProps} />}
-                  />
-                  <Route
-                    path="/ui/resource/view/*"
-                    element={<ViewResource {...pageProps} />}
-                  />
-                  <Route
-                    path="/ui/settings"
-                    element={<Settings {...pageProps} />}
-                  />
-                  <Route
-                    path="/ui/automation"
-                    element={<Automation {...pageProps} />}
-                  />
-                  {evaluate({}, "hasSqlEditorService()") && (
-                    <Route
-                      path="/ui/page/sql/:organization/:project/:database"
-                      element={<SqlPage {...pageProps} />}
-                    />
-                  )}
-                  <Route
-                    path="/ui/region-selector-settings"
-                    element={<RegionSettingsSelector {...pageProps} />}
-                  />
+                  <Route path="/ui/error" element={<ErrorPage {...pageProps} />} />
+                  <Route path="/ui/resource/list/*" element={<ListResource {...pageProps} />} />
+                  <Route path="/ui/resource/create/*" element={<CreateResource {...pageProps} />} />
+                  <Route path="/ui/resource/edit/*" element={<EditResource {...pageProps} />} />
+                  <Route path="/ui/resource/view/*" element={<ViewResource {...pageProps} />} />
+                  <Route path="/ui/settings" element={<Settings {...pageProps} />} />
+                  <Route path="/ui/automation" element={<Automation {...pageProps} />} />
+                  {evaluate({}, "hasSqlEditorService()") && <Route path="/ui/page/sql/:organization/:project/:database" element={<SqlPage {...pageProps} />} />}
+                  <Route path="/ui/region-selector-settings" element={<RegionSettingsSelector {...pageProps} />} />
                   <Route path="/ui" element={<DefaultPage />} />
                   <Route path="/ui/login" element={<DefaultPage />} />
                   <Route path="/webui" element={<Navigate to="/ui" />} />
@@ -181,33 +132,14 @@ function App({ t }: { t: any }) {
                   <Route path="/*" element={<NotFound {...pageProps} />} />
                 </Routes>
               </React.Fragment>
-            ) : (
+              :
               <Routes>
-                <Route
-                  path="/ui/region-selector-settings"
-                  element={<RegionSettingsSelector {...pageProps} />}
-                />
-                <Route
-                  path="/ui/login"
-                  element={<LoginForm setIsLoggedIn={setIsLoggedIn} />}
-                />
-                <Route
-                  path="/ui/error"
-                  element={<ErrorPage {...pageProps} />}
-                />
-                <Route
-                  path="/*"
-                  element={
-                    <Navigate
-                      to={
-                        "/ui/login?redirect=" +
-                        encodeURIComponent(window.location.pathname)
-                      }
-                    />
-                  }
-                />
+                <Route path="/ui/region-selector-settings" element={<RegionSettingsSelector {...pageProps} />} />
+                <Route path="/ui/login" element={<LoginForm setIsLoggedIn={setIsLoggedIn} />} />
+                <Route path="/ui/error" element={<ErrorPage {...pageProps} />} />
+                <Route path="/*" element={<Navigate to={"/ui/login?redirect=" + encodeURIComponent(window.location.pathname)} />} />
               </Routes>
-            )}
+            }
           </BrowserRouter>
         </Customizations>
       </GlobalErrorBoundary>
