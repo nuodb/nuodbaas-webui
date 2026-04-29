@@ -1,4 +1,4 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";

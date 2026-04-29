@@ -1,4 +1,4 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 export function sqlString(value: string): string {
   if (value === null) {

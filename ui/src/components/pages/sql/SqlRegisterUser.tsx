@@ -1,4 +1,4 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import DialogMaterial from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";

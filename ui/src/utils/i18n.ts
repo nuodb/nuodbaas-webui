@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import i18n from "i18next";
 import detector from "i18next-browser-languagedetector";

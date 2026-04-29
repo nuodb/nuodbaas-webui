@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { getValue, setValue } from "./utils";
 import { FieldBase_validate, FieldProps } from "./FieldBase";

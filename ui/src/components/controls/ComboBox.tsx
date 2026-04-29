@@ -1,4 +1,4 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 import React, { ReactNode, useEffect, useState } from "react";
 import { MenuItemProps } from "../../utils/types";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";

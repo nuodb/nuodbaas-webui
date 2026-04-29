@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
