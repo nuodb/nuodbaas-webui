@@ -1,426 +1,425 @@
 {
-    "copyright": "(C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.",
-    "button": {
-        "advanced": "Advanced",
-        "create": "Create",
-        "create.resource": "New {{resource}}",
-        "add": "Add",
-        "delete": "Delete",
-        "view": "View",
-        "edit": "Edit",
-        "save": "Save",
-        "close": "Close",
-        "yes": "Yes",
-        "no": "No",
-        "ok": "Ok",
-        "cancel": "Cancel",
-        "true": "True",
-        "false": "False",
-        "unassigned": "Unassigned",
-        "db.connection.info": "Show DB Connection Info",
-        "db.changeDbaPassword": "Change DBA Password",
-        "start.database": "Start Database",
-        "stop.database": "Stop Database",
-        "show.databases": "Show Databases",
-        "show.backups": "Show Backups",
-        "settings": "Settings",
-        "automation": "Automation",
-        "logout": "Logout",
-        "copy": "Copy",
-        "copied": "Copied!",
-        "dismiss": "Dismiss",
-        "sql": {
-            "addToQueue": "Add to Queue",
-            "addAllToQueue": "Add all to Queue",
-            "export": "Export",
-            "editor": "SQL Editor",
-            "register": "Register"
-        },
-        "changePassword": "Change Password"
+  "copyright": "(C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.",
+  "button": {
+    "advanced": "Advanced",
+    "create": "Create",
+    "create.resource": "New {{resource}}",
+    "add": "Add",
+    "delete": "Delete",
+    "view": "View",
+    "edit": "Edit",
+    "save": "Save",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "Ok",
+    "cancel": "Cancel",
+    "true": "True",
+    "false": "False",
+    "unassigned": "Unassigned",
+    "db.connection.info": "Show DB Connection Info",
+    "db.changeDbaPassword": "Change DBA Password",
+    "start.database": "Start Database",
+    "stop.database": "Stop Database",
+    "show.databases": "Show Databases",
+    "show.backups": "Show Backups",
+    "settings": "Settings",
+    "automation": "Automation",
+    "logout": "Logout",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "dismiss": "Dismiss",
+    "sql": {
+      "addToQueue": "Add to Queue",
+      "addAllToQueue": "Add all to Queue",
+      "export": "Export",
+      "editor": "SQL Editor",
+      "register": "Register"
     },
-    "hint": {
-        "open.settings": "Open Settings",
-        "regionSelector": "Select Region"
+    "changePassword": "Change Password"
+  },
+  "hint": {
+    "open.settings": "Open Settings",
+    "regionSelector": "Select Region"
+  },
+  "control": {
+    "select.item.all": "--- All ---",
+    "select.item.select": "--- Select ---"
+  },
+  "confirm": {
+    "start.database.title": "Start Database",
+    "start.database.body": "Do you want to start Database {{organization}}/{{project}}/{{name}}?",
+    "stop.database.title": "Stop Database",
+    "stop.database.body": "Do you want to stop Database {{organization}}/{{project}}/{{name}}?",
+    "delete.resource.title": "Deleting {{resources_one}} {{name}}",
+    "delete.resource.body": "Please confirm deletion of {{resources_one}} {{name}}?",
+    "delete.resources.title": "Deleting {{count}} {{resources}}",
+    "delete.resources.body": "Please confirm deleting of {{resources}} {{names}}?",
+    "userAccessRuleCheck.title": "User's access rules are outside of their org",
+    "userAccessRuleCheck.body": "Are you sure you want to give this user access outside of their org?"
+  },
+  "resource": {
+    "label": {
+      "backuppolicies": "Backup policies",
+      "backuppolicies_one": "Backup policy",
+      "backups": "backups",
+      "backups_one": "backup",
+      "databases": "databases",
+      "databases_one": "database",
+      "projects": "projects",
+      "projects_one": "project",
+      "users": "users",
+      "users_one": "user",
+      "cluster": {
+        "canaryrollouts": "Canary Rollouts",
+        "canaryrollouts_one": "Canary Rollout",
+        "canaryrollouttemplates": "Canary Rollout Templates",
+        "canaryrollouttemplates_one": "Canary Rollout Template",
+        "databasequotas": "Database Quotas",
+        "databasequotas_one": "Database Quota",
+        "helmfeatures": "Helm Features",
+        "helmfeatures_one": "Helm Feature",
+        "identityproviders": "Identity Providers",
+        "identityproviders_one": "Identity Provider",
+        "metrics": "Metrics",
+        "metrics_one": "Metric",
+        "metricsources": "Metric Sources",
+        "metricsources_one": "Metric Source",
+        "roletemplates": "Role Templates",
+        "roletemplates_one": "Role Template",
+        "servicetiers": "Service Tiers",
+        "servicetiers_one": "Service Tier"
+      }
+    }
+  },
+  "field": {
+    "label": {
+      "allowCrossOrganizationAccess": "Allow Cross-Organization Access",
+      "password": "Password",
+      "dbaPassword": "DBA Password",
+      "organization": "Organization",
+      "username": "Username",
+      "accessRule": "Access Rule",
+      "accessRule.allow": "Allow",
+      "accessRule.deny": "Deny",
+      "name": "Name",
+      "labels": "Labels",
+      "search": "search, i.e. \"somevalue\" or \"fieldname=value\" or \"fieldname=*partialvalue*\" or \"label=key=value\"",
+      "sla": "SLA",
+      "tier": "Tier",
+      "properties": "Properties",
+      "project": "Project",
+      "status": "Status",
+      "state": "State",
+      "database": "Database",
+      "frequency": "Frequency",
+      "selector": "Selector",
+      "selector.scope": "Scope",
+      "selector.slas": "SLAs",
+      "selector.tiers": "Tiers",
+      "selector.labels": "Labels",
+      "status.sqlEndpoint": "SQL Endpoint",
+      "status.caPem": "Certificate",
+      "status.ready": "Ready",
+      "status.shutdown": "Shutdown",
+      "status.message": "Message",
+      "status.state": "State",
+      "maintenance": "Maintenance",
+      "maintenance.expiresAtTime": "Expires at time",
+      "maintenance.expiresIn": "Expires in",
+      "properties.propagatePolicyLabels": "Propagate policy labels",
+      "properties.propagateDatabaseLabels": "Propagate database labels",
+      "properties.archiveDiskSize": "Archive disk size",
+      "properties.journalDiskSize": "Journal disk size",
+      "properties.tierParameters": "Tier parameters",
+      "properties.inheritTierParameters": "Inherit tier parameters",
+      "properties.productVersion": "Product version",
+      "properties.productVersionSelector": "Product version selector",
+      "properties.productVersionSelector.matchesTag": "Matches tag",
+      "properties.archiveDiskAutoResize": "Archive disk auto resize",
+      "properties.archiveDiskAutoResize.threshold": "Threshold",
+      "properties.archiveDiskAutoResize.threshold.bytesAvailable": "Bytes available",
+      "properties.archiveDiskAutoResize.threshold.percentageAvailable": "Percentage available",
+      "properties.archiveDiskAutoResize.growth": "Growth",
+      "properties.archiveDiskAutoResize.growth.increment": "Increment",
+      "properties.archiveDiskAutoResize.growth.scale": "Scale",
+      "properties.archiveDiskAutoResize.initialSize": "Initial size",
+      "properties.archiveDiskAutoResize.maxSize": "Max size",
+      "properties.journalDiskAutoResize": "Journal disk auto resize",
+      "properties.journalDiskAutoResize.threshold": "Treshold",
+      "properties.journalDiskAutoResize.threshold.bytesAvailable": "Bytes available",
+      "properties.journalDiskAutoResize.threshold.percentageAvailable": "Percentage available",
+      "properties.journalDiskAutoResize.growth": "Growth",
+      "properties.journalDiskAutoResize.growth.increment": "Increment",
+      "properties.journalDiskAutoResize.growth.scale": "Scale",
+      "properties.journalDiskAutoResize.initialSize": "Initial Size",
+      "properties.journalDiskAutoResize.maxSize": "Max size",
+      "retention": "Retention",
+      "retention.hourly": "Hourly",
+      "retention.daily": "Daily",
+      "retention.weekly": "Weekly",
+      "retention.monthly": "Monthly",
+      "retention.yearly": "Yearly",
+      "retention.settings.dayOfWeek": "Day of week",
+      "retention.settings.month": "Month",
+      "retention.settings.relativeToLast": "Relative to last",
+      "retention.settings.promoteLatestToHourly": "Promote latest to hourly",
+      "retention.settings.promoteLatestToDaily": "Promote latest to daily",
+      "retention.settings.promoteLatestToMonthly": "Promote latest to monthly",
+      "restoreFrom": "Restore from",
+      "restoreFrom.backup": "Backup",
+      "importSource": "Import source",
+      "importSource.backupHandle": "Backup handle",
+      "importSource.backupPlugin": "Backup plugin",
+      "suspended": "Suspended",
+      "roles": "Roles",
+      "sql": {
+        "select.files": "Select SQL Files",
+        "filename": "Filename",
+        "success": "Success",
+        "failures": "Failures",
+        "updates": "Updates",
+        "error": "Error",
+        "status": "Status"
+      }
     },
-    "control": {
-        "select.item.all": "--- All ---",
-        "select.item.select": "--- Select ---"
+    "required": "Required",
+    "crontab": {
+      "minute": "Minute",
+      "hour": "Hour",
+      "dayOfMonth": "Day",
+      "month": "Month",
+      "weekday": "Weekday"
     },
-    "confirm": {
-        "start.database.title": "Start Database",
-        "start.database.body": "Do you want to start Database {{organization}}/{{project}}/{{name}}?",
-        "stop.database.title": "Stop Database",
-        "stop.database.body": "Do you want to stop Database {{organization}}/{{project}}/{{name}}?",
-        "delete.resource.title": "Deleting {{resources_one}} {{name}}",
-        "delete.resource.body": "Please confirm deletion of {{resources_one}} {{name}}?",
-        "delete.resources.title": "Deleting {{count}} {{resources}}",
-        "delete.resources.body": "Please confirm deleting of {{resources}} {{names}}?",
-        "userAccessRuleCheck.title": "User's access rules are outside of their org",
-        "userAccessRuleCheck.body": "Are you sure you want to give this user access outside of their org?"
-    },
-    "resource": {
-        "label": {
-            "backuppolicies": "Backup policies",
-            "backuppolicies_one": "Backup policy",
-            "backups": "backups",
-            "backups_one": "backup",
-            "databases": "databases",
-            "databases_one": "database",
-            "projects": "projects",
-            "projects_one": "project",
-            "users": "users",
-            "users_one": "user",
-            "cluster": {
-                "canaryrollouts": "Canary Rollouts",
-                "canaryrollouts_one": "Canary Rollout",
-                "canaryrollouttemplates": "Canary Rollout Templates",
-                "canaryrollouttemplates_one": "Canary Rollout Template",
-                "databasequotas": "Database Quotas",
-                "databasequotas_one": "Database Quota",
-                "helmfeatures": "Helm Features",
-                "helmfeatures_one": "Helm Feature",
-                "identityproviders": "Identity Providers",
-                "identityproviders_one": "Identity Provider",
-                "metrics": "Metrics",
-                "metrics_one": "Metric",
-                "metricsources": "Metric Sources",
-                "metricsources_one": "Metric Source",
-                "roletemplates": "Role Templates",
-                "roletemplates_one": "Role Template",
-                "servicetiers": "Service Tiers",
-                "servicetiers_one": "Service Tier"
-            }
-        }
-    },
-    "field": {
-        "label": {
-            "allowCrossOrganizationAccess": "Allow Cross-Organization Access",
-            "password": "Password",
-            "dbaPassword": "DBA Password",
-            "organization": "Organization",
-            "username": "Username",
-            "accessRule": "Access Rule",
-            "accessRule.allow": "Allow",
-            "accessRule.deny": "Deny",
-            "name": "Name",
-            "labels": "Labels",
-            "search": "search, i.e. \"somevalue\" or \"fieldname=value\" or \"fieldname=*partialvalue*\" or \"label=key=value\"",
-            "sla": "SLA",
-            "tier": "Tier",
-            "properties": "Properties",
-            "project": "Project",
-            "status": "Status",
-            "state": "State",
-            "database": "Database",
-            "frequency": "Frequency",
-            "selector": "Selector",
-            "selector.scope": "Scope",
-            "selector.slas": "SLAs",
-            "selector.tiers": "Tiers",
-            "selector.labels": "Labels",
-            "status.sqlEndpoint": "SQL Endpoint",
-            "status.caPem": "Certificate",
-            "status.ready": "Ready",
-            "status.shutdown": "Shutdown",
-            "status.message": "Message",
-            "status.state": "State",
-            "maintenance": "Maintenance",
-            "maintenance.expiresAtTime": "Expires at time",
-            "maintenance.expiresIn": "Expires in",
-            "properties.propagatePolicyLabels": "Propagate policy labels",
-            "properties.propagateDatabaseLabels": "Propagate database labels",
-            "properties.archiveDiskSize": "Archive disk size",
-            "properties.journalDiskSize": "Journal disk size",
-            "properties.tierParameters": "Tier parameters",
-            "properties.inheritTierParameters": "Inherit tier parameters",
-            "properties.productVersion": "Product version",
-            "properties.productVersionSelector": "Product version selector",
-            "properties.productVersionSelector.matchesTag": "Matches tag",
-            "properties.archiveDiskAutoResize": "Archive disk auto resize",
-            "properties.archiveDiskAutoResize.threshold": "Threshold",
-            "properties.archiveDiskAutoResize.threshold.bytesAvailable": "Bytes available",
-            "properties.archiveDiskAutoResize.threshold.percentageAvailable": "Percentage available",
-            "properties.archiveDiskAutoResize.growth": "Growth",
-            "properties.archiveDiskAutoResize.growth.increment": "Increment",
-            "properties.archiveDiskAutoResize.growth.scale": "Scale",
-            "properties.archiveDiskAutoResize.initialSize": "Initial size",
-            "properties.archiveDiskAutoResize.maxSize": "Max size",
-            "properties.journalDiskAutoResize": "Journal disk auto resize",
-            "properties.journalDiskAutoResize.threshold": "Treshold",
-            "properties.journalDiskAutoResize.threshold.bytesAvailable": "Bytes available",
-            "properties.journalDiskAutoResize.threshold.percentageAvailable": "Percentage available",
-            "properties.journalDiskAutoResize.growth": "Growth",
-            "properties.journalDiskAutoResize.growth.increment": "Increment",
-            "properties.journalDiskAutoResize.growth.scale": "Scale",
-            "properties.journalDiskAutoResize.initialSize": "Initial Size",
-            "properties.journalDiskAutoResize.maxSize": "Max size",
-            "retention": "Retention",
-            "retention.hourly": "Hourly",
-            "retention.daily": "Daily",
-            "retention.weekly": "Weekly",
-            "retention.monthly": "Monthly",
-            "retention.yearly": "Yearly",
-            "retention.settings.dayOfWeek": "Day of week",
-            "retention.settings.month": "Month",
-            "retention.settings.relativeToLast": "Relative to last",
-            "retention.settings.promoteLatestToHourly": "Promote latest to hourly",
-            "retention.settings.promoteLatestToDaily": "Promote latest to daily",
-            "retention.settings.promoteLatestToMonthly": "Promote latest to monthly",
-            "restoreFrom": "Restore from",
-            "restoreFrom.backup": "Backup",
-            "importSource": "Import source",
-            "importSource.backupHandle": "Backup handle",
-            "importSource.backupPlugin": "Backup plugin",
-            "suspended": "Suspended",
-            "roles": "Roles",
-            "sql": {
-                "select.files": "Select SQL Files",
-                "filename": "Filename",
-                "success": "Success",
-                "failures": "Failures",
-                "updates": "Updates",
-                "error": "Error",
-                "status": "Status"
-            }
-        },
-        "required": "Required",
-        "crontab": {
-            "minute": "Minute",
-            "hour": "Hour",
-            "dayOfMonth": "Day",
-            "month": "Month",
-            "weekday": "Weekday"
-        },
-        "enum": {
-            "retention.settings": {
-                "dayOfWeek": {
-                    "Sunday": "Sunday",
-                    "Monday": "Monday",
-                    "Tuesday": "Tuesday",
-                    "Wednesday": "Wednesday",
-                    "Thursday": "Thursday",
-                    "Friday": "Friday",
-                    "Saturday": "Saturday"
-                },
-                "month": {
-                    "January": "January",
-                    "February": "February",
-                    "March": "March",
-                    "April": "April",
-                    "May": "May",
-                    "June": "June",
-                    "July": "July",
-                    "August": "August",
-                    "September": "September",
-                    "October": "October",
-                    "November": "November",
-                    "December": "December"
-                }
-            },
-            "frequency": {
-                "@hourly": "Hourly",
-                "@daily": "Daily",
-                "@weekly": "Weekly",
-                "@monthly": "Monthly",
-                "@yearly": "Yearly",
-                "other": "Custom"
-            }
-        },
-        "map": {
-            "header.label.key": "Key",
-            "header.label.value": "Value",
-            "hint.new.key": "new key",
-            "hint.new.value": "new value"
-        },
-        "select": {
-            "selectItem": "--- Select Item ---",
-            "allOrgs": "All Organizations"
-        }
-    },
-    "list": {
-        "label": {
-            "management": "Management",
-            "cluster": "Cluster"
-        }
-    },
-    "form": {
-        "settings": {
-            "label": {
-                "theme": "Theme",
-                "title": "Settings"
-            }
-        },
-        "sqleditor": {
-            "label": {
-                "dbUsername": "DB Username",
-                "dbPassword": "DB Password",
-                "dbaPassword": "DBA Password",
-                "dbSchema": "DB Schema",
-                "title": "SQL Editor",
-                "allFieldsRequired": "All fields are required",
-                "fieldName": "Field Name",
-                "dataType": "Data Type",
-                "condition": "Condition",
-                "value": "Value",
-                "tab": {
-                    "browse": "Browse",
-                    "query": "Query",
-                    "import": "Import",
-                    "export": "Export",
-                    "users": "Users"
-                },
-                "tasksComplete": "{{completed}} of {{total}} Tasks complete",
-                "exporting": "Exporting {{dbSchema}}",
-                "tableToExport": "Table to export",
-                "renameTable": "optionally rename exported Table",
-                "renameSchema": "optionally rename Schema",
-                "batchSize": "batch size",
-                "exportLimit": "export limit per table",
-                "includeDdl": "Include DDL",
-                "includeData": "Include Data",
-                "includeDrop": "Include Drop Statements",
-                "allTables": "All Tables",
-                "dbAdmin": {
-                    "username": "Database admin username",
-                    "password": "Database admin password"
-                },
-                "registerUserWith": "Register user \"{{user}}\" with",
-                "readPermissions": "READ permissions",
-                "fullPermissions": "FULL permissions",
-                "setupLogin": "Setup automatic login for database \"{{database}}\"",
-                "delete.user.title": "Deleting user {{username}} in database {{database}}",
-                "delete.user.body": "Please confirm deleting of user {{username}} in database {{database}}?",
-                "user.deleted": "Deleted user {{username}} in database {{database}}",
-                "user.delete.failed": "Unable to delete user {{username}} in database {{database}}",
-                "userNeedsRegistration": "To setup automatic login, the DBaaS user needs to be registered in the database.",
-                "loginWithDbAdmin": "Login with a database administrator account:",
-                "addRolesToUser": "Select Roles to be added to the user account {{username}}:",
-                "createUser": "Create User",
-                "addDbaasUserToDatabase": "Add DBaaS user to database",
-                "editUser": "Edit User {{username}}"
-            },
-            "error": {
-                "userExists": "User exists already."
-            },
-            "button": {
-                "login": "Login",
-                "executing": "Executing...",
-                "submit": "Submit",
-                "setupLogin": "Setup automatic login",
-                "createDatabaseUser": "Create Database User",
-                "addDbaasUser": "Add DBaaS User"
-            }
-        },
-        "login": {
-            "label": {
-                "loginWith": "Login With {{providerDesc}} ",
-                "goBack": "Go Back",
-                "login": "Login"
-            }
-        },
-        "editRegionSettings": {
-            "title": "Edit Regions",
-            "label": {
-                "name": "Name",
-                "cpBaseUrl": "CP Base URL",
-                "sqlBaseUrl": "SQL Base URL",
-                "makeActive": "Make active",
-                "active": "Active",
-                "editRegionEntry": "Edit region entry",
-                "addRegionEntry": "Add Region Entry",
-                "editRegions": "Edit Regions",
-                "defaultRegion": "Default"
-            }
-        }
-    },
-    "dialog": {
-        "dbConnectionInfo": {
-            "title": "Database Connection info for {{dbName}}",
-            "label": {
-                "database": "Database",
-                "sqlEndpoint": "SQL Endpoint",
-                "certificate": "Certificate",
-                "codeSamples": "Code Samples",
-                "description": "Following samples require the NuoDB client library which can be downloaded from [here](https://github.com/nuodb/nuodb-client/releases). Fill in database username + password and run the samples below from within the extracted NuoDB client library directory.",
-                "nuosql": "Command Line (nuosql)",
-                "jdbc": "Java (JDBC)",
-                "cpp": "C++"
-            }
-        },
-        "automation": {
-            "title": "Automation",
-            "curl": "Export recording as CURL commands",
-            "startRecording": "Start new recording",
-            "stopRecording": "Stop recording",
-            "recordingInProgress": "Recording in progress...",
-            "hideGetRequests": "Hide GET requests",
-            "convertUpdatesToPatchRequests": "Convert updates to PATCH requests",
-            "noWriteRequests": "No write requests recorded."
-        },
-        "databasePassword": {
-            "changeForDatabase": "Change DBA Password for database {{database}}",
-            "cannotChangePassword": "Cannot change password. {{error}}",
-            "passwordChanged": "Database password changed for {{database}}",
-            "currentPassword": "Current Password",
-            "newPassword": "New Password",
-            "confirmPassword": "Confirm new Password",
-            "noMatch": "Passwords don't match",
-            "fieldRequired": "Field is required"
-        }
-
-    },
-    "text": {
-        "editEntryForPath": "Edit entry for {{path}}",
-        "createNewForResource": "Create new {{resources_one}}",
-        "viewForResource": "{{resources_one}}",
-        "editForResource": "Edit {{resources_one}}",
-        "newResource": "New {{resources_one}}",
-        "noData": "No Data",
-        "more": "More",
-        "less": "Less",
-        "networkError": "Network error",
-        "unableToLoadOtherDomain": "Unable to load resources from other domain. What do you want to do?"
-    },
-    "section": {
-        "title": {
-            "general": "General",
-            "advanced": "Advanced",
-            "access.deny.rules": "Access/Deny Rules",
-            "labels": "Labels",
-            "change.password": "Change Password",
-            "database.selection": "Database Selection",
-            "database.retention": "Database Retention"
-        }
-    },
-    "calendar": {
-        "timezone": "Timezone",
-        "time": "Time",
-        "am": "AM",
-        "pm": "PM",
-        "timezone.local": "Local Time",
-        "timezone.utc": "UTC Time",
+    "enum": {
+      "retention.settings": {
         "dayOfWeek": {
-            "Sunday": "Sunday",
-            "Monday": "Monday",
-            "Tuesday": "Tuesday",
-            "Wednesday": "Wednesday",
-            "Thursday": "Thursday",
-            "Friday": "Friday",
-            "Saturday": "Saturday"
+          "Sunday": "Sunday",
+          "Monday": "Monday",
+          "Tuesday": "Tuesday",
+          "Wednesday": "Wednesday",
+          "Thursday": "Thursday",
+          "Friday": "Friday",
+          "Saturday": "Saturday"
         },
         "month": {
-            "January": "January",
-            "February": "February",
-            "March": "March",
-            "April": "April",
-            "May": "May",
-            "June": "June",
-            "July": "July",
-            "August": "August",
-            "September": "September",
-            "October": "October",
-            "November": "November",
-            "December": "December"
+          "January": "January",
+          "February": "February",
+          "March": "March",
+          "April": "April",
+          "May": "May",
+          "June": "June",
+          "July": "July",
+          "August": "August",
+          "September": "September",
+          "October": "October",
+          "November": "November",
+          "December": "December"
         }
+      },
+      "frequency": {
+        "@hourly": "Hourly",
+        "@daily": "Daily",
+        "@weekly": "Weekly",
+        "@monthly": "Monthly",
+        "@yearly": "Yearly",
+        "other": "Custom"
+      }
+    },
+    "map": {
+      "header.label.key": "Key",
+      "header.label.value": "Value",
+      "hint.new.key": "new key",
+      "hint.new.value": "new value"
+    },
+    "select": {
+      "selectItem": "--- Select Item ---",
+      "allOrgs": "All Organizations"
     }
+  },
+  "list": {
+    "label": {
+      "management": "Management",
+      "cluster": "Cluster"
+    }
+  },
+  "form": {
+    "settings": {
+      "label": {
+        "theme": "Theme",
+        "title": "Settings"
+      }
+    },
+    "sqleditor": {
+      "label": {
+        "dbUsername": "DB Username",
+        "dbPassword": "DB Password",
+        "dbaPassword": "DBA Password",
+        "dbSchema": "DB Schema",
+        "title": "SQL Editor",
+        "allFieldsRequired": "All fields are required",
+        "fieldName": "Field Name",
+        "dataType": "Data Type",
+        "condition": "Condition",
+        "value": "Value",
+        "tab": {
+          "browse": "Browse",
+          "query": "Query",
+          "import": "Import",
+          "export": "Export",
+          "users": "Users"
+        },
+        "tasksComplete": "{{completed}} of {{total}} Tasks complete",
+        "exporting": "Exporting {{dbSchema}}",
+        "tableToExport": "Table to export",
+        "renameTable": "optionally rename exported Table",
+        "renameSchema": "optionally rename Schema",
+        "batchSize": "batch size",
+        "exportLimit": "export limit per table",
+        "includeDdl": "Include DDL",
+        "includeData": "Include Data",
+        "includeDrop": "Include Drop Statements",
+        "allTables": "All Tables",
+        "dbAdmin": {
+          "username": "Database admin username",
+          "password": "Database admin password"
+        },
+        "registerUserWith": "Register user \"{{user}}\" with",
+        "readPermissions": "READ permissions",
+        "fullPermissions": "FULL permissions",
+        "setupLogin": "Setup automatic login for database \"{{database}}\"",
+        "delete.user.title": "Deleting user {{username}} in database {{database}}",
+        "delete.user.body": "Please confirm deleting of user {{username}} in database {{database}}?",
+        "user.deleted": "Deleted user {{username}} in database {{database}}",
+        "user.delete.failed": "Unable to delete user {{username}} in database {{database}}",
+        "userNeedsRegistration": "To setup automatic login, the DBaaS user needs to be registered in the database.",
+        "loginWithDbAdmin": "Login with a database administrator account:",
+        "addRolesToUser": "Select Roles to be added to the user account {{username}}:",
+        "createUser": "Create User",
+        "addDbaasUserToDatabase": "Add DBaaS user to database",
+        "editUser": "Edit User {{username}}"
+      },
+      "error": {
+        "userExists": "User exists already."
+      },
+      "button": {
+        "login": "Login",
+        "executing": "Executing...",
+        "submit": "Submit",
+        "setupLogin": "Setup automatic login",
+        "createDatabaseUser": "Create Database User",
+        "addDbaasUser": "Add DBaaS User"
+      }
+    },
+    "login": {
+      "label": {
+        "loginWith": "Login With {{providerDesc}} ",
+        "goBack": "Go Back",
+        "login": "Login"
+      }
+    },
+    "editRegionSettings": {
+      "title": "Edit Regions",
+      "label": {
+        "name": "Name",
+        "cpBaseUrl": "CP Base URL",
+        "sqlBaseUrl": "SQL Base URL",
+        "makeActive": "Make active",
+        "active": "Active",
+        "editRegionEntry": "Edit region entry",
+        "addRegionEntry": "Add Region Entry",
+        "editRegions": "Edit Regions",
+        "defaultRegion": "Default"
+      }
+    }
+  },
+  "dialog": {
+    "dbConnectionInfo": {
+      "title": "Database Connection info for {{dbName}}",
+      "label": {
+        "database": "Database",
+        "sqlEndpoint": "SQL Endpoint",
+        "certificate": "Certificate",
+        "codeSamples": "Code Samples",
+        "description": "Following samples require the NuoDB client library which can be downloaded from [here](https://github.com/nuodb/nuodb-client/releases). Fill in database username + password and run the samples below from within the extracted NuoDB client library directory.",
+        "nuosql": "Command Line (nuosql)",
+        "jdbc": "Java (JDBC)",
+        "cpp": "C++"
+      }
+    },
+    "automation": {
+      "title": "Automation",
+      "curl": "Export recording as CURL commands",
+      "startRecording": "Start new recording",
+      "stopRecording": "Stop recording",
+      "recordingInProgress": "Recording in progress...",
+      "hideGetRequests": "Hide GET requests",
+      "convertUpdatesToPatchRequests": "Convert updates to PATCH requests",
+      "noWriteRequests": "No write requests recorded."
+    },
+    "databasePassword": {
+      "changeForDatabase": "Change DBA Password for database {{database}}",
+      "cannotChangePassword": "Cannot change password. {{error}}",
+      "passwordChanged": "Database password changed for {{database}}",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm new Password",
+      "noMatch": "Passwords don't match",
+      "fieldRequired": "Field is required"
+    }
+  },
+  "text": {
+    "editEntryForPath": "Edit entry for {{path}}",
+    "createNewForResource": "Create new {{resources_one}}",
+    "viewForResource": "{{resources_one}}",
+    "editForResource": "Edit {{resources_one}}",
+    "newResource": "New {{resources_one}}",
+    "noData": "No Data",
+    "more": "More",
+    "less": "Less",
+    "networkError": "Network error",
+    "unableToLoadOtherDomain": "Unable to load resources from other domain. What do you want to do?"
+  },
+  "section": {
+    "title": {
+      "general": "General",
+      "advanced": "Advanced",
+      "access.deny.rules": "Access/Deny Rules",
+      "labels": "Labels",
+      "change.password": "Change Password",
+      "database.selection": "Database Selection",
+      "database.retention": "Database Retention"
+    }
+  },
+  "calendar": {
+    "timezone": "Timezone",
+    "time": "Time",
+    "am": "AM",
+    "pm": "PM",
+    "timezone.local": "Local Time",
+    "timezone.utc": "UTC Time",
+    "dayOfWeek": {
+      "Sunday": "Sunday",
+      "Monday": "Monday",
+      "Tuesday": "Tuesday",
+      "Wednesday": "Wednesday",
+      "Thursday": "Thursday",
+      "Friday": "Friday",
+      "Saturday": "Saturday"
+    },
+    "month": {
+      "January": "January",
+      "February": "February",
+      "March": "March",
+      "April": "April",
+      "May": "May",
+      "June": "June",
+      "July": "July",
+      "August": "August",
+      "September": "September",
+      "October": "October",
+      "November": "November",
+      "December": "December"
+    }
+  }
 }

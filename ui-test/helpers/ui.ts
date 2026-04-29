@@ -24,7 +24,7 @@ export async function waitRestComplete(
 ): Promise<void> {
   await page
     .getByTestId("rest_spinner__complete")
-    .waitFor({ state: 'hidden', timeout });
+    .waitFor({ state: "hidden", timeout });
 }
 
 /**
@@ -151,14 +151,14 @@ export async function hasNotPopupMenu(
 // ---------------------------------------------------------------------------
 
 export async function getInputOrTextareaByName(page: Page, name: string) {
-  let input:Locator = page.locator(`input[name="${name}"]`);
-  for(let i=0; i<10; i++) {
+  let input: Locator = page.locator(`input[name="${name}"]`);
+  for (let i = 0; i < 10; i++) {
     input = page.locator(`input[name="${name}"]`);
-    if ((await input.count()) > 0 && await input.isVisible()) {
+    if ((await input.count()) > 0 && (await input.isVisible())) {
       return input;
     }
     input = page.locator(`textarea[name="${name}"]`);
-    if((await input.count()) > 0 && await input.isVisible()) {
+    if ((await input.count()) > 0 && (await input.isVisible())) {
       return input;
     }
     await sleep(100); // TODO(agr22)
@@ -195,13 +195,13 @@ export async function replaceInputOrTextareaByName(
     return;
   }
   // Regular input
-  await retry(async ()=> {
+  await retry(async () => {
     // MUI Input field is weird - it initially creates a textarea (non-visible) and then an input field or the other way around ...
     let input = await getInputOrTextareaByName(page, name);
-    if(!await input.isVisible()) {
+    if (!(await input.isVisible())) {
       throw new Error("input/textarea field not visible"); //retry
     }
-    if(await input.inputValue() !== value) {
+    if ((await input.inputValue()) !== value) {
       await input.fill(value);
     }
   });
@@ -213,8 +213,8 @@ export async function replaceInputByName(
   value: string,
 ): Promise<void> {
   let input = await getInputOrTextareaByName(page, name);
-  input.waitFor({state: "visible"});
-  if(await input.inputValue() !== value) {
+  input.waitFor({ state: "visible" });
+  if ((await input.inputValue()) !== value) {
     await input.fill(value);
   }
 }
@@ -230,8 +230,6 @@ export async function waitForTestIdHidden(page: Page, id: string) {
   await element.waitFor({ state: "hidden" });
   return element;
 }
-
-
 
 // ---------------------------------------------------------------------------
 // Table helpers
@@ -259,7 +257,7 @@ export async function waitTableElements(
   const table = page.getByTestId(tableId);
   await table.waitFor({ state: "visible", timeout });
 
-  for(let retry=0; retry<10; retry++) {
+  for (let retry = 0; retry < 10; retry++) {
     // Build header-testid → column index map
     const headerEls = await table.locator("thead tr th[data-testid]").all();
     const headerIds = await Promise.all(
@@ -289,10 +287,12 @@ export async function waitTableElements(
       }
     }
 
-    if (headerEls.length === (await table.locator("thead tr th[data-testid]").all()).length) {
+    if (
+      headerEls.length ===
+      (await table.locator("thead tr th[data-testid]").all()).length
+    ) {
       return results;
-    }
-    else {
+    } else {
       // DOM was modified while we parsed the table - retry parsing table.
       sleep(50);
     }
@@ -429,7 +429,7 @@ export async function createBackupUI(
 }
 
 export function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // ---------------------------------------------------------------------------
@@ -441,7 +441,6 @@ export const E2E_PASSWORD = process.env.E2E_PASSWORD ?? TEST_ADMIN_PASSWORD;
 
 // Re-export for convenience in test files
 export { TEST_ORGANIZATION, TEST_ADMIN_USER, TEST_ADMIN_PASSWORD };
-
 
 // ---------------------------------------------------------------------------
 // Login helpers

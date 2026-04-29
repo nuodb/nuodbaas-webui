@@ -4,1084 +4,1117 @@ body,
 #root,
 .App,
 .NuoPageLayout {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
 }
 
 html,
 body {
-    width: 100vw;
-    height: 100vh;
-    overflow-x: clip;
+  width: 100vw;
+  height: 100vh;
+  overflow-x: clip;
 }
 html {
-    min-height: 100vh;
+  min-height: 100vh;
 }
 .NuoContainerSM {
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .NuoListResourceHeader {
-    display: flex;
-    flex-direction: column;
-    margin: 0 15px;
+  display: flex;
+  flex-direction: column;
+  margin: 0 15px;
 }
-.NuoListResourceHeader>h3 {
-    font-size: 1.5em;
-    margin: 0;
-    text-transform: capitalize;
+.NuoListResourceHeader > h3 {
+  font-size: 1.5em;
+  margin: 0;
+  text-transform: capitalize;
 }
 
-.NuoListResourceHeader>div {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+.NuoListResourceHeader > div {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }
 .MuiBreadcrumbs-li {
-    text-transform: capitalize;
+  text-transform: capitalize;
 }
 .NuoLoginForm {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.NuoLoginForm>img {
-    content: url("/ui/images/nuodb.png");
-    width: 300px;
-    height: 100%;
-    padding: 30px;
-    margin-left: auto;
-    margin-right: auto;
+.NuoLoginForm > img {
+  content: url("/ui/images/nuodb.png");
+  width: 300px;
+  height: 100%;
+  padding: 30px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .NuoBanner {
-    display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-    width: 100%;
-    padding: 15px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  padding: 15px;
 }
 
 .NuoBannerItems {
-    flex: 1 0 auto;
-    display: flex;
+  flex: 1 0 auto;
+  display: flex;
 }
 
 .NuoBannerSettings {
-    flex: 0 0 auto;
-    display: flex;
+  flex: 0 0 auto;
+  display: flex;
 }
 .DraggableElement {
-    background-color: white;
+  background-color: white;
 }
 
 .NuoMenuPopup {
-    list-style: none;
-    margin: 5px;
-    padding: 8px 0px;
-    position: absolute;
-    justify-content: start;
-    outline: 0px;
-    color: black;
-    background-color: white;
-    box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+  list-style: none;
+  margin: 5px;
+  padding: 8px 0px;
+  position: absolute;
+  justify-content: start;
+  outline: 0px;
+  color: black;
+  background-color: white;
+  box-shadow:
+    0px 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0px 8px 10px 1px rgba(0, 0, 0, 0.14),
+    0px 3px 14px 2px rgba(0, 0, 0, 0.12);
 }
 
 .NuoMenuPopupItem {
-    display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-    margin: 0px;
-    padding: 5px 10px;
-    font-family: Roboto, Helvetica, Arial, sans-serif;
-    font-weight: 400;
-    font-size: 1rem;
-    line-height: 1.5;
-    letter-spacing: 0.00938em;
-    text-align: left;
-    cursor: pointer;
-    white-space: nowrap;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 0px;
+  padding: 5px 10px;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: 0.00938em;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
-.NuoMenuPopupItem>svg {
-    display: flex;
-    flex: 0 0 auto;
-    opacity: 0.5;
+.NuoMenuPopupItem > svg {
+  display: flex;
+  flex: 0 0 auto;
+  opacity: 0.5;
 }
 .NuoMenuPopupItem:hover {
-    background-color: lightgray;
+  background-color: lightgray;
 }
 
 .NuoMenuSelected {
-    background-color: rgba(25, 118, 210, 0.08);
+  background-color: rgba(25, 118, 210, 0.08);
 }
 
 .NuoMenuSelected:hover {
-    background-color: rgba(110, 110, 110, 0.2);
+  background-color: rgba(110, 110, 110, 0.2);
 }
 .NuoMenuDisabled {
-    color: rgb(0, 0, 0, 0.2);
-    cursor: default;
+  color: rgb(0, 0, 0, 0.2);
+  cursor: default;
 }
 
 .NuoMenuDisabled:hover {
-    background-color: white;
+  background-color: white;
 }
 .NuoAlignRight {
-    left: auto;
-    right: 0;
+  left: auto;
+  right: 0;
 }
 
 .NuoAlignLeft {
-    left: 0;
-    right: auto;
+  left: 0;
+  right: auto;
 }
 .NuoTableNoData {
-    font-size: 1.25em;
-    padding: 25px;
+  font-size: 1.25em;
+  padding: 25px;
 }
 .NuoTableContainer {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    box-shadow: 0px 2px 1px -1px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
-    background-color: #fff;
-    color: rgba(0, 0, 0, 0.87);
-    transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-    border-radius: 10px;
-    margin: 15px;
-    padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  box-shadow:
+    0px 2px 1px -1px rgba(0, 0, 0, 0.2),
+    0px 1px 1px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+  background-color: #fff;
+  color: rgba(0, 0, 0, 0.87);
+  transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  border-radius: 10px;
+  margin: 15px;
+  padding: 10px 0;
 }
 
 .NuoTableTable {
-    display: table;
-    width: 100%;
-    border-spacing: 0;
-    text-indent: initial;
-    unicode-bidi: isolate;
-    border-bottom: solid 1px lightgray;
+  display: table;
+  width: 100%;
+  border-spacing: 0;
+  text-indent: initial;
+  unicode-bidi: isolate;
+  border-bottom: solid 1px lightgray;
 }
 
 .NuoTableScrollWrapper {
-    display: flex;
-        flex-direction: column;
-        flex: 1 1 auto;
-    width: 100%;
-    overflow-x: auto;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  width: 100%;
+  overflow-x: auto;
 }
 
 .NuoTableThead {
-    vertical-align: middle;
-    unicode-bidi: isolate;
+  vertical-align: middle;
+  unicode-bidi: isolate;
 }
 
 .NuoTableTr {
-    color: inherit;
-    display: table-row;
-    vertical-align: middle;
-    outline: 0;
-    unicode-bidi: isolate;
-    border-color: inherit;
-    border-top: 1px solid rgba(224, 224, 224, 1);
+  color: inherit;
+  display: table-row;
+  vertical-align: middle;
+  outline: 0;
+  unicode-bidi: isolate;
+  border-color: inherit;
+  border-top: 1px solid rgba(224, 224, 224, 1);
 }
 
 .NuoTableSettingsItem {
-    display: flex;
-    flex-direction: row;
-    flex: 1 1 auto;
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 auto;
 }
 
 .NuoRow {
-    display: flex;
-    flex-direction: row;
-    flex: 1 1 auto;
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 auto;
 }
 
 .NuoRowReverse {
-    display: flex;
-    flex-direction: row-reverse;
-    flex: 1 1 auto;
+  display: flex;
+  flex-direction: row-reverse;
+  flex: 1 1 auto;
 }
 .NuoColumn {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
 }
 .NuoRowFixed {
-    display: flex;
-    flex-direction: row;
-    flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  flex: 0 0 auto;
 }
 
 .NuoColumnFixed {
-    display: flex;
-    flex-direction: column;
-    flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
 }
 
 .NuoCenter {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .NuoRight {
-    display: flex;
-    flex-direction: column;
-    align-items: end;
-    justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  justify-content: center;
 }
-.NuoTableSettingsItem>label {
-    display: flex;
-    flex: 1 1 auto;
+.NuoTableSettingsItem > label {
+  display: flex;
+  flex: 1 1 auto;
 }
 
 .NuoTableTh,
 .NuoTableTd {
-    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
-    font-size: 0.875rem;
-    letter-spacing: 0.0108em;
-    display: table-cell;
-    padding: 16px;
-    vertical-align: inherit;
-    color: rgba(0, 0, 0, 0.87);
-    unicode-bidi: isolate;
-    text-align: left;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  font-size: 0.875rem;
+  letter-spacing: 0.0108em;
+  display: table-cell;
+  padding: 16px;
+  vertical-align: inherit;
+  color: rgba(0, 0, 0, 0.87);
+  unicode-bidi: isolate;
+  text-align: left;
 }
 
 .NuoTableTh {
-    background-color: #f5f6f8;
-    line-height: 1.5rem;
-        font-weight: 500;
-        border-top: solid 1px lightgray;
-        border-bottom: solid 1px lightgray;
+  background-color: #f5f6f8;
+  line-height: 1.5rem;
+  font-weight: 500;
+  border-top: solid 1px lightgray;
+  border-bottom: solid 1px lightgray;
 }
 
 .NuoTableTd {
-    background-color: white;
+  background-color: white;
 }
-.NuoTableTd>div>button,
+.NuoTableTd > div > button,
 .NuoLinkButton {
-    border: none;
-    background-color: transparent;
-    color: black;
-    cursor: pointer;
-    text-decoration: underline;
-    padding: 0;
+  border: none;
+  background-color: transparent;
+  color: black;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
 }
 
-.NuoTableTd>div>button:hover,
+.NuoTableTd > div > button:hover,
 .NuoLinkButton:hover {
-        background-color: transparent;
-        box-shadow: none;
+  background-color: transparent;
+  box-shadow: none;
 }
 
 .NuoTableTd {
-    font-weight: 400;
-    line-height: 1.43;
+  font-weight: 400;
+  line-height: 1.43;
 }
 
 .NuoTableTbody {
-    display: table-row-group;
-    vertical-align: middle;
-    unicode-bidi: isolate;
-    border-color: inherit;
-    border-collapse: collapse;
-    border-spacing: 0;
+  display: table-row-group;
+  vertical-align: middle;
+  unicode-bidi: isolate;
+  border-color: inherit;
+  border-collapse: collapse;
+  border-spacing: 0;
 }
 
 .NuoTableMenuCell {
-    right: 0;
-    text-align: right;
+  right: 0;
+  text-align: right;
 }
 .NuoCrontabContainer {
-    display: flex;
-    flex-direction: row;
+  display: flex;
+  flex-direction: row;
 }
 
 .NuoFieldCrontab {
-    position: relative;
-    border: 1px solid;
-    padding: 10px;
-    color: rgba(0, 0, 0, 0.23);
-    border-radius: 4px;
+  position: relative;
+  border: 1px solid;
+  padding: 10px;
+  color: rgba(0, 0, 0, 0.23);
+  border-radius: 4px;
 }
 
-.NuoFieldCrontab>div,
-.NuoFieldCrontab>select {
-    margin: 10px;
+.NuoFieldCrontab > div,
+.NuoFieldCrontab > select {
+  margin: 10px;
 }
 
-.NuoFieldCrontab>div {
-    width: calc(100% - 20px);
+.NuoFieldCrontab > div {
+  width: calc(100% - 20px);
 }
 
-.NuoFieldCrontab>label {
-    position: absolute;
-    top: -15px;
-    left: 10px;
-    background-color: white;
-    font-size: 1rem;
-    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
-    font-weight: 400;
+.NuoFieldCrontab > label {
+  position: absolute;
+  top: -15px;
+  left: 10px;
+  background-color: white;
+  font-size: 1rem;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  font-weight: 400;
 }
 .NuoError {
-    color: #d32f2f;
-    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
-    font-weight: 400;
-    font-size: 0.75rem;
+  color: #d32f2f;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  font-weight: 400;
+  font-size: 0.75rem;
 }
 .NuoCalendar {
-    display: flex;
-    flex-direction: row;
+  display: flex;
+  flex-direction: row;
 }
 
 .NuoCalendarDate,
 .NuoCalendarTime {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .NuoCalendarTime {
-    border-left: solid;
-    border-color: lightgray;
-    padding: 0 10px;
+  border-left: solid;
+  border-color: lightgray;
+  padding: 0 10px;
 }
 
-.NuoCalendarTime>label:not(:first-child) {
-    margin-top: 10px;
+.NuoCalendarTime > label:not(:first-child) {
+  margin-top: 10px;
 }
 
 .NuoCalendarMonthYear,
 .NuoCalendarWeekdays {
-    display: flex;
-    flex-direction: row;
-    flex: 1 1 auto;
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 auto;
 }
 
-.NuoCalendarMonthYear>select {
-    display: flex;
-    flex: 1 1 auto;
-    margin: 3px;
-    color: rgba(0, 0, 0, 0.87);
-    border-radius: 3px;
-    text-align: center;
+.NuoCalendarMonthYear > select {
+  display: flex;
+  flex: 1 1 auto;
+  margin: 3px;
+  color: rgba(0, 0, 0, 0.87);
+  border-radius: 3px;
+  text-align: center;
 }
 
 .NuoCalendarPrevNext {
-    display: flex;
-    flex-direction: row;
-    flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  flex: 0 0 auto;
 }
 
 .NuoCalendarCell,
 .NuoCalendarCellHeader,
 .NuoCalendarCellSelected {
-    display: flex;
-    flex: 0 0 auto;
-    justify-content: center;
-    align-items: center;
-    width: 40px;
-    height: 40px;
-    padding: 5px;
-    text-align: center;
-    vertical-align: center;
-    cursor: pointer;
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 5px;
+  text-align: center;
+  vertical-align: center;
+  cursor: pointer;
 }
 
 .NuoCalendarCellSelected {
-    background-color: lightgray;
-    border-radius: 20px;
+  background-color: lightgray;
+  border-radius: 20px;
 }
 
 .NuoCalendarCellHeader {
-    color: lightgray;
+  color: lightgray;
 }
 
 code {
-    white-space: pre-line;
+  white-space: pre-line;
 }
 
-.NuoDbConnectionInfo>fieldset {
-    border: none;
-    display: flex;
-    flex-direction: row;
-    flex: 1 1 auto;
+.NuoDbConnectionInfo > fieldset {
+  border: none;
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 auto;
 }
 
-.NuoDbConnectionInfo>fieldset>label {
-    width: 150px;
-    height: 25px;
-    margin: 5px;
+.NuoDbConnectionInfo > fieldset > label {
+  width: 150px;
+  height: 25px;
+  margin: 5px;
 }
 
-.NuoDbConnectionInfo>fieldset>textarea,
-.NuoDbConnectionInfo>fieldset>input {
-    margin: 5px;
-    width: 100%;
-    height: 25px;
+.NuoDbConnectionInfo > fieldset > textarea,
+.NuoDbConnectionInfo > fieldset > input {
+  margin: 5px;
+  width: 100%;
+  height: 25px;
 }
 
 .NuoDbConnectionInfoSample {
-    width: 100%;
-    height: 300px;
+  width: 100%;
+  height: 300px;
 }
 
 .NuoCopyButton {
-    margin: 5px;
-    width: 25px;
-    height: 25px;
-    float: left;
+  margin: 5px;
+  width: 25px;
+  height: 25px;
+  float: left;
 }
 
 .NuoButtons {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    margin: 5px 0;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin: 5px 0;
 }
 .NuoRecordingBanner {
-    background-color: #e0e033;
-    padding: 5px 24px;
+  background-color: #e0e033;
+  padding: 5px 24px;
 }
 
-.NuoLeftMenu>img,
-.NuoLeftMenuCollapsed>img {
-    position: relative;
-    margin: 5px;
+.NuoLeftMenu > img,
+.NuoLeftMenuCollapsed > img {
+  position: relative;
+  margin: 5px;
 }
-.NuoLeftMenu>img {
-    content: url("/ui/images/nuodb.png");
-    width: 62px;
-    margin: 15px;
+.NuoLeftMenu > img {
+  content: url("/ui/images/nuodb.png");
+  width: 62px;
+  margin: 15px;
 }
 
-.NuoLeftMenuCollapsed>img {
-    content: url("/ui/images/nuodb-bird-only.png");
-    width: 24px;
-    height: 38px;
-    object-fit: contain;
+.NuoLeftMenuCollapsed > img {
+  content: url("/ui/images/nuodb-bird-only.png");
+  width: 24px;
+  height: 38px;
+  object-fit: contain;
 }
 
 .NuoLeftMenu,
 .NuoLeftMenuCollapsed {
-    transition: width 0.2s, padding 0.2s, opacity 0.2s;
+  transition:
+    width 0.2s,
+    padding 0.2s,
+    opacity 0.2s;
 }
 
 .summary {
-    transition: padding 0.2s;
+  transition: padding 0.2s;
 }
 
 @media (max-width: 600px) {
-    .NuoForDesktop {
-        display: none !important;
-    }
+  .NuoForDesktop {
+    display: none !important;
+  }
 }
 
 @media (min-width: 601px) {
-    .NuoForMobile {
-        display: none !important;
-    }
+  .NuoForMobile {
+    display: none !important;
+  }
 }
 .NuoLeftMenu {
-    width: 200px;
-    background-color: white;
+  width: 200px;
+  background-color: white;
 }
 
 .NuoLeftMenuCollapsed {
-    opacity: 1;
-    width: 45px;
+  opacity: 1;
+  width: 45px;
 }
 
 .NuoContainerLG {
-    width: calc(100% - 200px);
+  width: calc(100% - 200px);
 }
 
 .NuoContainerLGCollapsed {
-    width: calc(100% - 45px);
+  width: calc(100% - 45px);
 }
 
 @media (max-width: 600px) {
-
-    .NuoContainerLG,
-    .NuoContainerLGCollapsed {
-        width: 100%;
-    }
+  .NuoContainerLG,
+  .NuoContainerLGCollapsed {
+    width: 100%;
+  }
 }
 .NuoLeftMenuPopup {
-    position: absolute;
-    z-index: 1001;
-    top: 70px;
-    padding: 5px;
-    box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+  position: absolute;
+  z-index: 1001;
+  top: 70px;
+  padding: 5px;
+  box-shadow:
+    0px 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0px 8px 10px 1px rgba(0, 0, 0, 0.14),
+    0px 3px 14px 2px rgba(0, 0, 0, 0.12);
 }
-.NuoLeftMenu>.details,
-.NuoLeftMenuCollapsed>.details {
-    text-wrap: nowrap;
+.NuoLeftMenu > .details,
+.NuoLeftMenuCollapsed > .details {
+  text-wrap: nowrap;
 }
-.NuoLeftMenu>.details>.summary,
-.NuoLeftMenuCollapsed>.details>.summary {
-    text-transform: uppercase;
-        font-weight: bold;
-        font-size: 0.8em;
-    color: #888888;
-    margin: 10px 0 0 0;
-    padding: 0 15px;
-    cursor: default;
-    }
-
-    .NuoLeftMenuCollapsed>.details>.summary {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        padding: 0 0 0 5px;
-    }
-
-    .NuoLeftMenuCollapsed>.details>.summary:hover {
-        overflow: visible;
-        background-color: white;
-        width: fit-content;
-        position: relative;
-        z-index: 1001;
-    }
-
-    .NuoLeftMenuCollapsed>.details>ol>li {
-        padding: 0 5px;
+.NuoLeftMenu > .details > .summary,
+.NuoLeftMenuCollapsed > .details > .summary {
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 0.8em;
+  color: #888888;
+  margin: 10px 0 0 0;
+  padding: 0 15px;
+  cursor: default;
 }
 
-.NuoLeftMenu>.details>ol,
-.NuoLeftMenuCollapsed>.details>ol {
-    margin: 0 0 10px 0;
-    padding: 0;
+.NuoLeftMenuCollapsed > .details > .summary {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 0 0 5px;
+}
+
+.NuoLeftMenuCollapsed > .details > .summary:hover {
+  overflow: visible;
+  background-color: white;
+  width: fit-content;
+  position: relative;
+  z-index: 1001;
+}
+
+.NuoLeftMenuCollapsed > .details > ol > li {
+  padding: 0 5px;
+}
+
+.NuoLeftMenu > .details > ol,
+.NuoLeftMenuCollapsed > .details > ol {
+  margin: 0 0 10px 0;
+  padding: 0;
 }
 
 .NuoLeftMenuItem {
-    display: flex;
-    justify-content: left;
-    align-items: center;
-    list-style-type: none;
-    border-radius: 5px;
-    height: 40px;
-    padding: 0 15px;
-    cursor: default;
-    text-wrap: nowrap;
-    overflow: hidden;
-    font-size: 0.9em;
-    text-align: left;
-        color: #7a8088;
-    text-transform: capitalize;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  list-style-type: none;
+  border-radius: 5px;
+  height: 40px;
+  padding: 0 15px;
+  cursor: default;
+  text-wrap: nowrap;
+  overflow: hidden;
+  font-size: 0.9em;
+  text-align: left;
+  color: #7a8088;
+  text-transform: capitalize;
 }
 
-.NuoLeftMenuItem>svg {
-    margin: 5px;
-    color: #cdd1d6;
+.NuoLeftMenuItem > svg {
+  margin: 5px;
+  color: #cdd1d6;
 }
 
-.NuoLeftMenuCollapsed *>.NuoLeftMenuItem>label {
-    display: none;
+.NuoLeftMenuCollapsed * > .NuoLeftMenuItem > label {
+  display: none;
 }
 
-.NuoLeftMenuCollapsed *>.NuoLeftMenuItem:hover>label {
-    display: flex;
+.NuoLeftMenuCollapsed * > .NuoLeftMenuItem:hover > label {
+  display: flex;
 }
-.NuoLeftMenuItem:hover>label,
-.NuoLeftMenuItemSelected:hover>label {
-    display: flex;
-    text-wrap: wrap;
-    max-width: 500px;
-    position: absolute;
-    margin: 5px 0px 5px 35px;
-    z-index: 1001;
-}
-
-.NuoLeftMenuCollapsed *>.NuoLeftMenuItem:hover>label {
-    padding-top: 8px;
-        padding-right: 5px;
-        padding-bottom: 8px;
-        padding-left: 5px;
-        height: 40px;
-    border-right: 1px solid;
-    border-top: 1px solid;
-    border-bottom: 1px solid;
-    border-radius: 0 5px 5px 0;
-    background-color: white;
+.NuoLeftMenuItem:hover > label,
+.NuoLeftMenuItemSelected:hover > label {
+  display: flex;
+  text-wrap: wrap;
+  max-width: 500px;
+  position: absolute;
+  margin: 5px 0px 5px 35px;
+  z-index: 1001;
 }
 
-.NuoLeftMenuCollapsed *>.NuoLeftMenuItem:hover {
-    border-left: 1px solid;
-    border-top: 1px solid;
-    border-bottom: 1px solid;
-    padding: 5px;
+.NuoLeftMenuCollapsed * > .NuoLeftMenuItem:hover > label {
+  padding-top: 8px;
+  padding-right: 5px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  height: 40px;
+  border-right: 1px solid;
+  border-top: 1px solid;
+  border-bottom: 1px solid;
+  border-radius: 0 5px 5px 0;
+  background-color: white;
 }
 
-.NuoLeftMenuCollapsed *>.NuoLeftMenuItemSelected:hover>label {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-color: #4f8dbf;
-    height: 30px;
-    border-radius: 0 5px 5px 0;
-        padding: 19px 5px;
+.NuoLeftMenuCollapsed * > .NuoLeftMenuItem:hover {
+  border-left: 1px solid;
+  border-top: 1px solid;
+  border-bottom: 1px solid;
+  padding: 5px;
+}
+
+.NuoLeftMenuCollapsed * > .NuoLeftMenuItemSelected:hover > label {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #4f8dbf;
+  height: 30px;
+  border-radius: 0 5px 5px 0;
+  padding: 19px 5px;
 }
 
 .NuoLeftMenuItemSelected,
-.NuoLeftMenuItemSelected>svg {
-    background-color: #4f8dbf;
-    color: white;
+.NuoLeftMenuItemSelected > svg {
+  background-color: #4f8dbf;
+  color: white;
 }
 
 .NuoPageLayout {
-    display: flex;
-    flex-direction: row;
-    padding: 0;
+  display: flex;
+  flex-direction: row;
+  padding: 0;
 }
 
 .NuoPageLayoutMenuSeparator {
-    width: 1px;
-    border-left: 1px solid;
-    border-color: rgba(240, 240, 240, 1);
-    margin: 0;
-        padding: 0;
+  width: 1px;
+  border-left: 1px solid;
+  border-color: rgba(240, 240, 240, 1);
+  margin: 0;
+  padding: 0;
 }
 
-.NuoPageLayoutMenuSeparator>button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    border: 1px solid;
-    border-radius: 50%;
-    padding: 0;
-    margin: 0;
-    left: -10px;
-    top: 25px;
-    width: 20px;
-    height: 20px;
-    background-color: white;
-    color: rgba(200, 200, 200, 1);
-
+.NuoPageLayoutMenuSeparator > button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  border: 1px solid;
+  border-radius: 50%;
+  padding: 0;
+  margin: 0;
+  left: -10px;
+  top: 25px;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  color: rgba(200, 200, 200, 1);
 }
 .NuoComboBox {
-    display: flex;
-    color: #cdd1d6;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-        padding: 0 0 0 15px;
-    border: 1px solid rgba(240, 240, 240, 1);
-        cursor: default;
-        overflow: hidden;
+  display: flex;
+  color: #cdd1d6;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0 0 15px;
+  border: 1px solid rgba(240, 240, 240, 1);
+  cursor: default;
+  overflow: hidden;
 }
 
-.NuoComboBox>div {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    text-wrap: nowrap;
+.NuoComboBox > div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  text-wrap: nowrap;
 }
 
-.NuoComboBox>div>svg {
-    margin: 5px 10px 5px 0px;
-        color: #cdd1d6;
-        border: 1px solid;
-        border-radius: 50%;
-        padding: 3px;
-        width: 30px;
-        height: 30px;
+.NuoComboBox > div > svg {
+  margin: 5px 10px 5px 0px;
+  color: #cdd1d6;
+  border: 1px solid;
+  border-radius: 50%;
+  padding: 3px;
+  width: 30px;
+  height: 30px;
 }
 
-.NuoLeftMenuCollapsed>.NuoComboBox,
-.NuoLeftMenuCollapsed *>.NuoComboBox {
-    padding: 0 5px;
-    justify-content: left;
+.NuoLeftMenuCollapsed > .NuoComboBox,
+.NuoLeftMenuCollapsed * > .NuoComboBox {
+  padding: 0 5px;
+  justify-content: left;
 }
 
 .NuoFormHeader {
-    margin-block-start: 0.67em;
-    margin-block-end: 2em;
-    margin-inline-start: 0;
-    margin-inline-end: 0;
+  margin-block-start: 0.67em;
+  margin-block-end: 2em;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
 }
 
-.NuoFormHeader>h1 {
-    display: flex;
-    margin-block-start: 0;
-    margin-block-end: 0;
-    font-size: 2em;
-    font-weight: bold;
-    unicode-bidi: isolate;
+.NuoFormHeader > h1 {
+  display: flex;
+  margin-block-start: 0;
+  margin-block-end: 0;
+  font-size: 2em;
+  font-weight: bold;
+  unicode-bidi: isolate;
 }
 
-.NuoFormHeader>label {
-    margin-block-end: 0.67em;
+.NuoFormHeader > label {
+  margin-block-end: 0.67em;
 }
 
 .NuoInfoPopup {
-    display: flex;
-    cursor: default;
-    flex-direction: row;
-    align-items: top;
-    justify-content: right;
+  display: flex;
+  cursor: default;
+  flex-direction: row;
+  align-items: top;
+  justify-content: right;
 }
 
-.NuoInfoPopup>label {
-    display: none;
+.NuoInfoPopup > label {
+  display: none;
 }
 
-.NuoInfoPopup>svg {
-    opacity: 0.5;
+.NuoInfoPopup > svg {
+  opacity: 0.5;
 }
 
-.NuoInfoPopup:hover>label {
-    display: flex;
-    text-wrap: wrap;
-    max-width: 500px;
-    background-color: white;
-    box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
-    position: absolute;
-    margin-top: 30px;
-    margin-left: -1000px;
-    padding: 5px;
-    z-index: 1001;
+.NuoInfoPopup:hover > label {
+  display: flex;
+  text-wrap: wrap;
+  max-width: 500px;
+  background-color: white;
+  box-shadow:
+    0px 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0px 8px 10px 1px rgba(0, 0, 0, 0.14),
+    0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+  position: absolute;
+  margin-top: 30px;
+  margin-left: -1000px;
+  padding: 5px;
+  z-index: 1001;
 }
 
 .NuoArrayLabel {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
 .NuoTableField_labels {
-    display: inline-block;
-    border: 1px solid lightgray;
-    border-radius: 10px;
-    padding: 2px 8px;
-    margin: 2px;
+  display: inline-block;
+  border: 1px solid lightgray;
+  border-radius: 10px;
+  padding: 2px 8px;
+  margin: 2px;
 }
 
-*:has(>.NuoTableField_labels) {
-    display: inline-block;
+*:has(> .NuoTableField_labels) {
+  display: inline-block;
 }
 
 .NuoTableOptions {
-    display: flex;
-        flex-direction: row;
-        flex: 0 0 auto;
-    padding: 15px;
-    align-items: center;
-    }
-
-.NuoTableSelectedActions {
-    display: inline-flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
+  display: flex;
+  flex-direction: row;
+  flex: 0 0 auto;
+  padding: 15px;
+  align-items: center;
 }
 
-.NuoTableSelectedActions>button {
-    margin: 0 2px;
+.NuoTableSelectedActions {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.NuoTableSelectedActions > button {
+  margin: 0 2px;
 }
 
 .deleteButton {
-    background-color: red;
+  background-color: red;
 }
 
 .deleteButton:hover {
-    background-color: darkred;
+  background-color: darkred;
 }
 
-.NuoTableSelectedActions>label {
-    margin: 0 5px;
+.NuoTableSelectedActions > label {
+  margin: 0 5px;
 }
 .NuoMenuIcon {
-    border: 1px solid lightgray;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    border-radius: 50%;
-    width: 40px;
-        height: 40px;
-    padding: 15px;
+  border: 1px solid lightgray;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  padding: 15px;
 }
 
 .NuoMenuIcon:hover {
-    background-color: lightgray;
-    cursor: pointer;
+  background-color: lightgray;
+  cursor: pointer;
 }
 .NuoIcon {
-    width: 24px;
-    height: 24px;
-    margin-right: 5px;
+  width: 24px;
+  height: 24px;
+  margin-right: 5px;
 }
 button,
 .NuoButton {
-    display: flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    background-color: #4f8dbf;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 0.9em;
-    padding: 7px 10px;
-    cursor: default;
-    text-wrap: nowrap;
-    text-align: left;
-    height: 38px;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  background-color: #4f8dbf;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.9em;
+  padding: 7px 10px;
+  cursor: default;
+  text-wrap: nowrap;
+  text-align: left;
+  height: 38px;
 }
 
 button:hover,
 button:focus,
 .NuoButton:hover,
 .NuoButton:focus {
-    background-color: #4377a2;
-    box-shadow: 2px 2px 5px -3px rgba(0, 0, 0, 0.2), 4px 4px 10px 1px rgba(0, 0, 0, 0.14), 1px 1px 14px 2px rgba(0, 0, 0, 0.12);
+  background-color: #4377a2;
+  box-shadow:
+    2px 2px 5px -3px rgba(0, 0, 0, 0.2),
+    4px 4px 10px 1px rgba(0, 0, 0, 0.14),
+    1px 1px 14px 2px rgba(0, 0, 0, 0.12);
 }
 .NuoButtonDown {
-    display: flex;
-    flex-direction: row;
-    flex: 0 0 auto;
-    background-color: #4f8dbf;
-    color: white;
-    height: 38px;
-    border-radius: 5px;
+  display: flex;
+  flex-direction: row;
+  flex: 0 0 auto;
+  background-color: #4f8dbf;
+  color: white;
+  height: 38px;
+  border-radius: 5px;
 }
 
 .NuoButtonOutlined {
-    background-color: transparent;
-    color: black;
-    border: 1px solid #4f8dbf;
+  background-color: transparent;
+  color: black;
+  border: 1px solid #4f8dbf;
 }
 
 .NuoButtonOutlined:hover,
 .NuoButtonOutlined:focus {
-    background-color: transparent;
-    color: black;
-    box-shadow: 2px 2px 5px -3px rgba(0, 0, 0, 0.2), 4px 4px 10px 1px rgba(0, 0, 0, 0.14), 1px 1px 14px 2px rgba(0, 0, 0, 0.12);
+  background-color: transparent;
+  color: black;
+  box-shadow:
+    2px 2px 5px -3px rgba(0, 0, 0, 0.2),
+    4px 4px 10px 1px rgba(0, 0, 0, 0.14),
+    1px 1px 14px 2px rgba(0, 0, 0, 0.12);
 }
 
 .NuoButtonOutlined {
-    background-color: transparent;
-    color: black;
-    border: 1px solid #4f8dbf;
+  background-color: transparent;
+  color: black;
+  border: 1px solid #4f8dbf;
 }
 
 .NuoButtonDisabled,
 .NuoButtonDisabled:hover {
-    background-color: light-dark(rgba(239, 239, 239, 0.3), rgba(19, 1, 1, 0.3));
-    color: light-dark(rgba(16, 16, 16, 0.3), rgba(255, 255, 255, 0.3));
-    border-color: light-dark(rgba(118, 118, 118, 0.3), rgba(195, 195, 195, 0.3));
+  background-color: light-dark(rgba(239, 239, 239, 0.3), rgba(19, 1, 1, 0.3));
+  color: light-dark(rgba(16, 16, 16, 0.3), rgba(255, 255, 255, 0.3));
+  border-color: light-dark(rgba(118, 118, 118, 0.3), rgba(195, 195, 195, 0.3));
 }
 .NuoButtonText {
-    background-color: transparent;
-    color: #4f8dbf;
-    border: none;
-    margin: 0 5px;
+  background-color: transparent;
+  color: #4f8dbf;
+  border: none;
+  margin: 0 5px;
 }
 
 .NuoButtonText:hover,
 .NuoButtonText:focus {
-    background-color: transparent;
-    color: #4377a2;
-    box-shadow: 2px 2px 5px -3px rgba(0, 0, 0, 0.2), 4px 4px 10px 1px rgba(0, 0, 0, 0.14), 1px 1px 14px 2px rgba(0, 0, 0, 0.12);
+  background-color: transparent;
+  color: #4377a2;
+  box-shadow:
+    2px 2px 5px -3px rgba(0, 0, 0, 0.2),
+    4px 4px 10px 1px rgba(0, 0, 0, 0.14),
+    1px 1px 14px 2px rgba(0, 0, 0, 0.12);
 }
 .RestSpinner {
-    position: absolute;
-    top: 30%;
-    bottom: 70%;
-    left: 50%;
-    right: 50%;
-    z-index: 600;
+  position: absolute;
+  top: 30%;
+  bottom: 70%;
+  left: 50%;
+  right: 50%;
+  z-index: 600;
 }
 
 .NuoTabs {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
 }
-.NuoTabs>ul {
-    display: flex;
-    flex-direction: row;
-    padding: 5px 5px 0 5px;
-        margin: 20px 20px 0 15px;
-        overflow: overlay;
+.NuoTabs > ul {
+  display: flex;
+  flex-direction: row;
+  padding: 5px 5px 0 5px;
+  margin: 20px 20px 0 15px;
+  overflow: overlay;
 }
 
-.NuoTabs>ul>li {
-    display: flex;
-    flex-direction: row;
-        align-items: center;
-    background-color: #fff;
-    color: rgba(0, 0, 0, 0.87);
-    padding: 10px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-    z-index: 0;
-    cursor: default;
-    text-wrap: nowrap;
+.NuoTabs > ul > li {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: #fff;
+  color: rgba(0, 0, 0, 0.87);
+  padding: 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  z-index: 0;
+  cursor: default;
+  text-wrap: nowrap;
 }
 
 .NuoTabsSelected {
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 0px 10px -1px rgba(0, 0, 0, .2), 0px -1px 1px 0px rgba(0, 0, 0, 0.14), 0px -1px 3px 0px rgba(0, 0, 0, 0.12);
-    background-color: #fff;
-    color: rgba(0, 0, 0, 0.87);
-    border-radius: 10px 10px 0 0;
-    border-bottom: 0 !important;
-    z-index: 1 !important;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 0px 10px -1px rgba(0, 0, 0, 0.2),
+    0px -1px 1px 0px rgba(0, 0, 0, 0.14),
+    0px -1px 3px 0px rgba(0, 0, 0, 0.12);
+  background-color: #fff;
+  color: rgba(0, 0, 0, 0.87);
+  border-radius: 10px 10px 0 0;
+  border-bottom: 0 !important;
+  z-index: 1 !important;
 }
 
 .NuoTabsBody {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    position: relative;
-    box-shadow: 0 0px 10px 1px rgba(0, 0, 0, .2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12);
-    clip-path: inset(0px -10px -10px -10px);
-    background-color: #fff;
-    color: rgba(0, 0, 0, 0.87);
-    border-radius: 0 0 10px 10px;
-    margin: 0 20px 20px 20px;
-    padding: 0;
-    z-index: 2 !important;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  position: relative;
+  box-shadow:
+    0 0px 10px 1px rgba(0, 0, 0, 0.2),
+    0px 1px 1px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 3px 0px rgba(0, 0, 0, 0.12);
+  clip-path: inset(0px -10px -10px -10px);
+  background-color: #fff;
+  color: rgba(0, 0, 0, 0.87);
+  border-radius: 0 0 10px 10px;
+  margin: 0 20px 20px 20px;
+  padding: 0;
+  z-index: 2 !important;
 }
 .NuoFieldContainer {
-    margin: .5em;
+  margin: 0.5em;
 }
 .NuoBadge,
 .NuoBadgeLight {
-    min-width: 10px;
-    min-height: 10px;
-    margin: 0 0 0 5px;
-    border-radius: 99999px;
-    padding: 3px;
-    font-size: 13px;
+  min-width: 10px;
+  min-height: 10px;
+  margin: 0 0 0 5px;
+  border-radius: 99999px;
+  padding: 3px;
+  font-size: 13px;
 }
 
 .NuoBadge {
-    background-color: red;
-    color: white;
+  background-color: red;
+  color: white;
 }
 
 .NuoBadgeLight {
-    background-color: lightgray;
-    color: black;
+  background-color: lightgray;
+  color: black;
 }
 
 details summary {
-    list-style: none;
-    /* Hide the default arrow marker */
-    position: relative;
-    /* Needed for positioning the pseudo-element */
-    padding-left: 20px;
-    /* Create space for the custom arrow */
-    cursor: pointer;
+  list-style: none;
+  /* Hide the default arrow marker */
+  position: relative;
+  /* Needed for positioning the pseudo-element */
+  padding-left: 20px;
+  /* Create space for the custom arrow */
+  cursor: pointer;
 }
 
 details summary::-webkit-details-marker {
-    display: none;
+  display: none;
 }
 
 details summary::before {
-    content: '►';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
+  content: "►";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 details[open] summary::before {
-    content: '▼';
+  content: "▼";
 }
 
 .NuoSummaryContent {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 
 .NuoEllipsis {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    max-width: 200px;
-    position: relative;
-    cursor: default;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  position: relative;
+  cursor: default;
 }
 .NuoToast {
-    left: 50%;
-    right: auto;
-    -webkit-transform: translateX(-50%);
-    -moz-transform: translateX(-50%);
-    -ms-transform: translateX(-50%);
-    transform: translateX(-50%);
-    position: absolute;
+  left: 50%;
+  right: auto;
+  -webkit-transform: translateX(-50%);
+  -moz-transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+  transform: translateX(-50%);
+  position: absolute;
 }
 
-.NuoToast>div {
-    box-shadow: 0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 6px 10px 0px rgba(0, 0, 0, 0.14), 0px 1px 18px 0px rgba(0, 0, 0, 0.12);
-    opacity: 1;
-    transform: none;
-    transition: opacity 225ms cubic-bezier(0.4, 0, 0.2, 1), transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    padding: 8px 15px;
-    border-radius: 5px;
-    background-color: black;
-    color: white;
-    margin: 5px;
+.NuoToast > div {
+  box-shadow:
+    0px 3px 5px -1px rgba(0, 0, 0, 0.2),
+    0px 6px 10px 0px rgba(0, 0, 0, 0.14),
+    0px 1px 18px 0px rgba(0, 0, 0, 0.12);
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 225ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 8px 15px;
+  border-radius: 5px;
+  background-color: black;
+  color: white;
+  margin: 5px;
 }
 .NuoMoreValue {
-    display: inline;
-    color: blue;
-    cursor: pointer;
+  display: inline;
+  color: blue;
+  cursor: pointer;
 }
 
 .NuoMoreValueExpanded {
-    display: inline;
+  display: inline;
 }
 .NuoError {
-    white-space: preserve;
-    color: red;
-    font-size: .8em;
-        font-family: monospace;
+  white-space: preserve;
+  color: red;
+  font-size: 0.8em;
+  font-family: monospace;
 }
 .NuoFilterActive,
 .NuoFilterInactive {
-    display: flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
 }
 
 .NuoFilterInactive {
-    color: #cdd1d6;
+  color: #cdd1d6;
 }
 
 .NuoFilterActive {
-    background-color: blue;
-    color: white;
-    border-radius: 5px;
+  background-color: blue;
+  color: white;
+  border-radius: 5px;
 }
 .NuoEnumItem {
-    display: inline;
+  display: inline;
 }
 
 .NuoEnumItemTitle {
-    display: inline;
-    padding: 0 10px 0 0;
+  display: inline;
+  padding: 0 10px 0 0;
 }
 
 .NuoEnumItemDescription {
-    display: inline;
-    color: lightgray;
-    text-wrap: wrap;
-    font-size: 0.9em;
+  display: inline;
+  color: lightgray;
+  text-wrap: wrap;
+  font-size: 0.9em;
 }
 
 .NuoLoginForm .MuiFormControl-root + .MuiFormControl-root {
@@ -1089,101 +1122,104 @@ details[open] summary::before {
 }
 
 input[type="file"].NuoUpload {
-    display: none;
+  display: none;
 }
 
 label.NuoUpload {
-    width: 100px;
-    height: 100px;
-    border-radius: 50px;
-    background-color: inherit;
-    border-style: dotted;
-    border-color: lightgray;
-    color: lightgray;
-    border-width: 3px;
-    align-items: center;
-    justify-content: center;
-    display: flex;
+  width: 100px;
+  height: 100px;
+  border-radius: 50px;
+  background-color: inherit;
+  border-style: dotted;
+  border-color: lightgray;
+  color: lightgray;
+  border-width: 3px;
+  align-items: center;
+  justify-content: center;
+  display: flex;
 }
 
 label.NuoUpload > div {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 label.NuoUpload:hover {
-    background-color: rgb(200, 200, 200);
+  background-color: rgb(200, 200, 200);
 }
 .NuoUploadLightLabel {
-    color: lightgray;
-    font-size: .8em;
+  color: lightgray;
+  font-size: 0.8em;
 }
 .NuoBackgroundTasksStatus {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    z-index: 500;
-    box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
-    padding: 5px;
-    background-color: white;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 500;
+  box-shadow:
+    0px 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0px 8px 10px 1px rgba(0, 0, 0, 0.14),
+    0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+  padding: 5px;
+  background-color: white;
 }
 .NuoPadding10 {
-    padding: 10px;
+  padding: 10px;
 }
 .NuoHorizontalCheckboxes {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    flex: 1 1 auto;
-    padding: 10px 0;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  padding: 10px 0;
 }
 
-.NuoHorizontalCheckboxes>label {
-    padding-right: 10px;
+.NuoHorizontalCheckboxes > label {
+  padding-right: 10px;
 }
 
-.NuoHorizontalCheckboxes>label>input[type="checkbox"] {
-    margin: 0 10px;
+.NuoHorizontalCheckboxes > label > input[type="checkbox"] {
+  margin: 0 10px;
 }
 .NuoTableCheckbox {
-    display: flex;
-        flex: 1 1 auto;
-        flex-direction: row;
-    }
-
-    .NuoTableCheckbox>input,
-    .NuoTableSelectedActions>input {
-    margin: 0 16px 0 0;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: row;
 }
 
-.NuoTableCheckbox>button {
-    justify-content: left;
+.NuoTableCheckbox > input,
+.NuoTableSelectedActions > input {
+  margin: 0 16px 0 0;
+}
+
+.NuoTableCheckbox > button {
+  justify-content: left;
 }
 .NuoStickyLeft,
 .NuoStickyRight {
-    position: sticky;
-    z-index: 1;
+  position: sticky;
+  z-index: 1;
 }
 
 .NuoStickyLeft {
-    border-right: solid 1px lightgray;
-    left: 0;
+  border-right: solid 1px lightgray;
+  left: 0;
 }
 
 .NuoStickyRight {
-    border-left: solid 1px lightgray;
-    right: 0;
+  border-left: solid 1px lightgray;
+  right: 0;
 }
 
 .NuoSimpleTable,
-.NuoSimpleTable>thead,
-.NuoSimpleTable>thead>tr,
-.NuoSimpleTable>thead>tr>th,
-.NuoSimpleTable>tbody,
-.NuoSimpleTable>tbody>tr,
-.NuoSimpleTable>tbody>tr>td {
-    border: 1px solid lightgray;
-    border-collapse: collapse;
+.NuoSimpleTable > thead,
+.NuoSimpleTable > thead > tr,
+.NuoSimpleTable > thead > tr > th,
+.NuoSimpleTable > tbody,
+.NuoSimpleTable > tbody > tr,
+.NuoSimpleTable > tbody > tr > td {
+  border: 1px solid lightgray;
+  border-collapse: collapse;
 }
