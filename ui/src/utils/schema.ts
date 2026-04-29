@@ -1,10 +1,34 @@
 // (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
+import axios from "axios";
 import Toast from "../components/controls/Toast";
 import { Rest } from "../components/pages/parts/Rest";
-import Auth from "./auth"
+import Auth, { isBrowser } from "./auth"
 import { FieldValuesType, TempAny, SchemaType, FieldParametersType } from "./types";
 let schema : TempAny = null;
+
+export const Feature: {FILTER_ON_SERVER: boolean|undefined} = {
+    FILTER_ON_SERVER: undefined
+};
+
+function compareSemVer(semver1: string, semver2: string) : number | null {
+    semver1 = semver1.split("-")[0].split("+")[0];
+    semver2 = semver2.split("-")[0].split("+")[0];
+    const parts1 = semver1.split(".");
+    const parts2 = semver2.split(".");
+    for(let i=0; i<parts1.length && i<parts2.length; i++) {
+        const val1 = parseInt(parts1[i]);
+        const val2 = parseInt(parts2[i]);
+        if(isNaN(val1) || isNaN(val2)) {
+            return null;
+        }
+        if(val1 < val2) return -1;
+        if(val1 > val2) return 1;
+    }
+    if(parts1.length < parts2.length) return -1;
+    if(parts1.length > parts2.length) return 1;
+    return 0;
+}
 
 /**
  * Pulls OpenAPI spec schema and parses it
@@ -13,10 +37,17 @@ let schema : TempAny = null;
 export async function getSchema() {
     if(!schema) {
         try {
-            schema = await Rest.get("openapi");
+            if(isBrowser()) {
+                schema = await Rest.get("openapi");
+            }
+            else {
+                schema = (await axios.get(Auth.getNuodbCpRestUrl("openapi"), { headers: Auth.getHeaders() })).data;
+            }
             parseSchema(schema, schema, []);
+            const version = schema.info?.version || "1.0.0";
             schema = schema["paths"];
             schema = filterAccessPaths(schema);
+            Feature.FILTER_ON_SERVER = (compareSemVer(version, "2.12.0") || 0) >= 0 && schema["/users"]?.get?.parameters?.find((p: { name: string; }) => p.name === "fieldFilter") && true || false;
         }
         catch(error) {
             console.log("ERROR", error);
@@ -347,13 +378,12 @@ export function concatChunks(chunk1: Uint8Array<ArrayBuffer>, chunk2: Uint8Array
     return ret;
 }
 
-let monitoredPaths = new Set<string>();
+let eventTransaction = 0;
 
-export function hasMonitoredPath(path: string) : boolean {
-    return monitoredPaths.has(path.split("?")[0]);
+let monitored: undefined | {abort: AbortController, transactionNumber: number} = undefined;
+export function hasActiveStream() : boolean {
+    return !!monitored;
 }
-
-let lastSetTimeout_getResourceEvents: any = undefined;
 
 /**
  * Gets event streaming resource by path (fall back to non-streaming resource on failure)
@@ -363,16 +393,13 @@ let lastSetTimeout_getResourceEvents: any = undefined;
  * @param {*} retryIntervalMS - milliseconds for the next retry (which will be doubled each time). Set to <= 0 to disable retries.
  * @returns AbortController - use ret.abort() to abort
  */
-export function getResourceEvents(schema: any, path: string, multiResolve: TempAny, multiReject: TempAny, retryIntervalMS: number = 0) {
-    if(lastSetTimeout_getResourceEvents) {
-        clearTimeout(lastSetTimeout_getResourceEvents);
-    }
+export function getResourceEvents(schema: any, path: string, multiResolve: TempAny, multiReject: TempAny, retryIntervalMS: number = 0, transactionNumber: number = -1) {
     //only one event stream is supported - close prior one if it exists.
     let eventsAbortController = new AbortController();
 
     let hasEventsAccess = false;
     Object.keys(schema).forEach(schemaPath => {
-        if(matchesPath("/events" + path, schemaPath)) {
+        if(matchesPath("/events" + path.split("?")[0], schemaPath)) {
             hasEventsAccess = true;
         }
     })
@@ -384,9 +411,19 @@ export function getResourceEvents(schema: any, path: string, multiResolve: TempA
         return;
     }
 
+    // increment transaction number and abort existing ones on same path
+    if(monitored && monitored.transactionNumber !== transactionNumber) {
+        // this is a different request on the same resource - abort the prior one
+        monitored.abort.abort();
+    }
+    if(transactionNumber === -1) {
+        eventTransaction++;
+        transactionNumber = eventTransaction;
+    }
+
     Rest.getStream(Auth.getNuodbCpRestUrl("events" + path), Auth.getHeaders(), eventsAbortController)
       .then(async (response: TempAny) => {
-        monitoredPaths.add(path.split("?")[0]);
+        monitored = {abort: eventsAbortController, transactionNumber};
         let event = null;
         let data = null;
         let id = null;
@@ -496,6 +533,9 @@ export function getResourceEvents(schema: any, path: string, multiResolve: TempA
                 }
             }
         }
+        if(monitored && monitored.transactionNumber === transactionNumber) {
+            monitored = undefined;
+        }
       })
       .catch((error) => {
         if(error.status === 404) {
@@ -504,19 +544,22 @@ export function getResourceEvents(schema: any, path: string, multiResolve: TempA
                 .then(data => multiResolve(data))
                 .catch(reason => multiReject(reason));
         }
+        else if(error.status === 400) {
+            multiReject(error)
+        }
         else {
             // request failed. Retry incrementally.
             if(retryIntervalMS > 0) {
                 // reconnect - server/proxy might disconnect due to a timeout
-                lastSetTimeout_getResourceEvents = setTimeout(()=> {
-                    getResourceEvents(schema, path, multiResolve, multiReject, retryIntervalMS * 1.3); //retry with a 30% delay (exponential backoff)
+                setTimeout(()=> {
+                    if(monitored && monitored.transactionNumber === transactionNumber) {
+                        // only retry if the event stream for the specified path is not superseded by another one
+                        getResourceEvents(schema, path, multiResolve, multiReject, retryIntervalMS * 1.3, transactionNumber); //retry with a 30% delay (exponential backoff)
+                    }
                 }, retryIntervalMS);
             }
         }
       })
-      .finally(()=>{
-        monitoredPaths.delete(path.split("?")[0]);
-      });
 
       return eventsAbortController;
 }

@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -9,6 +9,7 @@ import Auth from "../../utils/auth";
 import { PageProps, TempAny } from "../../utils/types";
 import PageLayout from "./parts/PageLayout";
 import { withTranslation } from "react-i18next";
+import Toast from "../controls/Toast";
 
 /**
  * handles all the /resource/edit/* requests to edit a resource
@@ -26,6 +27,7 @@ function EditResource(props: PageProps) {
             }).catch((error) => {
                 Auth.handle401Error(error);
                 setData({});
+                Toast.show("Error retrieving entry", error);
             });
         }
         else {

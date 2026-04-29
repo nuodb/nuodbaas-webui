@@ -1,4 +1,4 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { JSX, ReactNode } from 'react';
 
@@ -49,7 +49,7 @@ export function Checkbox({id, checked, onChange, label}: CheckboxProps): JSX.Ele
 }
 
 export default function Checkboxes({items, setItems}: CheckboxesProps): ReactNode {
-    return items.map((item,index) => <Checkbox id={item.id} checked={item.selected} label={item.label || item.id} onChange={(event)=>{
+    return items.map((item, index) => <Checkbox key={index} id={item.id} checked={item.selected} label={item.label || item.id} onChange={(event) => {
         let newItems = [...items];
         newItems[index] = {...newItems[index], selected: !newItems[index].selected};
         setItems(newItems);

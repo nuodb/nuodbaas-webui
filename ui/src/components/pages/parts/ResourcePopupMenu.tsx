@@ -2,7 +2,7 @@
 
 import { useNavigate } from "react-router-dom";
 import { CustomViewMenu, evaluate, getCustomizationsView } from "../../../utils/Customizations";
-import { getResourceByPath, getSchemaPath, hasMonitoredPath, replaceVariables } from "../../../utils/schema";
+import { getResourceByPath, getSchemaPath, hasActiveStream, replaceVariables } from "../../../utils/schema";
 import { MenuItemProps, TempAny } from "../../../utils/types";
 import Menu from "../../controls/Menu";
 import Toast from "../../controls/Toast";
@@ -36,7 +36,7 @@ export default function ResourcePopupMenu({ row, schema, path, sla, defaultItem,
                     if(!row["$ref"]) {
                         navigate("/ui/resource/list/" + deletePath.substring(0, deletePath.lastIndexOf("/")))
                     }
-                    else if (!hasMonitoredPath(path)) {
+                    else if (!hasActiveStream()) {
                         window.location.reload();
                     }
                 }).catch((error) => {

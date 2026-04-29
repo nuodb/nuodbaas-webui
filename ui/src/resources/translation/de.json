@@ -269,6 +269,25 @@
             "hideGetRequests": "GET Anweisungen ausblenden",
             "convertUpdatesToPatchRequests": "PUT Anweisungen zu PATCH umwandeln",
             "noWriteRequests": "Keine Änderungen aufgenommen."
+        },
+        "searchFilter": {
+            "addTitle": "Filter hinzufügen",
+            "editTitle": "Filter bearbeiten",
+            "label": {
+                "addField": "Suchfeld hinzufügen",
+                "fieldName": "Feld name",
+                "condition": "Vergleich",
+                "value": "Wert"
+            },
+            "options": {
+                "NON_NULL": "enthalten",
+                "NULL": "nicht enhalten",
+                "=": "gleich",
+                "!=": "nicht gleich",
+                ">=": "größer oder gleich",
+                "<=": "kleiner oder gleich",
+                "~": "Regex"
+            }
         }
     },
     "text": {
