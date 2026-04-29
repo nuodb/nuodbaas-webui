@@ -153,9 +153,6 @@ function RegionSelectorSettings(props: PageProps) {
                         const cp = removeSlashPostfix((fields.cp || "").trim());
                         const sql = removeSlashPostfix((fields.sql || "").trim());
 
-                        // validate we can connect
-
-
                         // save regions
                         let regions: RegionSettings = Auth.getRegions();
                         if(isNew) {
