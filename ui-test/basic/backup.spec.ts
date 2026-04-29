@@ -10,10 +10,7 @@ import {
   sleep,
   clickMenu,
 } from "../helpers/ui";
-import {
-  createProjectRest,
-  createDatabaseRest,
-} from "../helpers/api";
+import { createProjectRest, createDatabaseRest } from "../helpers/api";
 import { expect } from "@playwright/test";
 
 test.describe("BackupTest", () => {

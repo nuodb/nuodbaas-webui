@@ -10,7 +10,7 @@ import FieldArray from "./FieldArray";
 import FieldInteger from "./FieldInteger";
 import FieldMessage from "./FieldMessage";
 import FieldDateTime from "./FieldDateTime";
-import { FieldBase_display, FieldBase_validate, FieldProps} from "./FieldBase";
+import { FieldBase_display, FieldBase_validate, FieldProps } from "./FieldBase";
 import { ReactNode } from "react";
 import FieldSelect from "./FieldSelect";
 import FieldCrontab from "./FieldCrontab";
@@ -18,118 +18,123 @@ import { matchesPath } from "../../utils/schema";
 import FieldUserRole from "./FieldUserRole";
 
 /** Factory function to create components based on the field type */
-export function Field(props: FieldProps) : ReactNode {
-    props = { ...props };
-    props.values = JSON.parse(JSON.stringify(props.values));
+export function Field(props: FieldProps): ReactNode {
+  props = { ...props };
+  props.values = JSON.parse(JSON.stringify(props.values));
 
-    let leftOvers = JSON.parse(JSON.stringify(props.parameter || {}));
-    if (!("schema" in leftOvers)) {
-        leftOvers["schema"] = {};
-    }
+  let leftOvers = JSON.parse(JSON.stringify(props.parameter || {}));
+  if (!("schema" in leftOvers)) {
+    leftOvers["schema"] = {};
+  }
 
-    function get(key1: string, key2?: string) {
-        if (!key2) {
-            let ret = leftOvers[key1];
-            delete leftOvers[key1];
-            return ret;
-        }
-        else {
-            let ret = leftOvers[key1][key2];
-            delete leftOvers[key1][key2];
-            return ret;
-        }
+  function get(key1: string, key2?: string) {
+    if (!key2) {
+      let ret = leftOvers[key1];
+      delete leftOvers[key1];
+      return ret;
+    } else {
+      let ret = leftOvers[key1][key2];
+      delete leftOvers[key1][key2];
+      return ret;
     }
+  }
 
-    let in_ = get("in");
-    if (in_ && in_ !== "path" && in_ !== "query") {
-        throw new Error("Invalid IN value " + in_);
-    }
+  let in_ = get("in");
+  if (in_ && in_ !== "path" && in_ !== "query") {
+    throw new Error("Invalid IN value " + in_);
+  }
 
-    props.required = get("required");
+  props.required = get("required");
 
-    let format = get("format");
-    let type = get("type")
-    if (!type) {
-        type = get("schema", "type");
-        format = get("schema", "format");
-    }
+  let format = get("format");
+  let type = get("type");
+  if (!type) {
+    type = get("schema", "type");
+    format = get("schema", "format");
+  }
 
-    if (type === "string" && format === "date-time") {
-        return <FieldDateTime {...props} />;
+  if (type === "string" && format === "date-time") {
+    return <FieldDateTime {...props} />;
+  } else if (type === "string") {
+    if (props.prefix === "resourceVersion") {
+      return <FieldHidden {...props} />;
+    } else if (props.parameter["x-tf-sensitive"] === true) {
+      return <FieldPassword {...props} />;
+    } else if (props.parameter.enum && !props.readonly) {
+      return <FieldSelect {...props} />;
+    } else if (
+      props.prefix === "frequency" &&
+      (props.path === "/backuppolicies" ||
+        props.path.startsWith("/backuppolicies/"))
+    ) {
+      return <FieldCrontab {...props} />;
+    } else {
+      return <FieldString {...props} />;
     }
-    else if (type === "string") {
-        if (props.prefix === "resourceVersion") {
-            return <FieldHidden {...props} />;
-        }
-        else if (props.parameter["x-tf-sensitive"] === true) {
-            return <FieldPassword {...props} />;
-        }
-        else if (props.parameter.enum && !props.readonly) {
-            return <FieldSelect {...props} />;
-        }
-        else if (props.prefix === "frequency" && (props.path === "/backuppolicies" || props.path.startsWith("/backuppolicies/"))) {
-            return <FieldCrontab {...props} />;
-        }
-        else {
-            return <FieldString {...props} />;
-        }
-    }
-    else if (type === "boolean") {
-        return <FieldBoolean {...props} />;
-    }
-    else if (type === "object") {
-        if (props.parameter["properties"]) {
-            if (props.parameter.expand === false || props.parameter.expand === true) {
-                props.expand = props.parameter.expand;
-            }
+  } else if (type === "boolean") {
+    return <FieldBoolean {...props} />;
+  } else if (type === "object") {
+    if (props.parameter["properties"]) {
+      if (props.parameter.expand === false || props.parameter.expand === true) {
+        props.expand = props.parameter.expand;
+      }
 
-            if (matchesPath(props.path, "/users/{organization}/{name}") && props.prefix.startsWith("roles.")) {
-                return <FieldUserRole {...props} />;
-            }
-            else {
-                return <FieldObject {...props} />;
-            }
+      if (
+        matchesPath(props.path, "/users/{organization}/{name}") &&
+        props.prefix.startsWith("roles.")
+      ) {
+        return <FieldUserRole {...props} />;
+      } else {
+        return <FieldObject {...props} />;
+      }
+    } else if (props.parameter["additionalProperties"]) {
+      return <FieldMap {...props} />;
+    } else {
+      return <FieldMessage {...props} message="ERROR: Invalid object" />;
+    }
+  } else if (type === "array") {
+    return <FieldArray {...props} />;
+  } else if (type === "integer") {
+    return <FieldInteger {...props} />;
+  } else {
+    return (
+      <FieldMessage
+        {...props}
+        message={
+          "Invalid type " +
+          String(type) +
+          " " +
+          JSON.stringify(props.parameter) +
+          " " +
+          JSON.stringify(leftOvers)
         }
-        else if (props.parameter["additionalProperties"]) {
-            return <FieldMap {...props} />;
-        }
-        else {
-            return <FieldMessage {...props}  message="ERROR: Invalid object" />;
-        }
-    }
-    else if (type === "array") {
-        return <FieldArray {...props} />;
-    }
-    else if (type === "integer") {
-        return <FieldInteger {...props} />;
-    }
-    else {
-        return <FieldMessage { ...props} message={"Invalid type " + String(type) + " " + JSON.stringify(props.parameter) + " " + JSON.stringify(leftOvers) } />;
-    }
+      />
+    );
+  }
 }
 
 export function Field_display(props: FieldProps): ReactNode {
-    return FieldBase_display({
-        ...props,
-        setValues: () => { },
-        errors: {},
-        updateErrors: () => { },
-        required: false,
-        autoFocus: false,
-        expand: false,
-        hideTitle: false,
-        readonly: true,
-    });
+  return FieldBase_display({
+    ...props,
+    setValues: () => {},
+    errors: {},
+    updateErrors: () => {},
+    required: false,
+    autoFocus: false,
+    expand: false,
+    hideTitle: false,
+    readonly: true,
+  });
 }
 
 export function Field_validate(props: FieldProps): boolean {
-    return FieldBase_validate({
-        ...props,
-        errors: {},
-        required: false,
-        autoFocus: false,
-        expand: false,
-        hideTitle: false,
-        readonly: true,
-    });
+  return FieldBase_validate({
+    ...props,
+    errors: {},
+    required: false,
+    autoFocus: false,
+    expand: false,
+    hideTitle: false,
+    readonly: true,
+  });
 }

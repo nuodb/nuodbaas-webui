@@ -3,31 +3,36 @@
 import axios from "axios";
 import Toast from "../components/controls/Toast";
 import { Rest } from "../components/pages/parts/Rest";
-import Auth, { isBrowser } from "./auth"
-import { FieldValuesType, TempAny, SchemaType, FieldParametersType } from "./types";
-let schema : TempAny = null;
+import Auth, { isBrowser } from "./auth";
+import {
+  FieldValuesType,
+  TempAny,
+  SchemaType,
+  FieldParametersType,
+} from "./types";
+let schema: TempAny = null;
 
-export const Feature: {FILTER_ON_SERVER: boolean|undefined} = {
-    FILTER_ON_SERVER: undefined
+export const Feature: { FILTER_ON_SERVER: boolean | undefined } = {
+  FILTER_ON_SERVER: undefined,
 };
 
-function compareSemVer(semver1: string, semver2: string) : number | null {
-    semver1 = semver1.split("-")[0].split("+")[0];
-    semver2 = semver2.split("-")[0].split("+")[0];
-    const parts1 = semver1.split(".");
-    const parts2 = semver2.split(".");
-    for(let i=0; i<parts1.length && i<parts2.length; i++) {
-        const val1 = parseInt(parts1[i]);
-        const val2 = parseInt(parts2[i]);
-        if(isNaN(val1) || isNaN(val2)) {
-            return null;
-        }
-        if(val1 < val2) return -1;
-        if(val1 > val2) return 1;
+function compareSemVer(semver1: string, semver2: string): number | null {
+  semver1 = semver1.split("-")[0].split("+")[0];
+  semver2 = semver2.split("-")[0].split("+")[0];
+  const parts1 = semver1.split(".");
+  const parts2 = semver2.split(".");
+  for (let i = 0; i < parts1.length && i < parts2.length; i++) {
+    const val1 = parseInt(parts1[i]);
+    const val2 = parseInt(parts2[i]);
+    if (isNaN(val1) || isNaN(val2)) {
+      return null;
     }
-    if(parts1.length < parts2.length) return -1;
-    if(parts1.length > parts2.length) return 1;
-    return 0;
+    if (val1 < val2) return -1;
+    if (val1 > val2) return 1;
+  }
+  if (parts1.length < parts2.length) return -1;
+  if (parts1.length > parts2.length) return 1;
+  return 0;
 }
 
 /**
@@ -35,26 +40,34 @@ function compareSemVer(semver1: string, semver2: string) : number | null {
  * @returns schema or null on error
  */
 export async function getSchema() {
-    if(!schema) {
-        try {
-            if(isBrowser()) {
-                schema = await Rest.get("openapi");
-            }
-            else {
-                schema = (await axios.get(Auth.getNuodbCpRestUrl("openapi"), { headers: Auth.getHeaders() })).data;
-            }
-            parseSchema(schema, schema, []);
-            const version = schema.info?.version || "1.0.0";
-            schema = schema["paths"];
-            schema = filterAccessPaths(schema);
-            Feature.FILTER_ON_SERVER = (compareSemVer(version, "2.12.0") || 0) >= 0 && schema["/users"]?.get?.parameters?.find((p: { name: string; }) => p.name === "fieldFilter") && true || false;
-        }
-        catch(error) {
-            console.log("ERROR", error);
-            Auth.handle401Error(error);
-        }
+  if (!schema) {
+    try {
+      if (isBrowser()) {
+        schema = await Rest.get("openapi");
+      } else {
+        schema = (
+          await axios.get(Auth.getNuodbCpRestUrl("openapi"), {
+            headers: Auth.getHeaders(),
+          })
+        ).data;
+      }
+      parseSchema(schema, schema, []);
+      const version = schema.info?.version || "1.0.0";
+      schema = schema["paths"];
+      schema = filterAccessPaths(schema);
+      Feature.FILTER_ON_SERVER =
+        ((compareSemVer(version, "2.12.0") || 0) >= 0 &&
+          schema["/users"]?.get?.parameters?.find(
+            (p: { name: string }) => p.name === "fieldFilter",
+          ) &&
+          true) ||
+        false;
+    } catch (error) {
+      console.log("ERROR", error);
+      Auth.handle401Error(error);
     }
-    return schema;
+  }
+  return schema;
 }
 
 /**
@@ -62,40 +75,52 @@ export async function getSchema() {
  * (without SLA verification to avoid network traffic)
  * It also skips URL prefixes which are not relevant for the UI (/login, /healthz, /openapi)
  */
-function filterAccessPaths(schema: any) : void {
-    let newSchema:any = {};
-    const ignorePaths = ["/login", "/healthz", "/openapi"];
+function filterAccessPaths(schema: any): void {
+  let newSchema: any = {};
+  const ignorePaths = ["/login", "/healthz", "/openapi"];
 
-    // get all resources whe have access to directly
-    Object.keys(schema).forEach(path => {
-        if(!ignorePaths.includes(path)) {
-            Object.keys(schema[path]).forEach(method => {
-                if(Auth.hasAccess(method.toUpperCase() as "GET"|"PUT"|"PATCH"|"POST"|"DELETE", path, undefined)) {
-                    if(!newSchema[path]) {
-                        newSchema[path] = {};
-                    }
-                    newSchema[path] = {...newSchema[path], [method]: JSON.parse(JSON.stringify(schema[path][method]))}
-                }
-            })
+  // get all resources whe have access to directly
+  Object.keys(schema).forEach((path) => {
+    if (!ignorePaths.includes(path)) {
+      Object.keys(schema[path]).forEach((method) => {
+        if (
+          Auth.hasAccess(
+            method.toUpperCase() as "GET" | "PUT" | "PATCH" | "POST" | "DELETE",
+            path,
+            undefined,
+          )
+        ) {
+          if (!newSchema[path]) {
+            newSchema[path] = {};
+          }
+          newSchema[path] = {
+            ...newSchema[path],
+            [method]: JSON.parse(JSON.stringify(schema[path][method])),
+          };
         }
-    });
+      });
+    }
+  });
 
-    // get all parent resources
-    Object.keys(newSchema).forEach(path => {
-        let lastSlash;
-        while((lastSlash = path.lastIndexOf("/")) > 0) {
-            path = path.substring(0, lastSlash);
-            if(schema[path] && schema[path]["get"]) {
-                if(!newSchema[path]) {
-                    newSchema[path] = {};
-                }
-                if(!newSchema[path].get) {
-                    newSchema[path] = {...newSchema[path], get: JSON.parse(JSON.stringify(schema[path].get))}
-                }
-            }
+  // get all parent resources
+  Object.keys(newSchema).forEach((path) => {
+    let lastSlash;
+    while ((lastSlash = path.lastIndexOf("/")) > 0) {
+      path = path.substring(0, lastSlash);
+      if (schema[path] && schema[path]["get"]) {
+        if (!newSchema[path]) {
+          newSchema[path] = {};
         }
-    })
-    return newSchema;
+        if (!newSchema[path].get) {
+          newSchema[path] = {
+            ...newSchema[path],
+            get: JSON.parse(JSON.stringify(schema[path].get)),
+          };
+        }
+      }
+    }
+  });
+  return newSchema;
 }
 
 /**
@@ -105,46 +130,59 @@ function filterAccessPaths(schema: any) : void {
  * @param {*} schema
  * @param {*} path
  */
-function parseSchema(rootSchema:SchemaType, schema:SchemaType, path:string[]) {
-
-    // remove all non-2xx responses (not relevant for the UI)
-    if(path.length === 4 && path[0] === "paths" && path[3] === "responses") {
-        Object.keys(schema).forEach(key => {
-            if(parseInt(key) < 200 || parseInt(key) > 299) {
-                delete schema[key];
-            }
-        })
-    }
-
-    // recursively inline $ref references
-    Object.keys(schema).forEach(key => {
-        if(key === "$ref" && (typeof schema[key] === "string") && schema[key].startsWith("#/")) {
-            let child = getChild(rootSchema, schema[key].substring("#/".length));
-            child = JSON.parse(JSON.stringify(child));
-            delete schema[key];
-            Object.keys(child).forEach(childKey => {
-                schema[childKey] = child[childKey];
-                parseSchema(rootSchema, schema[childKey], [...path, childKey]);
-            })
-        }
-        else if(typeof schema[key] === 'object' && !Array.isArray(schema[key]) && schema[key] !== null) {
-            parseSchema(rootSchema, schema[key], [...path, key]);
-        }
-        else if(typeof schema[key] === 'object' && Array.isArray(schema[key]) && schema[key] !== null) {
-            for(let i=0; i<schema[key].length; i++) {
-                parseSchema(rootSchema, schema[key][i], [...path, key]);
-            }
-        }
+function parseSchema(
+  rootSchema: SchemaType,
+  schema: SchemaType,
+  path: string[],
+) {
+  // remove all non-2xx responses (not relevant for the UI)
+  if (path.length === 4 && path[0] === "paths" && path[3] === "responses") {
+    Object.keys(schema).forEach((key) => {
+      if (parseInt(key) < 200 || parseInt(key) > 299) {
+        delete schema[key];
+      }
     });
+  }
 
-    // remove all paths not part of the UI
-    if(schema.keys) {
-        Object.keys(schema.keys).forEach(key => {
-            if(!("x-ui" in schema.keys[key])) {
-                delete schema.keys[key];
-            }
-        });
+  // recursively inline $ref references
+  Object.keys(schema).forEach((key) => {
+    if (
+      key === "$ref" &&
+      typeof schema[key] === "string" &&
+      schema[key].startsWith("#/")
+    ) {
+      let child = getChild(rootSchema, schema[key].substring("#/".length));
+      child = JSON.parse(JSON.stringify(child));
+      delete schema[key];
+      Object.keys(child).forEach((childKey) => {
+        schema[childKey] = child[childKey];
+        parseSchema(rootSchema, schema[childKey], [...path, childKey]);
+      });
+    } else if (
+      typeof schema[key] === "object" &&
+      !Array.isArray(schema[key]) &&
+      schema[key] !== null
+    ) {
+      parseSchema(rootSchema, schema[key], [...path, key]);
+    } else if (
+      typeof schema[key] === "object" &&
+      Array.isArray(schema[key]) &&
+      schema[key] !== null
+    ) {
+      for (let i = 0; i < schema[key].length; i++) {
+        parseSchema(rootSchema, schema[key][i], [...path, key]);
+      }
     }
+  });
+
+  // remove all paths not part of the UI
+  if (schema.keys) {
+    Object.keys(schema.keys).forEach((key) => {
+      if (!("x-ui" in schema.keys[key])) {
+        delete schema.keys[key];
+      }
+    });
+  }
 }
 
 /**
@@ -155,24 +193,28 @@ function parseSchema(rootSchema:SchemaType, schema:SchemaType, path:string[]) {
  * @param {*} schemaPath
  * @returns
  */
-export function matchesPath(path:string, schemaPath:string) : boolean {
-    let partsPath = path.split("/");
-    let partsSchemaPath = schemaPath.split("/");
-    for (let i = 0; i < partsPath.length; i++) {
-        if(partsSchemaPath.length === i) {
-            return false;
-        }
-        const p = partsPath[i].endsWith("?") ? partsPath[i].substring(0, partsPath[i].length-1) : partsPath[i];
-        const s = partsSchemaPath[i].endsWith("?") ? partsSchemaPath[i].substring(0, partsSchemaPath[i].length-1) : partsSchemaPath[i];
-        const hasEndMarker = partsSchemaPath[i].endsWith("?");
-        if(p !== s && !s.startsWith("{")) {
-            return false;
-        }
-        if(i === partsPath.length - 1 && hasEndMarker) {
-            return true;
-        }
+export function matchesPath(path: string, schemaPath: string): boolean {
+  let partsPath = path.split("/");
+  let partsSchemaPath = schemaPath.split("/");
+  for (let i = 0; i < partsPath.length; i++) {
+    if (partsSchemaPath.length === i) {
+      return false;
     }
-    return partsPath.length === partsSchemaPath.length;
+    const p = partsPath[i].endsWith("?")
+      ? partsPath[i].substring(0, partsPath[i].length - 1)
+      : partsPath[i];
+    const s = partsSchemaPath[i].endsWith("?")
+      ? partsSchemaPath[i].substring(0, partsSchemaPath[i].length - 1)
+      : partsSchemaPath[i];
+    const hasEndMarker = partsSchemaPath[i].endsWith("?");
+    if (p !== s && !s.startsWith("{")) {
+      return false;
+    }
+    if (i === partsPath.length - 1 && hasEndMarker) {
+      return true;
+    }
+  }
+  return partsPath.length === partsSchemaPath.length;
 }
 
 /**
@@ -182,23 +224,23 @@ export function matchesPath(path:string, schemaPath:string) : boolean {
  * @param {*} path
  * @returns
  */
-export function getSchemaPath(schema: SchemaType, path:string) : string|null {
-    if(!schema) {
-        return null
-    }
-    const ret = Object.keys(schema).filter(sPath => matchesPath(path, sPath));
-    return ret.length === 1 ? ret[0] : null;
+export function getSchemaPath(schema: SchemaType, path: string): string | null {
+  if (!schema) {
+    return null;
+  }
+  const ret = Object.keys(schema).filter((sPath) => matchesPath(path, sPath));
+  return ret.length === 1 ? ret[0] : null;
 }
 
 export function getOrgFromPath(schema: SchemaType, path: string) {
-    let pathParts = path.split("/");
-    const schemaParts = getSchemaPath(schema, path)?.split("/") || [];
-    for(let i=0; i<pathParts.length && i<schemaParts.length; i++) {
-        if(schemaParts[i] === "{organization}") {
-            return pathParts[i];
-        }
+  let pathParts = path.split("/");
+  const schemaParts = getSchemaPath(schema, path)?.split("/") || [];
+  for (let i = 0; i < pathParts.length && i < schemaParts.length; i++) {
+    if (schemaParts[i] === "{organization}") {
+      return pathParts[i];
     }
-    return "";
+  }
+  return "";
 }
 
 /**
@@ -207,11 +249,11 @@ export function getOrgFromPath(schema: SchemaType, path: string) {
  * @param {*} variables
  * @returns string with the placeholders replaced.
  */
-export function replaceVariables(search: string, variables: TempAny) : string {
-    Object.keys(variables).forEach(key => {
-        search = search.replaceAll("{" + key + "}", variables[key]);
-    })
-    return search;
+export function replaceVariables(search: string, variables: TempAny): string {
+  Object.keys(variables).forEach((key) => {
+    search = search.replaceAll("{" + key + "}", variables[key]);
+  });
+  return search;
 }
 
 /**
@@ -221,23 +263,26 @@ export function replaceVariables(search: string, variables: TempAny) : string {
  * @param {*} path
  * @returns
  */
-export function getResourceByPath(rootSchema: TempAny, path: string | null) : TempAny {
-    if(!rootSchema || !path) {
-        return [];
-    }
+export function getResourceByPath(
+  rootSchema: TempAny,
+  path: string | null,
+): TempAny {
+  if (!rootSchema || !path) {
+    return [];
+  }
 
-    let retArray = Object.keys(rootSchema).filter(sPath => {
-        return matchesPath(path, sPath);
-    }).map(sPath => rootSchema[sPath]);
-    if(retArray.length === 0) {
-        return null;
-    }
-    else if(retArray.length === 1) {
-        return retArray[0];
-    }
-    else {
-        throw Error("Duplicate schema resources for path " + path);
-    }
+  let retArray = Object.keys(rootSchema)
+    .filter((sPath) => {
+      return matchesPath(path, sPath);
+    })
+    .map((sPath) => rootSchema[sPath]);
+  if (retArray.length === 0) {
+    return null;
+  } else if (retArray.length === 1) {
+    return retArray[0];
+  } else {
+    throw Error("Duplicate schema resources for path " + path);
+  }
 }
 
 /**
@@ -246,33 +291,35 @@ export function getResourceByPath(rootSchema: TempAny, path: string | null) : Te
  * @param {*} path
  * @returns full path or null if not found
  */
-export function getCreatePath(rootSchema: TempAny, path: string) : string|null {
-    if(!rootSchema) {
-        return null;
-    }
+export function getCreatePath(
+  rootSchema: TempAny,
+  path: string,
+): string | null {
+  if (!rootSchema) {
+    return null;
+  }
 
-    let retPaths = Object.keys(rootSchema).filter(sPath => {
-        let parts = path.split("/");
-        let sParts = sPath.split("/");
-        if(parts.length >= sParts.length) {
-            return false;
-        }
-        for (let i = 0; i < parts.length; i++) {
-            if(parts[i] !== sParts[i] && !sParts[i].startsWith("{")) {
-                return false;
-            }
-        }
-        return "put" in rootSchema[sPath];
-    });
-    if(retPaths.length === 0) {
-        return null;
+  let retPaths = Object.keys(rootSchema).filter((sPath) => {
+    let parts = path.split("/");
+    let sParts = sPath.split("/");
+    if (parts.length >= sParts.length) {
+      return false;
     }
-    if(retPaths.length === 1) {
-        return retPaths[0];
+    for (let i = 0; i < parts.length; i++) {
+      if (parts[i] !== sParts[i] && !sParts[i].startsWith("{")) {
+        return false;
+      }
     }
-    else {
-        throw Error("Duplicate PUT child resources for path " + path);
-    }
+    return "put" in rootSchema[sPath];
+  });
+  if (retPaths.length === 0) {
+    return null;
+  }
+  if (retPaths.length === 1) {
+    return retPaths[0];
+  } else {
+    throw Error("Duplicate PUT child resources for path " + path);
+  }
 }
 
 /**
@@ -282,33 +329,36 @@ export function getCreatePath(rootSchema: TempAny, path: string) : string|null {
  * @param {*} path
  * @returns full path or null if not found
  */
-export function getEntryPath(rootSchema: TempAny, path: string) : string|null {
-    if(!rootSchema) {
-        return null;
-    }
+export function getEntryPath(rootSchema: TempAny, path: string): string | null {
+  if (!rootSchema) {
+    return null;
+  }
 
-    let retPath = "";
-    const parts = path.split("/");
-    Object.keys(rootSchema).forEach(sPath => {
-        const sParts = sPath.split("/");
-        if(parts.length >= sParts.length) {
-            return;
-        }
-        for (let i = 0; i < parts.length; i++) {
-            if(parts[i] !== sParts[i] && !sParts[i].startsWith("{")) {
-                return;
-            }
-        }
-        if(retPath.length < sPath.length && ("get" in rootSchema[sPath]) && sPath[sPath.length-1].endsWith("}")) {
-            retPath = sPath;
-        }
-    });
-    if(!retPath) {
-        return null;
+  let retPath = "";
+  const parts = path.split("/");
+  Object.keys(rootSchema).forEach((sPath) => {
+    const sParts = sPath.split("/");
+    if (parts.length >= sParts.length) {
+      return;
     }
-    else {
-        return retPath;
+    for (let i = 0; i < parts.length; i++) {
+      if (parts[i] !== sParts[i] && !sParts[i].startsWith("{")) {
+        return;
+      }
     }
+    if (
+      retPath.length < sPath.length &&
+      "get" in rootSchema[sPath] &&
+      sPath[sPath.length - 1].endsWith("}")
+    ) {
+      retPath = sPath;
+    }
+  });
+  if (!retPath) {
+    return null;
+  } else {
+    return retPath;
+  }
 }
 
 /**
@@ -317,72 +367,76 @@ export function getEntryPath(rootSchema: TempAny, path: string) : string|null {
  * @param {*} path
  * @returns full path or null if not found
  */
-export function getFilterField(rootSchema: TempAny, path: string): string|null|string[] {
-    if(!rootSchema) {
-        return null;
-    }
+export function getFilterField(
+  rootSchema: TempAny,
+  path: string,
+): string | null | string[] {
+  if (!rootSchema) {
+    return null;
+  }
 
-    let retPaths = Object.keys(rootSchema).filter(sPath => {
-        let parts = path.split("/");
-        let sParts = sPath.split("/");
-        if(parts.length + 1 !== sParts.length) {
-            return false;
-        }
-        for (let i = 0; i < parts.length; i++) {
-            if(parts[i] !== sParts[i] && !sParts[i].startsWith("{")) {
-                return false;
-            }
-        }
-        return "get" in rootSchema[sPath];
+  let retPaths = Object.keys(rootSchema).filter((sPath) => {
+    let parts = path.split("/");
+    let sParts = sPath.split("/");
+    if (parts.length + 1 !== sParts.length) {
+      return false;
+    }
+    for (let i = 0; i < parts.length; i++) {
+      if (parts[i] !== sParts[i] && !sParts[i].startsWith("{")) {
+        return false;
+      }
+    }
+    return "get" in rootSchema[sPath];
+  });
+  if (retPaths.length === 0) {
+    return null;
+  } else if (retPaths.length === 1) {
+    let hasChildPaths = false;
+    Object.keys(rootSchema).forEach((key) => {
+      if (key.startsWith(retPaths[0] + "/") && key.endsWith("}")) {
+        hasChildPaths = true;
+      }
     });
-    if(retPaths.length === 0) {
+    if (hasChildPaths) {
+      const parts = retPaths[0].split("/");
+      const lastPart = parts[parts.length - 1];
+      if (lastPart.startsWith("{") && lastPart.endsWith("}")) {
+        return lastPart.substring(1, lastPart.length - 1);
+      } else {
         return null;
+      }
+    } else {
+      return null;
     }
-    else if(retPaths.length === 1) {
-        let hasChildPaths = false;
-        Object.keys(rootSchema).forEach(key => {
-            if(key.startsWith(retPaths[0] + "/") && key.endsWith("}")) {
-                hasChildPaths = true;
-            }
-        })
-        if(hasChildPaths) {
-            const parts = retPaths[0].split("/");
-            const lastPart = parts[parts.length-1];
-            if(lastPart.startsWith("{") && lastPart.endsWith("}")) {
-                return lastPart.substring(1, lastPart.length-1);
-            }
-            else {
-                return null;
-            }
-        }
-        else {
-            return null;
-        }
-    }
-    else {
-        // multiple schema definitions match the same path - return all the values
-        // which may be used to provide a selection box with those values
-        let ret:string[] = [];
-        retPaths.forEach((retPath:string) => {
-           const parts = retPath.split("/");
-           ret.push(parts[parts.length-1]);
-        });
-        return ret;
-    }
+  } else {
+    // multiple schema definitions match the same path - return all the values
+    // which may be used to provide a selection box with those values
+    let ret: string[] = [];
+    retPaths.forEach((retPath: string) => {
+      const parts = retPath.split("/");
+      ret.push(parts[parts.length - 1]);
+    });
+    return ret;
+  }
 }
 
-export function concatChunks(chunk1: Uint8Array<ArrayBuffer>, chunk2: Uint8Array<ArrayBuffer>) : Uint8Array<ArrayBuffer> {
-    let ret = new Uint8Array(chunk1.length + chunk2.length);
-    ret.set(chunk1, 0);
-    ret.set(chunk2, chunk1.length);
-    return ret;
+export function concatChunks(
+  chunk1: Uint8Array<ArrayBuffer>,
+  chunk2: Uint8Array<ArrayBuffer>,
+): Uint8Array<ArrayBuffer> {
+  let ret = new Uint8Array(chunk1.length + chunk2.length);
+  ret.set(chunk1, 0);
+  ret.set(chunk2, chunk1.length);
+  return ret;
 }
 
 let eventTransaction = 0;
 
-let monitored: undefined | {abort: AbortController, transactionNumber: number} = undefined;
-export function hasActiveStream() : boolean {
-    return !!monitored;
+let monitored:
+  | undefined
+  | { abort: AbortController; transactionNumber: number } = undefined;
+export function hasActiveStream(): boolean {
+  return !!monitored;
 }
 
 /**
@@ -393,175 +447,193 @@ export function hasActiveStream() : boolean {
  * @param {*} retryIntervalMS - milliseconds for the next retry (which will be doubled each time). Set to <= 0 to disable retries.
  * @returns AbortController - use ret.abort() to abort
  */
-export function getResourceEvents(schema: any, path: string, multiResolve: TempAny, multiReject: TempAny, retryIntervalMS: number = 0, transactionNumber: number = -1) {
-    //only one event stream is supported - close prior one if it exists.
-    let eventsAbortController = new AbortController();
+export function getResourceEvents(
+  schema: any,
+  path: string,
+  multiResolve: TempAny,
+  multiReject: TempAny,
+  retryIntervalMS: number = 0,
+  transactionNumber: number = -1,
+) {
+  //only one event stream is supported - close prior one if it exists.
+  let eventsAbortController = new AbortController();
 
-    let hasEventsAccess = false;
-    Object.keys(schema).forEach(schemaPath => {
-        if(matchesPath("/events" + path.split("?")[0], schemaPath)) {
-            hasEventsAccess = true;
+  let hasEventsAccess = false;
+  Object.keys(schema).forEach((schemaPath) => {
+    if (matchesPath("/events" + path.split("?")[0], schemaPath)) {
+      hasEventsAccess = true;
+    }
+  });
+
+  if (!hasEventsAccess) {
+    Rest.get(path)
+      .then((data) => multiResolve(data))
+      .catch((reason) => multiReject(reason));
+    return;
+  }
+
+  // increment transaction number and abort existing ones on same path
+  if (monitored && monitored.transactionNumber !== transactionNumber) {
+    // this is a different request on the same resource - abort the prior one
+    monitored.abort.abort();
+  }
+  if (transactionNumber === -1) {
+    eventTransaction++;
+    transactionNumber = eventTransaction;
+  }
+
+  Rest.getStream(
+    Auth.getNuodbCpRestUrl("events" + path),
+    Auth.getHeaders(),
+    eventsAbortController,
+  )
+    .then(async (response: TempAny) => {
+      monitored = { abort: eventsAbortController, transactionNumber };
+      let event = null;
+      let data = null;
+      let id = null;
+      let mergedData: TempAny = {};
+      let buffer = Uint8Array.of();
+      for await (let chunk of response) {
+        buffer = concatChunks(buffer, chunk);
+        while (buffer.length > 0) {
+          let posNewline = buffer.indexOf("\n".charCodeAt(0));
+          if (posNewline === -1) {
+            break;
+          }
+          let line = new TextDecoder().decode(buffer.slice(0, posNewline));
+          buffer = buffer.slice(posNewline + 1);
+          if (line.startsWith("event: ")) {
+            event = line.substring("event: ".length);
+          } else if (line.startsWith("data: ")) {
+            data = line.substring("data: ".length);
+          } else if (line.startsWith("id: ")) {
+            id = line.substring("id: ".length);
+          } else if (line.length === 0) {
+            if (event === "HEARTBEAT") {
+              // ignore
+            } else if (event === "RESYNC" && data !== null) {
+              mergedData = JSON.parse(data);
+              multiResolve(mergedData);
+            } else if (
+              event === "UPDATED" &&
+              id !== null &&
+              mergedData.items &&
+              data !== null
+            ) {
+              let newData: TempAny = { ...mergedData };
+              newData.items = [...newData.items];
+              let modified = false;
+              for (let i = 0; i < newData.items.length; i++) {
+                if (id === newData.items[i]["$ref"]) {
+                  newData.items[i] = JSON.parse(data);
+                  newData.items[i]["$ref"] = id;
+                  modified = true;
+                  break;
+                }
+              }
+              if (modified) {
+                mergedData = newData;
+                multiResolve(mergedData);
+              } else {
+                console.error("item with id " + id + " not found for merging");
+              }
+            } else if (
+              event === "UPDATED" &&
+              data !== null &&
+              !mergedData.items
+            ) {
+              mergedData = JSON.parse(data);
+              multiResolve(mergedData);
+            } else if (event === "DELETED" && id !== null && mergedData.items) {
+              let newData: TempAny = { ...mergedData };
+              newData.items = [...newData.items];
+              let modified = false;
+              for (let i = 0; i < newData.items.length; i++) {
+                if (id === newData.items[i]["$ref"]) {
+                  newData.items[i] = { ...newData.items[i], __deleted__: true };
+                  modified = true;
+                  break;
+                }
+              }
+              if (modified) {
+                mergedData = newData;
+                multiResolve(mergedData);
+              }
+            } else if (event === "DELETED" && !mergedData.items) {
+              mergedData = {};
+              multiResolve(mergedData);
+            } else if (event === "CREATED" && id !== null && data !== null) {
+              data = JSON.parse(data);
+              data["$ref"] = id;
+              mergedData = { ...mergedData };
+              mergedData.items = [...mergedData.items];
+
+              let found = false;
+              for (let i = 0; i < mergedData.items.length; i++) {
+                if (id === mergedData.items[i]["$ref"]) {
+                  mergedData.items[i] = data;
+                  delete mergedData.items[i]["__deleted__"];
+                  found = true;
+                  break;
+                }
+              }
+              if (!found) {
+                mergedData.items.push(data);
+              }
+              multiResolve(mergedData);
+            } else {
+              console.log(
+                "Ignoring event " + event + ", id=" + id + ", data=" + data,
+              );
+            }
+
+            //clear out all data
+            event = null;
+            data = null;
+            id = null;
+          } else {
+            console.log("Ignoring line " + line);
+          }
         }
+      }
+      if (monitored && monitored.transactionNumber === transactionNumber) {
+        monitored = undefined;
+      }
     })
-
-    if(!hasEventsAccess) {
+    .catch((error) => {
+      if (error.status === 404) {
+        // fall back to non-streaming request
         Rest.get(path)
-        .then(data => multiResolve(data))
-        .catch(reason => multiReject(reason));
-        return;
-    }
-
-    // increment transaction number and abort existing ones on same path
-    if(monitored && monitored.transactionNumber !== transactionNumber) {
-        // this is a different request on the same resource - abort the prior one
-        monitored.abort.abort();
-    }
-    if(transactionNumber === -1) {
-        eventTransaction++;
-        transactionNumber = eventTransaction;
-    }
-
-    Rest.getStream(Auth.getNuodbCpRestUrl("events" + path), Auth.getHeaders(), eventsAbortController)
-      .then(async (response: TempAny) => {
-        monitored = {abort: eventsAbortController, transactionNumber};
-        let event = null;
-        let data = null;
-        let id = null;
-        let mergedData: TempAny = {};
-        let buffer = Uint8Array.of();
-        for await (let chunk of response) {
-            buffer = concatChunks(buffer, chunk);
-            while(buffer.length > 0) {
-                let posNewline = buffer.indexOf("\n".charCodeAt(0));
-                if(posNewline === -1) {
-                    break;
-                }
-                let line = new TextDecoder().decode(buffer.slice(0, posNewline));
-                buffer = buffer.slice(posNewline+1);
-                if(line.startsWith("event: ")) {
-                    event = line.substring("event: ".length);
-                }
-                else if(line.startsWith("data: ")) {
-                    data = line.substring("data: ".length);
-                }
-                else if(line.startsWith("id: ")) {
-                    id = line.substring("id: ".length);
-                }
-                else if(line.length === 0) {
-                    if(event === "HEARTBEAT") {
-                        // ignore
-                    }
-                    else if(event === "RESYNC" && data !== null) {
-                        mergedData = JSON.parse(data);
-                        multiResolve(mergedData);
-                    }
-                    else if(event === "UPDATED" && id !== null && mergedData.items && data !== null) {
-                        let newData: TempAny = {...mergedData};
-                        newData.items = [...newData.items];
-                        let modified = false;
-                        for(let i=0; i<newData.items.length; i++) {
-                            if(id === newData.items[i]["$ref"]) {
-                                newData.items[i] = JSON.parse(data);
-                                newData.items[i]["$ref"] = id;
-                                modified = true;
-                                break;
-                            }
-                        }
-                        if(modified) {
-                            mergedData = newData;
-                            multiResolve(mergedData);
-                        }
-                        else {
-                            console.error("item with id " + id + " not found for merging");
-                        }
-                    }
-                    else if(event === "UPDATED" && data !== null && !mergedData.items) {
-                        mergedData = JSON.parse(data);
-                        multiResolve(mergedData);
-                    }
-                    else if(event === "DELETED" && id !== null && mergedData.items) {
-                        let newData: TempAny = {...mergedData};
-                        newData.items = [...newData.items];
-                        let modified = false;
-                        for(let i=0; i<newData.items.length; i++) {
-                            if(id === newData.items[i]["$ref"]) {
-                                newData.items[i] = {...newData.items[i], __deleted__: true};
-                                modified = true;
-                                break;
-                            }
-                        }
-                        if(modified) {
-                            mergedData = newData;
-                            multiResolve(mergedData);
-                        }
-                    }
-                    else if(event === "DELETED" && !mergedData.items) {
-                        mergedData = {};
-                        multiResolve(mergedData);
-                    }
-                    else if(event === "CREATED" && id !== null && data !== null) {
-                        data = JSON.parse(data);
-                        data["$ref"] = id;
-                        mergedData = {...mergedData};
-                        mergedData.items = [...mergedData.items];
-
-                        let found = false;
-                        for(let i=0; i<mergedData.items.length; i++) {
-                            if(id === mergedData.items[i]["$ref"]) {
-                                mergedData.items[i] = data;
-                                delete mergedData.items[i]["__deleted__"];
-                                found = true;
-                                break;
-                            }
-                        }
-                        if(!found) {
-                            mergedData.items.push(data);
-                        }
-                        multiResolve(mergedData);
-                    }
-                    else {
-                        console.log("Ignoring event " + event + ", id=" + id + ", data=" + data);
-                    }
-
-                    //clear out all data
-                    event = null;
-                    data = null;
-                    id = null;
-                }
-                else {
-                    console.log("Ignoring line " + line);
-                }
+          .then((data) => multiResolve(data))
+          .catch((reason) => multiReject(reason));
+      } else if (error.status === 400) {
+        multiReject(error);
+      } else {
+        // request failed. Retry incrementally.
+        if (retryIntervalMS > 0) {
+          // reconnect - server/proxy might disconnect due to a timeout
+          setTimeout(() => {
+            if (
+              monitored &&
+              monitored.transactionNumber === transactionNumber
+            ) {
+              // only retry if the event stream for the specified path is not superseded by another one
+              getResourceEvents(
+                schema,
+                path,
+                multiResolve,
+                multiReject,
+                retryIntervalMS * 1.3,
+                transactionNumber,
+              ); //retry with a 30% delay (exponential backoff)
             }
+          }, retryIntervalMS);
         }
-        if(monitored && monitored.transactionNumber === transactionNumber) {
-            monitored = undefined;
-        }
-      })
-      .catch((error) => {
-        if(error.status === 404) {
-            // fall back to non-streaming request
-            Rest.get(path)
-                .then(data => multiResolve(data))
-                .catch(reason => multiReject(reason));
-        }
-        else if(error.status === 400) {
-            multiReject(error)
-        }
-        else {
-            // request failed. Retry incrementally.
-            if(retryIntervalMS > 0) {
-                // reconnect - server/proxy might disconnect due to a timeout
-                setTimeout(()=> {
-                    if(monitored && monitored.transactionNumber === transactionNumber) {
-                        // only retry if the event stream for the specified path is not superseded by another one
-                        getResourceEvents(schema, path, multiResolve, multiReject, retryIntervalMS * 1.3, transactionNumber); //retry with a 30% delay (exponential backoff)
-                    }
-                }, retryIntervalMS);
-            }
-        }
-      })
+      }
+    });
 
-      return eventsAbortController;
+  return eventsAbortController;
 }
 
 /**
@@ -571,21 +643,20 @@ export function getResourceEvents(schema: any, path: string, multiResolve: TempA
  * @returns
  */
 export function getChild(schema: TempAny, pathParts: string | string[]) {
-    if(typeof pathParts === "string") {
-        while(pathParts.startsWith("/")) {
-            pathParts = pathParts.substring(1);
-        }
-        pathParts = pathParts.split("/");
+  if (typeof pathParts === "string") {
+    while (pathParts.startsWith("/")) {
+      pathParts = pathParts.substring(1);
     }
-    try {
-        for(let i=0; i<pathParts.length; i++) {
-            schema = schema[pathParts[i]];
-        }
-        return schema;
+    pathParts = pathParts.split("/");
+  }
+  try {
+    for (let i = 0; i < pathParts.length; i++) {
+      schema = schema[pathParts[i]];
     }
-    catch(exception) {
-        return null;
-    }
+    return schema;
+  } catch (exception) {
+    return null;
+  }
 }
 
 /**
@@ -595,11 +666,11 @@ export function getChild(schema: TempAny, pathParts: string | string[]) {
  * @returns
  */
 export function arrayToObject(array: TempAny, key: string): TempAny {
-    let ret:TempAny = {};
-    array.forEach((a: TempAny) => {
-        ret[a[key]] = a;
-    });
-    return ret;
+  let ret: TempAny = {};
+  array.forEach((a: TempAny) => {
+    ret[a[key]] = a;
+  });
+  return ret;
 }
 
 /**
@@ -609,29 +680,25 @@ export function arrayToObject(array: TempAny, key: string): TempAny {
  * @returns
  */
 export function getDefaultValue(parameter: TempAny, value: TempAny) {
-    if(value) {
-        return value;
-    }
-    let type = parameter["type"];
-    if(!type) {
-        type = parameter["schema"] && parameter["schema"]["type"];
-    }
+  if (value) {
+    return value;
+  }
+  let type = parameter["type"];
+  if (!type) {
+    type = parameter["schema"] && parameter["schema"]["type"];
+  }
 
-    if(type === "object") {
-        return null;
-    }
-    else if(type === "boolean") {
-        return (parameter["schema"] && parameter["schema"]["default"]) || null;
-    }
-    else if(type === "array") {
-        return [];
-    }
-    else if(type === "integer") {
-        return "";
-    }
-    else {
-        return null;
-    }
+  if (type === "object") {
+    return null;
+  } else if (type === "boolean") {
+    return (parameter["schema"] && parameter["schema"]["default"]) || null;
+  } else if (type === "array") {
+    return [];
+  } else if (type === "integer") {
+    return "";
+  } else {
+    return null;
+  }
 }
 
 /**
@@ -639,37 +706,34 @@ export function getDefaultValue(parameter: TempAny, value: TempAny) {
  * @param {*} values
  */
 function deleteEmptyFields(values: FieldValuesType) {
-    if(typeof values === 'object' && !Array.isArray(values)) {
-        Object.keys(values).forEach(key => {
-            if(!values[key]) {
-                // delete keys with undefined, null or empty values
-                delete values[key];
-            }
-            else if(typeof values[key] === 'object') {
-                if(!Array.isArray(values[key])) {
-                    deleteEmptyFields(values[key]);
-                    if(Object.keys(values[key]).length === 0) {
-                        // Delete empty Objects
-                        delete values[key];
-                    }
-                }
-                else {
-                    for(let i=0; i<values[key].length; i++) {
-                        deleteEmptyFields(values[key]);
-                    }
-                    if(values[key].length === 0) {
-                        // Delete empty arrays
-                        delete values[key];
-                    }
-                }
-            }
-        });
-    }
-    else if(typeof values === 'object' && Array.isArray(values)) {
-        for(let i=0; i<values.length; i++) {
-            deleteEmptyFields(values[i]);
+  if (typeof values === "object" && !Array.isArray(values)) {
+    Object.keys(values).forEach((key) => {
+      if (!values[key]) {
+        // delete keys with undefined, null or empty values
+        delete values[key];
+      } else if (typeof values[key] === "object") {
+        if (!Array.isArray(values[key])) {
+          deleteEmptyFields(values[key]);
+          if (Object.keys(values[key]).length === 0) {
+            // Delete empty Objects
+            delete values[key];
+          }
+        } else {
+          for (let i = 0; i < values[key].length; i++) {
+            deleteEmptyFields(values[key]);
+          }
+          if (values[key].length === 0) {
+            // Delete empty arrays
+            delete values[key];
+          }
         }
+      }
+    });
+  } else if (typeof values === "object" && Array.isArray(values)) {
+    for (let i = 0; i < values.length; i++) {
+      deleteEmptyFields(values[i]);
     }
+  }
 }
 
 /**
@@ -680,46 +744,55 @@ function deleteEmptyFields(values: FieldValuesType) {
  * @param {*} values
  * @returns
  */
-export async function submitForm(urlParameters: FieldParametersType, formParameters: FieldParametersType, path: string, values: FieldValuesType) {
-    let queryParameters = Object.keys(urlParameters).filter(key => urlParameters[key]["in"] === "query");
+export async function submitForm(
+  urlParameters: FieldParametersType,
+  formParameters: FieldParametersType,
+  path: string,
+  values: FieldValuesType,
+) {
+  let queryParameters = Object.keys(urlParameters).filter(
+    (key) => urlParameters[key]["in"] === "query",
+  );
 
-    // the last URL parameter has the name of the resource, while the form parameter always has "name"
-    // rename last URL parameter to "name"
-    let posBracketStart = path.lastIndexOf("{");
-    let posBracketEnd = path.lastIndexOf("}");
-    if(posBracketStart >= 0 && posBracketEnd > posBracketStart) {
-        path = path.substring(0, posBracketStart+1) + "name" + path.substring(posBracketEnd);
+  // the last URL parameter has the name of the resource, while the form parameter always has "name"
+  // rename last URL parameter to "name"
+  let posBracketStart = path.lastIndexOf("{");
+  let posBracketEnd = path.lastIndexOf("}");
+  if (posBracketStart >= 0 && posBracketEnd > posBracketStart) {
+    path =
+      path.substring(0, posBracketStart + 1) +
+      "name" +
+      path.substring(posBracketEnd);
+  }
+
+  // replace variables within the path
+  Object.keys(values).forEach((key) => {
+    path = path.replace("{" + key + "}", String(values[key]));
+  });
+
+  // add query parameters to path
+  queryParameters.forEach((query) => {
+    let queryValue = undefined;
+    if (query in values) {
+      queryValue = values[query];
+    } else {
+      queryValue = urlParameters[query]?.schema?.default;
     }
+    if (queryValue !== undefined) {
+      path += path.includes("?") ? "&" : "?";
+      path += encodeURIComponent(query) + "=" + encodeURIComponent(queryValue);
+    }
+  });
 
-    // replace variables within the path
-    Object.keys(values).forEach(key => {
-        path = path.replace("{" + key + "}", String(values[key]));
-    });
+  values = { ...values };
+  Object.keys(values).forEach((key) => {
+    if (!(key in formParameters)) {
+      //remove fields which are not used as form parameter
+      delete values[key];
+    }
+  });
 
-    // add query parameters to path
-    queryParameters.forEach((query) => {
-        let queryValue = undefined;
-        if(query in values) {
-            queryValue = values[query];
-        }
-        else {
-            queryValue = urlParameters[query]?.schema?.default;
-        }
-        if(queryValue !== undefined) {
-            path += path.includes("?") ? "&" : "?";
-            path += encodeURIComponent(query) + "=" + encodeURIComponent(queryValue);
-        }
-    })
+  deleteEmptyFields(values);
 
-    values = {...values};
-    Object.keys(values).forEach(key => {
-        if(!(key in formParameters)) {
-            //remove fields which are not used as form parameter
-            delete values[key];
-        }
-    });
-
-    deleteEmptyFields(values);
-
-    return await Rest.put(path, values);
+  return await Rest.put(path, values);
 }

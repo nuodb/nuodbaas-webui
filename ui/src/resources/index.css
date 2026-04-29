@@ -1,9 +1,9 @@
 /* (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved. */
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -15,21 +15,21 @@ body {
   gap: 1em;
 }
 /* Style for showing Maps (list of key/value pairs) */
-dl.map>div {
+dl.map > div {
   display: flex;
   flex-direction: row;
 }
 
-dl.map>div>dd {
+dl.map > div > dd {
   margin-inline-start: 0px;
 }
 
-dl.map>div>dt::after {
+dl.map > div > dt::after {
   content: ":";
   padding-right: 5px;
 }
 .verticalAlignTop {
-  vertical-align: top !important
+  vertical-align: top !important;
 }
 .SectionSummary,
 .FieldObjectSection {
@@ -44,7 +44,7 @@ dl.map>div>dt::after {
   padding: 5px;
   margin: 5px;
   color: gray;
-  font-size: .75em;
+  font-size: 0.75em;
 }
 
 .AbsoluteBottomRight {
@@ -59,7 +59,7 @@ dl.map>div>dt::after {
   margin: 1em;
 }
 
-.ErrorPage>label {
+.ErrorPage > label {
   display: block;
   font-family: sans-serif;
   margin-top: 1em;

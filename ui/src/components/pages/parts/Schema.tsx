@@ -9,13 +9,16 @@ export default function Schema({ setSchema }: TempAny) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getSchema().then(schema => {
+    getSchema().then((schema) => {
       if (!schema && window.location.pathname !== "/ui/error") {
-        navigate("/ui/error?msg=" + encodeURIComponent("Unable to get Schema. Retry at a later time."));
+        navigate(
+          "/ui/error?msg=" +
+            encodeURIComponent("Unable to get Schema. Retry at a later time."),
+        );
       }
       setSchema(schema);
     });
-  }, [setSchema, navigate])
+  }, [setSchema, navigate]);
 
   return null;
 }

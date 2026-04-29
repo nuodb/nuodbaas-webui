@@ -5,9 +5,9 @@
 declare const BUILD_DATE: string;
 
 interface ImportMetaEnv {
-    readonly REACT_APP_GIT_SHA: string;
+  readonly REACT_APP_GIT_SHA: string;
 }
 
 interface ImportMeta {
-    readonly env: ImportMetaEnv;
+  readonly env: ImportMetaEnv;
 }
