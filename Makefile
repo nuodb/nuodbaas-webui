@@ -414,6 +414,15 @@ stop-dev: teardown-integration-tests ## stop development environment processes (
 	if [ "$$DOT_KIND_OWNER" = "root" ] ; then sudo rm -r ~/.kind; fi
 	@rm -rf ~/.kind
 
+.PHONY: prettier
+prettier:
+	cd ui && npm install && npx prettier -w . && cd ..
+	cd ui-test && npm install && npx prettier -w . && cd ..
+
+.PHONY: prettier-check
+prettier-check:
+	cd ui && npm install && npx prettier --check . && cd ..
+	cd ui-test && npm install && npx prettier --check . && cd ..
 
 $(KIND):
 	mkdir -p $(shell dirname ${KIND})

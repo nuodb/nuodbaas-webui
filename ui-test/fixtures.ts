@@ -1,8 +1,6 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 import { test as base, type Page } from "@playwright/test";
-import {
-  cleanupResources,
-} from "./helpers/api";
+import { cleanupResources } from "./helpers/api";
 import { loginRest, loginViaUI } from "./helpers/ui";
 const fs = require("fs");
 
@@ -19,28 +17,31 @@ type Fixtures = {
 };
 
 export const test = base.extend<Fixtures>({
-    coverageHook: [
-      async ({page}, use) => {
-        page.on('console', msg => console.log(msg.text()));
-        await page.coverage.startJSCoverage();
+  coverageHook: [
+    async ({ page }, use) => {
+      page.on("console", (msg) => console.log(msg.text()));
+      await page.coverage.startJSCoverage();
 
-        await use();
+      await use();
 
-        let coverage = await page.coverage.stopJSCoverage();
-        fs.mkdirSync("target/coverage-data", {recursive: true});
-        fs.writeFileSync("target/coverage-data/" + (Date.now()/1000) + ".json", JSON.stringify(coverage, null, 2));
-      },
-      { auto: true },
-    ],
-    authedPage: async ({ page }, use) => {
-      await loginViaUI(page);
-      await use(page);
+      let coverage = await page.coverage.stopJSCoverage();
+      fs.mkdirSync("target/coverage-data", { recursive: true });
+      fs.writeFileSync(
+        "target/coverage-data/" + Date.now() / 1000 + ".json",
+        JSON.stringify(coverage, null, 2),
+      );
     },
+    { auto: true },
+  ],
+  authedPage: async ({ page }, use) => {
+    await loginViaUI(page);
+    await use(page);
+  },
 
-    restPage: async ({ page }, use) => {
-      await loginRest(page);
-      await use(page);
-      // Clean up all non-keep, non-admin resources created during the test
-      await cleanupResources();
-    },
+  restPage: async ({ page }, use) => {
+    await loginRest(page);
+    await use(page);
+    // Clean up all non-keep, non-admin resources created during the test
+    await cleanupResources();
+  },
 });

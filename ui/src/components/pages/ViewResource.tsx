@@ -15,66 +15,87 @@ import ResourceHeader from "./parts/ResourceHeader";
  * handles all the /resource/view/* requests to edit a resource
  */
 function ViewResource(props: PageProps) {
-    const { schema } = props;
-    const path = "/" + useParams()["*"];
-    const navigate = useNavigate();
-    const [data, setData] = useState({});
-    const [error, setError] = useState<any>(undefined);
+  const { schema } = props;
+  const path = "/" + useParams()["*"];
+  const navigate = useNavigate();
+  const [data, setData] = useState({});
+  const [error, setError] = useState<any>(undefined);
 
-    useEffect(() => {
-        let resourceByPath = getResourceByPath(schema, path);
-        if ("get" in resourceByPath) {
-            getResourceEvents(schema, path, (data: TempAny) => {
-                if (data === null) {
-                    setError({ response: { status: 404 } })
-                    setData({});
-                }
-                else {
-                    setData(data);
-                    setError(undefined);
-                }
-            }, (error: any) => {
-                setError(error);
-                Auth.handle401Error(error);
-                setData({});
-            }, 1000);
-        }
-        else {
+  useEffect(() => {
+    let resourceByPath = getResourceByPath(schema, path);
+    if ("get" in resourceByPath) {
+      getResourceEvents(
+        schema,
+        path,
+        (data: TempAny) => {
+          if (data === null) {
+            setError({ response: { status: 404 } });
             setData({});
-        }
-    }, [schema, path]);
-
-    if (!schema || !path) {
-        return null;
+          } else {
+            setData(data);
+            setError(undefined);
+          }
+        },
+        (error: any) => {
+          setError(error);
+          Auth.handle401Error(error);
+          setData({});
+        },
+        1000,
+      );
+    } else {
+      setData({});
     }
+  }, [schema, path]);
 
-    function renderError(): ReactNode {
-        let msg = "";
-        if (!error?.response?.status) {
-            msg = "Unknown error occurred";
-        }
-        else if (error.response.data?.detail) {
-            msg = error.response.data.detail;
-        }
-        else if (error.response.status === 404) {
-            msg = "Not Found";
-        }
-        else {
-            msg = "Error occurred: " + error.response.status;
-        }
-        return <>
-            <ResourceHeader schema={schema} path={path} type="not_found" onAction={() => {
-                navigate(-1);
-            }} />
-            <div className="NuoTableContainer"><div className="NuoFieldContainer"><h3>{msg}</h3></div></div></>;
+  if (!schema || !path) {
+    return null;
+  }
+
+  function renderError(): ReactNode {
+    let msg = "";
+    if (!error?.response?.status) {
+      msg = "Unknown error occurred";
+    } else if (error.response.data?.detail) {
+      msg = error.response.data.detail;
+    } else if (error.response.status === 404) {
+      msg = "Not Found";
+    } else {
+      msg = "Error occurred: " + error.response.status;
     }
-
     return (
-        <PageLayout {...props}>
-            {error ? renderError() :
-                <CreateEditEntry schema={schema} path={path} data={data} readonly={true} />}
-        </PageLayout>
+      <>
+        <ResourceHeader
+          schema={schema}
+          path={path}
+          type="not_found"
+          onAction={() => {
+            navigate(-1);
+          }}
+        />
+        <div className="NuoTableContainer">
+          <div className="NuoFieldContainer">
+            <h3>{msg}</h3>
+          </div>
+        </div>
+      </>
     );
+  }
+
+  return (
+    <PageLayout {...props}>
+      {error ? (
+        renderError()
+      ) : (
+        <CreateEditEntry
+          schema={schema}
+          path={path}
+          data={data}
+          readonly={true}
+        />
+      )}
+    </PageLayout>
+  );
 }
 
 export default withTranslation()(ViewResource);

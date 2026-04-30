@@ -1,27 +1,36 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
-import React, { JSX, ReactNode } from 'react';
+import React, { JSX, ReactNode } from "react";
 
 export type ButtonProps = {
-    "data-testid"?: string,
-    type?: "button" | "reset" | "submit",
-    disabled?: boolean,
-    variant?: "contained" | "outlined" | "text",
-    style?: React.CSSProperties,
-    children: ReactNode,
-    className?: string
-    onClick: () => void
-}
+  "data-testid"?: string;
+  type?: "button" | "reset" | "submit";
+  disabled?: boolean;
+  variant?: "contained" | "outlined" | "text";
+  style?: React.CSSProperties;
+  children: ReactNode;
+  className?: string;
+  onClick: () => void;
+};
 export default function Button(props: ButtonProps): JSX.Element {
-    return <button
-        {...props}
-        className={props.disabled ? "NuoButtonDisabled"
-            : props.variant === "outlined" ? "NuoButtonOutlined"
-            : props.variant === "text" ? "NuoButtonText" : ""}
-        onClick={(event) => {
-            event.preventDefault();
-            props.onClick();
-        }}>
-        {props.children}
+  return (
+    <button
+      {...props}
+      className={
+        props.disabled
+          ? "NuoButtonDisabled"
+          : props.variant === "outlined"
+            ? "NuoButtonOutlined"
+            : props.variant === "text"
+              ? "NuoButtonText"
+              : ""
+      }
+      onClick={(event) => {
+        event.preventDefault();
+        props.onClick();
+      }}
+    >
+      {props.children}
     </button>
+  );
 }

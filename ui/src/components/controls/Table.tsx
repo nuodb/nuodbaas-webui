@@ -1,43 +1,64 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 import { JSX, ReactNode } from "react";
 
 type TableProps = {
-    children: JSX.Element[],
-    key?: string,
-    "data-testid"?: string,
-}
+  children: JSX.Element[];
+  key?: string;
+  "data-testid"?: string;
+};
 
 interface ChildProps {
-    children?: ReactNode,
-    className?: string,
-    "data-testid"?: string,
-    zIndex?: number;
+  children?: ReactNode;
+  className?: string;
+  "data-testid"?: string;
+  zIndex?: number;
 }
 
 interface CellProps extends ChildProps {
-    colSpan?: number;
+  colSpan?: number;
 }
 
 export function Table(props: TableProps): JSX.Element {
-    return <table data-testid={props["data-testid"]} className="NuoTableTable">{props.children}</table>
+  return (
+    <table data-testid={props["data-testid"]} className="NuoTableTable">
+      {props.children}
+    </table>
+  );
 }
 
 export function TableHead(props: ChildProps): JSX.Element {
-    return <thead className="NuoTableThead">{props.children}</thead>
+  return <thead className="NuoTableThead">{props.children}</thead>;
 }
 
 export function TableRow(props: ChildProps): JSX.Element {
-    return <tr className="NuoTableTr">{props.children}</tr>
+  return <tr className="NuoTableTr">{props.children}</tr>;
 }
 
 export function TableCell(props: CellProps): JSX.Element {
-    return <td data-testid={props["data-testid"]} className={["NuoTableTd", props.className].join(" ")} style={{ zIndex: props.zIndex }}>{props.children}</td>
+  return (
+    <td
+      data-testid={props["data-testid"]}
+      className={["NuoTableTd", props.className].join(" ")}
+      style={{ zIndex: props.zIndex }}
+    >
+      {props.children}
+    </td>
+  );
 }
 
 export function TableTh(props: CellProps): JSX.Element {
-    return <th data-testid={props["data-testid"]} className={["NuoTableTh", props.className].join(" ")} colSpan={props.colSpan} style={{ zIndex: props.zIndex }}>{props.children}</th>
+  return (
+    <th
+      data-testid={props["data-testid"]}
+      className={["NuoTableTh", props.className].join(" ")}
+      colSpan={props.colSpan}
+      style={{ zIndex: props.zIndex }}
+    >
+      {props.children}
+    </th>
+  );
 }
 
 export function TableBody(props: ChildProps): JSX.Element {
-    return <tbody className="NuoTableTbody">{props.children}</tbody>
+  return <tbody className="NuoTableTbody">{props.children}</tbody>;
 }

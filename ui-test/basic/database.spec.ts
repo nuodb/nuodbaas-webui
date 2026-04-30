@@ -10,10 +10,7 @@ import {
   createDatabaseUI,
   sleep,
 } from "../helpers/ui";
-import {
-  createProjectRest,
-  createDatabaseRest,
-} from "../helpers/api";
+import { createProjectRest, createDatabaseRest } from "../helpers/api";
 import { expect } from "@playwright/test";
 
 test.describe("DatabaseTest", () => {
@@ -122,7 +119,7 @@ test.describe("DatabaseTest", () => {
 
     // Change password to "db1"
     let popupMenu = page.getByTestId("resource-popup-menu");
-    await popupMenu.waitFor({state: "visible"});
+    await popupMenu.waitFor({ state: "visible" });
     popupMenu.click();
     await page.getByTestId("popupmenu-button.db.changeDbaPassword").click();
     await page.locator('input[name="oldPassword"]').fill("passw0rd");

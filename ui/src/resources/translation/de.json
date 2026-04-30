@@ -1,345 +1,345 @@
 {
-    "copyright": "(C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.",
-    "button": {
-        "advanced": "Weitere Einstellungen",
-        "create": "Erstellen",
-        "create.resource": "{{resource}} erstellen",
-        "add": "Hinzufügen",
-        "delete": "Löschen",
-        "view": "Ansehen",
-        "edit": "Bearbeiten",
-        "save": "Speichern",
-        "close": "Schließen",
-        "yes": "Ja",
-        "no": "Nein",
-        "ok": "Ok",
-        "cancel": "Abbrechen",
-        "true": "Richtig",
-        "false": "Falsch",
-        "db.connection.info": "Datenbankverbindung anzeigen",
-        "start.database": "Datenbank starten",
-        "stop.database": "Datenbank stoppen",
-        "show.databases": "Datenbanken anzeigen",
-        "show.backups": "Sicherungen anzeigen",
-        "settings": "Einstellungen",
-        "automation": "Automatisierung",
-        "logout": "Ausloggen",
-        "copy": "Kopieren",
-        "copied": "Kopiert!",
-        "dismiss": "Schließen",
-        "sql": {
-            "addToQueue": "Zur Warteschlange hinzufügen",
-            "addAllToQueue": "Alle zur Warteschlange hinzufügen",
-            "export": "Exportieren",
-            "editor": "SQL Editor"
-        }
+  "copyright": "(C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.",
+  "button": {
+    "advanced": "Weitere Einstellungen",
+    "create": "Erstellen",
+    "create.resource": "{{resource}} erstellen",
+    "add": "Hinzufügen",
+    "delete": "Löschen",
+    "view": "Ansehen",
+    "edit": "Bearbeiten",
+    "save": "Speichern",
+    "close": "Schließen",
+    "yes": "Ja",
+    "no": "Nein",
+    "ok": "Ok",
+    "cancel": "Abbrechen",
+    "true": "Richtig",
+    "false": "Falsch",
+    "db.connection.info": "Datenbankverbindung anzeigen",
+    "start.database": "Datenbank starten",
+    "stop.database": "Datenbank stoppen",
+    "show.databases": "Datenbanken anzeigen",
+    "show.backups": "Sicherungen anzeigen",
+    "settings": "Einstellungen",
+    "automation": "Automatisierung",
+    "logout": "Ausloggen",
+    "copy": "Kopieren",
+    "copied": "Kopiert!",
+    "dismiss": "Schließen",
+    "sql": {
+      "addToQueue": "Zur Warteschlange hinzufügen",
+      "addAllToQueue": "Alle zur Warteschlange hinzufügen",
+      "export": "Exportieren",
+      "editor": "SQL Editor"
+    }
+  },
+  "hint": {
+    "open.settings": "Einstellungen öffnen"
+  },
+  "control": {
+    "select.item.all": "--- Alle ---",
+    "select.item.select": "--- Auswählen ---"
+  },
+  "confirm": {
+    "start.database.title": "Datenbank starten",
+    "start.database.body": "Möchten sie die Datenbank {{organization}}/{{project}}/{{name}} starten?",
+    "stop.database.title": "Datenbank stoppen",
+    "stop.database.body": "Möchten sie die Datenbank {{organization}}/{{project}}/{{name}} stoppen?",
+    "delete.resource.title": "{{resources_one}} {{name}} löschen",
+    "delete.resource.body": "Wollen sie wirklich die {{resources_one}} {{name}} löschen?",
+    "delete.resources.title": "{{count}} {{resources}} löschen",
+    "delete.resources.body": "Bitte bestätigen sie die löschung der {{resources}} {{names}}?"
+  },
+  "resource": {
+    "label": {
+      "backuppolicies": "Backup Einstellungen",
+      "backuppolicies_one": "Backup Einstellung",
+      "backups": "Backups",
+      "backups_one": "Backup",
+      "databases": "Datenbanken",
+      "databases_one": "Datenbank",
+      "projects": "Projekte",
+      "projects_one": "Projekt",
+      "users": "Benutzer",
+      "users_one": "Benutzer"
+    }
+  },
+  "field": {
+    "label": {
+      "allowCrossOrganizationAccess": "Zugriff über Organisationen erlauben",
+      "password": "Kennwort",
+      "dbaPassword": "DBA Password",
+      "organization": "Organisation",
+      "username": "Username",
+      "accessRule": "Zugriffsregeln",
+      "accessRule.allow": "Erlauben",
+      "accessRule.deny": "Ablehnen",
+      "name": "Name",
+      "labels": "Etiketten",
+      "search": "suchen, z.B. \"wert\" oder \"feldname=wert\" oder \"feldname=*teilwert*\" oder \"label=schlüssel=wert\"",
+      "sla": "SLA",
+      "tier": "Tier",
+      "properties": "Eigenschaften",
+      "project": "Projekt",
+      "status": "Status",
+      "state": "Status",
+      "database": "Datenbank",
+      "frequency": "Frequenz",
+      "selector": "Auswahl",
+      "selector.scope": "Scope",
+      "selector.slas": "SLAs",
+      "selector.tiers": "Tiers",
+      "selector.labels": "Labels",
+      "status.sqlEndpoint": "SQL Endpoint",
+      "status.caPem": "Certificate",
+      "status.ready": "Ready",
+      "status.shutdown": "Shutdown",
+      "status.message": "Message",
+      "status.state": "State",
+      "maintenance": "Maintenance",
+      "maintenance.expiresAtTime": "Läuft ab am",
+      "maintenance.expiresIn": "Läuft ab in",
+      "properties.propagatePolicyLabels": "Richtlinien labels verbreiten",
+      "properties.propagateDatabaseLabels": "Datenbank labels verbreiten",
+      "properties.archiveDiskSize": "Archiv Speichergröße",
+      "properties.journalDiskSize": "Journal Speichergröße",
+      "properties.tierParameters": "Tier Einstellungen",
+      "properties.inheritTierParameters": "Tier Einstellungen übernehmen",
+      "properties.productVersion": "Product Version",
+      "retention": "Beibehaltung",
+      "retention.hourly": "Stündlich",
+      "retention.daily": "Täglich",
+      "retention.weekly": "Wöchentlich",
+      "retention.monthly": "Monatlich",
+      "retention.yearly": "Jährlich",
+      "retention.settings.dayOfWeek": "Wochentag",
+      "retention.settings.month": "Monat",
+      "retention.settings.relativeToLast": "Abhängig von letzter Sicherung",
+      "retention.settings.promoteLatestToHourly": "Übernehme letzes zu stündlich",
+      "retention.settings.promoteLatestToDaily": "Übernehme letzes zu täglich",
+      "retention.settings.promoteLatestToMonthly": "Übernehme letzes zu monatlich",
+      "restoreFrom": "Wiederherstellen von",
+      "restoreFrom.backup": "Sicherung",
+      "importSource": "Importquelle",
+      "importSource.backupHandle": "Sicherung handle",
+      "importSource.backupPlugin": "Sicherung plugin",
+      "suspended": "Ausgesetzt",
+      "roles": "Rollen",
+      "sql": {
+        "select.files": "SQL Dateien auswählen",
+        "filename": "Datei",
+        "success": "Erfolgreich",
+        "failures": "Fehlgeschlagen",
+        "updates": "Aktuallisierungen",
+        "error": "Fehler",
+        "status": "Status"
+      }
     },
-    "hint": {
-        "open.settings": "Einstellungen öffnen"
+    "required": "Erforderlich",
+    "crontab": {
+      "minute": "Minute",
+      "hour": "Stunde",
+      "dayOfMonth": "Monatstag",
+      "month": "Monat",
+      "weekday": "Wochentag"
     },
-    "control": {
-        "select.item.all": "--- Alle ---",
-        "select.item.select": "--- Auswählen ---"
-    },
-    "confirm": {
-        "start.database.title": "Datenbank starten",
-        "start.database.body": "Möchten sie die Datenbank {{organization}}/{{project}}/{{name}} starten?",
-        "stop.database.title": "Datenbank stoppen",
-        "stop.database.body": "Möchten sie die Datenbank {{organization}}/{{project}}/{{name}} stoppen?",
-        "delete.resource.title": "{{resources_one}} {{name}} löschen",
-        "delete.resource.body": "Wollen sie wirklich die {{resources_one}} {{name}} löschen?",
-        "delete.resources.title": "{{count}} {{resources}} löschen",
-        "delete.resources.body": "Bitte bestätigen sie die löschung der {{resources}} {{names}}?"
-    },
-    "resource": {
-        "label": {
-            "backuppolicies": "Backup Einstellungen",
-            "backuppolicies_one": "Backup Einstellung",
-            "backups": "Backups",
-            "backups_one": "Backup",
-            "databases": "Datenbanken",
-            "databases_one": "Datenbank",
-            "projects": "Projekte",
-            "projects_one": "Projekt",
-            "users": "Benutzer",
-            "users_one": "Benutzer"
-        }
-    },
-    "field": {
-        "label": {
-            "allowCrossOrganizationAccess": "Zugriff über Organisationen erlauben",
-            "password": "Kennwort",
-            "dbaPassword": "DBA Password",
-            "organization": "Organisation",
-            "username": "Username",
-            "accessRule": "Zugriffsregeln",
-            "accessRule.allow": "Erlauben",
-            "accessRule.deny": "Ablehnen",
-            "name": "Name",
-            "labels": "Etiketten",
-            "search": "suchen, z.B. \"wert\" oder \"feldname=wert\" oder \"feldname=*teilwert*\" oder \"label=schlüssel=wert\"",
-            "sla": "SLA",
-            "tier": "Tier",
-            "properties": "Eigenschaften",
-            "project": "Projekt",
-            "status": "Status",
-            "state": "Status",
-            "database": "Datenbank",
-            "frequency": "Frequenz",
-            "selector": "Auswahl",
-            "selector.scope": "Scope",
-            "selector.slas": "SLAs",
-            "selector.tiers": "Tiers",
-            "selector.labels": "Labels",
-            "status.sqlEndpoint": "SQL Endpoint",
-            "status.caPem": "Certificate",
-            "status.ready": "Ready",
-            "status.shutdown": "Shutdown",
-            "status.message": "Message",
-            "status.state": "State",
-            "maintenance": "Maintenance",
-            "maintenance.expiresAtTime": "Läuft ab am",
-            "maintenance.expiresIn": "Läuft ab in",
-            "properties.propagatePolicyLabels": "Richtlinien labels verbreiten",
-            "properties.propagateDatabaseLabels": "Datenbank labels verbreiten",
-            "properties.archiveDiskSize": "Archiv Speichergröße",
-            "properties.journalDiskSize": "Journal Speichergröße",
-            "properties.tierParameters": "Tier Einstellungen",
-            "properties.inheritTierParameters": "Tier Einstellungen übernehmen",
-            "properties.productVersion": "Product Version",
-            "retention": "Beibehaltung",
-            "retention.hourly": "Stündlich",
-            "retention.daily": "Täglich",
-            "retention.weekly": "Wöchentlich",
-            "retention.monthly": "Monatlich",
-            "retention.yearly": "Jährlich",
-            "retention.settings.dayOfWeek": "Wochentag",
-            "retention.settings.month": "Monat",
-            "retention.settings.relativeToLast": "Abhängig von letzter Sicherung",
-            "retention.settings.promoteLatestToHourly": "Übernehme letzes zu stündlich",
-            "retention.settings.promoteLatestToDaily": "Übernehme letzes zu täglich",
-            "retention.settings.promoteLatestToMonthly": "Übernehme letzes zu monatlich",
-            "restoreFrom": "Wiederherstellen von",
-            "restoreFrom.backup": "Sicherung",
-            "importSource": "Importquelle",
-            "importSource.backupHandle": "Sicherung handle",
-            "importSource.backupPlugin": "Sicherung plugin",
-            "suspended": "Ausgesetzt",
-            "roles": "Rollen",
-            "sql": {
-                "select.files": "SQL Dateien auswählen",
-                "filename": "Datei",
-                "success": "Erfolgreich",
-                "failures": "Fehlgeschlagen",
-                "updates": "Aktuallisierungen",
-                "error": "Fehler",
-                "status": "Status"
-            }
-        },
-        "required": "Erforderlich",
-        "crontab": {
-            "minute": "Minute",
-            "hour": "Stunde",
-            "dayOfMonth": "Monatstag",
-            "month": "Monat",
-            "weekday": "Wochentag"
-        },
-        "enum": {
-            "retention.settings": {
-                "dayOfWeek": {
-                    "Sunday": "Sonntag",
-                    "Monday": "Montag",
-                    "Tuesday": "Dienstag",
-                    "Wednesday": "Mittwoch",
-                    "Thursday": "Donnerstag",
-                    "Friday": "Freitag",
-                    "Saturday": "Samstag"
-                },
-                "month": {
-                    "January": "Januar",
-                    "February": "Februar",
-                    "March": "März",
-                    "April": "April",
-                    "May": "Mai",
-                    "June": "Juni",
-                    "July": "Juli",
-                    "August": "August",
-                    "September": "September",
-                    "October": "Oktober",
-                    "November": "November",
-                    "December": "Dezember"
-                }
-            },
-            "frequency": {
-                "@hourly": "Stündlich",
-                "@daily": "Täglich",
-                "@weekly": "Wöchentlich",
-                "@monthly": "Monatlich",
-                "@yearly": "Jährlich",
-                "other": "Benutzer definiert"
-            }
-        },
-        "map": {
-            "header.label.key": "Schlüssel",
-            "header.label.value": "Wert",
-            "hint.new.key": "Neuer Schlüssel",
-            "hint.new.value": "Neuer Wert"
-        },
-        "select": {
-            "selectItem": "--- Eintrag auswählen ---",
-            "allOrgs": "Alle Organisationen"
-        }
-    },
-    "list": {
-        "label": {
-            "management": "Management"
-        }
-    },
-    "form": {
-        "settings": {
-            "label": {
-                "theme": "Thema",
-                "title": "Einstellungen"
-            }
-        },
-        "sqleditor": {
-            "label": {
-                "dbUsername": "DB Benutzername",
-                "dbPassword": "DB Passwort",
-                "dbaPassword": "DBA Password",
-                "dbSchema": "DB Schema",
-                "title": "SQL Editor",
-                "allFieldsRequired": "Alle felder sind erforderlich",
-                "fieldName": "Feldname",
-                "dataType": "Datentyp",
-                "condition": "Bedingung",
-                "value": "Wert",
-                "tab": {
-                    "browse": "Durchsuchen",
-                    "query": "Abfrage",
-                    "import": "Importieren",
-                    "export": "Exportieren"
-                },
-                "tasksComplete": "{{completed}} von {{total}} Aufträgen abgeschlossen",
-                "exporting": "{{dbSchema}} exportieren",
-                "tableToExport": "Tabelle zu exportieren",
-                "renameTable": "optional die exportierte Tabelle umbenennen",
-                "renameSchema": "optional das Schema umbenennen",
-                "batchSize": "batch Größe",
-                "exportLimit": "maximale exportierte Reihen pro Tabelle",
-                "includeDdl": "DDL exportieren",
-                "includeData": "Daten exportieren",
-                "includeDrop": "'Drop' Anweisungen beinhalten",
-                "allTables": "Alle Tabellen"
-            },
-            "button": {
-                "login": "Login",
-                "executing": "Ausführen...",
-                "submit": "Übermitteln"
-            }
-        },
-        "login": {
-            "label": {
-                "loginWith": "Login mit {{providerDesc}} ",
-                "goBack": "Zurück",
-                "login": "Login"
-            }
-        }
-    },
-    "dialog": {
-        "dbConnectionInfo": {
-            "title": "Datenbankverbindung Information für {{dbName}}",
-            "label": {
-                "database": "Datenbank",
-                "sqlEndpoint": "SQL Addresse",
-                "certificate": "Zertifikat",
-                "codeSamples": "Code Beispiel",
-                "description": "Folgende Beispiele benötigen die \"NuoDB client library\" welche von [hier](https://github.com/nuodb/nuodb-client/releases) heruntergeladen werden kann. Füllen sie den Benutzernamen/Kennwort für die Datenbank aus und starten sie die Beispiele von dem extrahierten Verzeichnis der \"NuoDB Client Library\".",
-                "nuosql": "Kommandozeile (nuosql)",
-                "jdbc": "Java (JDBC)",
-                "cpp": "C++"
-            }
-        },
-        "automation": {
-            "title": "Automatisierung",
-            "curl": "Aufnahme als CURL Anweisungen exportieren",
-            "startRecording": "Neue Aufnahme starten",
-            "stopRecording": "Aufnahme beenden",
-            "recordingInProgress": "Aufnahme läuft...",
-            "hideGetRequests": "GET Anweisungen ausblenden",
-            "convertUpdatesToPatchRequests": "PUT Anweisungen zu PATCH umwandeln",
-            "noWriteRequests": "Keine Änderungen aufgenommen."
-        },
-        "searchFilter": {
-            "addTitle": "Filter hinzufügen",
-            "editTitle": "Filter bearbeiten",
-            "label": {
-                "addField": "Suchfeld hinzufügen",
-                "fieldName": "Feld name",
-                "condition": "Vergleich",
-                "value": "Wert"
-            },
-            "options": {
-                "NON_NULL": "enthalten",
-                "NULL": "nicht enhalten",
-                "=": "gleich",
-                "!=": "nicht gleich",
-                ">=": "größer oder gleich",
-                "<=": "kleiner oder gleich",
-                "~": "Regex"
-            }
-        }
-    },
-    "text": {
-        "editEntryForPath": "Eintrag für {{path}} bearbeiten",
-        "createNewForResource": "Neue {{resources_one}} erstellen",
-        "viewForResource": "{{resources_one}}",
-        "editForResource": "{{resources_one}} bearbeiten",
-        "newResource": "{{resources_one}} erstellen",
-        "noData": "Keine Daten",
-        "more": "Mehr",
-        "less": "Weniger"
-    },
-    "section": {
-        "title": {
-            "general": "Allgemain",
-            "advanced": "Erweiterte Einstellungen",
-            "access.deny.rules": "Zugriffsregeln",
-            "labels": "Etiketten",
-            "change.password": "Passwort ändern",
-            "database.selection": "Datenbank Auswahl",
-            "database.retention": "Datenbank beibehalten"
-        }
-    },
-    "calendar": {
-        "timezone": "Zeitzone",
-        "time": "Zeit",
-        "am": "Vormittags",
-        "pm": "Nachmittags",
-        "timezone.local": "Örtliche Zeit",
-        "timezone.utc": "UTC Zeit",
+    "enum": {
+      "retention.settings": {
         "dayOfWeek": {
-            "Sunday": "Sonntag",
-            "Monday": "Motag",
-            "Tuesday": "Dienstag",
-            "Wednesday": "Mittwoch",
-            "Thursday": "Donnerstag",
-            "Friday": "Freitag",
-            "Saturday": "Samstag"
+          "Sunday": "Sonntag",
+          "Monday": "Montag",
+          "Tuesday": "Dienstag",
+          "Wednesday": "Mittwoch",
+          "Thursday": "Donnerstag",
+          "Friday": "Freitag",
+          "Saturday": "Samstag"
         },
         "month": {
-            "January": "Januar",
-            "February": "Februar",
-            "March": "März",
-            "April": "April",
-            "May": "Mai",
-            "June": "Juni",
-            "July": "Juli",
-            "August": "August",
-            "September": "September",
-            "October": "Oktober",
-            "November": "November",
-            "December": "Dezember"
+          "January": "Januar",
+          "February": "Februar",
+          "March": "März",
+          "April": "April",
+          "May": "Mai",
+          "June": "Juni",
+          "July": "Juli",
+          "August": "August",
+          "September": "September",
+          "October": "Oktober",
+          "November": "November",
+          "December": "Dezember"
         }
-}
+      },
+      "frequency": {
+        "@hourly": "Stündlich",
+        "@daily": "Täglich",
+        "@weekly": "Wöchentlich",
+        "@monthly": "Monatlich",
+        "@yearly": "Jährlich",
+        "other": "Benutzer definiert"
+      }
+    },
+    "map": {
+      "header.label.key": "Schlüssel",
+      "header.label.value": "Wert",
+      "hint.new.key": "Neuer Schlüssel",
+      "hint.new.value": "Neuer Wert"
+    },
+    "select": {
+      "selectItem": "--- Eintrag auswählen ---",
+      "allOrgs": "Alle Organisationen"
+    }
+  },
+  "list": {
+    "label": {
+      "management": "Management"
+    }
+  },
+  "form": {
+    "settings": {
+      "label": {
+        "theme": "Thema",
+        "title": "Einstellungen"
+      }
+    },
+    "sqleditor": {
+      "label": {
+        "dbUsername": "DB Benutzername",
+        "dbPassword": "DB Passwort",
+        "dbaPassword": "DBA Password",
+        "dbSchema": "DB Schema",
+        "title": "SQL Editor",
+        "allFieldsRequired": "Alle felder sind erforderlich",
+        "fieldName": "Feldname",
+        "dataType": "Datentyp",
+        "condition": "Bedingung",
+        "value": "Wert",
+        "tab": {
+          "browse": "Durchsuchen",
+          "query": "Abfrage",
+          "import": "Importieren",
+          "export": "Exportieren"
+        },
+        "tasksComplete": "{{completed}} von {{total}} Aufträgen abgeschlossen",
+        "exporting": "{{dbSchema}} exportieren",
+        "tableToExport": "Tabelle zu exportieren",
+        "renameTable": "optional die exportierte Tabelle umbenennen",
+        "renameSchema": "optional das Schema umbenennen",
+        "batchSize": "batch Größe",
+        "exportLimit": "maximale exportierte Reihen pro Tabelle",
+        "includeDdl": "DDL exportieren",
+        "includeData": "Daten exportieren",
+        "includeDrop": "'Drop' Anweisungen beinhalten",
+        "allTables": "Alle Tabellen"
+      },
+      "button": {
+        "login": "Login",
+        "executing": "Ausführen...",
+        "submit": "Übermitteln"
+      }
+    },
+    "login": {
+      "label": {
+        "loginWith": "Login mit {{providerDesc}} ",
+        "goBack": "Zurück",
+        "login": "Login"
+      }
+    }
+  },
+  "dialog": {
+    "dbConnectionInfo": {
+      "title": "Datenbankverbindung Information für {{dbName}}",
+      "label": {
+        "database": "Datenbank",
+        "sqlEndpoint": "SQL Addresse",
+        "certificate": "Zertifikat",
+        "codeSamples": "Code Beispiel",
+        "description": "Folgende Beispiele benötigen die \"NuoDB client library\" welche von [hier](https://github.com/nuodb/nuodb-client/releases) heruntergeladen werden kann. Füllen sie den Benutzernamen/Kennwort für die Datenbank aus und starten sie die Beispiele von dem extrahierten Verzeichnis der \"NuoDB Client Library\".",
+        "nuosql": "Kommandozeile (nuosql)",
+        "jdbc": "Java (JDBC)",
+        "cpp": "C++"
+      }
+    },
+    "automation": {
+      "title": "Automatisierung",
+      "curl": "Aufnahme als CURL Anweisungen exportieren",
+      "startRecording": "Neue Aufnahme starten",
+      "stopRecording": "Aufnahme beenden",
+      "recordingInProgress": "Aufnahme läuft...",
+      "hideGetRequests": "GET Anweisungen ausblenden",
+      "convertUpdatesToPatchRequests": "PUT Anweisungen zu PATCH umwandeln",
+      "noWriteRequests": "Keine Änderungen aufgenommen."
+    },
+    "searchFilter": {
+      "addTitle": "Filter hinzufügen",
+      "editTitle": "Filter bearbeiten",
+      "label": {
+        "addField": "Suchfeld hinzufügen",
+        "fieldName": "Feld name",
+        "condition": "Vergleich",
+        "value": "Wert"
+      },
+      "options": {
+        "NON_NULL": "enthalten",
+        "NULL": "nicht enhalten",
+        "=": "gleich",
+        "!=": "nicht gleich",
+        ">=": "größer oder gleich",
+        "<=": "kleiner oder gleich",
+        "~": "Regex"
+      }
+    }
+  },
+  "text": {
+    "editEntryForPath": "Eintrag für {{path}} bearbeiten",
+    "createNewForResource": "Neue {{resources_one}} erstellen",
+    "viewForResource": "{{resources_one}}",
+    "editForResource": "{{resources_one}} bearbeiten",
+    "newResource": "{{resources_one}} erstellen",
+    "noData": "Keine Daten",
+    "more": "Mehr",
+    "less": "Weniger"
+  },
+  "section": {
+    "title": {
+      "general": "Allgemain",
+      "advanced": "Erweiterte Einstellungen",
+      "access.deny.rules": "Zugriffsregeln",
+      "labels": "Etiketten",
+      "change.password": "Passwort ändern",
+      "database.selection": "Datenbank Auswahl",
+      "database.retention": "Datenbank beibehalten"
+    }
+  },
+  "calendar": {
+    "timezone": "Zeitzone",
+    "time": "Zeit",
+    "am": "Vormittags",
+    "pm": "Nachmittags",
+    "timezone.local": "Örtliche Zeit",
+    "timezone.utc": "UTC Zeit",
+    "dayOfWeek": {
+      "Sunday": "Sonntag",
+      "Monday": "Motag",
+      "Tuesday": "Dienstag",
+      "Wednesday": "Mittwoch",
+      "Thursday": "Donnerstag",
+      "Friday": "Freitag",
+      "Saturday": "Samstag"
+    },
+    "month": {
+      "January": "Januar",
+      "February": "Februar",
+      "March": "März",
+      "April": "April",
+      "May": "Mai",
+      "June": "Juni",
+      "July": "Juli",
+      "August": "August",
+      "September": "September",
+      "October": "Oktober",
+      "November": "November",
+      "December": "Dezember"
+    }
+  }
 }

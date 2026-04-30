@@ -35,7 +35,8 @@
   "homepage": "/",
   "devDependencies": {
     "@playwright/test": "^1.58.2",
-    "@types/node": "^25.5.2"
+    "@types/node": "^25.5.2",
+    "prettier": "^3.8.3"
   },
   "nyc": {
     "extension": [

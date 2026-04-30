@@ -15,35 +15,36 @@ import Toast from "../controls/Toast";
  * handles all the /resource/edit/* requests to edit a resource
  */
 function EditResource(props: PageProps) {
-    const { schema } = props;
-    const path = "/" + useParams()["*"];
-    const [data, setData] = useState({});
+  const { schema } = props;
+  const path = "/" + useParams()["*"];
+  const [data, setData] = useState({});
 
-    useEffect(() => {
-        let resourceByPath = getResourceByPath(schema, path);
-        if ("get" in resourceByPath) {
-            Rest.get(path).then((data: TempAny) => {
-                setData(data);
-            }).catch((error) => {
-                Auth.handle401Error(error);
-                setData({});
-                Toast.show("Error retrieving entry", error);
-            });
-        }
-        else {
-            setData({});
-        }
-    }, [schema, path]);
-
-    if (!schema || !path) {
-        return null;
+  useEffect(() => {
+    let resourceByPath = getResourceByPath(schema, path);
+    if ("get" in resourceByPath) {
+      Rest.get(path)
+        .then((data: TempAny) => {
+          setData(data);
+        })
+        .catch((error) => {
+          Auth.handle401Error(error);
+          setData({});
+          Toast.show("Error retrieving entry", error);
+        });
+    } else {
+      setData({});
     }
+  }, [schema, path]);
 
-    return (
-        <PageLayout {...props}>
-            <CreateEditEntry schema={schema} path={path} data={data} />
-        </PageLayout >
-    );
+  if (!schema || !path) {
+    return null;
+  }
+
+  return (
+    <PageLayout {...props}>
+      <CreateEditEntry schema={schema} path={path} data={data} />
+    </PageLayout>
+  );
 }
 
 export default withTranslation()(EditResource);
