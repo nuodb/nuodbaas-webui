@@ -14,6 +14,7 @@ import Button from "../../controls/Button";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useState } from "react";
 import LeftMenu from "./LeftMenu";
+import RegionSettingsMenu from "../RegionSettingsMenu";
 
 interface Props extends PageProps {
   schema: SchemaType;
@@ -65,46 +66,49 @@ function Banner(props: Props) {
           />
         </div>
         <div className="NuoForDesktop"></div>
-        <Menu
-          data-testid="user-menu"
-          align="right"
-          items={[
-            {
-              label: t("button.settings"),
-              id: "settings",
-              "data-testid": "settings",
-              onClick: () => {
-                navigate("/ui/settings");
-                return true;
+        <div className="NuoRowReverse">
+          <Menu
+            data-testid="user-menu"
+            align="right"
+            items={[
+              {
+                label: t("button.settings"),
+                id: "settings",
+                "data-testid": "settings",
+                onClick: () => {
+                  navigate("/ui/settings");
+                  return true;
+                },
               },
-            },
-            {
-              label: t("button.automation"),
-              id: "automation",
-              "data-testid": "automation",
-              onClick: () => {
-                navigate("/ui/automation");
-                return true;
+              {
+                label: t("button.automation"),
+                id: "automation",
+                "data-testid": "automation",
+                onClick: () => {
+                  navigate("/ui/automation");
+                  return true;
+                },
               },
-            },
-            {
-              label: t("button.logout"),
-              id: "logout",
-              "data-testid": "logout",
-              onClick: () => {
-                Auth.logout();
-                window.location.href = "/ui";
-                return true;
+              {
+                label: t("button.logout"),
+                id: "logout",
+                "data-testid": "logout",
+                onClick: () => {
+                  Auth.logout();
+                  window.location.href = "/ui";
+                  return true;
+                },
               },
-            },
-          ]}
-        >
-          <Tooltip title={t("hint.open.settings")}>
-            <IconButton sx={{ p: 0 }}>
-              <Avatar>{Auth.getAvatarText()}</Avatar>
-            </IconButton>
-          </Tooltip>
-        </Menu>
+            ]}
+          >
+            <Tooltip title={t("hint.open.settings")}>
+              <IconButton sx={{ p: 0 }}>
+                <Avatar>{Auth.getAvatarText()}</Avatar>
+              </IconButton>
+            </Tooltip>
+          </Menu>
+          <RegionSettingsMenu />
+        </div>
       </div>
       {showMobileMenu && (
         <div>

@@ -140,7 +140,10 @@ function MenuItems({
 
   return items.map((item: MenuItemProps, index: number) => (
     <div
-      style={{ zIndex: 102 }}
+      style={{
+        zIndex: 102,
+        borderTop: item.hasSeparator ? "2px solid lightgray" : undefined,
+      }}
       id={item.id}
       data-testid={(defaultItem ? "popupmenu-" : "") + item["data-testid"]}
       ref={refs[index]}

@@ -5,6 +5,7 @@ import { TempAny } from "./types";
 import { getValue } from "../components/fields/utils";
 import { matchesPath } from "./schema";
 import React, { JSX, useEffect, useState } from "react";
+import Auth from "./auth";
 
 export const LOCAL_USER_SETTINGS = "nuodbaas_webui_userSettings";
 
@@ -303,7 +304,7 @@ export default function Customizations(
 
     try {
       hasSqlEditorService = (
-        (await axios.get("/api/sql/")).data || ""
+        (await axios.get(Auth.getNuodbSqlRestUrl("/"))).data || ""
       ).includes("NuoDB SQL service");
     } catch (ex) {
       hasSqlEditorService = false;

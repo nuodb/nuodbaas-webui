@@ -1,5 +1,5 @@
 #!/bin/sh
-# (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+# (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 if [ "$1" == "tgz_static" ] ; then
     echo "Extract static files from image" 1>&2
@@ -11,6 +11,12 @@ fi
 if [ "${NUODB_CP_REST_URL}" != "" ] ; then
     find /usr/share/nginx/html -type f | while read line; do
         sed -i "s#___NUODB_CP_REST_URL___#${NUODB_CP_REST_URL}#g" ${line}
+    done
+fi
+
+if [ "${NUODB_SQL_REST_URL}" != "" ] ; then
+    find /usr/share/nginx/html -type f | while read line; do
+        sed -i "s#___NUODB_SQL_REST_URL___#${NUODB_SQL_REST_URL}#g" ${line}
     done
 fi
 

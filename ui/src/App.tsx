@@ -29,6 +29,7 @@ import BackgroundTasks, { BackgroundTaskType } from "./utils/BackgroundTasks";
 import { withTranslation } from "react-i18next";
 import Redirect from "./components/pages/Redirect";
 import DefaultPage from "./components/pages/DefaultPage";
+import RegionSettingsSelector from "./components/pages/RegionSettingsSelector";
 
 /**
  * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
@@ -169,6 +170,10 @@ function App({ t }: { t: any }) {
                       element={<SqlPage {...pageProps} />}
                     />
                   )}
+                  <Route
+                    path="/ui/region-selector-settings"
+                    element={<RegionSettingsSelector {...pageProps} />}
+                  />
                   <Route path="/ui" element={<DefaultPage />} />
                   <Route path="/ui/login" element={<DefaultPage />} />
                   <Route path="/webui" element={<Navigate to="/ui" />} />
@@ -178,6 +183,10 @@ function App({ t }: { t: any }) {
               </React.Fragment>
             ) : (
               <Routes>
+                <Route
+                  path="/ui/region-selector-settings"
+                  element={<RegionSettingsSelector {...pageProps} />}
+                />
                 <Route
                   path="/ui/login"
                   element={<LoginForm setIsLoggedIn={setIsLoggedIn} />}

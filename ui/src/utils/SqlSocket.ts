@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import { Rest } from "../components/pages/parts/Rest";
+import Auth from "./auth";
 
 export type SqlOperationType =
   | "SET_CREDENTIALS"
@@ -99,7 +100,7 @@ export default function SqlSocket(
     try {
       Rest.incrementPending();
       const response = await axios.post(
-        "/api/sql/query" + getOrgProjDbSchemaUrl(),
+        Auth.getNuodbSqlRestUrl("/query" + getOrgProjDbSchemaUrl()),
         request,
         {
           headers: {
@@ -150,10 +151,12 @@ export default function SqlSocket(
   ): Promise<SqlImportResponseType> {
     try {
       const response = await axios.post(
-        "/api/sql/import/sql/" +
-          getOrgProjDbSchemaUrl() +
-          "?progressKey=" +
-          progressKey,
+        Auth.getNuodbSqlRestUrl(
+          "/import/sql/" +
+            getOrgProjDbSchemaUrl() +
+            "?progressKey=" +
+            progressKey,
+        ),
         file,
         {
           headers: {
@@ -177,7 +180,7 @@ export default function SqlSocket(
   async function sqlSimpleImport(body: string): Promise<SqlImportResponseType> {
     try {
       const response = await axios.post(
-        "/api/sql/import/sql/" + getOrgProjDbSchemaUrl(),
+        Auth.getNuodbSqlRestUrl("/import/sql/" + getOrgProjDbSchemaUrl()),
         body,
         {
           headers: {

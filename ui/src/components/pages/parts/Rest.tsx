@@ -5,6 +5,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
 import Auth from "../../../utils/auth";
 import { JsonType, RestLogEntry, RestMethodType } from "../../../utils/types";
+import Dialog from "./Dialog";
 
 let instance: Rest | null = null;
 
@@ -125,6 +126,33 @@ export class Rest extends React.Component<{
     );
   }
 
+  static async isCorsError(url: string, reason: any) {
+    if (
+      url.startsWith("/") ||
+      url
+        .toLowerCase()
+        .startsWith(
+          (
+            window.location.protocol +
+            window.location.hostname +
+            "/"
+          ).toLowerCase(),
+        )
+    ) {
+      return false;
+    }
+    if (reason?.message === "Network Error") {
+      const baseUrl = url.split("/").slice(0, 4).join("/"); // URL https://server/api" has 4 elements
+      try {
+        await axios.get(baseUrl + "/login/providers");
+        return true;
+      } catch (ex) {
+        return false;
+      }
+    }
+    return false;
+  }
+
   static async get(path: string) {
     return new Promise((resolve, reject) => {
       Rest.incrementPending();
@@ -136,10 +164,45 @@ export class Rest extends React.Component<{
           resolve(response.data);
         })
         .catch(async (reason) => {
-          if (!(await Rest.process401(reason))) {
+          if (await Rest.isCorsError(url, reason)) {
+            const button = await Dialog.show(
+              "Network error",
+              "Unable to load resources from other domain. What do you want to do?",
+              [
+                {
+                  id: "redirect",
+                  label:
+                    "Redirect to " +
+                    url.split("/")[2] /* 2 = hostname portion of the path */,
+                },
+                {
+                  id: "reset",
+                  label: "Reset to default",
+                },
+              ],
+              "",
+            );
+            if (button === "redirect") {
+              // redirect to base URL with hard coded "/ui" subpath. This is the default except for 3DS sites - and those redirect the "/ui" to the real one.
+              window.location.href =
+                url.split("/").slice(0, 3).join("/") +
+                "/u" +
+                (new Date().getTime() > 0 ? "" : "never_occurs") +
+                "i/";
+            } else {
+              // reset to the default
+              Auth.setRegions(
+                Auth.getRegions().map((region) => ({
+                  ...region,
+                  active: false,
+                })),
+              );
+              window.location.reload();
+            }
+          } else if (!(await Rest.process401(reason))) {
             Rest.log("get", url, false);
-            reject(reason);
           }
+          reject(reason);
         })
         .finally(() => {
           Rest.decrementPending();

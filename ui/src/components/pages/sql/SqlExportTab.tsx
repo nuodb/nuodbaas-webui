@@ -23,6 +23,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Button from "../../controls/Button";
 import { SqlType } from "../../../utils/SqlSocket";
 import { Checkbox } from "../../controls/Checkboxes";
+import Auth from "../../../utils/auth";
 
 type SqlExportTabProps = {
   tasks: BackgroundTaskType[];
@@ -181,11 +182,8 @@ function SqlExportTab({ tasks, setTasks, sqlConnection }: SqlExportTabProps) {
         ".sql",
     });
 
-    const url = new URL(
-      location.protocol +
-        location.host +
-        "/api/sql/export/sql" +
-        sqlConnection.getOrgProjDbSchemaUrl(),
+    const url = Auth.getNuodbSqlRestUrl(
+      "/export/sql" + sqlConnection.getOrgProjDbSchemaUrl(),
     );
     const body = {
       includeDdl,

@@ -12,6 +12,7 @@ import { withTranslation } from "react-i18next";
 import { TempAny } from "../../utils/types";
 import { Rest } from "./parts/Rest";
 import axios from "axios";
+import RegionSettingsMenu from "./RegionSettingsMenu";
 
 interface Props {
   setIsLoggedIn: (isLoggedIn: boolean) => void;
@@ -293,6 +294,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
 
   return (
     <>
+      <RegionSettingsMenu />
       <div className="NuoLoginForm">
         <img alt="" />
         {progressMessage ? (

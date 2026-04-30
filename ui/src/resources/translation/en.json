@@ -39,7 +39,8 @@
     "changePassword": "Change Password"
   },
   "hint": {
-    "open.settings": "Open Settings"
+    "open.settings": "Open Settings",
+    "regionSelector": "Select Region"
   },
   "control": {
     "select.item.all": "--- All ---",
@@ -316,6 +317,20 @@
         "goBack": "Go Back",
         "login": "Login"
       }
+    },
+    "editRegionSettings": {
+      "title": "Edit Regions",
+      "label": {
+        "name": "Name",
+        "cpBaseUrl": "CP Base URL",
+        "sqlBaseUrl": "SQL Base URL",
+        "makeActive": "Make active",
+        "active": "Active",
+        "editRegionEntry": "Edit region entry",
+        "addRegionEntry": "Add Region Entry",
+        "editRegions": "Edit Regions",
+        "defaultRegion": "Default"
+      }
     }
   },
   "dialog": {
@@ -389,7 +404,9 @@
     "newResource": "New {{resources_one}}",
     "noData": "No Data",
     "more": "More",
-    "less": "Less"
+    "less": "Less",
+    "networkError": "Network error",
+    "unableToLoadOtherDomain": "Unable to load resources from other domain. What do you want to do?"
   },
   "section": {
     "title": {

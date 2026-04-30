@@ -26,6 +26,7 @@ import { concatChunks } from "../../../utils/schema";
 import { TempAny } from "../../../utils/types";
 import Toast from "../../controls/Toast";
 import BackgroundTaskStatus from "../../../utils/BackgroundTaskStatus";
+import Auth from "../../../utils/auth";
 
 type SqlImportTabProps = {
   tasks: BackgroundTaskType[];
@@ -101,7 +102,7 @@ function SqlImportTab({
           ),
       };
       Rest.getStream(
-        "/api/sql/progress/sqlimport",
+        Auth.getNuodbSqlRestUrl("/progress/sqlimport"),
         headers,
         progressAbortController,
       )

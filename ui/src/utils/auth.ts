@@ -1,6 +1,6 @@
 // (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 import axios from "axios";
-import { TempAny } from "./types";
+import { RegionSettings, TempAny } from "./types";
 
 /**
  * Authenticates users and stores info in localStorage "credentials".
@@ -22,7 +22,19 @@ export default class Auth {
     return this.getCredentials() ? true : false;
   }
 
-  static getNuodbCpRestUrl(path: string) {
+  static getRegions(): RegionSettings {
+    try {
+      return JSON.parse(localStorage.getItem("regions") || "[]");
+    } catch (exc) {
+      return [];
+    }
+  }
+
+  static setRegions(regions: RegionSettings) {
+    localStorage.setItem("regions", JSON.stringify(regions));
+  }
+
+  static getDefaultCpPrefixPath(): string {
     // The default for the NuoDB REST Control Plane prefix is "/nuodb-cp", which can be overwritten by the
     // environment variable NUODB_CP_REST_URL in the Docker container or Helm Chart config.
     //
@@ -36,6 +48,57 @@ export default class Auth {
       "___NUODB_CP" + (Date.now() > 0 ? "_REST_URL___" : "")
     ) {
       prefixPath = "___NUODB_CP_REST_URL___";
+    }
+    return prefixPath;
+  }
+
+  static getDefaultSqlPrefixPath(): string {
+    // The default for the NuoDB SQL prefix is "/api/sql", which can be overwritten by the
+    // environment variable NUODB_SQL_REST_URL in the Docker container or Helm Chart config.
+    //
+    // When the Docker container starts up, it will replace "___NUODB_SQL_REST_URL___" in the
+    // built client with the custom URL using string replacement. I had to prevent the JavaScript
+    // optimizer / webpack to optimize the next line, that's why I split the constant and made it
+    // dependent on the current time (it will always be after January 1, 1970)
+    let prefixPath = "/api/sql";
+    if (
+      "___NUODB_SQL_REST_URL___" !==
+      "___NUODB_SQL" + (Date.now() > 0 ? "_REST_URL___" : "")
+    ) {
+      prefixPath = "___NUODB_SQL_REST_URL___";
+    }
+    return prefixPath;
+  }
+
+  static getNuodbCpRestUrl(path: string) {
+    let prefixPath = Auth.getDefaultCpPrefixPath();
+
+    const currentRegion = Auth.getRegions().find(
+      (region) => region.active === true,
+    );
+    if (currentRegion && currentRegion.cp) {
+      prefixPath = currentRegion.cp;
+    }
+
+    while (prefixPath.endsWith("/")) {
+      prefixPath.substring(0, prefixPath.length - 1);
+    }
+
+    while (path.startsWith("/")) {
+      path = path.substring(1);
+    }
+
+    return prefixPath + "/" + path;
+  }
+
+  static getNuodbSqlRestUrl(path: string) {
+    let prefixPath = Auth.getDefaultSqlPrefixPath();
+
+    const currentRegion = Auth.getRegions().find(
+      (region) => region.active === true,
+    );
+    if (currentRegion && currentRegion.sql) {
+      prefixPath = currentRegion.sql;
     }
 
     while (prefixPath.endsWith("/")) {
