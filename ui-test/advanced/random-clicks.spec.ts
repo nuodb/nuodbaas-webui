@@ -18,7 +18,6 @@ const MENU_ITEMS = [
   "users",
 ];
 
-
 test.describe("RandomClicks", () => {
   test.setTimeout(45_000);
   test("testRandomClicks – rapid random navigation must not trigger global error boundary", async ({

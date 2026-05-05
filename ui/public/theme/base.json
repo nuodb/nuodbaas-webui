@@ -1,243 +1,243 @@
 {
-    "copyright": "(C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.",
-    "views": {
-        "/databases": {
-            "columns": [
-                "name",
-                "organization",
-                "project",
-                "labels",
-                "tier",
-                "properties",
-                "status.state",
-                "status"
-            ],
-            "menu": [
-                {
-                    "label": "button.db.connection.info",
-                    "icon": "Info",
-                    "dialog": "DbConnectionInfo"
-                },
-                {
-                    "label": "confirm.start.database.title",
-                    "icon": "PlayArrow",
-                    "patch": [
-                        {
-                            "op": "remove",
-                            "path": "/maintenance"
-                        }
-                    ],
-                    "visible": "maintenance.isDisabled",
-                    "confirm": "confirm.start.database.body"
-                },
-                {
-                    "label": "confirm.stop.database.title",
-                    "icon": "Stop",
-                    "patch": [
-                        {
-                            "op": "add",
-                            "path": "/maintenance",
-                            "value": {
-                                "isDisabled": true
-                            }
-                        }
-                    ],
-                    "visible": "!maintenance",
-                    "confirm": "confirm.stop.database.body"
-                },
-                {
-                    "label": "confirm.stop.database.title",
-                    "icon": "Stop",
-                    "patch": [
-                        {
-                            "op": "replace",
-                            "path": "/maintenance",
-                            "value": {
-                                "isDisabled": true
-                            }
-                        }
-                    ],
-                    "visible": "maintenance.isDisabled=false",
-                    "confirm": "confirm.stop.database.body"
-                },
-                {
-                    "label": "button.sql.editor",
-                    "visible": "hasSqlEditorService()",
-                    "icon": "Storage",
-                    "link": "/ui/page/sql/{organization}/{project}/{name}"
-                },
-                {
-                    "label": "button.db.changeDbaPassword",
-                    "icon": "Password",
-                    "writeAccessRequired": true,
-                    "dialog": "ChangeDbaPassword"
-                }
-            ]
+  "copyright": "(C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.",
+  "views": {
+    "/databases": {
+      "columns": [
+        "name",
+        "organization",
+        "project",
+        "labels",
+        "tier",
+        "properties",
+        "status.state",
+        "status"
+      ],
+      "menu": [
+        {
+          "label": "button.db.connection.info",
+          "icon": "Info",
+          "dialog": "DbConnectionInfo"
         },
-        "/backuppolicies": {
-            "columns": [
-                "name",
-                "organization",
-                "labels",
-                "frequency",
-                "selector",
-                "properties",
-                "*"
-            ],
-            "menu": [
-                {
-                    "label": "button.show.databases",
-                    "link": "/ui/resource/list/backuppolicies/{organization}/{name}/databases"
-                },
-                {
-                    "label": "button.show.backups",
-                    "link": "/ui/resource/list/backuppolicies/{organization}/{name}/backups"
-                }
-            ]
+        {
+          "label": "confirm.start.database.title",
+          "icon": "PlayArrow",
+          "patch": [
+            {
+              "op": "remove",
+              "path": "/maintenance"
+            }
+          ],
+          "visible": "maintenance.isDisabled",
+          "confirm": "confirm.start.database.body"
         },
-        "/projects": {
-            "menu": [
-                {
-                    "label": "button.show.databases",
-                    "link": "/ui/resource/list/databases/{organization}/{name}"
-                }
-            ]
+        {
+          "label": "confirm.stop.database.title",
+          "icon": "Stop",
+          "patch": [
+            {
+              "op": "add",
+              "path": "/maintenance",
+              "value": {
+                "isDisabled": true
+              }
+            }
+          ],
+          "visible": "!maintenance",
+          "confirm": "confirm.stop.database.body"
+        },
+        {
+          "label": "confirm.stop.database.title",
+          "icon": "Stop",
+          "patch": [
+            {
+              "op": "replace",
+              "path": "/maintenance",
+              "value": {
+                "isDisabled": true
+              }
+            }
+          ],
+          "visible": "maintenance.isDisabled=false",
+          "confirm": "confirm.stop.database.body"
+        },
+        {
+          "label": "button.sql.editor",
+          "visible": "hasSqlEditorService()",
+          "icon": "Storage",
+          "link": "/ui/page/sql/{organization}/{project}/{name}"
+        },
+        {
+          "label": "button.db.changeDbaPassword",
+          "icon": "Password",
+          "writeAccessRequired": true,
+          "dialog": "ChangeDbaPassword"
         }
+      ]
     },
-    "forms": {
-        "/users?/{organization}?/{name}": {
-            "sections": [
-                {
-                    "fields": {
-                        "organization": {},
-                        "name": {},
-                        "password": {}
-                    }
-                },
-                {
-                    "title": "section.title.access.deny.rules",
-                    "fields": {
-                        "accessRule": {
-                            "expand": false
-                        }
-                    }
-                },
-                {
-                    "title": "section.title.labels",
-                    "fields": {
-                        "labels": {}
-                    }
-                },
-                {
-                    "title": "section.title.advanced",
-                    "fields": {
-                        "*": {}
-                    }
-                }
-            ]
+    "/backuppolicies": {
+      "columns": [
+        "name",
+        "organization",
+        "labels",
+        "frequency",
+        "selector",
+        "properties",
+        "*"
+      ],
+      "menu": [
+        {
+          "label": "button.show.databases",
+          "link": "/ui/resource/list/backuppolicies/{organization}/{name}/databases"
         },
-        "/projects?/{organization}?/{name}": {
-            "sections": [
-                {
-                    "fields": {
-                        "organization": {},
-                        "name": {},
-                        "sla": {},
-                        "tier": {}
-                    }
-                },
-                {
-                    "title": "section.title.advanced",
-                    "fields": {
-                        "*": {}
-                    }
-                }
-            ]
-        },
-        "/databases?/{organization}?/{project}?/{database}": {
-            "sections": [
-                {
-                    "fields": {
-                        "organization": {},
-                        "project": {},
-                        "name": {},
-                        "dbaPassword": {}
-                    }
-                },
-                {
-                    "title": "section.title.advanced",
-                    "fields": {
-                        "*": {}
-                    }
-                }
-            ]
-        },
-        "/databases/{organization}/{project}/{name}": {
-            "sections": [
-                {
-                    "fields": {
-                        "dbaPassword": {
-                            "hidden": true
-                        },
-                        "*": {}
-                    }
-                }
-            ]
-        },
-        "/backups?/{organization}?/{project}?/{database}?/{name}": {
-            "sections": [
-                {
-                    "fields": {
-                        "organization": {},
-                        "project": {},
-                        "database": {},
-                        "name": {}
-                    }
-                },
-                {
-                    "title": "section.title.advanced",
-                    "fields": {
-                        "*": {}
-                    }
-                }
-            ]
-        },
-        "/backuppolicies?/{organization}?/{name}": {
-            "sections": [
-                {
-                    "fields": {
-                        "organization": {},
-                        "name": {},
-                        "frequency": {},
-                        "suspended": {}
-                    }
-                },
-                {
-                    "title": "section.title.database.selection",
-                    "fields": {
-                        "selector": {}
-                    }
-                },
-                {
-                    "title": "section.title.database.retention",
-                    "fields": {
-                        "retention": {}
-                    }
-                },
-                {
-                    "title": "section.title.labels",
-                    "fields": {
-                        "labels": {},
-                        "properties": {}
-                    }
-                },
-                {
-                    "title": "section.title.advanced",
-                    "fields": {
-                        "*": {}
-                    }
-                }
-            ]
+        {
+          "label": "button.show.backups",
+          "link": "/ui/resource/list/backuppolicies/{organization}/{name}/backups"
         }
+      ]
+    },
+    "/projects": {
+      "menu": [
+        {
+          "label": "button.show.databases",
+          "link": "/ui/resource/list/databases/{organization}/{name}"
+        }
+      ]
     }
+  },
+  "forms": {
+    "/users?/{organization}?/{name}": {
+      "sections": [
+        {
+          "fields": {
+            "organization": {},
+            "name": {},
+            "password": {}
+          }
+        },
+        {
+          "title": "section.title.access.deny.rules",
+          "fields": {
+            "accessRule": {
+              "expand": false
+            }
+          }
+        },
+        {
+          "title": "section.title.labels",
+          "fields": {
+            "labels": {}
+          }
+        },
+        {
+          "title": "section.title.advanced",
+          "fields": {
+            "*": {}
+          }
+        }
+      ]
+    },
+    "/projects?/{organization}?/{name}": {
+      "sections": [
+        {
+          "fields": {
+            "organization": {},
+            "name": {},
+            "sla": {},
+            "tier": {}
+          }
+        },
+        {
+          "title": "section.title.advanced",
+          "fields": {
+            "*": {}
+          }
+        }
+      ]
+    },
+    "/databases?/{organization}?/{project}?/{database}": {
+      "sections": [
+        {
+          "fields": {
+            "organization": {},
+            "project": {},
+            "name": {},
+            "dbaPassword": {}
+          }
+        },
+        {
+          "title": "section.title.advanced",
+          "fields": {
+            "*": {}
+          }
+        }
+      ]
+    },
+    "/databases/{organization}/{project}/{name}": {
+      "sections": [
+        {
+          "fields": {
+            "dbaPassword": {
+              "hidden": true
+            },
+            "*": {}
+          }
+        }
+      ]
+    },
+    "/backups?/{organization}?/{project}?/{database}?/{name}": {
+      "sections": [
+        {
+          "fields": {
+            "organization": {},
+            "project": {},
+            "database": {},
+            "name": {}
+          }
+        },
+        {
+          "title": "section.title.advanced",
+          "fields": {
+            "*": {}
+          }
+        }
+      ]
+    },
+    "/backuppolicies?/{organization}?/{name}": {
+      "sections": [
+        {
+          "fields": {
+            "organization": {},
+            "name": {},
+            "frequency": {},
+            "suspended": {}
+          }
+        },
+        {
+          "title": "section.title.database.selection",
+          "fields": {
+            "selector": {}
+          }
+        },
+        {
+          "title": "section.title.database.retention",
+          "fields": {
+            "retention": {}
+          }
+        },
+        {
+          "title": "section.title.labels",
+          "fields": {
+            "labels": {},
+            "properties": {}
+          }
+        },
+        {
+          "title": "section.title.advanced",
+          "fields": {
+            "*": {}
+          }
+        }
+      ]
+    }
+  }
 }

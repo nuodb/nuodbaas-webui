@@ -75,7 +75,11 @@ test.describe("ProjectTest", () => {
         await replaceInputOrTextareaByName(page, "tier", "n0.small");
         await page.getByTestId("section-title-advanced").click();
         await page.getByTestId("section-maintenance").click();
-        await replaceInputOrTextareaByName(page, "maintenance.expiresIn", "30d");
+        await replaceInputOrTextareaByName(
+          page,
+          "maintenance.expiresIn",
+          "30d",
+        );
         await page.getByTestId("create_resource__save_button").click();
         await waitRestComplete(page);
 

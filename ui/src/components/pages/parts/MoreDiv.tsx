@@ -1,14 +1,14 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 
-import React, { useState, useRef, useLayoutEffect, ReactNode } from 'react';
+import React, { useState, useRef, useLayoutEffect, ReactNode } from "react";
 
 type MoreDivProps = {
-    children: ReactNode;
-    maxHeight: number;
-    t: any;
-}
+  children: ReactNode;
+  maxHeight: number;
+  t: any;
+};
 
-export default function MoreDiv({ children, maxHeight, t} : MoreDivProps) {
+export default function MoreDiv({ children, maxHeight, t }: MoreDivProps) {
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -16,10 +16,10 @@ export default function MoreDiv({ children, maxHeight, t} : MoreDivProps) {
   useLayoutEffect(() => {
     const element = contentRef.current;
     if (element) {
-        const overflowing = element.scrollHeight > element.clientHeight
+      const overflowing = element.scrollHeight > element.clientHeight;
       setIsOverflowing(overflowing);
-      if(!overflowing) {
-        element.style.maxHeight = 'none';
+      if (!overflowing) {
+        element.style.maxHeight = "none";
       }
     }
   }, [children, maxHeight]);
@@ -29,17 +29,27 @@ export default function MoreDiv({ children, maxHeight, t} : MoreDivProps) {
       <div
         ref={contentRef}
         style={{
-          maxHeight: isExpanded ? 'none' : (String(maxHeight) + "px"),
-          overflow: 'hidden',
+          maxHeight: isExpanded ? "none" : String(maxHeight) + "px",
+          overflow: "hidden",
         }}
       >
         {children}
       </div>
       {isOverflowing && (
-        <button onClick={() => setIsExpanded(!isExpanded)} style={{ background: 'none', border: 'none', color: 'blue', cursor: 'pointer', padding: 0, boxShadow: "none" }}>
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          style={{
+            background: "none",
+            border: "none",
+            color: "blue",
+            cursor: "pointer",
+            padding: 0,
+            boxShadow: "none",
+          }}
+        >
           {isExpanded ? t("text.less") : t("text.more")}
         </button>
       )}
     </div>
   );
-};
+}

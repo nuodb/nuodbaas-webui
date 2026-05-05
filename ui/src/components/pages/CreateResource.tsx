@@ -1,4 +1,4 @@
-// (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import React from "react";
 import { useParams } from "react-router-dom";
@@ -11,17 +11,17 @@ import { withTranslation } from "react-i18next";
  * handles all the /resource/create/* requests to create a resource
  */
 function CreateResource(props: PageProps) {
-    const { schema } = props;
-    const path = "/" + useParams()["*"];
-    if (!schema) {
-        return null;
-    }
+  const { schema } = props;
+  const path = "/" + useParams()["*"];
+  if (!schema) {
+    return null;
+  }
 
-    return (
-        <PageLayout {...props} >
-            <CreateEditEntry schema={schema} path={path} />
-        </PageLayout>
-    );
+  return (
+    <PageLayout {...props}>
+      <CreateEditEntry schema={schema} path={path} />
+    </PageLayout>
+  );
 }
 
 export default withTranslation()(CreateResource);

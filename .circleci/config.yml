@@ -53,6 +53,9 @@ jobs:
           name: Check copyrights
           command: make copyright
       - run:
+          name: Check Code formatting
+          command: make prettier-check
+      - run:
           name: Run Unit tests (+ coverage)
           command: make run-unit-tests
 

@@ -17,11 +17,14 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   /* Reporter to use */
   reporter: [
-    ['list'],
-    ['html', {
-      outputFolder: 'target/playwright-report',
-      host: '0.0.0.0',
-    }]
+    ["list"],
+    [
+      "html",
+      {
+        outputFolder: "target/playwright-report",
+        host: "0.0.0.0",
+      },
+    ],
   ],
   use: {
     /* Base URL */
@@ -33,18 +36,18 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'setup coverage',
+      name: "setup coverage",
       testMatch: /helpers\/global\.setup\.ts/,
       teardown: "teardown coverage",
     },
     {
-      name: 'teardown coverage',
+      name: "teardown coverage",
       testMatch: /helpers\/global\.teardown\.ts/,
     },
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      dependencies: ['setup coverage'],
+      dependencies: ["setup coverage"],
     },
     // {
     //   name: "firefox",

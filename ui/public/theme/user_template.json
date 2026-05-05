@@ -1,15 +1,11 @@
 {
-    "copyright": "(C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.",
-    "views": {
-        "/databases?/{organization}?/{project}": {
-            "columns": [
-                "*"
-            ]
-        },
-        "/backuppolicies?/{organization}": {
-            "columns": [
-                "*"
-            ]
-        }
+  "copyright": "(C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.",
+  "views": {
+    "/databases?/{organization}?/{project}": {
+      "columns": ["*"]
+    },
+    "/backuppolicies?/{organization}": {
+      "columns": ["*"]
     }
+  }
 }

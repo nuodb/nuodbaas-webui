@@ -1,4 +1,4 @@
-// (C) Copyright 2024 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -9,13 +9,16 @@ export default function Schema({ setSchema }: TempAny) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getSchema().then(schema => {
+    getSchema().then((schema) => {
       if (!schema && window.location.pathname !== "/ui/error") {
-        navigate("/ui/error?msg=" + encodeURIComponent("Unable to get Schema. Retry at a later time."));
+        navigate(
+          "/ui/error?msg=" +
+            encodeURIComponent("Unable to get Schema. Retry at a later time."),
+        );
       }
       setSchema(schema);
     });
-  }, [setSchema, navigate])
+  }, [setSchema, navigate]);
 
   return null;
 }

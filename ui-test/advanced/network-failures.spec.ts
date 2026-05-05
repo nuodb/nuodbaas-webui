@@ -51,8 +51,12 @@ export async function startTcpForwarder(
       targetSocket.on("close", () => clientSocket.end());
 
       // Propagate errors (they will also cause the server to close the socket).
-      clientSocket.on("error", (err) => console.error("Client socket error:", err));
-      targetSocket.on("error", (err) => console.error("Target socket error:", err));
+      clientSocket.on("error", (err) =>
+        console.error("Client socket error:", err),
+      );
+      targetSocket.on("error", (err) =>
+        console.error("Target socket error:", err),
+      );
     });
 
     server.on("error", (err) => reject(err));
@@ -101,16 +105,22 @@ test.describe("UserTest", () => {
     const showLoginBtn = page.getByTestId("show_login_button");
     await showLoginBtn.waitFor({ state: "visible" });
     await showLoginBtn.click();
-    await page.getByTestId("organization").locator("input").fill(TEST_ORGANIZATION);
+    await page
+      .getByTestId("organization")
+      .locator("input")
+      .fill(TEST_ORGANIZATION);
     await page.getByTestId("username").locator("input").fill(TEST_ADMIN_USER);
-    await page.getByTestId("password").locator("input").fill(TEST_ADMIN_PASSWORD);
+    await page
+      .getByTestId("password")
+      .locator("input")
+      .fill(TEST_ADMIN_PASSWORD);
     await page.getByTestId("login_button").click();
     await page.waitForURL(/\/ui(?!\/login)/);
 
     // verify user exists
     await clickMenu(page, "users");
     let cells: Locator[];
-    await retry(async ()=>{
+    await retry(async () => {
       cells = await waitTableElements(
         page,
         "list_resource__table",
@@ -125,22 +135,22 @@ test.describe("UserTest", () => {
     deleteResourceRest("users", "integrationtest/" + userName);
 
     // verify user no longer shows in UI (due to SSE update)
-    await retry(async ()=> {
-    cells = await waitTableElements(
-      page,
-      "list_resource__table",
-      "name",
-      userName,
-      "$ref",
-    );
-    expect(cells.length).toBe(0);
+    await retry(async () => {
+      cells = await waitTableElements(
+        page,
+        "list_resource__table",
+        "name",
+        userName,
+        "$ref",
+      );
+      expect(cells.length).toBe(0);
     });
 
     // create another user and verify user shows up in the UI
     userName = await createUserRest();
 
     // reload user view until new user appears
-    await retry(async ()=>{
+    await retry(async () => {
       await clickMenu(page, "projects");
       await waitRestComplete(page);
       await clickMenu(page, "users");
@@ -165,7 +175,7 @@ test.describe("UserTest", () => {
     server = await startTcpForwarder("localhost", 8089, "localhost", 80);
 
     // wait until the user shows as deleted in the UI (SSE should reconnect)
-    await retry(async ()=> {
+    await retry(async () => {
       cells = await waitTableElements(
         page,
         "list_resource__table",

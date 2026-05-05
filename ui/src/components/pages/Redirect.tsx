@@ -1,18 +1,17 @@
-// (C) Copyright 2025 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { Navigate, useParams } from "react-router-dom";
 
 type RedirectProps = {
-    baseUrl: string;
-}
+  baseUrl: string;
+};
 
-export default function Redirect({baseUrl} : RedirectProps) {
-    const params = useParams()["*"];
-    if (params) {
-        const path = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + params;
-        return <Navigate to={path} />;
-    }
-    else {
-        return <Navigate to={baseUrl} />;
-    }
+export default function Redirect({ baseUrl }: RedirectProps) {
+  const params = useParams()["*"];
+  if (params) {
+    const path = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + params;
+    return <Navigate to={path} />;
+  } else {
+    return <Navigate to={baseUrl} />;
+  }
 }

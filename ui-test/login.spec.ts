@@ -1,7 +1,13 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 // Converted from: selenium-tests/…/basic/LoginTest.java
 import { test, expect, Page } from "@playwright/test";
-import { loginViaUI, TEST_ADMIN_PASSWORD, TEST_ADMIN_USER, TEST_ORGANIZATION, waitRestComplete } from "./helpers/ui";
+import {
+  loginViaUI,
+  TEST_ADMIN_PASSWORD,
+  TEST_ADMIN_USER,
+  TEST_ORGANIZATION,
+  waitRestComplete,
+} from "./helpers/ui";
 
 /** Reveals the login form whether or not an SSO provider list is shown. */
 async function revealLoginForm(page: Page) {
