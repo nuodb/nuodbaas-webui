@@ -45,9 +45,7 @@ test.describe("AutomationTest", () => {
     // Stop recording
     await retry(async () => {
       await clickUserMenu(page, "automation");
-      await page
-        .locator("[data-testid=btnStopRecording][variant=contained]")
-        .click();
+      await page.locator("[data-testid=btnStopRecording][variant=contained]").click();
     });
 
     // Validate the recorded operations
