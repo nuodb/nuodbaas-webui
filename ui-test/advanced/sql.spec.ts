@@ -102,6 +102,7 @@ async function verifyAndDeleteDbUser(page: Page, user: string): Promise<void> {
 }
 
 test.describe("SqlTests", () => {
+
   test("testSqlPage – execute SQL, export data, verify downloaded content", async ({
     restPage: page,
   }) => {
@@ -137,8 +138,7 @@ test.describe("SqlTests", () => {
     await waitRestComplete(page);
 
     // Export
-    if (false) {
-      // TODO(agr22) disabled due to missing "save" dialog in Playwright
+    if(false) { // TODO(agr22) disabled due to missing "save" dialog in Playwright
       await page.getByTestId("export").click();
       await page.getByTestId("perform.export").click();
       await retry(
@@ -156,6 +156,7 @@ test.describe("SqlTests", () => {
       );
       expect(downloadedFile).toContain("('abc')");
     }
+
   });
 
   test("testSqlUsersLocal – create local DB user with all roles, verify, delete", async ({
