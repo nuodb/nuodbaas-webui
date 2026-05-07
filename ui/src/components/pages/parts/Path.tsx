@@ -9,6 +9,7 @@ import Typography from "@mui/material/Typography";
 import { styled } from "@mui/material";
 import { getFilterField, getSchemaPath } from "../../../utils/schema";
 import { SchemaType } from "../../../utils/types";
+import ComboBox from "../../controls/ComboBox";
 
 type PathProps = {
   schema: SchemaType;
@@ -66,22 +67,27 @@ function Path({
     }
 
     return (
-      <Select
-        id={filterField}
-        label={t("field.label." + filterField, filterField)}
-        value={""}
-        onChange={({ target }) => {
-          navigate("/ui/resource/list" + path + "/" + target.value);
-        }}
+      <ComboBox
+        loadItems={() =>
+          Promise.resolve(
+            filterValues.map((item) => ({
+              id: item,
+              label: item,
+              onClick: () => {
+                navigate(
+                  "/ui/resource/list" + path + "/" + encodeURIComponent(item),
+                );
+                return true;
+              },
+            })),
+          )
+        }
+        selected={org}
       >
-        <SelectOption value="">{t("control.select.item.all")}</SelectOption>
-        {filterValues &&
-          filterValues.map((fv: string) => (
-            <SelectOption key={fv} value={fv}>
-              {fv}
-            </SelectOption>
-          ))}
-      </Select>
+        <label className="NuoRow" style={{ alignItems: "center" }}>
+          {t("field.label." + filterField, filterField)}
+        </label>
+      </ComboBox>
     );
   }
 

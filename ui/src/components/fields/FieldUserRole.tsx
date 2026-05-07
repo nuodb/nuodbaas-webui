@@ -139,6 +139,7 @@ export default function FieldUserRole(props: FieldProps): ReactNode {
             ? parametersByTemplate[role.name] || []
             : [];
           variables.forEach((variable) => {
+            role.params = role.params || {};
             role.params[variable] = role.params[variable] || "";
           });
         }

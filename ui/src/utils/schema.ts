@@ -715,8 +715,10 @@ function deleteEmptyFields(values: FieldValuesType) {
         if (!Array.isArray(values[key])) {
           deleteEmptyFields(values[key]);
           if (Object.keys(values[key]).length === 0) {
-            // Delete empty Objects
-            delete values[key];
+            // Delete empty Objects except for "accessRule"
+            if (key !== "accessRule") {
+              delete values[key];
+            }
           }
         } else {
           for (let i = 0; i < values[key].length; i++) {
