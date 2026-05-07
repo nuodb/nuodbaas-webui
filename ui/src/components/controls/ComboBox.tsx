@@ -36,6 +36,9 @@ function ComboBoxItems({ items, position, setPosition, selected }: ComboBoxItems
                 return;
             }
         }
+        if (items.length > 0) {
+            ref[0].current?.focus();
+        }
     }, []);
 
     return items.map((item, index) => <div style={{ zIndex: 102, minWidth: position.width + "px" }}
@@ -111,7 +114,7 @@ export default function ComboBox({ loadItems, children, selected, align }: Combo
                     padding: "0",
                     margin: "0",
                     left: x,
-                    zIndex: 102
+                    zIndex: 1101
                 }}>
                 <div className="NuoComboBox" onClick={(event) => {
                     event.preventDefault();
