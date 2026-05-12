@@ -41,6 +41,9 @@ function ComboBoxItems({
         return;
       }
     }
+    if (items.length > 0) {
+      ref[0].current?.focus();
+    }
   }, []);
 
   return items.map((item, index) => (
@@ -135,7 +138,7 @@ export default function ComboBox({
             padding: "0",
             margin: "0",
             left: x,
-            zIndex: 102,
+            zIndex: 1101,
           }}
         >
           <div
