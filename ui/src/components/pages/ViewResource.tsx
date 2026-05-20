@@ -42,6 +42,8 @@ function ViewResource(props: PageProps) {
           setData({});
         },
         1000,
+        -1,
+        [],
       );
     } else {
       setData({});

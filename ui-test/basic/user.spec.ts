@@ -12,8 +12,13 @@ import {
   createDatabaseUI,
   getInputOrTextareaByName,
 } from "../helpers/ui";
-import { createProjectRest, TEST_ORGANIZATION } from "../helpers/api";
-import { expect } from "@playwright/test";
+import {
+  createProjectRest,
+  createUserRest,
+  shortUnique,
+  TEST_ORGANIZATION,
+} from "../helpers/api";
+import { expect, Locator } from "@playwright/test";
 
 test.describe("UserTest", () => {
   test("testCreateUser", async ({ restPage: page }) => {
@@ -102,6 +107,45 @@ test.describe("UserTest", () => {
       );
       expect(cells.length).toBe(0);
     });
+  });
+
+  test("testWatchAll", async ({ restPage: page }) => {
+    const u00002 = await createUserUI(page, { name: shortUnique("u00002") });
+    const u00004 = await createUserUI(page, { name: shortUnique("u00004") });
+
+    await clickMenu(page, "users");
+    await waitRestComplete(page);
+    // Verify presence
+    await retry(async () => {
+      const cells = await waitTableElements(
+        page,
+        "list_resource__table",
+        "name",
+        "u0000",
+        "$ref",
+      );
+      expect(cells.length).toBe(2);
+    });
+    const u00001 = await createUserRest({ name: shortUnique("u00001") });
+    const u00003 = await createUserRest({ name: shortUnique("u00003") });
+    const u00005 = await createUserRest({ name: shortUnique("u00005") });
+
+    let cells: Locator[] = [];
+    await retry(async () => {
+      cells = await waitTableElements(
+        page,
+        "list_resource__table",
+        "name",
+        "u0000",
+        "name",
+      );
+      expect(cells.length).toBe(5);
+    });
+    expect(cells[0]).toHaveText(u00001);
+    expect(cells[1]).toHaveText(u00002);
+    expect(cells[2]).toHaveText(u00003);
+    expect(cells[3]).toHaveText(u00004);
+    expect(cells[4]).toHaveText(u00005);
   });
 
   test("testEditUser – add label and verify", async ({ restPage: page }) => {

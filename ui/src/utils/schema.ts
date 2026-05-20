@@ -1,7 +1,6 @@
 // (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import axios from "axios";
-import Toast from "../components/controls/Toast";
 import { Rest } from "../components/pages/parts/Rest";
 import Auth, { isBrowser } from "./auth";
 import {
@@ -9,8 +8,12 @@ import {
   TempAny,
   SchemaType,
   FieldParametersType,
+  SearchType,
 } from "./types";
+import { getValue } from "../components/fields/utils";
 let schema: TempAny = null;
+
+export const LIST_PAGE_SIZE = 20;
 
 export const Feature: { FILTER_ON_SERVER: boolean | undefined } = {
   FILTER_ON_SERVER: undefined,
@@ -439,6 +442,80 @@ export function hasActiveStream(): boolean {
   return !!monitored;
 }
 
+function getAllValues(obj: any): string[] {
+  if (obj !== null && typeof obj === "object") {
+    return Object.values(obj).flatMap(getAllValues);
+  }
+  if (obj) {
+    return [String(obj)];
+  } else {
+    return [];
+  }
+}
+
+function toString(value: any, toUpper: boolean): string {
+  let ret;
+  if (!value) {
+    ret = "";
+  } else if (typeof value === "object") {
+    ret = JSON.stringify(value);
+  } else {
+    ret = String(value);
+  }
+  if (toUpper) {
+    return ret.toUpperCase();
+  } else {
+    return ret;
+  }
+}
+
+/* check if value is in the entry (or "null" if condition cannot be evaluated (i.e. regex, raw))
+ */
+export function includesValue(entry: any, search: SearchType): boolean | null {
+  const entryValueRaw = getValue(entry, search.field);
+  const entryValue: string = toString(entryValueRaw, search.ignoreCase);
+  const searchValue: string = toString(search.value, search.ignoreCase);
+  switch (search.condition) {
+    case "!=":
+      return entryValue !== searchValue;
+    case "<=":
+      return isNaN(entryValueRaw)
+        ? entryValue <= searchValue
+        : entryValueRaw <= Number(search.value);
+    case "=":
+      return entryValue === searchValue;
+    case ">=":
+      return isNaN(entryValueRaw)
+        ? entryValue >= searchValue
+        : entryValueRaw >= Number(search.value);
+    case "contains":
+      return entryValue.includes(searchValue);
+    case "startsWith":
+      return entryValue.startsWith(searchValue);
+    case "endsWith":
+      return entryValue.endsWith(searchValue);
+    case "exists":
+      return !!entryValueRaw;
+    case "notExists":
+      return !entryValueRaw;
+    case "raw":
+      return null;
+    case "~":
+      return null;
+    case "search":
+      const allValues = getAllValues(entry);
+      for (let i = 0; i < allValues.length; i++) {
+        if (search.ignoreCase) {
+          if (allValues[i].toUpperCase().includes(search.value.toUpperCase())) {
+            return true;
+          }
+        }
+      }
+      return false;
+  }
+  return null;
+}
+
 /**
  * Gets event streaming resource by path (fall back to non-streaming resource on failure)
  * @param {*} path
@@ -452,8 +529,9 @@ export function getResourceEvents(
   path: string,
   multiResolve: TempAny,
   multiReject: TempAny,
-  retryIntervalMS: number = 0,
-  transactionNumber: number = -1,
+  retryIntervalMS: number,
+  transactionNumber: number,
+  search: SearchType[],
 ) {
   //only one event stream is supported - close prior one if it exists.
   let eventsAbortController = new AbortController();
@@ -488,6 +566,9 @@ export function getResourceEvents(
     eventsAbortController,
   )
     .then(async (response: TempAny) => {
+      const urlParams = new URLSearchParams(path.split("?")[1]);
+      const sortBy = urlParams.get("sortBy") || "name";
+      const reverse = urlParams.get("reverse") === "true" ? true : false;
       monitored = { abort: eventsAbortController, transactionNumber };
       let event = null;
       let data = null;
@@ -565,6 +646,17 @@ export function getResourceEvents(
               multiResolve(mergedData);
             } else if (event === "CREATED" && id !== null && data !== null) {
               data = JSON.parse(data);
+              let searchMatch = true;
+              for (let s = 0; s < search.length; s++) {
+                if (!includesValue(data, search[s])) {
+                  searchMatch = false;
+                  break;
+                }
+              }
+              if (!searchMatch) {
+                continue;
+              }
+
               data["$ref"] = id;
               mergedData = { ...mergedData };
               mergedData.items = [...mergedData.items];
@@ -579,7 +671,25 @@ export function getResourceEvents(
                 }
               }
               if (!found) {
-                mergedData.items.push(data);
+                // insert new row into the existing rows taking sortBy/reverse into account
+                for (let i = 0; i < mergedData.items.length; i++) {
+                  const existingValue = getValue(mergedData.items[i], sortBy);
+                  const newValue = getValue(data, sortBy);
+                  const isLess =
+                    !existingValue && !newValue
+                      ? false
+                      : existingValue?.localeCompare(newValue) < 0
+                        ? true
+                        : false;
+                  if ((isLess && reverse) || (!isLess && !reverse)) {
+                    mergedData.items.splice(i, 0, data);
+                    found = true;
+                    break;
+                  }
+                }
+                if (!found && mergedData.items.length < LIST_PAGE_SIZE) {
+                  mergedData.items.push(data);
+                }
               }
               multiResolve(mergedData);
             } else {
@@ -626,6 +736,7 @@ export function getResourceEvents(
                 multiReject,
                 retryIntervalMS * 1.3,
                 transactionNumber,
+                search,
               ); //retry with a 30% delay (exponential backoff)
             }
           }, retryIntervalMS);

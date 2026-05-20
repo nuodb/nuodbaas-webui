@@ -8,18 +8,27 @@ import {
   getResourceByPath,
   getFilterField,
   Feature,
+  LIST_PAGE_SIZE,
+  includesValue,
 } from "../../utils/schema";
 import { Rest } from "./parts/Rest";
 import PageLayout from "./parts/PageLayout";
 import Auth from "../../utils/auth";
-import { PageProps, SortColumnDirectionType, TempAny } from "../../utils/types";
+import {
+  PageProps,
+  SearchType,
+  SortColumnDirectionType,
+  TempAny,
+} from "../../utils/types";
 import Pagination from "../controls/Pagination";
 import { withTranslation } from "react-i18next";
 import Search from "./parts/Search";
 import ResourceHeader from "./parts/ResourceHeader";
 import Toast from "../controls/Toast";
 import { getValue } from "../fields/utils";
-import { getFieldFilter, SearchType } from "./ListResourceFilter";
+import { getFieldFilter } from "./ListResourceFilter";
+import ReplayIcon from "@mui/icons-material/Replay";
+import Button from "../controls/Button";
 
 type ItemsAndPathProps = {
   items: [] | null;
@@ -32,7 +41,6 @@ type ItemsAndPathProps = {
 function ListResource(props: PageProps) {
   const { schema } = props;
   const path = "/" + useParams()["*"];
-  const pageSize = 20;
 
   const [itemsAndPath, setItemsAndPath] = useState<ItemsAndPathProps>({
     items: null,
@@ -76,6 +84,10 @@ function ListResource(props: PageProps) {
   }
 
   useEffect(() => {
+    loadResource();
+  }, [page, path, schema, search, sort]);
+
+  function loadResource() {
     if (!schema) {
       return;
     }
@@ -95,9 +107,9 @@ function ListResource(props: PageProps) {
             url =
               path +
               "?listAccessible=true&expand=true&offset=" +
-              (page - 1) * pageSize +
+              (page - 1) * LIST_PAGE_SIZE +
               "&limit=" +
-              pageSize;
+              LIST_PAGE_SIZE;
             if (sort.column) {
               url += "&sortBy=" + encodeURIComponent(sort.column);
               url += "&reverse=" + String(sort.direction === "desc");
@@ -106,6 +118,7 @@ function ListResource(props: PageProps) {
               url += "&fieldFilter=" + encodeURIComponent(getFieldFilter(s));
             });
           }
+          url += "&watchAll=true";
           setAbortController(
             getResourceEvents(
               schema,
@@ -124,6 +137,8 @@ function ListResource(props: PageProps) {
                 setItemsAndPath({ items: [], path });
               },
               1000,
+              -1,
+              search,
             ),
           );
         })
@@ -131,7 +146,7 @@ function ListResource(props: PageProps) {
           Toast.show("Unable to get resource in " + path, reason);
         });
     }
-  }, [page, path, schema, search]);
+  }
 
   useEffect(() => {
     setPage(1);
@@ -150,7 +165,7 @@ function ListResource(props: PageProps) {
   }, [abortController]);
 
   function renderPaging(total: number) {
-    const lastPage = Math.ceil(total / pageSize);
+    const lastPage = Math.ceil(total / LIST_PAGE_SIZE);
     return (
       <Pagination
         count={lastPage}
@@ -176,118 +191,22 @@ function ListResource(props: PageProps) {
     return [...filterValues];
   }
 
-  /* compares both values. value2 can have asterisks ("*") at the beginning, end or both as wildcards.
-       - "value1" or "value2" can be string, null or undefined values
-       - if "value1" or "value2" are objects or arrays, they are converted to JSON text and then used for comparison
-       - the match is case-insensitive
-    */
-  function isMatch(value1: any, value2: any) {
-    if (
-      (value1 === null && value2 === null) ||
-      (value1 === undefined && value2 === undefined)
-    ) {
-      return true;
+  function renderReload() {
+    if (!search.find((s) => s.condition === "raw" || s.condition === "~")) {
+      return null;
     }
-    if (
-      value1 === null ||
-      value2 === null ||
-      value1 === undefined ||
-      value2 === undefined
-    ) {
-      return false;
-    }
-
-    if (typeof value1 === "object") {
-      value1 = JSON.stringify(value1);
-    }
-    if (typeof value2 === "object") {
-      value2 = JSON.stringify(value2);
-    }
-
-    value1 = String(value1).trim().toUpperCase();
-    value2 = String(value2).trim().toUpperCase();
-
-    if (value2 === "*") {
-      return true;
-    } else if (value2.startsWith("*")) {
-      if (value2.endsWith("*")) {
-        return value1.includes(value2.substring(1, value2.length - 1));
-      } else {
-        return value1.endsWith(value2.substring(1));
-      }
-    } else if (value2.endsWith("*")) {
-      return value1.startsWith(value2.substring(0, value2.length - 1));
-    } else {
-      return value1 === value2;
-    }
-  }
-
-  function toString(value: any, toUpper: boolean): string {
-    let ret;
-    if (!value) {
-      ret = "";
-    } else if (typeof value === "object") {
-      ret = JSON.stringify(value);
-    } else {
-      ret = String(value);
-    }
-    if (toUpper) {
-      return ret.toUpperCase();
-    } else {
-      return ret;
-    }
-  }
-
-  function getAllValues(obj: any): string[] {
-    if (obj !== null && typeof obj === "object") {
-      return Object.values(obj).flatMap(getAllValues);
-    }
-    if (obj) {
-      return [String(obj)];
-    } else {
-      return [];
-    }
-  }
-
-  /* check if value is in the entry
-   */
-  function includesValue(entry: any, search: SearchType): boolean {
-    const entryValueRaw = getValue(entry, search.field);
-    const entryValue: string = toString(entryValueRaw, search.ignoreCase);
-    const searchValue: string = toString(search.value, search.ignoreCase);
-    switch (search.condition) {
-      case "!=":
-        return entryValue !== searchValue;
-      case "<=":
-        return entryValue <= searchValue;
-      case "=":
-        return entryValue === searchValue;
-      case ">=":
-        return entryValue >= searchValue;
-      case "contains":
-        return entryValue.includes(searchValue);
-      case "startsWith":
-        return entryValue.startsWith(searchValue);
-      case "endsWith":
-        return entryValue.endsWith(searchValue);
-      case "exists":
-        return !!entryValueRaw;
-      case "notExists":
-        return !entryValueRaw;
-      case "search":
-        const allValues = getAllValues(entry);
-        for (let i = 0; i < allValues.length; i++) {
-          if (search.ignoreCase) {
-            if (
-              allValues[i].toUpperCase().includes(search.value.toUpperCase())
-            ) {
-              return true;
-            }
-          }
-        }
-        return false;
-    }
-    return false;
+    return (
+      <div style={{ margin: "0 10px 0 0" }}>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            loadResource();
+          }}
+        >
+          <ReplayIcon />
+        </Button>
+      </div>
+    );
   }
 
   if (itemsAndPath.items) {
@@ -329,7 +248,7 @@ function ListResource(props: PageProps) {
 
       data = searchFiltered.filter(
         (_: any, index: number) =>
-          index >= (page - 1) * pageSize && index < page * pageSize,
+          index >= (page - 1) * LIST_PAGE_SIZE && index < page * LIST_PAGE_SIZE,
       );
     }
     return (
@@ -343,6 +262,7 @@ function ListResource(props: PageProps) {
         />
         <div className="NuoTableContainer">
           <div className="NuoTableOptions">
+            {renderReload()}
             <Search
               path={path}
               fieldNames={allFieldNames}
