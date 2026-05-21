@@ -76,14 +76,6 @@ function SqlPagedQuery({ pageSize, sqlConnection, sqlQuery }: SqlQueryProps) {
 
   if (!results || results.error) {
     return <SqlResultsRender results={results} />;
-  } else if (results.error) {
-    return (
-      <div className="NuoError">
-        {results.error.split("\n").map((line, index) => (
-          <div key={index}>{line}</div>
-        ))}
-      </div>
-    );
   }
   return (
     <>

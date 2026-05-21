@@ -349,7 +349,7 @@ function Table(props: TableProps) {
                 : props.sort.direction || "none"
             }
             setSort={(direction: "asc" | "desc") => {
-              props.setSort && props.setSort({ column: column.id, direction });
+              props.setSort?.({ column: column.id, direction });
             }}
           />
         )}

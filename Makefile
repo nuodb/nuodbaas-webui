@@ -424,6 +424,14 @@ prettier-check:
 	cd ui && npm install && npx prettier --check . && cd ..
 	cd ui-test && npm install && npx prettier --check . && cd ..
 
+.PHONY: eslint-check
+eslint-check:
+	cd ui && npm install && npx eslint . && cd ..
+
+.PHONY: presubmit-checks
+presubmit-checks: prettier eslint-check
+	@echo "All Checks passed"
+
 $(KIND):
 	mkdir -p $(shell dirname ${KIND})
 	curl -f -Lo ${KIND} https://kind.sigs.k8s.io/dl/v${KIND_VERSION}/kind-${OS}-${ARCH}

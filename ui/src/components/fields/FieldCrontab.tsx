@@ -5,7 +5,6 @@ import { FieldBase_validate, FieldProps } from "./FieldBase";
 import { ReactNode } from "react";
 import Select, { SelectOption } from "../controls/Select";
 import TextField from "../controls/TextField";
-import { FieldParameterType } from "../../utils/types";
 
 export default function FieldCrontab(props: FieldProps): ReactNode {
   switch (props.op) {
@@ -53,7 +52,9 @@ export default function FieldCrontab(props: FieldProps): ReactNode {
     }
 
     function handleBlur() {
-      FieldBase_validate(props) && validate();
+      if (FieldBase_validate(props)) {
+        validate();
+      }
     }
 
     return (

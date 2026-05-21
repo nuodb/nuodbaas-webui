@@ -10,8 +10,6 @@ import { Component, ReactNode } from "react";
 
 let s_instance: Dialog | null = null;
 
-interface IProps {}
-
 type MaxWidthType = "xs" | "sm" | "md" | "lg" | "xl";
 
 interface DialogProps {
@@ -23,8 +21,6 @@ interface DialogProps {
   reject: TempAny;
 }
 
-interface IProps {}
-
 interface IState {
   dialogs?: DialogProps[];
 }
@@ -34,7 +30,10 @@ type ButtonProps = {
   label: string;
 };
 
-export default class Dialog extends Component<IProps, IState> {
+export default class Dialog extends Component<
+  Record<string, undefined>,
+  IState
+> {
   state = {
     dialogs: [],
   };
