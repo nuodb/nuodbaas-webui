@@ -84,6 +84,18 @@ function ListResource(props: PageProps) {
   }
 
   useEffect(() => {
+    const timeout = setInterval(() => {
+      if (search.find((s) => s.condition === "raw" || s.condition === "~")) {
+        return null;
+      }
+      loadResource();
+    }, 60 * 1000);
+    return () => {
+      clearInterval(timeout);
+    };
+  }, []);
+
+  useEffect(() => {
     loadResource();
   }, [page, path, schema, search, sort]);
 

@@ -479,15 +479,15 @@ export function includesValue(entry: any, search: SearchType): boolean | null {
     case "!=":
       return entryValue !== searchValue;
     case "<=":
-      return isNaN(entryValueRaw)
-        ? entryValue <= searchValue
-        : entryValueRaw <= Number(search.value);
+      // to be consistent with the Control Plane which compares even numbers lexically,
+      // we do the same here as well
+      return entryValue <= searchValue;
     case "=":
       return entryValue === searchValue;
     case ">=":
-      return isNaN(entryValueRaw)
-        ? entryValue >= searchValue
-        : entryValueRaw >= Number(search.value);
+      // to be consistent with the Control Plane which compares even numbers lexically,
+      // we do the same here as well
+      return entryValue >= searchValue;
     case "contains":
       return entryValue.includes(searchValue);
     case "startsWith":
@@ -509,6 +509,8 @@ export function includesValue(entry: any, search: SearchType): boolean | null {
           if (allValues[i].toUpperCase().includes(search.value.toUpperCase())) {
             return true;
           }
+        } else if (allValues[i].includes(search.value)) {
+          return true;
         }
       }
       return false;
@@ -560,6 +562,34 @@ export function getResourceEvents(
     transactionNumber = eventTransaction;
   }
 
+  /**
+   *
+   * @param data get the value of the sorted column. If no columns are sorted, provide current resource hierarchical value, i.e. {organization}/{project}/{username}
+   * @param sortBy
+   * @returns
+   */
+  function getHierarchicalValue(data: any, sortBy: string | undefined) {
+    if (sortBy) {
+      return getValue(data, sortBy);
+    }
+
+    const pathParts = getSchemaPath(schema, path)
+      ?.split("{")
+      .map((part) => part.split("}")[0]);
+    if (!pathParts) {
+      // we should never get here since the path should be defined (unless user constructs own invalid URL in the browser) - fall back to "name" sorting.
+      return getValue(data, "name");
+    }
+    let value = "";
+    for (let i = 0; i < pathParts?.length; i++) {
+      if (i > 0) {
+        value += "/";
+      }
+      value += getValue(data, pathParts[i]);
+    }
+    return value;
+  }
+
   Rest.getStream(
     Auth.getNuodbCpRestUrl("events" + path),
     Auth.getHeaders(),
@@ -567,7 +597,7 @@ export function getResourceEvents(
   )
     .then(async (response: TempAny) => {
       const urlParams = new URLSearchParams(path.split("?")[1]);
-      const sortBy = urlParams.get("sortBy") || "name";
+      const sortBy = urlParams.get("sortBy") || undefined;
       const reverse = urlParams.get("reverse") === "true" ? true : false;
       monitored = { abort: eventsAbortController, transactionNumber };
       let event = null;
@@ -673,8 +703,11 @@ export function getResourceEvents(
               if (!found) {
                 // insert new row into the existing rows taking sortBy/reverse into account
                 for (let i = 0; i < mergedData.items.length; i++) {
-                  const existingValue = getValue(mergedData.items[i], sortBy);
-                  const newValue = getValue(data, sortBy);
+                  const existingValue = getHierarchicalValue(
+                    mergedData.items[i],
+                    sortBy,
+                  );
+                  const newValue = getHierarchicalValue(data, sortBy);
                   const isLess =
                     !existingValue && !newValue
                       ? false
