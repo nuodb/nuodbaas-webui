@@ -295,7 +295,12 @@ deploy-webui: $(HELM) $(KIND)  ## deploy WebUI
 	@if [ -d charts/nuodbaas-webui ] ; then \
 		${MAKE} build-image && \
 		$(KIND) load docker-image nuodbaas-webui:latest && \
-		$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui --set image.repository=nuodbaas-webui --set image.tag=latest --set nuodbaasWebui.ingress.enabled=true --set nuodbaasWebui.cpUrl=/api; \
+		$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui \
+			--set image.repository=nuodbaas-webui \
+			--set image.tag=latest \
+			--set-file nuodbaasWebui.customJson=docker/development/custom.json \
+			--set nuodbaasWebui.ingress.enabled=true \
+			--set nuodbaasWebui.cpUrl=/api; \
 	fi
 
 .PHONY: undeploy-webui
@@ -385,7 +390,10 @@ run-integration-tests: build-image setup-integration-tests ## run integration te
 .PHONY: start-dev
 start-dev: stop-dev setup-integration-tests ## launch WebUI/ControlPlane/Proxy for development environment
 	(cd ui && npm install && npm start &)
-	docker run --rm -d --name nuodb-webui-dev -v `pwd`/docker/development/default.conf:/etc/nginx/conf.d/default.conf --network=host -it nginx:stable-alpine
+	docker run --rm -d --name nuodb-webui-dev \
+		-v `pwd`/docker/development/default.conf:/etc/nginx/conf.d/default.conf \
+		-v `pwd`/docker/development/custom.json:/usr/share/nginx/html/theme/custom.json \
+		--network=host -it nginx:stable-alpine
 
 .PHONY: start-dev-remote
 start-dev-remote: setup-nginx-default-conf ## launch WebUI to remote Control Plane. Set environment variables NUODB_CP_URL_BASE and NUODB_SQL_URL_BASE

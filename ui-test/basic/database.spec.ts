@@ -270,6 +270,20 @@ test.describe("DatabaseTest", () => {
     await page.getByTestId("copy-Database").click();
     await page.getByTestId("dialog_button_ok").click();
 
+    // Popup menu: ConnectionInfoCustom (custom menu item)
+    await page.getByTestId("resource-popup-menu").click();
+    await page.getByTestId("popupmenu-ConnectionInfoCustom").click();
+    const expectedURL = 'https://www.example.com/integrationtest/' + projectName + '/' + databaseName + '/n0.nano';
+    await expect(page).toHaveURL(expectedURL);
+
+    // validate we are on a new "_blank" page by trying to go back and making sure we are still on the same URL
+    await page.goBack();
+    await expect(page).toHaveURL(expectedURL);
+
+    // close new _blank tab
+    await page.close();
+
+
     // Popup menu: Stop → No
     await page.getByTestId("resource-popup-menu").click();
     await page.getByTestId("popupmenu-confirm.stop.database.title").click();

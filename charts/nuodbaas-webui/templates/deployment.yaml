@@ -65,6 +65,10 @@ spec:
           volumeMounts:
           - name: tmp-volume
             mountPath: /tmp
+          - name: custom-json-volume
+            mountPath: /usr/share/nginx/html/theme/custom.json
+            subPath: custom.json
+            readOnly: true
       {{- with .Values.nuodbaasWebui.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -84,3 +88,6 @@ spec:
       volumes:
       - name: tmp-volume
         {{- include "nuodbaas-webui.ephemeralVolume" . | indent 8 }}
+      - name: custom-json-volume
+        configMap:
+          name: {{ include "nuodbaas-webui.fullname" . }}-custom-json

@@ -1223,3 +1223,11 @@ label.NuoUpload:hover {
   border: 1px solid lightgray;
   border-collapse: collapse;
 }
+
+.BannerItem {
+  color: white !important;
+}
+
+.NuoBannerMenu>button {
+  color: white !important;
+}

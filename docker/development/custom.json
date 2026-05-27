@@ -1,0 +1,14 @@
+{
+    "views": {
+        "/databases": {
+            "menu-append": [
+                {
+                    "label": "ConnectionInfoCustom",
+                    "icon": "Info",
+                    "link": "https://www.example.com/{organization}/{project}/{name}/{tier}",
+                    "linkTarget": "_blank"
+                }
+            ]
+        }
+    }
+}

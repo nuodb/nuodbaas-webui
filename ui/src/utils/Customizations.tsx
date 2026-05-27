@@ -42,6 +42,7 @@ export type CustomViewMenu = {
   confirm: string;
   dialog?: string;
   link?: string;
+  linkTarget?: string;
 };
 
 export type CustomViewFields = { [key: string]: CustomViewField };
@@ -258,6 +259,15 @@ function isObject(item: any): boolean {
 }
 
 /**
+ * Simple array check.
+ * @param item
+ * @returns {boolean}
+ */
+function isArray(item: any): boolean {
+  return item && typeof item === "object" && Array.isArray(item);
+}
+
+/**
  * Deep merge two objects.
  * @param merged object where data is merged into
  * @param data object to apply to the merged object
@@ -270,7 +280,15 @@ export function mergeRecursive(merged: any, data: any): void {
       }
       mergeRecursive(merged[key], data[key]);
     } else {
-      merged[key] = data[key];
+      const keyWithoutAppend = key.endsWith("-append") ? key.substring(0, key.length - "-append".length) : key;
+      if (isArray(data[key]) && key.endsWith("-append") && isArray(merged[keyWithoutAppend])) {
+        data[key].forEach((value: any) => {
+          merged[keyWithoutAppend].push(value);
+        })
+      }
+      else {
+        merged[key] = data[key];
+      }
     }
   }
 }
@@ -294,13 +312,10 @@ export default function Customizations(
   async function initCustomizations() {
     // retrieve all configuration files
     const baseJson = (await axios.get("/ui/theme/base.json")).data || {};
+    const customJson = (await axios.get("/ui/theme/custom.json")).data || {};
     const userJson = JSON.parse(
       localStorage.getItem(LOCAL_USER_SETTINGS) || "{}",
     );
-    const themeType =
-      userJson?.theme?.type || baseJson?.theme?.type || "material";
-    const themeJson =
-      (await axios.get("/ui/theme/" + themeType + ".json")).data || {};
 
     try {
       hasSqlEditorService = (
@@ -312,30 +327,10 @@ export default function Customizations(
 
     // merge configuration files together
     let merged = baseJson;
-    mergeRecursive(merged, themeJson || {});
+    mergeRecursive(merged, customJson);
     mergeRecursive(merged, userJson);
     mergedJson = merged;
 
-    // loading theme + user CSS files
-    const themeCss = document.getElementById("theme_stylesheet");
-    themeCss?.setAttribute("href", "/ui/theme/material.css");
-
-    const userCss = document.getElementById("user_stylesheet");
-    if (userCss && mergedJson?.theme?.css) {
-      const css = mergedJson.theme.css;
-      if (
-        css.startsWith("http://") ||
-        css.startsWith("https://") ||
-        css.startsWith("/")
-      ) {
-        userCss.setAttribute("href", css);
-      } else {
-        const urlCSS = URL.createObjectURL(
-          new Blob([css], { type: "text/css" }),
-        );
-        userCss.setAttribute("href", urlCSS);
-      }
-    }
     setDone(true);
   }
 

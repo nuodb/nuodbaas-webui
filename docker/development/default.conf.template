@@ -9,6 +9,10 @@ server {
     proxy_pass http://localhost:3000/ui/;
   }
 
+  location /ui/theme/custom.json {
+    alias /usr/share/nginx/html/theme/custom.json;
+  }
+
   location /nuodb-cp/ {
     proxy_pass %%%NUODB_CP_URL_BASE%%%/;
   }
