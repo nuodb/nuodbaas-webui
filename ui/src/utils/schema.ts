@@ -250,7 +250,11 @@ export function getOrgFromPath(schema: SchemaType, path: string) {
  * @param {*} variables
  * @returns string with the placeholders replaced.
  */
-export function replaceVariables(search: string, variables: TempAny, urlEncode: boolean): string {
+export function replaceVariables(
+  search: string,
+  variables: TempAny,
+  urlEncode: boolean,
+): string {
   let posOpenBracket;
   while ((posOpenBracket = search.indexOf("{")) !== -1) {
     const posCloseBracket = search.indexOf("}", posOpenBracket + 1);
@@ -261,12 +265,12 @@ export function replaceVariables(search: string, variables: TempAny, urlEncode: 
         search.substring(posOpenBracket + 1);
     } else {
       let value = getValue(
-          variables,
-          search.substring(posOpenBracket + 1, posCloseBracket),
-        );
-        if (urlEncode) {
-          value = encodeURIComponent(value);
-        }
+        variables,
+        search.substring(posOpenBracket + 1, posCloseBracket),
+      );
+      if (urlEncode) {
+        value = encodeURIComponent(value);
+      }
       search =
         search.substring(0, posOpenBracket) +
         value +
