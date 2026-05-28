@@ -328,7 +328,7 @@ function Table(props: TableProps) {
 
     // provide custom link
     if (cv?.links?.[fieldName]?.link) {
-      const link = replaceVariables(cv.links[fieldName].link, row);
+      const link = replaceVariables(cv.links[fieldName].link, row, true);
       const linkTarget = cv.links[fieldName].linkTarget;
       return (
         <button

@@ -192,13 +192,7 @@ Example:
 {
   "views": {
     "/backuppolicies": {
-      "columns": [
-        "name",
-        "organization",
-        "frequency",
-        "selector",
-        "retention"
-      ]
+      "columns": ["name", "organization", "frequency", "selector", "retention"]
     }
   }
 }

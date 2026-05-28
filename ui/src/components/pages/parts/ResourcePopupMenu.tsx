@@ -201,7 +201,7 @@ export default function ResourcePopupMenu({
                     );
                   });
                 } else if (menu.link) {
-                  const link = replaceVariables(menu.link, row);
+                  const link = replaceVariables(menu.link, row, true);
                   if (
                     !menu.linkTarget &&
                     !link.startsWith("//") &&
