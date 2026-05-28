@@ -51,6 +51,12 @@ export type CustomView = {
   columns?: string[];
   fields?: CustomViewFields;
   menu?: CustomViewMenu[];
+  links?: {
+    [key: string]: {
+      link: string;
+      linkTarget?: string;
+    };
+  };
 };
 
 export type CustomViews = { [key: string]: CustomView };
@@ -280,13 +286,18 @@ export function mergeRecursive(merged: any, data: any): void {
       }
       mergeRecursive(merged[key], data[key]);
     } else {
-      const keyWithoutAppend = key.endsWith("-append") ? key.substring(0, key.length - "-append".length) : key;
-      if (isArray(data[key]) && key.endsWith("-append") && isArray(merged[keyWithoutAppend])) {
+      const keyWithoutAppend = key.endsWith("-append")
+        ? key.substring(0, key.length - "-append".length)
+        : key;
+      if (
+        isArray(data[key]) &&
+        key.endsWith("-append") &&
+        isArray(merged[keyWithoutAppend])
+      ) {
         data[key].forEach((value: any) => {
           merged[keyWithoutAppend].push(value);
-        })
-      }
-      else {
+        });
+      } else {
         merged[key] = data[key];
       }
     }

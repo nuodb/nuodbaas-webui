@@ -207,6 +207,7 @@ export async function createProjectRest(name?: string): Promise<string> {
 export async function createDatabaseRest(
   projectName: string,
   name?: string,
+  labels?: any,
 ): Promise<string> {
   const n = name ?? shortUnique("d");
   await createResourceRest(
@@ -217,6 +218,7 @@ export async function createDatabaseRest(
       project: projectName,
       name: n,
       dbaPassword: "passw0rd",
+      labels: labels,
     },
   );
   return n;
