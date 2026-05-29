@@ -316,26 +316,6 @@ export default function Customizations(
     mergeRecursive(merged, userJson);
     mergedJson = merged;
 
-    // loading theme + user CSS files
-    const themeCss = document.getElementById("theme_stylesheet");
-    themeCss?.setAttribute("href", "/ui/theme/material.css");
-
-    const userCss = document.getElementById("user_stylesheet");
-    if (userCss && mergedJson?.theme?.css) {
-      const css = mergedJson.theme.css;
-      if (
-        css.startsWith("http://") ||
-        css.startsWith("https://") ||
-        css.startsWith("/")
-      ) {
-        userCss.setAttribute("href", css);
-      } else {
-        const urlCSS = URL.createObjectURL(
-          new Blob([css], { type: "text/css" }),
-        );
-        userCss.setAttribute("href", urlCSS);
-      }
-    }
     setDone(true);
   }
 

@@ -4,13 +4,14 @@ import React, { Component } from "react";
 
 let s_instance: Toast | null = null;
 
-interface IProps {}
-
 interface IState {
   messages?: string[];
 }
 
-export default class Toast extends Component<IProps, IState> {
+export default class Toast extends Component<
+  Record<string, undefined>,
+  IState
+> {
   state = {
     messages: [],
   };
@@ -34,10 +35,9 @@ export default class Toast extends Component<IProps, IState> {
     } else {
       console.log("Toast", msg, error);
     }
-    s_instance &&
-      s_instance.setState({
-        messages: [...s_instance.state.messages, msg],
-      });
+    s_instance?.setState({
+      messages: [...s_instance.state.messages, msg],
+    });
     setTimeout(() => {
       if (s_instance) {
         let messages = s_instance.state.messages.slice(1);

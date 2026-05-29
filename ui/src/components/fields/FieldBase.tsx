@@ -8,6 +8,7 @@ import {
   TempAny,
 } from "../../utils/types";
 import MoreDiv from "../pages/parts/MoreDiv";
+import MoreInline from "../pages/parts/MoreInline";
 
 interface FieldPropsDisplay {
   /** contains resource path */
@@ -166,36 +167,5 @@ export function getRecursiveValue(value: TempAny, t: any) {
     }
   }
 
-  let strValue = String(value);
-  let moreValue = "";
-  if (strValue.indexOf("\n") !== -1) {
-    moreValue = strValue.substring(strValue.indexOf("\n"));
-    strValue = strValue.substring(0, strValue.indexOf("\n"));
-  }
-  if (strValue.length > 80) {
-    moreValue = strValue.substring(80) + moreValue;
-    strValue = strValue.substring(0, 80);
-  }
-  if (moreValue) {
-    return (
-      <>
-        {strValue}
-        <div
-          className="NuoMoreValue"
-          data-morevalue={moreValue}
-          onClick={(element: React.MouseEvent<HTMLDivElement>) => {
-            element.currentTarget.innerHTML =
-              element.currentTarget.getAttribute("data-morevalue") || "";
-            element.currentTarget.removeAttribute("data-morevalue");
-            element.currentTarget.className = "NuoMoreValueExpanded";
-          }}
-        >
-          {" "}
-          {t("text.more")}
-        </div>
-      </>
-    );
-  } else {
-    return strValue;
-  }
+  return <MoreInline value={value} t={t} />;
 }
