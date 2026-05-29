@@ -141,6 +141,7 @@ nuodbaasWebui:
     storageClass: ""
 
   # JSON content for custom.json. Use a multi-line string.
-  customJson: |
+  # Info on the format is described in https://github.com/nuodb/nuodbaas-webui/blob/main/ui/customizations.md
+  customConfig: |
     {
     }

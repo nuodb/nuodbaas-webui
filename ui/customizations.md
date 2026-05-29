@@ -172,7 +172,8 @@ Server-provided customization files are read from:
 
 User-specific customizations are edited in the UI settings page and stored in browser local storage under `nuodbaas_webui_userSettings`.
 
-The `custom.json` file is intended to override or extend the defaults from `base.json`. This file can be replaced by volume-mounting the docker container at `/usr/share/nginx/html/theme/custom.json` or by setting the helm value `nuodbaasWebui.customJson` with the content of the file (i.e. by using the `--set-file` option.
+The `custom.json` file is intended to override or extend the defaults from `base.json`. This file can be replaced by volume-mounting the docker container at `/usr/share/nginx/html/theme/custom.json` or by setting the helm value `nuodbaasWebui.cu
+stomConfig` with the content of the file (i.e. by using the `--set-file` option.
 
 ## `views` customizations
 

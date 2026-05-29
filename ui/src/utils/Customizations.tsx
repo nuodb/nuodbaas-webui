@@ -323,7 +323,7 @@ export default function Customizations(
   async function initCustomizations() {
     // retrieve all configuration files
     const baseJson = (await axios.get("/ui/theme/base.json")).data || {};
-    const customJson = (await axios.get("/ui/theme/custom.json")).data || {};
+    const customConfig = (await axios.get("/ui/theme/custom.json")).data || {};
     const userJson = JSON.parse(
       localStorage.getItem(LOCAL_USER_SETTINGS) || "{}",
     );
@@ -338,7 +338,7 @@ export default function Customizations(
 
     // merge configuration files together
     let merged = baseJson;
-    mergeRecursive(merged, customJson);
+    mergeRecursive(merged, customConfig);
     mergeRecursive(merged, userJson);
     mergedJson = merged;
 
