@@ -9,13 +9,13 @@ if [ "$1" == "tgz_static" ] ; then
 fi
 
 if [ "${NUODB_CP_REST_URL}" != "" ] ; then
-    find /usr/share/nginx/html -type f ! -name "config.json" | while read line; do
+    find /usr/share/nginx/html -type f ! -name "custom.json" | while read line; do
         sed -i "s#___NUODB_CP_REST_URL___#${NUODB_CP_REST_URL}#g" ${line}
     done
 fi
 
 if [ "${NUODB_SQL_REST_URL}" != "" ] ; then
-    find /usr/share/nginx/html -type f ! -name "config.json" | while read line; do
+    find /usr/share/nginx/html -type f ! -name "custom.json" | while read line; do
         sed -i "s#___NUODB_SQL_REST_URL___#${NUODB_SQL_REST_URL}#g" ${line}
     done
 fi

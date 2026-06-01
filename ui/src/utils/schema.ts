@@ -264,10 +264,11 @@ export function replaceVariables(
         search.substring(0, posOpenBracket) +
         search.substring(posOpenBracket + 1);
     } else {
-      let value = getValue(
-        variables,
-        search.substring(posOpenBracket + 1, posCloseBracket),
-      );
+      let value =
+        getValue(
+          variables,
+          search.substring(posOpenBracket + 1, posCloseBracket),
+        ) || "";
       if (urlEncode) {
         value = encodeURIComponent(value);
       }
