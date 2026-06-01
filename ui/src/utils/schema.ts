@@ -10,6 +10,7 @@ import {
   SchemaType,
   FieldParametersType,
 } from "./types";
+import { getValue } from "../components/fields/utils";
 let schema: TempAny = null;
 
 export const Feature: { FILTER_ON_SERVER: boolean | undefined } = {
@@ -249,10 +250,34 @@ export function getOrgFromPath(schema: SchemaType, path: string) {
  * @param {*} variables
  * @returns string with the placeholders replaced.
  */
-export function replaceVariables(search: string, variables: TempAny): string {
-  Object.keys(variables).forEach((key) => {
-    search = search.replaceAll("{" + key + "}", variables[key]);
-  });
+export function replaceVariables(
+  search: string,
+  variables: TempAny,
+  urlEncode: boolean,
+): string {
+  let posOpenBracket;
+  while ((posOpenBracket = search.indexOf("{")) !== -1) {
+    const posCloseBracket = search.indexOf("}", posOpenBracket + 1);
+    if (posCloseBracket === -1) {
+      //missing close bracket - this shouldn't occur - just get rid of the open bracket
+      search =
+        search.substring(0, posOpenBracket) +
+        search.substring(posOpenBracket + 1);
+    } else {
+      let value =
+        getValue(
+          variables,
+          search.substring(posOpenBracket + 1, posCloseBracket),
+        ) || "";
+      if (urlEncode) {
+        value = encodeURIComponent(value);
+      }
+      search =
+        search.substring(0, posOpenBracket) +
+        value +
+        search.substring(posCloseBracket + 1);
+    }
+  }
   return search;
 }
 

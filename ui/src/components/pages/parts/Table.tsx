@@ -16,6 +16,7 @@ import {
   getSchemaPath,
   hasActiveStream,
   getEntryPath,
+  replaceVariables,
 } from "../../../utils/schema";
 import { Rest } from "./Rest";
 import Dialog from "./Dialog";
@@ -310,19 +311,49 @@ function Table(props: TableProps) {
       });
     }
 
-    return fieldName === "name" ? (
-      <button
-        key={row["$ref"]}
-        onClick={(event) => {
-          event.preventDefault();
-          navigate("/ui/resource/view" + path + "/" + row["$ref"]);
-        }}
-      >
-        {value}
-      </button>
-    ) : (
-      value
-    );
+    // provide link to view entry
+    if (fieldName === "name") {
+      return (
+        <button
+          key={row["$ref"]}
+          onClick={(event) => {
+            event.preventDefault();
+            navigate("/ui/resource/view" + path + "/" + row["$ref"]);
+          }}
+        >
+          {value}
+        </button>
+      );
+    }
+
+    // provide custom link
+    if (cv?.links?.[fieldName]?.link) {
+      const link = replaceVariables(cv.links[fieldName].link, row, true);
+      const linkTarget = cv.links[fieldName].linkTarget;
+      return (
+        <button
+          className="NuoLinkButton"
+          key={row["$ref"]}
+          onClick={(event) => {
+            event.preventDefault();
+            if (
+              !linkTarget &&
+              !link.startsWith("//") &&
+              link.indexOf("://") === -1
+            ) {
+              navigate(link);
+            } else {
+              window.open(link, linkTarget);
+            }
+          }}
+        >
+          {value}
+        </button>
+      );
+    }
+
+    // show value
+    return value;
   }
 
   function moveNameColumnToFront(columns: MenuItemProps[]) {

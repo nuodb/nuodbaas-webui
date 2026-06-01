@@ -13,6 +13,7 @@
 ^\./selenium-tests/package-lock.json$
 ^\./selenium-tests/package.json$
 ^\./selenium-tests/keycloak/keycloak-protocol-cas-26.2.1.jar
+^\./docker/development/default.conf$
 ^\./ui/package-lock.json$
 \.md$
 \./ui/public/favicon.ico$

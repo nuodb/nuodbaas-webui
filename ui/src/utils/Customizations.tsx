@@ -42,6 +42,7 @@ export type CustomViewMenu = {
   confirm: string;
   dialog?: string;
   link?: string;
+  linkTarget?: string;
 };
 
 export type CustomViewFields = { [key: string]: CustomViewField };
@@ -50,6 +51,12 @@ export type CustomView = {
   columns?: string[];
   fields?: CustomViewFields;
   menu?: CustomViewMenu[];
+  links?: {
+    [key: string]: {
+      link: string;
+      linkTarget?: string;
+    };
+  };
 };
 
 export type CustomViews = { [key: string]: CustomView };
@@ -258,6 +265,15 @@ function isObject(item: any): boolean {
 }
 
 /**
+ * Simple array check.
+ * @param item
+ * @returns {boolean}
+ */
+function isArray(item: any): boolean {
+  return item && typeof item === "object" && Array.isArray(item);
+}
+
+/**
  * Deep merge two objects.
  * @param merged object where data is merged into
  * @param data object to apply to the merged object
@@ -270,7 +286,20 @@ export function mergeRecursive(merged: any, data: any): void {
       }
       mergeRecursive(merged[key], data[key]);
     } else {
-      merged[key] = data[key];
+      const keyWithoutAppend = key.endsWith("-append")
+        ? key.substring(0, key.length - "-append".length)
+        : key;
+      if (
+        isArray(data[key]) &&
+        key.endsWith("-append") &&
+        isArray(merged[keyWithoutAppend])
+      ) {
+        data[key].forEach((value: any) => {
+          merged[keyWithoutAppend].push(value);
+        });
+      } else {
+        merged[key] = data[key];
+      }
     }
   }
 }
@@ -294,13 +323,10 @@ export default function Customizations(
   async function initCustomizations() {
     // retrieve all configuration files
     const baseJson = (await axios.get("/ui/theme/base.json")).data || {};
+    const customConfig = (await axios.get("/ui/theme/custom.json")).data || {};
     const userJson = JSON.parse(
       localStorage.getItem(LOCAL_USER_SETTINGS) || "{}",
     );
-    const themeType =
-      userJson?.theme?.type || baseJson?.theme?.type || "material";
-    const themeJson =
-      (await axios.get("/ui/theme/" + themeType + ".json")).data || {};
 
     try {
       hasSqlEditorService = (
@@ -312,7 +338,7 @@ export default function Customizations(
 
     // merge configuration files together
     let merged = baseJson;
-    mergeRecursive(merged, themeJson || {});
+    mergeRecursive(merged, customConfig);
     mergeRecursive(merged, userJson);
     mergedJson = merged;
 

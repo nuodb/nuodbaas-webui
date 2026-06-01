@@ -218,7 +218,9 @@ test.describe("DatabaseTest", () => {
     restPage: page,
   }) => {
     const projectName = await createProjectRest();
-    const databaseName = await createDatabaseRest(projectName);
+    const databaseName = await createDatabaseRest(projectName, undefined, {
+      "ds.com/abc": "abc",
+    });
     waitRestComplete(page);
 
     await clickMenu(page, "databases");
@@ -281,5 +283,49 @@ test.describe("DatabaseTest", () => {
       .getByTestId("popupmenu-button.sql.editor")
       .waitFor({ state: "visible" });
     await page.keyboard.press("Escape");
+
+    // Popup menu: ExternalUrl (custom menu item)
+    await page.getByTestId("resource-popup-menu").click();
+    const [newTab] = await Promise.all([
+      page.waitForEvent("popup"),
+      page.getByTestId("popupmenu-ExternalUrl").click(),
+    ]);
+    let expectedURL =
+      "https://www.example.com/integrationtest/" +
+      projectName +
+      "/" +
+      databaseName +
+      "/n0.nano/abc";
+    await expect(newTab).toHaveURL(expectedURL);
+
+    // validate we are on a new "_blank" page by trying to go back and making sure we are still on the same URL
+    await newTab.goBack();
+    await expect(newTab).toHaveURL(expectedURL);
+
+    // close new _blank tab
+    await newTab.close();
+
+    // Custom Link: labels.ds.com/abc
+    await clickMenu(page, "databases");
+    const labelCell = await waitTableElements(
+      page,
+      "list_resource__table",
+      "name",
+      databaseName,
+      "labels.ds.com/abc",
+    );
+    const [newTab2] = await Promise.all([
+      page.waitForEvent("popup"),
+      labelCell[0].getByRole("button").click(),
+    ]);
+    expectedURL = "https://www.example.com/abc";
+    await expect(newTab2).toHaveURL(expectedURL);
+
+    // validate we are on a new "_blank" page by trying to go back and making sure we are still on the same URL
+    await newTab2.goBack();
+    await expect(newTab2).toHaveURL(expectedURL);
+
+    // close new _blank tab
+    await newTab2.close();
   });
 });
