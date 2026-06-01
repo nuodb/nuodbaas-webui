@@ -119,6 +119,15 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     }
   }
 
+  function isSafeRedirect(url: string): boolean {
+    try {
+      const parsed = new URL(url, window.location.origin);
+      return parsed.origin === window.location.origin;
+    } catch {
+      return false;
+    }
+  }
+
   function handleLoginSuccess(data: TempAny) {
     localStorage.setItem(
       "credentials",
@@ -129,12 +138,13 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
         accessRule: data.accessRule,
       }),
     );
-    window.location.href = queryParams.get("redirectUrl") || "/ui";
+    const redirect = queryParams.get("redirectUrl") || "/ui";
+    window.location.href = isSafeRedirect(redirect) ? redirect : "/ui";
   }
 
   function loginFailed(err: any) {
     console.error("Login Failed", err);
-    var detailMsg = err?.response?.data?.detail;
+    let detailMsg = err?.response?.data?.detail;
     if (!detailMsg) {
       detailMsg = err.message;
     }
@@ -273,7 +283,12 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
 
         {providers &&
           providers
-            .filter((provider) => provider.description)
+            .filter(
+              (provider) =>
+                provider.description &&
+                (provider.url?.toLowerCase().startsWith("https://") || //prevents XSS by preventing a "javascript:" URL
+                  provider.url?.toLowerCase().startsWith("http://")),
+            )
             .map((provider) => (
               <Button
                 key={provider.name}

@@ -274,7 +274,7 @@ function ListResource(props: PageProps) {
         return !!entryValueRaw;
       case "notExists":
         return !entryValueRaw;
-      case "search":
+      case "search": {
         const allValues = getAllValues(entry);
         for (let i = 0; i < allValues.length; i++) {
           if (search.ignoreCase) {
@@ -286,6 +286,7 @@ function ListResource(props: PageProps) {
           }
         }
         return false;
+      }
     }
     return false;
   }
