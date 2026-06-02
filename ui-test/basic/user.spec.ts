@@ -122,10 +122,13 @@ test.describe("UserTest", () => {
         "list_resource__table",
         "name",
         "u0000",
-        "$ref",
+        "name",
       );
       expect(cells.length).toBe(2);
+      expect(cells[0]).toHaveText(u00002);
+      expect(cells[1]).toHaveText(u00004);
     });
+
     const u00001 = await createUserRest({ name: shortUnique("u00001") });
     const u00003 = await createUserRest({ name: shortUnique("u00003") });
     const u00005 = await createUserRest({ name: shortUnique("u00005") });
@@ -140,12 +143,12 @@ test.describe("UserTest", () => {
         "name",
       );
       expect(cells.length).toBe(5);
+      expect(cells[0]).toHaveText(u00001);
+      expect(cells[1]).toHaveText(u00002);
+      expect(cells[2]).toHaveText(u00003);
+      expect(cells[3]).toHaveText(u00004);
+      expect(cells[4]).toHaveText(u00005);
     });
-    expect(cells[0]).toHaveText(u00001);
-    expect(cells[1]).toHaveText(u00002);
-    expect(cells[2]).toHaveText(u00003);
-    expect(cells[3]).toHaveText(u00004);
-    expect(cells[4]).toHaveText(u00005);
   });
 
   test("testEditUser – add label and verify", async ({ restPage: page }) => {
