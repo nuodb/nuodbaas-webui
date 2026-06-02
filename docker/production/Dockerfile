@@ -1,6 +1,6 @@
 # (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
-FROM node:18-alpine AS build-ui
+FROM node:22-alpine AS build-ui
 WORKDIR /app/
 ARG REACT_APP_GIT_SHA
 COPY ui/ /app/

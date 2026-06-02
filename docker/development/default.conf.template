@@ -1,4 +1,4 @@
-# (C) Copyright 2024-2025 Dassault Systemes SE.  All Rights Reserved.
+# (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 server {
   listen 81;
@@ -7,6 +7,10 @@ server {
 
   location /ui/ {
     proxy_pass http://localhost:3000/ui/;
+  }
+
+  location /ui/theme/custom.json {
+    alias /usr/share/nginx/html/theme/custom.json;
   }
 
   location /nuodb-cp/ {

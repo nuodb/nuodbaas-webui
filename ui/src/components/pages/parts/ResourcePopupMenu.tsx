@@ -201,9 +201,15 @@ export default function ResourcePopupMenu({
                     );
                   });
                 } else if (menu.link) {
-                  const link = replaceVariables(menu.link, row);
-                  if (!link.startsWith("//") && link.indexOf("://") === -1) {
+                  const link = replaceVariables(menu.link, row, true);
+                  if (
+                    !menu.linkTarget &&
+                    !link.startsWith("//") &&
+                    link.indexOf("://") === -1
+                  ) {
                     navigate(link);
+                  } else {
+                    window.open(link, menu.linkTarget);
                   }
                 } else if (menu.dialog) {
                   CustomDialog({ dialog: menu.dialog, path, data: row, t });

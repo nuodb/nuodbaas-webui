@@ -1,11 +1,26 @@
 // (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 import js from "@eslint/js";
+import { defineConfig } from "eslint/config";
 import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
+import pluginSecurity from "eslint-plugin-security";
 
-export default tseslint.config(
+export default defineConfig(
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  {
+    rules: {
+      "prefer-const": "warn",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unused-vars": "warn",
+      "no-useless-assignment": "warn",
+      "@typescript-eslint/no-wrapper-object-types": "warn",
+      "@typescript-eslint/no-this-alias": "warn",
+    },
+  },
+  pluginSecurity.configs.recommended,
   { ignores: ["dist"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
@@ -24,6 +39,7 @@ export default tseslint.config(
         "warn",
         { allowConstantExport: true },
       ],
+      "react/no-danger": "error",
     },
   },
 );
