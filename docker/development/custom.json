@@ -1,0 +1,32 @@
+{
+    "copyright": "(C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.",
+    "views": {
+        "/databases": {
+            "columns": [
+                "name",
+                "organization",
+                "project",
+                "labels",
+                "tier",
+                "labels.ds.com/abc",
+                "properties",
+                "status.state",
+                "status"
+            ],
+            "links": {
+                "labels.ds.com/abc": {
+                    "link": "https://www.example.com/{labels.ds.com/abc}",
+                    "linkTarget": "_blank"
+                }
+            },
+            "menu-append": [
+                {
+                    "label": "ExternalUrl",
+                    "icon": "Info",
+                    "link": "https://www.example.com/{organization}/{project}/{name}/{tier}/{labels.ds.com/abc}",
+                    "linkTarget": "_blank"
+                }
+            ]
+        }
+    }
+}

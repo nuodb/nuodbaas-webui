@@ -298,7 +298,9 @@ export function PopupMenu(props: PopupMenuProps) {
       const newItem = props.items.find(
         (item: MenuItemProps) => item.id === child.getAttribute("id"),
       );
-      newItem && newItems.push(newItem);
+      if (newItem) {
+        newItems.push(newItem);
+      }
     });
     if (props.setItems) {
       const setItems: (items: MenuItemProps[]) => void = props.setItems;

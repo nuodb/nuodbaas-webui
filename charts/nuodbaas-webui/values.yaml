@@ -139,3 +139,9 @@ nuodbaasWebui:
 
     # The storage class to use for the generic ephemeral volume.
     storageClass: ""
+
+  # JSON content for custom.json. Use a multi-line string.
+  # Info on the format is described in https://github.com/nuodb/nuodbaas-webui/blob/main/ui/customizations.md
+  customConfig: |
+    {
+    }

@@ -56,6 +56,9 @@ jobs:
           name: Check Code formatting
           command: make prettier-check
       - run:
+          name: Run ES Lint checks
+          command: make eslint-check
+      - run:
           name: Run Unit tests (+ coverage)
           command: make run-unit-tests
 

@@ -221,6 +221,48 @@ function ListResource(props: PageProps) {
     );
   }
 
+  /* check if value is in the entry
+   */
+  function includesValue(entry: any, search: SearchType): boolean {
+    const entryValueRaw = getValue(entry, search.field);
+    const entryValue: string = toString(entryValueRaw, search.ignoreCase);
+    const searchValue: string = toString(search.value, search.ignoreCase);
+    switch (search.condition) {
+      case "!=":
+        return entryValue !== searchValue;
+      case "<=":
+        return entryValue <= searchValue;
+      case "=":
+        return entryValue === searchValue;
+      case ">=":
+        return entryValue >= searchValue;
+      case "contains":
+        return entryValue.includes(searchValue);
+      case "startsWith":
+        return entryValue.startsWith(searchValue);
+      case "endsWith":
+        return entryValue.endsWith(searchValue);
+      case "exists":
+        return !!entryValueRaw;
+      case "notExists":
+        return !entryValueRaw;
+      case "search": {
+        const allValues = getAllValues(entry);
+        for (let i = 0; i < allValues.length; i++) {
+          if (search.ignoreCase) {
+            if (
+              allValues[i].toUpperCase().includes(search.value.toUpperCase())
+            ) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+    }
+    return false;
+  }
+
   if (itemsAndPath.items) {
     let searchFiltered: any = undefined;
     let data = itemsAndPath.items.filter(

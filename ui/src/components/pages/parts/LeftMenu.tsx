@@ -166,7 +166,7 @@ function TOC(props: MenuProps) {
                   className={className}
                   tabIndex={0}
                   onClick={() => {
-                    onSelection && onSelection();
+                    onSelection?.();
                     navigate(path);
                   }}
                   onKeyDown={(event) => {

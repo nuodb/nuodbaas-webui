@@ -1,0 +1,12 @@
+# (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "nuodbaas-webui.fullname" . }}-custom-config
+  labels:
+    {{- include "nuodbaas-webui.labels" . | nindent 4 }}
+
+data:
+  custom.json: |
+{{ .Values.nuodbaasWebui.customConfig | indent 4 }}

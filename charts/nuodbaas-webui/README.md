@@ -33,6 +33,7 @@ All configurable parameters for each top-level scope are detailed below, organiz
 | `nuodbaasWebui.ephemeralVolume.enabled` |  Whether to create a generic ephemeral volume rather than emptyDir for any storage that does not outlive the pod | `false` |
 | `nuodbaasWebui.ephemeralVolume.size` |  The size of the generic ephemeral volume to create | `1Gi` |
 | `nuodbaasWebui.ephemeralVolume.storageClass` |  The storage class to use for the generic ephemeral volume | `""` |
+| `nuodbaasWebui.customConfig` | JSON value with UI customizations. Details here: https://github.com/nuodb/nuodbaas-webui/blob/main/ui/customizations.md | `{}` |
 
 ## Uninstalling the Chart
 
