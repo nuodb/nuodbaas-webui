@@ -167,5 +167,5 @@ export function getRecursiveValue(value: TempAny, t: any) {
     }
   }
 
-  return <MoreInline value={value} t={t} />;
+  return MoreInline({ value, t });
 }

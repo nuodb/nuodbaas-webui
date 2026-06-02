@@ -437,7 +437,7 @@ eslint-check:
 	cd ui && npm install && npx eslint . && cd ..
 
 .PHONY: presubmit-checks
-presubmit-checks: prettier eslint-check
+presubmit-checks: copyright prettier eslint-check
 	@echo "All Checks passed"
 
 $(KIND):

@@ -59,7 +59,7 @@ function ListResource(props: PageProps) {
   const navigate = useNavigate();
 
   function makeFieldnameList(prefix: string, items: any): string[] {
-    let list: Set<string> = new Set<string>();
+    const list: Set<string> = new Set<string>();
 
     if (typeof items === "object") {
       if (Array.isArray(items)) {
@@ -97,27 +97,27 @@ function ListResource(props: PageProps) {
 
   useEffect(() => {
     loadResource();
-  }, [page, itemsAndPath.path, schema, search, sort]);
+  }, [page, path, schema, search, sort]);
 
   function loadResource() {
     if (!schema) {
       return;
     }
 
-    let resourcesByPath_ = getResourceByPath(schema, itemsAndPath.path);
+    const resourcesByPath_ = getResourceByPath(schema, path);
     if (!resourcesByPath_) {
       navigate("/ui/notfound");
       return;
     }
     if ("get" in resourcesByPath_) {
-      Rest.get(itemsAndPath.path + "?listAccessible=true")
+      Rest.get(path + "?listAccessible=true")
         .then((data: TempAny) => {
           setAllItems(data.items);
           let url =
-            itemsAndPath.path + "?listAccessible=true&expand=true&offset=0&limit=1000000";
+            path + "?listAccessible=true&expand=true&offset=0&limit=1000000";
           if (Feature.FILTER_ON_SERVER) {
             url =
-              itemsAndPath.path +
+              path +
               "?listAccessible=true&expand=true&offset=" +
               (page - 1) * LIST_PAGE_SIZE +
               "&limit=" +
@@ -137,16 +137,19 @@ function ListResource(props: PageProps) {
               url,
               (data: TempAny) => {
                 if (data.items) {
-                  setItemsAndPath({ items: data.items, path: itemsAndPath.path });
+                  setItemsAndPath({
+                    items: data.items,
+                    path: path,
+                  });
                   setAllFieldNames(makeFieldnameList("", data.items));
                 } else {
-                  setItemsAndPath({ items: [], path: itemsAndPath.path });
+                  setItemsAndPath({ items: [], path: path });
                 }
               },
               (error: TempAny) => {
                 Auth.handle401Error(error);
                 Toast.show("Error retrieving entry", error);
-                setItemsAndPath({ items: [], path: itemsAndPath.path });
+                setItemsAndPath({ items: [], path: path });
               },
               1000,
               -1,
@@ -155,18 +158,18 @@ function ListResource(props: PageProps) {
           );
         })
         .catch((reason) => {
-          Toast.show("Unable to get resource in " + itemsAndPath.path, reason);
+          Toast.show("Unable to get resource in " + path, reason);
         });
     }
   }
 
   useEffect(() => {
     setPage(1);
-  }, [itemsAndPath.path, schema, search]);
+  }, [path, schema, search]);
 
   useEffect(() => {
     setSearch([]);
-  }, [itemsAndPath.path, schema]);
+  }, [path, schema]);
 
   useEffect(() => {
     return () => {
@@ -190,10 +193,10 @@ function ListResource(props: PageProps) {
   }
 
   function getFilterValues(): string[] {
-    if (!getFilterField(schema, itemsAndPath.path)) {
+    if (!getFilterField(schema, path)) {
       return [];
     }
-    let filterValues = new Set<string>();
+    const filterValues = new Set<string>();
     allItems.forEach((item: string) => {
       const parts = item.split("/");
       if (parts.length > 1) {
@@ -219,48 +222,6 @@ function ListResource(props: PageProps) {
         </Button>
       </div>
     );
-  }
-
-  /* check if value is in the entry
-   */
-  function includesValue(entry: any, search: SearchType): boolean {
-    const entryValueRaw = getValue(entry, search.field);
-    const entryValue: string = toString(entryValueRaw, search.ignoreCase);
-    const searchValue: string = toString(search.value, search.ignoreCase);
-    switch (search.condition) {
-      case "!=":
-        return entryValue !== searchValue;
-      case "<=":
-        return entryValue <= searchValue;
-      case "=":
-        return entryValue === searchValue;
-      case ">=":
-        return entryValue >= searchValue;
-      case "contains":
-        return entryValue.includes(searchValue);
-      case "startsWith":
-        return entryValue.startsWith(searchValue);
-      case "endsWith":
-        return entryValue.endsWith(searchValue);
-      case "exists":
-        return !!entryValueRaw;
-      case "notExists":
-        return !entryValueRaw;
-      case "search": {
-        const allValues = getAllValues(entry);
-        for (let i = 0; i < allValues.length; i++) {
-          if (search.ignoreCase) {
-            if (
-              allValues[i].toUpperCase().includes(search.value.toUpperCase())
-            ) {
-              return true;
-            }
-          }
-        }
-        return false;
-      }
-    }
-    return false;
   }
 
   if (itemsAndPath.items) {
@@ -309,16 +270,16 @@ function ListResource(props: PageProps) {
       <PageLayout {...props}>
         <ResourceHeader
           schema={schema}
-          path={itemsAndPath.path}
+          path={path}
           type="list"
           filterValues={getFilterValues()}
-          onAction={() => navigate("/ui/resource/create" + itemsAndPath.path)}
+          onAction={() => navigate("/ui/resource/create" + path)}
         />
         <div className="NuoTableContainer">
           <div className="NuoTableOptions">
             {renderReload()}
             <Search
-              path={itemsAndPath.path}
+              path={path}
               fieldNames={allFieldNames}
               search={search}
               setSearch={(search: SearchType[]) => {
@@ -332,7 +293,7 @@ function ListResource(props: PageProps) {
               data-testid="list_resource__table"
               {...props}
               data={data}
-              path={itemsAndPath.path}
+              path={path}
               sort={sort}
               setSort={setSort}
             />

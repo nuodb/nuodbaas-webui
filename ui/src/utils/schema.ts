@@ -477,7 +477,7 @@ function getAllValues(obj: any): string[] {
   }
 }
 
-function toString(value: any, toUpper: boolean): string {
+export function toString(value: any, toUpper: boolean): string {
   let ret;
   if (!value) {
     ret = "";
@@ -526,7 +526,7 @@ export function includesValue(entry: any, search: SearchType): boolean | null {
       return null;
     case "~":
       return null;
-    case "search":
+    case "search": {
       const allValues = getAllValues(entry);
       for (let i = 0; i < allValues.length; i++) {
         if (search.ignoreCase) {
@@ -538,6 +538,7 @@ export function includesValue(entry: any, search: SearchType): boolean | null {
         }
       }
       return false;
+    }
   }
   return null;
 }
