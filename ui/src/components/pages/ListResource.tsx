@@ -97,27 +97,27 @@ function ListResource(props: PageProps) {
 
   useEffect(() => {
     loadResource();
-  }, [page, path, schema, search, sort]);
+  }, [page, itemsAndPath.path, schema, search, sort]);
 
   function loadResource() {
     if (!schema) {
       return;
     }
 
-    let resourcesByPath_ = getResourceByPath(schema, path);
+    let resourcesByPath_ = getResourceByPath(schema, itemsAndPath.path);
     if (!resourcesByPath_) {
       navigate("/ui/notfound");
       return;
     }
     if ("get" in resourcesByPath_) {
-      Rest.get(path + "?listAccessible=true")
+      Rest.get(itemsAndPath.path + "?listAccessible=true")
         .then((data: TempAny) => {
           setAllItems(data.items);
           let url =
-            path + "?listAccessible=true&expand=true&offset=0&limit=1000000";
+            itemsAndPath.path + "?listAccessible=true&expand=true&offset=0&limit=1000000";
           if (Feature.FILTER_ON_SERVER) {
             url =
-              path +
+              itemsAndPath.path +
               "?listAccessible=true&expand=true&offset=" +
               (page - 1) * LIST_PAGE_SIZE +
               "&limit=" +
@@ -137,16 +137,16 @@ function ListResource(props: PageProps) {
               url,
               (data: TempAny) => {
                 if (data.items) {
-                  setItemsAndPath({ items: data.items, path });
+                  setItemsAndPath({ items: data.items, path: itemsAndPath.path });
                   setAllFieldNames(makeFieldnameList("", data.items));
                 } else {
-                  setItemsAndPath({ items: [], path });
+                  setItemsAndPath({ items: [], path: itemsAndPath.path });
                 }
               },
               (error: TempAny) => {
                 Auth.handle401Error(error);
                 Toast.show("Error retrieving entry", error);
-                setItemsAndPath({ items: [], path });
+                setItemsAndPath({ items: [], path: itemsAndPath.path });
               },
               1000,
               -1,
@@ -155,18 +155,18 @@ function ListResource(props: PageProps) {
           );
         })
         .catch((reason) => {
-          Toast.show("Unable to get resource in " + path, reason);
+          Toast.show("Unable to get resource in " + itemsAndPath.path, reason);
         });
     }
   }
 
   useEffect(() => {
     setPage(1);
-  }, [path, schema, search]);
+  }, [itemsAndPath.path, schema, search]);
 
   useEffect(() => {
     setSearch([]);
-  }, [path, schema]);
+  }, [itemsAndPath.path, schema]);
 
   useEffect(() => {
     return () => {
@@ -190,7 +190,7 @@ function ListResource(props: PageProps) {
   }
 
   function getFilterValues(): string[] {
-    if (!getFilterField(schema, path)) {
+    if (!getFilterField(schema, itemsAndPath.path)) {
       return [];
     }
     let filterValues = new Set<string>();
@@ -267,16 +267,16 @@ function ListResource(props: PageProps) {
       <PageLayout {...props}>
         <ResourceHeader
           schema={schema}
-          path={path}
+          path={itemsAndPath.path}
           type="list"
           filterValues={getFilterValues()}
-          onAction={() => navigate("/ui/resource/create" + path)}
+          onAction={() => navigate("/ui/resource/create" + itemsAndPath.path)}
         />
         <div className="NuoTableContainer">
           <div className="NuoTableOptions">
             {renderReload()}
             <Search
-              path={path}
+              path={itemsAndPath.path}
               fieldNames={allFieldNames}
               search={search}
               setSearch={(search: SearchType[]) => {
