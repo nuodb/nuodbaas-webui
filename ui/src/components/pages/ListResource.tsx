@@ -1,6 +1,6 @@
 // (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Table from "./parts/Table";
 import {
@@ -8,39 +8,63 @@ import {
   getResourceByPath,
   getFilterField,
   Feature,
-  LIST_PAGE_SIZE,
-  includesValue,
 } from "../../utils/schema";
 import { Rest } from "./parts/Rest";
 import PageLayout from "./parts/PageLayout";
 import Auth from "../../utils/auth";
-import {
-  PageProps,
-  SearchType,
-  SortColumnDirectionType,
-  TempAny,
-} from "../../utils/types";
+import { DataType, PageProps, SortColumnDirectionType, TempAny } from "../../utils/types";
 import Pagination from "../controls/Pagination";
 import { withTranslation } from "react-i18next";
 import Search from "./parts/Search";
 import ResourceHeader from "./parts/ResourceHeader";
 import Toast from "../controls/Toast";
 import { getValue } from "../fields/utils";
-import { getFieldFilter } from "./ListResourceFilter";
-import ReplayIcon from "@mui/icons-material/Replay";
-import Button from "../controls/Button";
+import { getFieldFilter, SearchType } from "./ListResourceFilter";
 
 type ItemsAndPathProps = {
-  items: [] | null;
+  items: DataType[] | null;
   path: string;
 };
+
+function getCurrentPath() {
+  const pathPrefix = "/ui/resource/list/";
+  let currentPath = window.location.pathname;
+  if (currentPath.startsWith(pathPrefix)) {
+    currentPath = "/" + currentPath.substring(pathPrefix.length);
+  }
+  return currentPath;
+}
+
+export function useInterval(callback: () => void, delay: number | null): void {
+  // Explicitly type the ref to hold a function matching the callback signature
+  const savedCallback = useRef<() => void>(undefined);
+
+  // Remember the latest callback configuration
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  // Set up the interval loop
+  useEffect(() => {
+    // Return early if the delay is null (paused state)
+    if (delay === null) return;
+
+    const id = setInterval(() => {
+      // Use optional chaining or non-null assertion safely
+      savedCallback.current?.();
+    }, delay);
+
+    return () => clearInterval(id);
+  }, [delay]);
+}
 
 /**
  * handles all the /resource/list/* requests to list a resource
  */
 function ListResource(props: PageProps) {
   const { schema } = props;
-  const path = "/" + useParams()["*"];
+  const path = getCurrentPath();
+  const pageSize = 20;
 
   const [itemsAndPath, setItemsAndPath] = useState<ItemsAndPathProps>({
     items: null,
@@ -57,6 +81,103 @@ function ListResource(props: PageProps) {
   });
 
   const navigate = useNavigate();
+
+  function getFilteredUrl() {
+    let url =
+      getCurrentPath() +
+      "?listAccessible=true&expand=true&offset=" +
+      (page - 1) * pageSize +
+      "&limit=" +
+      pageSize;
+    if (sort.column) {
+      url += "&sortBy=" + encodeURIComponent(sort.column);
+      url += "&reverse=" + String(sort.direction === "desc");
+    }
+    search.forEach((s) => {
+      url += "&fieldFilter=" + encodeURIComponent(getFieldFilter(s));
+    });
+    return url;
+
+  }
+
+  useInterval(() => {
+    let currentPath = getCurrentPath();
+    Rest.get(getFilteredUrl()).then(async (data: any) => {
+      if (!data.items) {
+        setItemsAndPath({ items: [], path: currentPath });
+        return;
+      }
+      if (currentPath !== itemsAndPath.path) {
+        setItemsAndPath({ items: data.items, path: currentPath });
+        setAllFieldNames(makeFieldnameList("", data.items));
+      }
+      else {
+        const items = await mergeItems(itemsAndPath.items || [], data.items);
+        setItemsAndPath({ items, path: currentPath });
+        setAllFieldNames(makeFieldnameList("", items));
+      }
+    })
+      .catch((error) => {
+        Auth.handle401Error(error);
+        Toast.show("Error retrieving entry", error);
+        setItemsAndPath({ items: [], path: currentPath });
+      });
+  }, 15 * 1000);
+
+  /**
+   * merges old item list with the new item list
+   * - all origItems before the first match with newItems will be at the beginning of the list
+   * - all origItems matching with the new list are skipped since the newList has an update (or are the same)
+   * - all origItems after the first match and not matching the newList will be at the end
+   * - all origItems not part of the newItems will be checked if they were deleted and then not included in the list
+   * Example:
+   *    orig: [a, c, e, g, j]
+   *    new: [B, C, E, F, H]
+   *    returns: [a, B, C, E, F, H, g, j]
+   *    "g" is at the end because it is not part of the new list and most likely is a deleted item or sorting brought it
+   *    out of the new list. It would go either between "a" and "B" or between "H" and "j". Since we cannot do server side
+   *    sorting to determine which one it is, we place it at the bottom of the list.
+   * @param origItems
+   * @param newItems
+   * @returns
+   */
+  async function mergeItems(origItems: DataType[], newItems: DataType[]) {
+    if (origItems.length === 0) {
+      return newItems;
+    }
+
+    let beforeItems: DataType[] = [];
+    let afterItems: DataType[] = [];
+    let foundFirst = false;
+    for (let i = 0; i < origItems.length; i++) {
+      if (newItems.find(ni => ni["$ref"] === origItems[i]["$ref"])) {
+        foundFirst = true;
+      }
+      else if (!foundFirst) {
+        beforeItems.push(origItems[i]);
+      }
+      else {
+        afterItems.push(origItems[i]);
+      }
+    }
+    const beforeDeleted = await Promise.allSettled(beforeItems.map(bi => Rest.get(getCurrentPath() + "/" + bi["$ref"])));
+    const afterDeleted = await Promise.allSettled(afterItems.map(ai => Rest.get(getCurrentPath() + "/" + ai["$ref"])));
+
+    for (let i = beforeDeleted.length - 1; i >= 0; i--) {
+      if (beforeDeleted[i].status === "rejected") {
+        beforeItems.splice(i, 1);
+      }
+    }
+
+    for (let i = afterDeleted.length - 1; i >= 0; i--) {
+      if (afterDeleted[i].status === "rejected") {
+        afterItems.splice(i, 1);
+      }
+    }
+
+    return [...beforeItems, ...newItems, ...afterItems];
+  }
+
 
   function makeFieldnameList(prefix: string, items: any): string[] {
     const list: Set<string> = new Set<string>();
@@ -84,73 +205,37 @@ function ListResource(props: PageProps) {
   }
 
   useEffect(() => {
-    const timeout = setInterval(() => {
-      loadResource();
-    }, 15 * 1000);
-    return () => {
-      clearInterval(timeout);
-    };
-  }, []);
-
-  useEffect(() => {
-    loadResource();
-  }, [page, path, schema, search, sort]);
-
-  function loadResource() {
     if (!schema) {
       return;
     }
 
-    const resourcesByPath_ = getResourceByPath(schema, path);
+    const resourcesByPath_ = getResourceByPath(schema, getCurrentPath());
     if (!resourcesByPath_) {
       navigate("/ui/notfound");
       return;
     }
     if ("get" in resourcesByPath_) {
-      Rest.get(path + "?listAccessible=true")
+      Rest.get(getCurrentPath() + "?listAccessible=true")
         .then((data: TempAny) => {
           setAllItems(data.items);
-          let url =
-            path + "?listAccessible=true&expand=true&offset=0&limit=1000000";
-          if (Feature.FILTER_ON_SERVER) {
-            url =
-              path +
-              "?listAccessible=true&expand=true&offset=" +
-              (page - 1) * LIST_PAGE_SIZE +
-              "&limit=" +
-              LIST_PAGE_SIZE;
-            if (sort.column) {
-              url += "&sortBy=" + encodeURIComponent(sort.column);
-              url += "&reverse=" + String(sort.direction === "desc");
-            }
-            search.forEach((s) => {
-              url += "&fieldFilter=" + encodeURIComponent(getFieldFilter(s));
-            });
-          }
-          url += "&watchAll=true";
           setAbortController(
             getResourceEvents(
               schema,
-              url,
+              getFilteredUrl(),
               (data: TempAny) => {
                 if (data.items) {
-                  setItemsAndPath({
-                    items: data.items,
-                    path: path,
-                  });
+                  setItemsAndPath({ items: data.items, path: getCurrentPath() });
                   setAllFieldNames(makeFieldnameList("", data.items));
                 } else {
-                  setItemsAndPath({ items: [], path: path });
+                  setItemsAndPath({ items: [], path });
                 }
               },
               (error: TempAny) => {
                 Auth.handle401Error(error);
                 Toast.show("Error retrieving entry", error);
-                setItemsAndPath({ items: [], path: path });
+                setItemsAndPath({ items: [], path });
               },
               1000,
-              -1,
-              search,
             ),
           );
         })
@@ -158,7 +243,7 @@ function ListResource(props: PageProps) {
           Toast.show("Unable to get resource in " + path, reason);
         });
     }
-  }
+  }, [page, path, schema, search]);
 
   useEffect(() => {
     setPage(1);
@@ -177,7 +262,7 @@ function ListResource(props: PageProps) {
   }, [abortController]);
 
   function renderPaging(total: number) {
-    const lastPage = Math.ceil(total / LIST_PAGE_SIZE);
+    const lastPage = Math.ceil(total / pageSize);
     return (
       <Pagination
         count={lastPage}
@@ -203,22 +288,119 @@ function ListResource(props: PageProps) {
     return [...filterValues];
   }
 
-  function renderReload() {
-    if (!search.find((s) => s.condition === "raw" || s.condition === "~")) {
-      return null;
+  /* compares both values. value2 can have asterisks ("*") at the beginning, end or both as wildcards.
+       - "value1" or "value2" can be string, null or undefined values
+       - if "value1" or "value2" are objects or arrays, they are converted to JSON text and then used for comparison
+       - the match is case-insensitive
+    */
+  function isMatch(value1: any, value2: any) {
+    if (
+      (value1 === null && value2 === null) ||
+      (value1 === undefined && value2 === undefined)
+    ) {
+      return true;
     }
-    return (
-      <div style={{ margin: "0 10px 0 0" }}>
-        <Button
-          variant="outlined"
-          onClick={() => {
-            loadResource();
-          }}
-        >
-          <ReplayIcon />
-        </Button>
-      </div>
-    );
+    if (
+      value1 === null ||
+      value2 === null ||
+      value1 === undefined ||
+      value2 === undefined
+    ) {
+      return false;
+    }
+
+    if (typeof value1 === "object") {
+      value1 = JSON.stringify(value1);
+    }
+    if (typeof value2 === "object") {
+      value2 = JSON.stringify(value2);
+    }
+
+    value1 = String(value1).trim().toUpperCase();
+    value2 = String(value2).trim().toUpperCase();
+
+    if (value2 === "*") {
+      return true;
+    } else if (value2.startsWith("*")) {
+      if (value2.endsWith("*")) {
+        return value1.includes(value2.substring(1, value2.length - 1));
+      } else {
+        return value1.endsWith(value2.substring(1));
+      }
+    } else if (value2.endsWith("*")) {
+      return value1.startsWith(value2.substring(0, value2.length - 1));
+    } else {
+      return value1 === value2;
+    }
+  }
+
+  function toString(value: any, toUpper: boolean): string {
+    let ret;
+    if (!value) {
+      ret = "";
+    } else if (typeof value === "object") {
+      ret = JSON.stringify(value);
+    } else {
+      ret = String(value);
+    }
+    if (toUpper) {
+      return ret.toUpperCase();
+    } else {
+      return ret;
+    }
+  }
+
+  function getAllValues(obj: any): string[] {
+    if (obj !== null && typeof obj === "object") {
+      return Object.values(obj).flatMap(getAllValues);
+    }
+    if (obj) {
+      return [String(obj)];
+    } else {
+      return [];
+    }
+  }
+
+  /* check if value is in the entry
+   */
+  function includesValue(entry: any, search: SearchType): boolean {
+    const entryValueRaw = getValue(entry, search.field);
+    const entryValue: string = toString(entryValueRaw, search.ignoreCase);
+    const searchValue: string = toString(search.value, search.ignoreCase);
+    switch (search.condition) {
+      case "!=":
+        return entryValue !== searchValue;
+      case "<=":
+        return entryValue <= searchValue;
+      case "=":
+        return entryValue === searchValue;
+      case ">=":
+        return entryValue >= searchValue;
+      case "contains":
+        return entryValue.includes(searchValue);
+      case "startsWith":
+        return entryValue.startsWith(searchValue);
+      case "endsWith":
+        return entryValue.endsWith(searchValue);
+      case "exists":
+        return !!entryValueRaw;
+      case "notExists":
+        return !entryValueRaw;
+      case "search": {
+        const allValues = getAllValues(entry);
+        for (let i = 0; i < allValues.length; i++) {
+          if (search.ignoreCase) {
+            if (
+              allValues[i].toUpperCase().includes(search.value.toUpperCase())
+            ) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+    }
+    return false;
   }
 
   if (itemsAndPath.items) {
@@ -260,7 +442,7 @@ function ListResource(props: PageProps) {
 
       data = searchFiltered.filter(
         (_: any, index: number) =>
-          index >= (page - 1) * LIST_PAGE_SIZE && index < page * LIST_PAGE_SIZE,
+          index >= (page - 1) * pageSize && index < page * pageSize,
       );
     }
     return (
@@ -274,7 +456,6 @@ function ListResource(props: PageProps) {
         />
         <div className="NuoTableContainer">
           <div className="NuoTableOptions">
-            {renderReload()}
             <Search
               path={path}
               fieldNames={allFieldNames}
@@ -290,7 +471,7 @@ function ListResource(props: PageProps) {
               data-testid="list_resource__table"
               {...props}
               data={data}
-              path={path}
+              path={itemsAndPath.path}
               sort={sort}
               setSort={setSort}
             />

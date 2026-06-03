@@ -20,7 +20,31 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { t } from "i18next";
 import Checkboxes from "../controls/Checkboxes";
 import { Feature } from "../../utils/schema";
-import { FilterCondition, filterOptions, SearchType } from "../../utils/types";
+
+const filterOptions = [
+  "search",
+  "contains",
+  "startsWith",
+  "endsWith",
+  "exists",
+  "notExists",
+  "=",
+  "!=",
+  ">=",
+  "<=",
+  "~",
+  "raw",
+] as const;
+export type FilterCondition = (typeof filterOptions)[number];
+
+export type SearchType = {
+  field: string; //field name. "[]" postfix indicates an array field, ".*" postfix indicates a map
+  condition: FilterCondition; // comparator
+  key: string; // used for a "map" field to search keys
+  value: string; // value to search for. Unused for "exists" and "notExists" conditions
+  ignoreCase: boolean; // ignore case
+  label?: string; // stores the label shown in the list of the react-select control
+};
 
 export function isSameSearch(s1: SearchType, s2: SearchType): boolean {
   if (s1.field !== s2.field) return false;

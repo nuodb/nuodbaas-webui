@@ -30,6 +30,7 @@ import { withTranslation } from "react-i18next";
 import Redirect from "./components/pages/Redirect";
 import DefaultPage from "./components/pages/DefaultPage";
 import RegionSettingsSelector from "./components/pages/RegionSettingsSelector";
+import { PageProps } from "./utils/types";
 
 /**
  * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
@@ -44,7 +45,7 @@ function App({ t }: { t: any }) {
   const [org, setOrg] = useState("");
   const [orgs, setOrgs] = useState<string[]>([]);
   const [tasks, setTasks] = useState<BackgroundTaskType[]>([]);
-  const pageProps = {
+  const pageProps: PageProps = {
     schema,
     isRecording,
     org,
@@ -52,6 +53,7 @@ function App({ t }: { t: any }) {
     orgs,
     tasks,
     setTasks: setTasks,
+    t
   };
 
   useEffect(() => {
