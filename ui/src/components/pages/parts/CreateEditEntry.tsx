@@ -106,7 +106,9 @@ function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
     data: TempAny,
     sections: SectionFormParameterType[],
   ): Promise<SectionFormParameterType[]> {
-    const ret: SectionFormParameterType[] = JSON.parse(JSON.stringify(sections));
+    const ret: SectionFormParameterType[] = JSON.parse(
+      JSON.stringify(sections),
+    );
 
     for (let i = 0; i < ret.length; i++) {
       if (ret[i].params["organization"]) {

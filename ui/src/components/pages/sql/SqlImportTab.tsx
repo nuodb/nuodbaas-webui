@@ -116,7 +116,9 @@ function SqlImportTab({
               if (posNewline === -1) {
                 break;
               }
-              const line = new TextDecoder().decode(buffer.slice(0, posNewline));
+              const line = new TextDecoder().decode(
+                buffer.slice(0, posNewline),
+              );
               buffer = buffer.slice(posNewline + 1);
               const stats: SqlImportData = JSON.parse(line);
               if (stats.progressKey && !gotProgressKey) {

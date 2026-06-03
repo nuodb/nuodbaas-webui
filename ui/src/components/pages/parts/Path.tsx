@@ -88,7 +88,9 @@ function Path({
 
   const filterField = getFilterField(schema, path);
 
-  const pathParts = (path.startsWith("/") ? path.substring(1) : path).split("/");
+  const pathParts = (path.startsWith("/") ? path.substring(1) : path).split(
+    "/",
+  );
   let pathPrefix = "";
   if (pathParts[0] === "cluster") {
     pathParts.shift();

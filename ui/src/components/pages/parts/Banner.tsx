@@ -92,7 +92,7 @@ function Banner(props: Props) {
               },
               {
                 label: t("button.logout", {
-                  name: Auth.getCredentials().username,
+                  name: Auth.getCredentials()?.username,
                 }),
                 id: "logout",
                 "data-testid": "logout",
