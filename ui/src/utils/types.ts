@@ -107,4 +107,4 @@ export type RegionSettings = {
 
 export type DataType = {
   [key: string]: any;
-}
+};

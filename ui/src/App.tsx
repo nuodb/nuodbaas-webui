@@ -53,7 +53,7 @@ function App({ t }: { t: any }) {
     orgs,
     tasks,
     setTasks: setTasks,
-    t
+    t,
   };
 
   useEffect(() => {

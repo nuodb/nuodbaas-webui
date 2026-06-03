@@ -1,7 +1,7 @@
 // (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Table from "./parts/Table";
 import {
   getResourceEvents,
@@ -12,7 +12,12 @@ import {
 import { Rest } from "./parts/Rest";
 import PageLayout from "./parts/PageLayout";
 import Auth from "../../utils/auth";
-import { DataType, PageProps, SortColumnDirectionType, TempAny } from "../../utils/types";
+import {
+  DataType,
+  PageProps,
+  SortColumnDirectionType,
+  TempAny,
+} from "../../utils/types";
 import Pagination from "../controls/Pagination";
 import { withTranslation } from "react-i18next";
 import Search from "./parts/Search";
@@ -97,26 +102,25 @@ function ListResource(props: PageProps) {
       url += "&fieldFilter=" + encodeURIComponent(getFieldFilter(s));
     });
     return url;
-
   }
 
   useInterval(() => {
     let currentPath = getCurrentPath();
-    Rest.get(getFilteredUrl()).then(async (data: any) => {
-      if (!data.items) {
-        setItemsAndPath({ items: [], path: currentPath });
-        return;
-      }
-      if (currentPath !== itemsAndPath.path) {
-        setItemsAndPath({ items: data.items, path: currentPath });
-        setAllFieldNames(makeFieldnameList("", data.items));
-      }
-      else {
-        const items = await mergeItems(itemsAndPath.items || [], data.items);
-        setItemsAndPath({ items, path: currentPath });
-        setAllFieldNames(makeFieldnameList("", items));
-      }
-    })
+    Rest.get(getFilteredUrl())
+      .then(async (data: any) => {
+        if (!data.items) {
+          setItemsAndPath({ items: [], path: currentPath });
+          return;
+        }
+        if (currentPath !== itemsAndPath.path) {
+          setItemsAndPath({ items: data.items, path: currentPath });
+          setAllFieldNames(makeFieldnameList("", data.items));
+        } else {
+          const items = await mergeItems(itemsAndPath.items || [], data.items);
+          setItemsAndPath({ items, path: currentPath });
+          setAllFieldNames(makeFieldnameList("", items));
+        }
+      })
       .catch((error) => {
         Auth.handle401Error(error);
         Toast.show("Error retrieving entry", error);
@@ -150,18 +154,20 @@ function ListResource(props: PageProps) {
     let afterItems: DataType[] = [];
     let foundFirst = false;
     for (let i = 0; i < origItems.length; i++) {
-      if (newItems.find(ni => ni["$ref"] === origItems[i]["$ref"])) {
+      if (newItems.find((ni) => ni["$ref"] === origItems[i]["$ref"])) {
         foundFirst = true;
-      }
-      else if (!foundFirst) {
+      } else if (!foundFirst) {
         beforeItems.push(origItems[i]);
-      }
-      else {
+      } else {
         afterItems.push(origItems[i]);
       }
     }
-    const beforeDeleted = await Promise.allSettled(beforeItems.map(bi => Rest.get(getCurrentPath() + "/" + bi["$ref"])));
-    const afterDeleted = await Promise.allSettled(afterItems.map(ai => Rest.get(getCurrentPath() + "/" + ai["$ref"])));
+    const beforeDeleted = await Promise.allSettled(
+      beforeItems.map((bi) => Rest.get(getCurrentPath() + "/" + bi["$ref"])),
+    );
+    const afterDeleted = await Promise.allSettled(
+      afterItems.map((ai) => Rest.get(getCurrentPath() + "/" + ai["$ref"])),
+    );
 
     for (let i = beforeDeleted.length - 1; i >= 0; i--) {
       if (beforeDeleted[i].status === "rejected") {
@@ -177,7 +183,6 @@ function ListResource(props: PageProps) {
 
     return [...beforeItems, ...newItems, ...afterItems];
   }
-
 
   function makeFieldnameList(prefix: string, items: any): string[] {
     const list: Set<string> = new Set<string>();
@@ -224,7 +229,10 @@ function ListResource(props: PageProps) {
               getFilteredUrl(),
               (data: TempAny) => {
                 if (data.items) {
-                  setItemsAndPath({ items: data.items, path: getCurrentPath() });
+                  setItemsAndPath({
+                    items: data.items,
+                    path: getCurrentPath(),
+                  });
                   setAllFieldNames(makeFieldnameList("", data.items));
                 } else {
                   setItemsAndPath({ items: [], path });
