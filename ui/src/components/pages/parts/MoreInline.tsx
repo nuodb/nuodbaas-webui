@@ -1,10 +1,11 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { useState, useRef, useLayoutEffect, ReactNode } from "react";
+import { TFunction } from "i18next";
 
 type MoreInlineProps = {
   value: string;
-  t: any;
+  t: TFunction;
 };
 
 export default function MoreInline({ value, t }: MoreInlineProps) {

@@ -66,7 +66,7 @@ export function setValue(
       return;
     }
   }
-  let posPeriod = prefix.indexOf(".");
+  const posPeriod = prefix.indexOf(".");
   if (posPeriod === -1) {
     if (value === null || value === undefined) {
       deletePrefix(values, prefix);

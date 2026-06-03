@@ -60,7 +60,7 @@ function SqlImportTab({
           accept=".sql"
           multiple={true}
           onChange={(event) => {
-            let updatedFiles: File[] = [...files];
+            const updatedFiles: File[] = [...files];
             const fl: FileList | null = event.target.files;
             for (let i = 0; fl !== null && i < fl.length; i++) {
               const flItem = fl.item(i);
@@ -94,7 +94,7 @@ function SqlImportTab({
 
   async function setProgress(task: BackgroundTaskType): Promise<string> {
     return new Promise((resolve, reject) => {
-      let headers = {
+      const headers = {
         Authorization:
           "Basic " +
           btoa(
@@ -109,14 +109,14 @@ function SqlImportTab({
         .then(async (response: TempAny) => {
           let buffer = Uint8Array.of();
           let gotProgressKey = false;
-          for await (let chunk of response) {
+          for await (const chunk of response) {
             buffer = concatChunks(buffer, chunk);
             while (buffer.length > 0) {
-              let posNewline = buffer.indexOf("\n".charCodeAt(0));
+              const posNewline = buffer.indexOf("\n".charCodeAt(0));
               if (posNewline === -1) {
                 break;
               }
-              let line = new TextDecoder().decode(buffer.slice(0, posNewline));
+              const line = new TextDecoder().decode(buffer.slice(0, posNewline));
               buffer = buffer.slice(posNewline + 1);
               const stats: SqlImportData = JSON.parse(line);
               if (stats.progressKey && !gotProgressKey) {
@@ -155,7 +155,7 @@ function SqlImportTab({
   }
 
   async function addToQueue(toQueue: File[]) {
-    let newTasks: BackgroundTaskType[] = toQueue.map((file) => {
+    const newTasks: BackgroundTaskType[] = toQueue.map((file) => {
       return {
         id: TASK_ID_PREFIX + generateRandom(),
         listenerId: "sqlImport",

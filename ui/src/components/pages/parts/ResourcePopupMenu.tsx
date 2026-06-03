@@ -23,6 +23,7 @@ import PageviewIcon from "@mui/icons-material/Pageview";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import Icon from "./Icon";
 import Auth from "../../../utils/auth";
+import { TFunction } from "i18next";
 
 type ResourcePopupMenuProps = {
   row: any;
@@ -30,7 +31,7 @@ type ResourcePopupMenuProps = {
   path: string;
   sla?: string;
   defaultItem?: string;
-  t: any;
+  t: TFunction;
 };
 
 export default function ResourcePopupMenu({
@@ -180,10 +181,10 @@ export default function ResourcePopupMenu({
           icon: <Icon name={menu.icon} />,
           label: t(menu.label),
           onClick: () => {
-            let label = t(menu.label, row);
+            const label = t(menu.label, row);
             let promiseConfirm: Promise<any>;
             if (menu.confirm) {
-              let confirm = t(menu.confirm, row);
+              const confirm = t(menu.confirm, row);
               promiseConfirm = Dialog.confirm(label, confirm, t);
             } else {
               promiseConfirm = Promise.resolve("yes");

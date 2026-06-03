@@ -1,6 +1,7 @@
 // (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { withTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 import { SqlResponse, SqlType } from "../../../utils/SqlSocket";
 import SqlResultsRender from "./SqlResultsRender";
 import Pagination from "../../controls/Pagination";
@@ -22,7 +23,7 @@ import SqlRoleSelector, { getRoles, RolesType } from "./SqlRoleSelector";
 
 type SqlUsersTabProps = {
   sqlConnection: SqlType;
-  t: any;
+  t: TFunction;
 };
 
 type SqlResponseState = {
@@ -104,7 +105,7 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
     const sqlResponse = await sqlConnection.runCommand("EXECUTE_QUERY", [
       sqlQueryWithLimit,
     ]);
-    let newState: SqlResponseState = {
+    const newState: SqlResponseState = {
       ...args,
       sqlResponse,
     };
@@ -291,7 +292,7 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
                 }
               });
               sql += "COMMIT;";
-              let sqlResponse = await sqlConnection.runCommand("EXECUTE", [
+              const sqlResponse = await sqlConnection.runCommand("EXECUTE", [
                 sql,
               ]);
               if (sqlResponse.status === "SUCCESS") {
@@ -399,7 +400,7 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
               });
               sql += "COMMIT;";
               if (sql) {
-                let sqlResponse = await sqlConnection.runCommand("EXECUTE", [
+                const sqlResponse = await sqlConnection.runCommand("EXECUTE", [
                   sql,
                 ]);
                 if (sqlResponse.status === "SUCCESS") {
@@ -496,7 +497,7 @@ function SqlUsersTab({ sqlConnection, t }: SqlUsersTabProps) {
               });
               if (sql) {
                 sql = "START TRANSACTION;" + sql + "COMMIT;";
-                let sqlResponse = await sqlConnection.runCommand("EXECUTE", [
+                const sqlResponse = await sqlConnection.runCommand("EXECUTE", [
                   sql,
                 ]);
                 if (sqlResponse.status === "SUCCESS") {

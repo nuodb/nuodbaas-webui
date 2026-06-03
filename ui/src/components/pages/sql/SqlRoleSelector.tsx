@@ -30,13 +30,13 @@ export async function getRoles(
         ) ur
         ON ur.rolename = r.rolename`;
   }
-  let sqlResponse = await sqlConnection.runCommand("EXECUTE_QUERY", [sql]);
+  const sqlResponse = await sqlConnection.runCommand("EXECUTE_QUERY", [sql]);
   if (
     sqlResponse.status === "SUCCESS" &&
     sqlResponse.columns &&
     sqlResponse.rows
   ) {
-    let roles: { [key: string]: RolesType } = {};
+    const roles: { [key: string]: RolesType } = {};
     sqlResponse.rows.forEach((row) => {
       if (row.values.length === 4) {
         const role = (row.values[0] + "." + row.values[1]).toLowerCase();
@@ -82,7 +82,7 @@ export default function SqlRoleSelector({
                 name={roleKey}
                 checked={roles[roleKey] !== "disabled"}
                 onChange={() => {
-                  let newRoles = { ...roles };
+                  const newRoles = { ...roles };
                   if (roles[roleKey] === "disabled") {
                     newRoles[roleKey] = "enabled";
                   } else {
@@ -100,7 +100,7 @@ export default function SqlRoleSelector({
                 name={roleKey}
                 checked={roles[roleKey] === "grant"}
                 onChange={() => {
-                  let newRoles = { ...roles };
+                  const newRoles = { ...roles };
                   if (newRoles[roleKey] === "enabled") {
                     newRoles[roleKey] = "grant";
                   } else {

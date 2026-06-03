@@ -33,10 +33,10 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
 
   function validateNewKey(): boolean {
     const { prefix, updateErrors } = props;
-    let values = JSON.parse(JSON.stringify(props.values));
-    let valueKeys = Object.keys(getValue(props.values, prefix) || {});
-    let prefixKeyLabel = prefix + "." + valueKeys.length + ".key";
-    let prefixValueLabel = prefix + "." + valueKeys.length + ".value";
+    const values = JSON.parse(JSON.stringify(props.values));
+    const valueKeys = Object.keys(getValue(props.values, prefix) || {});
+    const prefixKeyLabel = prefix + "." + valueKeys.length + ".key";
+    const prefixValueLabel = prefix + "." + valueKeys.length + ".value";
     setValue(values, prefixKeyLabel, newKey);
     if (newKey !== "") {
       return FieldBase_validate({
@@ -59,7 +59,7 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
       return;
     }
 
-    let values = JSON.parse(JSON.stringify(props.values));
+    const values = JSON.parse(JSON.stringify(props.values));
     let value = getValue(values, props.prefix);
     if (value === null) {
       value = {};
@@ -84,20 +84,20 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
   function edit(): ReactNode {
     const { prefix, values, errors, setValues, readonly, parameter, t } = props;
 
-    let valueKeys = Object.keys(getValue(values, prefix) || {});
-    let rows = [];
+    const valueKeys = Object.keys(getValue(values, prefix) || {});
+    const rows = [];
     for (let i = 0; i <= valueKeys.length; i++) {
       if ((props.fixedKeys || props.readonly) && i === valueKeys.length) {
         break;
       }
-      let prefixKeyLabel = prefix + "." + i + ".key";
-      let prefixKeyValue = prefix + "." + i + ".value";
-      let prefixErrorValue = prefix + "." + valueKeys[i];
-      let prefixKey = prefix + "." + valueKeys[i];
-      let errorValue =
+      const prefixKeyLabel = prefix + "." + i + ".key";
+      const prefixKeyValue = prefix + "." + i + ".value";
+      const prefixErrorValue = prefix + "." + valueKeys[i];
+      const prefixKey = prefix + "." + valueKeys[i];
+      const errorValue =
         (errors && prefixErrorValue in errors && errors[prefixErrorValue]) ||
         "";
-      let errorKey =
+      const errorKey =
         (errors && prefixKeyLabel in errors && errors[prefixKeyLabel]) || "";
       rows.push(
         <TableRow key={prefixKeyLabel}>
@@ -131,7 +131,7 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
                 if (i === valueKeys.length) {
                   return;
                 }
-                let v = JSON.parse(JSON.stringify(values));
+                const v = JSON.parse(JSON.stringify(values));
                 setValue(v, prefixKey, input.value);
                 setValues(v);
               }}
@@ -150,7 +150,7 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
             {i < valueKeys.length && !props.readonly && !props.fixedKeys && (
               <Button
                 onClick={() => {
-                  let v = { ...values };
+                  const v = { ...values };
                   setValue(v, prefixKey, null);
                   setValues(v);
                 }}
@@ -188,10 +188,10 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
   function validate(): boolean {
     const { prefix, parameter, values } = props;
 
-    let value = values[prefix];
+    const value = values[prefix];
     let success = true;
     if (value && parameter["additionalProperties"]) {
-      let value = getValue(values, prefix);
+      const value = getValue(values, prefix);
       if (value) {
         Object.values(value).forEach((v: TempAny, index: number) => {
           const fieldKey = prefix + "." + index + ".value";
@@ -225,7 +225,7 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
 
     // If a key has a forward slash (/), we'll group the key (the group name is the text before the slash).
     // Show the non-group items first, followed by the group items.
-    let ret: ReactNode[] = [
+    const ret: ReactNode[] = [
       Object.keys(value)
         .filter((key) => !key.includes("/"))
         .map((key) => {
@@ -241,7 +241,7 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
         }),
     ];
 
-    let groups = uniqueArray(
+    const groups = uniqueArray(
       Object.keys(value)
         .filter((key) => key.includes("/"))
         .map((key) => key.split("/")[0]),

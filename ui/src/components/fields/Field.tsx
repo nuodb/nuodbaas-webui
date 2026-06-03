@@ -22,24 +22,24 @@ export function Field(props: FieldProps): ReactNode {
   props = { ...props };
   props.values = JSON.parse(JSON.stringify(props.values));
 
-  let leftOvers = JSON.parse(JSON.stringify(props.parameter || {}));
+  const leftOvers = JSON.parse(JSON.stringify(props.parameter || {}));
   if (!("schema" in leftOvers)) {
     leftOvers["schema"] = {};
   }
 
   function get(key1: string, key2?: string) {
     if (!key2) {
-      let ret = leftOvers[key1];
+      const ret = leftOvers[key1];
       delete leftOvers[key1];
       return ret;
     } else {
-      let ret = leftOvers[key1][key2];
+      const ret = leftOvers[key1][key2];
       delete leftOvers[key1][key2];
       return ret;
     }
   }
 
-  let in_ = get("in");
+  const in_ = get("in");
   if (in_ && in_ !== "path" && in_ !== "query") {
     throw new Error("Invalid IN value " + in_);
   }

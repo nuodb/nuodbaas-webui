@@ -198,7 +198,7 @@ export default function LeftMenu(props: LeftMenuProps) {
   if (!schema) {
     return null;
   }
-  let resources: string[] = Object.keys(schema)
+  const resources: string[] = Object.keys(schema)
     .filter(
       (path) =>
         !path.includes("{") &&
@@ -231,8 +231,8 @@ export default function LeftMenu(props: LeftMenuProps) {
     return index1 - index2;
   });
 
-  let childrenManagement: { [key: string]: any } = {};
-  let childrenCluster: { [key: string]: any } = {};
+  const childrenManagement: { [key: string]: any } = {};
+  const childrenCluster: { [key: string]: any } = {};
   resources.forEach((resource) => {
     if (resource.startsWith("cluster/")) {
       childrenCluster[resource] = {
@@ -252,7 +252,7 @@ export default function LeftMenu(props: LeftMenuProps) {
     }
   });
 
-  let data: MenuDataType = {};
+  const data: MenuDataType = {};
   if (Object.keys(childrenManagement).length > 0) {
     data.management = {
       label: "Management",

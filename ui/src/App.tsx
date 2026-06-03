@@ -27,6 +27,7 @@ import { getOrgFromPath } from "./utils/schema";
 import Toast from "./components/controls/Toast";
 import BackgroundTasks, { BackgroundTaskType } from "./utils/BackgroundTasks";
 import { withTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 import Redirect from "./components/pages/Redirect";
 import DefaultPage from "./components/pages/DefaultPage";
 import RegionSettingsSelector from "./components/pages/RegionSettingsSelector";
@@ -35,7 +36,7 @@ import RegionSettingsSelector from "./components/pages/RegionSettingsSelector";
  * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
  * @returns
  */
-function App({ t }: { t: any }) {
+function App({ t }: { t: TFunction }) {
   const [schema, setSchema] = useState<any>();
   const [isLoggedIn, setIsLoggedIn] = useState(Auth.isLoggedIn());
   const [isRecording, setIsRecording] = useState(
@@ -68,9 +69,9 @@ function App({ t }: { t: any }) {
         ...usersAndProjects[0].items,
         ...usersAndProjects[1].items,
       ];
-      let orgs: string[] = [];
+      const orgs: string[] = [];
       data.forEach((item: string) => {
-        let org = item.split("/")[0];
+        const org = item.split("/")[0];
         if (!orgs.includes(org)) {
           orgs.push(org);
         }

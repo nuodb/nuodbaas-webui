@@ -34,9 +34,9 @@ export default function FieldObject(props: FieldProps): ReactNode {
           '"',
       });
     }
-    let ret = Object.keys(properties).map((key) => {
-      let prefixKey = prefix ? prefix + "." + key : key;
-      let defaultValue = getDefaultValue(
+    const ret = Object.keys(properties).map((key) => {
+      const prefixKey = prefix ? prefix + "." + key : key;
+      const defaultValue = getDefaultValue(
         properties[key],
         values && getValue(values, prefixKey),
       );

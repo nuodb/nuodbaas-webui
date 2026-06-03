@@ -77,7 +77,7 @@ export async function getSchema() {
  * It also skips URL prefixes which are not relevant for the UI (/login, /healthz, /openapi)
  */
 function filterAccessPaths(schema: any): void {
-  let newSchema: any = {};
+  const newSchema: any = {};
   const ignorePaths = ["/login", "/healthz", "/openapi"];
 
   // get all resources whe have access to directly
@@ -195,8 +195,8 @@ function parseSchema(
  * @returns
  */
 export function matchesPath(path: string, schemaPath: string): boolean {
-  let partsPath = path.split("/");
-  let partsSchemaPath = schemaPath.split("/");
+  const partsPath = path.split("/");
+  const partsSchemaPath = schemaPath.split("/");
   for (let i = 0; i < partsPath.length; i++) {
     if (partsSchemaPath.length === i) {
       return false;
@@ -234,7 +234,7 @@ export function getSchemaPath(schema: SchemaType, path: string): string | null {
 }
 
 export function getOrgFromPath(schema: SchemaType, path: string) {
-  let pathParts = path.split("/");
+  const pathParts = path.split("/");
   const schemaParts = getSchemaPath(schema, path)?.split("/") || [];
   for (let i = 0; i < pathParts.length && i < schemaParts.length; i++) {
     if (schemaParts[i] === "{organization}") {
@@ -296,7 +296,7 @@ export function getResourceByPath(
     return [];
   }
 
-  let retArray = Object.keys(rootSchema)
+  const retArray = Object.keys(rootSchema)
     .filter((sPath) => {
       return matchesPath(path, sPath);
     })
@@ -324,9 +324,9 @@ export function getCreatePath(
     return null;
   }
 
-  let retPaths = Object.keys(rootSchema).filter((sPath) => {
-    let parts = path.split("/");
-    let sParts = sPath.split("/");
+  const retPaths = Object.keys(rootSchema).filter((sPath) => {
+    const parts = path.split("/");
+    const sParts = sPath.split("/");
     if (parts.length >= sParts.length) {
       return false;
     }
@@ -400,9 +400,9 @@ export function getFilterField(
     return null;
   }
 
-  let retPaths = Object.keys(rootSchema).filter((sPath) => {
-    let parts = path.split("/");
-    let sParts = sPath.split("/");
+  const retPaths = Object.keys(rootSchema).filter((sPath) => {
+    const parts = path.split("/");
+    const sParts = sPath.split("/");
     if (parts.length + 1 !== sParts.length) {
       return false;
     }
@@ -436,7 +436,7 @@ export function getFilterField(
   } else {
     // multiple schema definitions match the same path - return all the values
     // which may be used to provide a selection box with those values
-    let ret: string[] = [];
+    const ret: string[] = [];
     retPaths.forEach((retPath: string) => {
       const parts = retPath.split("/");
       ret.push(parts[parts.length - 1]);
@@ -449,7 +449,7 @@ export function concatChunks(
   chunk1: Uint8Array<ArrayBuffer>,
   chunk2: Uint8Array<ArrayBuffer>,
 ): Uint8Array<ArrayBuffer> {
-  let ret = new Uint8Array(chunk1.length + chunk2.length);
+  const ret = new Uint8Array(chunk1.length + chunk2.length);
   ret.set(chunk1, 0);
   ret.set(chunk2, chunk1.length);
   return ret;
@@ -481,7 +481,7 @@ export function getResourceEvents(
   transactionNumber: number = -1,
 ) {
   //only one event stream is supported - close prior one if it exists.
-  let eventsAbortController = new AbortController();
+  const eventsAbortController = new AbortController();
 
   let hasEventsAccess = false;
   Object.keys(schema).forEach((schemaPath) => {
@@ -519,14 +519,14 @@ export function getResourceEvents(
       let id = null;
       let mergedData: TempAny = {};
       let buffer = Uint8Array.of();
-      for await (let chunk of response) {
+      for await (const chunk of response) {
         buffer = concatChunks(buffer, chunk);
         while (buffer.length > 0) {
-          let posNewline = buffer.indexOf("\n".charCodeAt(0));
+          const posNewline = buffer.indexOf("\n".charCodeAt(0));
           if (posNewline === -1) {
             break;
           }
-          let line = new TextDecoder().decode(buffer.slice(0, posNewline));
+          const line = new TextDecoder().decode(buffer.slice(0, posNewline));
           buffer = buffer.slice(posNewline + 1);
           if (line.startsWith("event: ")) {
             event = line.substring("event: ".length);
@@ -546,7 +546,7 @@ export function getResourceEvents(
               mergedData.items &&
               data !== null
             ) {
-              let newData: TempAny = { ...mergedData };
+              const newData: TempAny = { ...mergedData };
               newData.items = [...newData.items];
               let modified = false;
               for (let i = 0; i < newData.items.length; i++) {
@@ -571,7 +571,7 @@ export function getResourceEvents(
               mergedData = JSON.parse(data);
               multiResolve(mergedData);
             } else if (event === "DELETED" && id !== null && mergedData.items) {
-              let newData: TempAny = { ...mergedData };
+              const newData: TempAny = { ...mergedData };
               newData.items = [...newData.items];
               let modified = false;
               for (let i = 0; i < newData.items.length; i++) {
@@ -691,7 +691,7 @@ export function getChild(schema: TempAny, pathParts: string | string[]) {
  * @returns
  */
 export function arrayToObject(array: TempAny, key: string): TempAny {
-  let ret: TempAny = {};
+  const ret: TempAny = {};
   array.forEach((a: TempAny) => {
     ret[a[key]] = a;
   });
@@ -777,14 +777,14 @@ export async function submitForm(
   path: string,
   values: FieldValuesType,
 ) {
-  let queryParameters = Object.keys(urlParameters).filter(
+  const queryParameters = Object.keys(urlParameters).filter(
     (key) => urlParameters[key]["in"] === "query",
   );
 
   // the last URL parameter has the name of the resource, while the form parameter always has "name"
   // rename last URL parameter to "name"
-  let posBracketStart = path.lastIndexOf("{");
-  let posBracketEnd = path.lastIndexOf("}");
+  const posBracketStart = path.lastIndexOf("{");
+  const posBracketEnd = path.lastIndexOf("}");
   if (posBracketStart >= 0 && posBracketEnd > posBracketStart) {
     path =
       path.substring(0, posBracketStart + 1) +

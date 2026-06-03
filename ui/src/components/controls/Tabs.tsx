@@ -50,7 +50,7 @@ export function Tabs({
             onKeyDown={(event) => {
               if (event.key === "ArrowLeft" && index > 0) {
                 event.preventDefault();
-                let previous = event.currentTarget
+                const previous = event.currentTarget
                   .previousElementSibling as HTMLElement;
                 if (previous) {
                   setCurrentTab(index - 1);
@@ -62,7 +62,7 @@ export function Tabs({
                 index + 1 < children.length
               ) {
                 event.preventDefault();
-                let next = event.currentTarget
+                const next = event.currentTarget
                   .nextElementSibling as HTMLElement;
                 if (next) {
                   setCurrentTab(index + 1);
