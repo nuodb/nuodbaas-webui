@@ -199,7 +199,7 @@ function Automation(props: PageProps) {
           <ContentCopyOutlinedIcon
             className="NuoCopyButton"
             onClick={() => {
-              navigator.clipboard.writeText(lines.join("\n")).then(() => {
+              navigator.clipboard.writeText(lines.join("\r\n")).then(() => {
                 setCopiedField(summary);
                 if (copiedTimeout) {
                   clearTimeout(copiedTimeout);

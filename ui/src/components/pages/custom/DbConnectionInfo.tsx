@@ -170,7 +170,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
             data-testid={"copy-" + fieldname}
             className="NuoCopyButton"
             onClick={() => {
-              navigator.clipboard.writeText(value).then(() => {
+              navigator.clipboard.writeText(value.replace(/\n/g, "\r\n")).then(() => {
                 setCopiedField(fieldname);
                 if (copiedTimeout) {
                   clearTimeout(copiedTimeout);
@@ -187,7 +187,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
             name={fieldname}
             data-testid={"value-" + fieldname}
             disabled={true}
-            value={value}
+            value={value.replace(/\n/g, "\r\n")}
           ></Textarea>
         ) : (
           <input
@@ -217,7 +217,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
             data-testid={"copy-" + dataTestid}
             className="NuoCopyButton"
             onClick={() => {
-              navigator.clipboard.writeText(lines.join("\n")).then(() => {
+              navigator.clipboard.writeText(lines.join("\r\n")).then(() => {
                 setCopiedField(summary);
                 if (copiedTimeout) {
                   clearTimeout(copiedTimeout);
