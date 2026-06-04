@@ -42,12 +42,7 @@ interface SqlImportData extends SqlImportResponseType {
 let progressAbortController = new AbortController();
 const TASK_ID_PREFIX = "sqlimport_";
 
-function SqlImportTab({
-  sqlConnection,
-  dbTable,
-  tasks,
-  setTasks,
-}: SqlImportTabProps) {
+function SqlImportTab({ sqlConnection, tasks, setTasks }: SqlImportTabProps) {
   const [files, setFiles] = useState<File[]>([]); // files to be uploaded
 
   function renderFileSelector() {
@@ -93,7 +88,7 @@ function SqlImportTab({
   }
 
   async function setProgress(task: BackgroundTaskType): Promise<string> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       let headers = {
         Authorization:
           "Basic " +
@@ -233,7 +228,7 @@ function SqlImportTab({
           </TableRow>
         </TableHead>
         <TableBody>
-          {files.map((file, index) => {
+          {files.map((file) => {
             return (
               <TableRow key={file.name}>
                 <TableCell>{file.name}</TableCell>

@@ -50,7 +50,7 @@ function RegionSelectorSettings(props: PageProps) {
     try {
       new URL(url);
       return true;
-    } catch (e) {
+    } catch {
       return false;
     }
   }
@@ -257,7 +257,7 @@ function RegionSelectorSettings(props: PageProps) {
                     onClick={(event) => {
                       event.preventDefault();
                       Auth.setRegions(
-                        Auth.getRegions().map((region, idx) => ({
+                        Auth.getRegions().map((region) => ({
                           ...region,
                           active: false,
                         })),

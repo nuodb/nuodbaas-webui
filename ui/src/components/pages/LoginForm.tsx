@@ -57,6 +57,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
       window.location.host +
       queryRedirect,
   );
+  console.log("REDIRECTURL", redirectUrl);
 
   useEffect(() => {
     handleInitialLoad();

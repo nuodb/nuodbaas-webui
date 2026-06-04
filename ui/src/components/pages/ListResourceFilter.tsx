@@ -7,7 +7,6 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  TableTh,
 } from "../controls/Table";
 import { withTranslation } from "react-i18next";
 import Select, { SelectOption } from "../controls/Select";
@@ -308,9 +307,7 @@ function ListResourceFilter({
                 selected: editSearch[editIndex].ignoreCase,
               },
             ]}
-            setItems={(
-              items: { id: string; label?: string; selected?: boolean }[],
-            ) => {
+            setItems={() => {
               let newEditSearch = [...editSearch];
               newEditSearch[editIndex].ignoreCase =
                 !newEditSearch[editIndex].ignoreCase;

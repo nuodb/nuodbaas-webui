@@ -14,7 +14,7 @@ import SqlLogin from "./sql/SqlLogin";
 import SqlBrowseTab from "./sql/SqlBrowseTab";
 import Toast from "../controls/Toast";
 import SqlQueryTab from "./sql/SqlQueryTab";
-import SqlSocket, { SqlResponse, SqlType } from "../../utils/SqlSocket";
+import SqlSocket, { SqlType } from "../../utils/SqlSocket";
 import ComboBox from "../controls/ComboBox";
 import SqlImportTab from "./sql/SqlImportTab";
 import SqlExportTab from "./sql/SqlExportTab";
@@ -115,7 +115,7 @@ function SqlPage(props: PageProps) {
   });
 
   function tryDbaasLogin(): Promise<SqlType | undefined | void | ""> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const authUsername = Auth.getCredentials()?.username.replace("/", "_");
       const authToken = Auth.getCredentials()?.token;
       if (

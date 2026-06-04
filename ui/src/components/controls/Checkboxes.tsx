@@ -67,7 +67,7 @@ export default function Checkboxes({
       id={item.id}
       checked={item.selected}
       label={item.label || item.id}
-      onChange={(event) => {
+      onChange={() => {
         let newItems = [...items];
         newItems[index] = {
           ...newItems[index],

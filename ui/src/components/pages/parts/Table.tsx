@@ -522,7 +522,7 @@ function Table(props: TableProps) {
                     data-testid={"check_" + index}
                     checked={selected.has(row["$ref"])}
                     disabled={!canDelete(row)}
-                    onChange={(event) => {
+                    onChange={() => {
                       let tmpSelected = new Set(selected);
                       if (tmpSelected.has(row["$ref"])) {
                         tmpSelected.delete(row["$ref"]);

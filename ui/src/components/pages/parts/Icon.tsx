@@ -7,6 +7,10 @@ import StorageIcon from "@mui/icons-material/Storage";
 import PasswordIcon from "@mui/icons-material/Password";
 
 export default function Icon({ name }: { name: string | undefined }) {
+  if (!name) {
+    return <span></span>;
+  }
+
   switch (name) {
     case "Stop":
       return <StopIcon />;
@@ -18,7 +22,7 @@ export default function Icon({ name }: { name: string | undefined }) {
       return <StorageIcon />;
     case "Password":
       return <PasswordIcon />;
-    default:
-      return null;
   }
+
+  return <span className="material-icons">{name}</span>;
 }

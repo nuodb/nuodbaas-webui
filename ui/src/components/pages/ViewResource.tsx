@@ -4,7 +4,6 @@ import { ReactNode, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import CreateEditEntry from "./parts/CreateEditEntry";
 import { getResourceByPath, getResourceEvents } from "../../utils/schema";
-import { Rest } from "./parts/Rest";
 import Auth from "../../utils/auth";
 import { PageProps, TempAny } from "../../utils/types";
 import PageLayout from "./parts/PageLayout";

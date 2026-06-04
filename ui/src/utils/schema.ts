@@ -1,7 +1,6 @@
 // (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import axios from "axios";
-import Toast from "../components/controls/Toast";
 import { Rest } from "../components/pages/parts/Rest";
 import Auth, { isBrowser } from "./auth";
 import {
@@ -679,7 +678,7 @@ export function getChild(schema: TempAny, pathParts: string | string[]) {
       schema = schema[pathParts[i]];
     }
     return schema;
-  } catch (exception) {
+  } catch {
     return null;
   }
 }

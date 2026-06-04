@@ -146,7 +146,7 @@ export class Rest extends React.Component<{
       try {
         await axios.get(baseUrl + "/login/providers");
         return true;
-      } catch (ex) {
+      } catch {
         return false;
       }
     }

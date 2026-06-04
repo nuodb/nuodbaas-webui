@@ -26,7 +26,7 @@ type SqlResponseState = {
   isAscending: boolean;
 };
 
-function SqlBrowseTab({ sqlConnection, table, t }: SqlBrowseTabProps) {
+function SqlBrowseTab({ sqlConnection, table }: SqlBrowseTabProps) {
   const [state, setState] = useState<SqlResponseState>({
     sqlResponse: undefined,
     page: 1,

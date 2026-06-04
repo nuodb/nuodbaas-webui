@@ -25,7 +25,7 @@ export default class Auth {
   static getRegions(): RegionSettings {
     try {
       return JSON.parse(localStorage.getItem("regions") || "[]");
-    } catch (exc) {
+    } catch {
       return [];
     }
   }
