@@ -25,7 +25,11 @@ export default function MoreInline({ value, t }: MoreInlineProps) {
     strValue = strValue.substring(0, 80);
   }
   if (expanded) {
-    return <span style={{ whiteSpace: "pre-wrap" }}>{value.replace(/\n/g, "\r\n")}</span>
+    return (
+      <span style={{ whiteSpace: "pre-wrap" }}>
+        {value.replace(/\n/g, "\r\n")}
+      </span>
+    );
   }
   return (
     <>

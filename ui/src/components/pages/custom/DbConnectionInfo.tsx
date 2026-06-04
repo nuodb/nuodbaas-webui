@@ -170,15 +170,17 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
             data-testid={"copy-" + fieldname}
             className="NuoCopyButton"
             onClick={() => {
-              navigator.clipboard.writeText(value.replace(/\n/g, "\r\n")).then(() => {
-                setCopiedField(fieldname);
-                if (copiedTimeout) {
-                  clearTimeout(copiedTimeout);
-                }
-                copiedTimeout = setTimeout(() => {
-                  setCopiedField("");
-                }, 2000);
-              });
+              navigator.clipboard
+                .writeText(value.replace(/\n/g, "\r\n"))
+                .then(() => {
+                  setCopiedField(fieldname);
+                  if (copiedTimeout) {
+                    clearTimeout(copiedTimeout);
+                  }
+                  copiedTimeout = setTimeout(() => {
+                    setCopiedField("");
+                  }, 2000);
+                });
             }}
           />
         </Tooltip>
