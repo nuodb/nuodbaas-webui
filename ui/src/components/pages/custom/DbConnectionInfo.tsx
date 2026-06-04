@@ -240,7 +240,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
   }
 
   function processMarkdownLinks(text: string): React.ReactNode {
-    let ret: React.ReactNode[] = [];
+    const ret: React.ReactNode[] = [];
     while (text) {
       const posBetween = text.indexOf("](");
       if (posBetween === -1) {

@@ -195,7 +195,7 @@ function ListResourceFilter({
             id="condition"
             value={editSearch[editIndex].condition}
             onChange={(event: ChangeEvent<HTMLSelectElement>) => {
-              let newEditSearch: SearchType[] = [...editSearch];
+              const newEditSearch: SearchType[] = [...editSearch];
               newEditSearch[editIndex].condition = event.target
                 .value as FilterCondition;
               setEditSearch(newEditSearch);
@@ -228,7 +228,7 @@ function ListResourceFilter({
             id="field"
             value={editSearch[editIndex].field}
             onChange={(event: ChangeEvent<HTMLSelectElement>) => {
-              let newEditSearch: SearchType[] = [...editSearch];
+              const newEditSearch: SearchType[] = [...editSearch];
               newEditSearch[editIndex].field = event.target.value;
               setEditSearch(newEditSearch);
             }}
@@ -273,7 +273,7 @@ function ListResourceFilter({
             onChange={(
               event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
             ) => {
-              let newEditSearch = [...editSearch];
+              const newEditSearch = [...editSearch];
               newEditSearch[editIndex].key = event.currentTarget.value;
               setEditSearch(newEditSearch);
             }}
@@ -311,7 +311,7 @@ function ListResourceFilter({
             setItems={(
               items: { id: string; label?: string; selected?: boolean }[],
             ) => {
-              let newEditSearch = [...editSearch];
+              const newEditSearch = [...editSearch];
               newEditSearch[editIndex].ignoreCase =
                 !newEditSearch[editIndex].ignoreCase;
               setEditSearch(newEditSearch);
@@ -337,7 +337,7 @@ function ListResourceFilter({
             onChange={(
               event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
             ) => {
-              let newEditSearch = [...editSearch];
+              const newEditSearch = [...editSearch];
               newEditSearch[editIndex].value = event.currentTarget.value;
               setEditSearch(newEditSearch);
             }}
@@ -353,7 +353,7 @@ function ListResourceFilter({
   }
 
   function getErrors(): string[] {
-    let errors: string[] = [];
+    const errors: string[] = [];
     if ("contains" !== editSearch[editIndex].condition) {
       if (showField() && editSearch[editIndex].field.endsWith("[]")) {
         errors.push(

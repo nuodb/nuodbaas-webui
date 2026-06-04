@@ -37,11 +37,11 @@ export default function FieldArray(props: FieldProps): ReactNode {
         message: '"items" attribute missing in schema definition',
       });
     }
-    let ret = [];
-    let value = getValue(values, prefix);
+    const ret = [];
+    const value = getValue(values, prefix);
     if (value !== null) {
       for (let i = 0; i < value.length; i++) {
-        let prefixKey = prefix + "." + i;
+        const prefixKey = prefix + "." + i;
         const fieldEdit = Field({
           ...props,
           prefix: prefixKey,
@@ -49,7 +49,7 @@ export default function FieldArray(props: FieldProps): ReactNode {
           required: i === 0 && required,
           setValues: (vs: any) => {
             vs = { ...vs };
-            let v = getValue(vs, prefixKey);
+            const v = getValue(vs, prefixKey);
             setValue(vs, prefixKey, v === "" ? null : v);
             setValues(vs);
           },
@@ -63,15 +63,15 @@ export default function FieldArray(props: FieldProps): ReactNode {
     }
 
     if (!readonly) {
-      let nextIndex = value === null ? 0 : value.length;
-      let prefixKey = prefix + "." + nextIndex;
-      let fieldEdit = Field({
+      const nextIndex = value === null ? 0 : value.length;
+      const prefixKey = prefix + "." + nextIndex;
+      const fieldEdit = Field({
         ...props,
         prefix: prefixKey,
         parameter: parameter.items,
         setValues: (vs) => {
           vs = { ...vs };
-          let v = getValue(vs, prefixKey);
+          const v = getValue(vs, prefixKey);
           setValue(vs, prefixKey, v === "" ? null : v);
           setValues(vs);
         },

@@ -29,7 +29,7 @@ export default function FieldSelect(props: FieldProps): ReactNode {
       readonly,
       t,
     } = props;
-    let value = getValue(values, prefix);
+    const value = getValue(values, prefix);
 
     return (
       <Select
@@ -41,7 +41,7 @@ export default function FieldSelect(props: FieldProps): ReactNode {
         autoFocus={autoFocus}
         required={required}
         onChange={(e: any) => {
-          let v = { ...values };
+          const v = { ...values };
           setValue(v, prefix, e.target.value);
           setValues(v);
         }}

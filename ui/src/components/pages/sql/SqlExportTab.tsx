@@ -198,8 +198,8 @@ function SqlExportTab({ tasks, setTasks, sqlConnection }: SqlExportTabProps) {
       outputSchema: outputSchema || undefined,
     };
 
-    let progressAbortController = new AbortController();
-    let newTask: BackgroundTaskType = {
+    const progressAbortController = new AbortController();
+    const newTask: BackgroundTaskType = {
       id: TASK_ID_PREFIX + generateRandom(),
       label: t("form.sqleditor.label.exporting", {
         dbSchema: sqlConnection.getOrgProjDbSchemaUrl(),
@@ -239,16 +239,16 @@ function SqlExportTab({ tasks, setTasks, sqlConnection }: SqlExportTabProps) {
             if (done) break;
             await writableStream.write(value);
             downloaded += value.byteLength;
-            let now2 = new Date().getTime();
+            const now2 = new Date().getTime();
             if (now2 > now + 1000) {
               now = now2;
-              let t = { ...task };
+              const t = { ...task };
               t.data.downloaded = downloaded;
               updateOrAddTask(tasks, setTasks, t);
             }
           }
           await writableStream.close();
-          let t = { ...task };
+          const t = { ...task };
           t.data.downloaded = downloaded;
           updateOrAddTask(tasks, setTasks, t);
         } catch (error) {
@@ -359,7 +359,7 @@ function SqlExportTab({ tasks, setTasks, sqlConnection }: SqlExportTabProps) {
                           : [...exportTables];
                       if (newTables.includes(table)) {
                         newTables = newTables.filter((t) => t !== table);
-                        let newOutputTables = { ...outputTables };
+                        const newOutputTables = { ...outputTables };
                         delete newOutputTables[table];
                         setOutputTables(newOutputTables);
                       } else {

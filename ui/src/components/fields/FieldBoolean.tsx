@@ -30,7 +30,7 @@ export default function FieldBoolean(props: FieldProps): ReactNode {
       parameter,
       t,
     } = props;
-    let value = getValue(values, prefix);
+    const value = getValue(values, prefix);
     return (
       <Select
         id={prefix}
@@ -41,7 +41,7 @@ export default function FieldBoolean(props: FieldProps): ReactNode {
         autoFocus={autoFocus}
         required={required}
         onChange={({ target: input }) => {
-          let v = { ...values };
+          const v = { ...values };
           setValue(v, prefix, input.value);
           setValues(v);
         }}

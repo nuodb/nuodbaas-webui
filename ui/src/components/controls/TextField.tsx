@@ -36,7 +36,7 @@ export type TextFieldProps = {
 export default function TextField(props: TextFieldProps): JSX.Element {
   const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
 
-  let fieldProps = { ...props };
+  const fieldProps = { ...props };
   delete fieldProps.icon;
   delete fieldProps.leftIcon;
   delete fieldProps.iconOnClick;

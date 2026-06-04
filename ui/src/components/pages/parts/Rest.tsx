@@ -83,7 +83,7 @@ export class Rest extends React.Component<{
     if (instance === null || !instance.props.isRecording) {
       return;
     }
-    let automationLog = Rest.getLog();
+    const automationLog = Rest.getLog();
     const now = new Date();
     if (now <= instance.lastTimestamp) {
       instance.lastTimestamp = new Date(instance.lastTimestamp.getTime() + 1);

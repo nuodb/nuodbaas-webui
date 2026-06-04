@@ -1,6 +1,7 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { withTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 import Auth from "../../utils/auth";
 import { useNavigate } from "react-router-dom";
 import { IconButton, Tooltip } from "@mui/material";
@@ -10,7 +11,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import EditIcon from "@mui/icons-material/Edit";
 import Button from "../controls/Button";
 
-function RegionSettingsMenu({ t }: { t: any }) {
+function RegionSettingsMenu({ t }: { t: TFunction }) {
   const navigate = useNavigate();
 
   if (!localStorage.getItem("regions")) {

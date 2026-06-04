@@ -3,6 +3,7 @@
 import Auth from "../../../utils/auth";
 import { useNavigate } from "react-router-dom";
 import { withTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 
 import IconButton from "@mui/material/IconButton";
 import Avatar from "@mui/material/Avatar";
@@ -19,7 +20,7 @@ import RegionSettingsMenu from "../RegionSettingsMenu";
 interface Props extends PageProps {
   schema: SchemaType;
   isRecording: boolean;
-  t: any;
+  t: TFunction;
 }
 
 function Recording({ isRecording, t }: Props) {
@@ -90,7 +91,9 @@ function Banner(props: Props) {
                 },
               },
               {
-                label: t("button.logout"),
+                label: t("button.logout", {
+                  name: Auth.getCredentials()?.username,
+                }),
                 id: "logout",
                 "data-testid": "logout",
                 onClick: () => {

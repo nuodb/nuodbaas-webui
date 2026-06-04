@@ -34,7 +34,7 @@ function SqlQueryTab({ sqlConnection, dbTable }: SqlQueryTabProps) {
     setResults(undefined);
   }, [dbTable]);
 
-  let pagedResults = results ? { ...results } : undefined;
+  const pagedResults = results ? { ...results } : undefined;
   if (pagedResults && pagedResults.rows) {
     pagedResults.rows = [...pageFilter(pagedResults.rows, page, pageSize)];
   }

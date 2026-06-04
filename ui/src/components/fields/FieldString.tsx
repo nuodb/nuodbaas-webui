@@ -31,8 +31,8 @@ export default function FieldString(props: FieldProps): ReactNode {
       readonly,
       parameter,
     } = props;
-    let value = String(getValue(values, prefix) || "");
-    let error = (errors && prefix in errors && errors[prefix]) || "";
+    const value = String(getValue(values, prefix) || "");
+    const error = (errors && prefix in errors && errors[prefix]) || "";
     return (
       <TextField
         key={prefix}
@@ -43,7 +43,7 @@ export default function FieldString(props: FieldProps): ReactNode {
         value={value}
         autoFocus={autoFocus}
         onChange={({ currentTarget: input }) => {
-          let v = { ...values };
+          const v = { ...values };
           setValue(v, prefix, input.value);
           setValues(v);
         }}

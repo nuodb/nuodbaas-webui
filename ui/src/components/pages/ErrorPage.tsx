@@ -8,7 +8,7 @@ import { withTranslation } from "react-i18next";
 
 function ErrorPage(props: PageProps) {
   const navigate = useNavigate();
-  let [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   if (searchParams.get("crashme") === "true") {
     throw new Error("Simulate crash");

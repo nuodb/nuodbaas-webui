@@ -30,7 +30,7 @@ export default function FieldInteger(props: FieldProps): ReactNode {
       readonly,
       parameter,
     } = props;
-    let value = String(getValue(values, prefix) || "");
+    const value = String(getValue(values, prefix) || "");
 
     return (
       <TextField
@@ -42,7 +42,7 @@ export default function FieldInteger(props: FieldProps): ReactNode {
         value={value}
         autoFocus={autoFocus}
         onChange={({ currentTarget: input }) => {
-          let v = { ...values };
+          const v = { ...values };
           setValue(values, prefix, input.value);
           setValues(v);
         }}

@@ -19,7 +19,7 @@ export default function FieldHidden(props: FieldProps): ReactNode {
    */
   function edit(): ReactNode {
     const { prefix, values } = props;
-    let value = getValue(values, prefix);
+    const value = getValue(values, prefix);
     if (value === null) {
       return null;
     }

@@ -10,6 +10,7 @@ import {
   TableTh,
 } from "../../controls/Table";
 import { withTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 import { SqlResponse } from "../../../utils/SqlSocket";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
@@ -34,7 +35,7 @@ type SqlTableProps = {
   onDelete?: (name: string) => void;
   onDeleteDisabled?: (name: string) => boolean;
   addLabel?: ReactNode;
-  t: any;
+  t: TFunction;
 };
 
 function SqlResultsRender({
@@ -69,7 +70,7 @@ function SqlResultsRender({
     }
   }
 
-  function renderMenuCell(value: string, zIndex: number, t: any) {
+  function renderMenuCell(value: string, zIndex: number, t: TFunction) {
     const buttons: MenuItemProps[] = [];
     if (onEdit) {
       buttons.push({

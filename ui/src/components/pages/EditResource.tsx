@@ -20,7 +20,7 @@ function EditResource(props: PageProps) {
   const [data, setData] = useState({});
 
   useEffect(() => {
-    let resourceByPath = getResourceByPath(schema, path);
+    const resourceByPath = getResourceByPath(schema, path);
     if ("get" in resourceByPath) {
       Rest.get(path)
         .then((data: TempAny) => {

@@ -39,7 +39,7 @@ function SqlTabs({ dbTable, sqlConnection, tasks, setTasks }: SqlTabsProps) {
     return null;
   }
 
-  let tabs = [];
+  const tabs = [];
   if (dbTable) {
     tabs.push(
       <Tab id="browse" label={t("form.sqleditor.label.tab.browse")}>
