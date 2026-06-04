@@ -1233,18 +1233,19 @@ label.NuoUpload:hover {
 }
 
 @font-face {
-  font-family: 'Material Icons';
+  font-family: "Material Icons";
   font-style: normal;
   font-weight: 400;
-  src: local('Material Icons'),
-    local('MaterialIcons-Regular'),
-    url(/ui/images/material-icons.woff2) format('woff2'),
-    url(/ui/images/material-icons.woff) format('woff'),
-    url(/ui/images/material-icons.ttf) format('truetype');
+  src:
+    local("Material Icons"),
+    local("MaterialIcons-Regular"),
+    url(/ui/images/material-icons.woff2) format("woff2"),
+    url(/ui/images/material-icons.woff) format("woff"),
+    url(/ui/images/material-icons.ttf) format("truetype");
 }
 
 .material-icons {
-  font-family: 'Material Icons';
+  font-family: "Material Icons";
   font-weight: normal;
   font-style: normal;
   font-size: 24px;
@@ -1266,5 +1267,5 @@ label.NuoUpload:hover {
   -moz-osx-font-smoothing: grayscale;
 
   /* Support for IE. */
-  font-feature-settings: 'liga';
+  font-feature-settings: "liga";
 }
