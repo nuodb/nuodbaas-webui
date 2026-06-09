@@ -678,7 +678,7 @@ export function getChild(schema: TempAny, pathParts: string | string[]) {
       schema = schema[pathParts[i]];
     }
     return schema;
-  } catch (exception) {
+  } catch {
     return null;
   }
 }

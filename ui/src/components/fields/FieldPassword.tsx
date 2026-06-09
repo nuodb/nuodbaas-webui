@@ -3,7 +3,7 @@
 import TextField from "../controls/TextField";
 import { getValue, setValue } from "./utils";
 import { FieldBase_display, FieldBase_validate, FieldProps } from "./FieldBase";
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode } from "react";
 import { matchesPath } from "../../utils/schema";
 
 export default function FieldPassword(props: FieldProps): ReactNode {

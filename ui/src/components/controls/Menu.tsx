@@ -20,7 +20,7 @@ export default function Menu(props: MenuProps): JSX.Element {
   }
 
   function listMenu(items: MenuItemProps[]) {
-    return items.map((item, index) => (
+    return items.map((item) => (
       <Button
         data-testid={item.id}
         key={item.id}
@@ -126,7 +126,7 @@ function MenuItems({
   dndOver,
   dndStart,
 }: MenuItemsProps) {
-  const refs = items.map((item) => React.createRef<HTMLDivElement | null>());
+  const refs = items.map(() => React.createRef<HTMLDivElement | null>());
 
   useEffect(() => {
     if (items.length > 0) {

@@ -59,7 +59,7 @@ function getItemsFirstPart(listResponse: any): string[] {
 /**
  * common implementation of the /resource/create/* and /resource/edit/* requests
  */
-function CreateEditEntry({ schema, path, data, readonly, org, t }: TempAny) {
+function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
   const navigate = useNavigate();
 
   const [formParameters, setFormParameters] = useState<FieldParametersType>({});

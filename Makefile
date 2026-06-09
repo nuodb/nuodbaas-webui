@@ -290,8 +290,20 @@ undeploy-sql: $(KIND) $(HELM) build-sql
 		$(HELM) uninstall --ignore-not-found -n default nuodbaas-sql; \
 	fi
 
+.PHONY: pull-dependencies
+pull-dependencies:
+	@if [ ! -f ui/public/images/material-icons.woff ] ; then \
+		curl https://cdn.jsdelivr.net/fontsource/fonts/material-icons@latest/latin-400-normal.woff -o ui/public/images/material-icons.woff; \
+	fi
+	@if [ ! -f ui/public/images/material-icons.woff ] ; then \
+		curl https://cdn.jsdelivr.net/fontsource/fonts/material-icons@latest/latin-400-normal.woff2 -o ui/public/images/material-icons.woff2; \
+	fi
+	@if [ ! -f ui/public/images/material-icons.woff ] ; then \
+		curl https://cdn.jsdelivr.net/fontsource/fonts/material-icons@latest/latin-400-normal.ttf -o ui/public/images/material-icons.ttf; \
+	fi
+
 .PHONY: deploy-webui
-deploy-webui: $(HELM) $(KIND)  ## deploy WebUI
+deploy-webui: $(HELM) $(KIND)  pull-dependencies ## deploy WebUI
 	@if [ -d charts/nuodbaas-webui ] ; then \
 		${MAKE} build-image && \
 		$(KIND) load docker-image nuodbaas-webui:latest && \

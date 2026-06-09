@@ -26,7 +26,7 @@ export default class Toast extends Component<
       const text = await new Response(error.response.data).text();
       try {
         data = JSON.parse(text);
-      } catch (e) {
+      } catch {
         data = { detail: text };
       }
     }

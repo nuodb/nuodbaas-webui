@@ -1,6 +1,6 @@
 // (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { LOCAL_USER_SETTINGS } from "../../utils/Customizations";
 import axios from "axios";

@@ -26,14 +26,7 @@ interface OrganizationProps extends PageProps {
   onSelection?: () => void;
 }
 
-function Organization({
-  schema,
-  org,
-  orgs,
-  setOrg,
-  onSelection,
-  t,
-}: OrganizationProps) {
+function Organization({ schema, org, orgs, setOrg, t }: OrganizationProps) {
   const navigate = useNavigate();
   let path = "/" + useParams()["*"];
 
