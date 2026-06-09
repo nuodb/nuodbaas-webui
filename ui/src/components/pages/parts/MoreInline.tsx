@@ -1,6 +1,6 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 
-import React, { useState, useRef, useLayoutEffect, ReactNode } from "react";
+import React, { useState } from "react";
 import { TFunction } from "i18next";
 
 type MoreInlineProps = {
