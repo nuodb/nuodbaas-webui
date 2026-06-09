@@ -1,6 +1,7 @@
 // (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import React, { JSX, ReactNode } from "react";
+import { TFunction } from "i18next";
 
 export type SelectProps = {
   "data-testid"?: string;
@@ -14,7 +15,7 @@ export type SelectProps = {
   disabled?: boolean;
   onChange?: (event: any) => void;
   onBlur?: (event: any) => void;
-  t: any;
+  t: TFunction;
 };
 
 export type SelectOptionProps = {
@@ -68,7 +69,7 @@ export default function Checkboxes({
       checked={item.selected}
       label={item.label || item.id}
       onChange={(event) => {
-        let newItems = [...items];
+        const newItems = [...items];
         newItems[index] = {
           ...newItems[index],
           selected: !newItems[index].selected,

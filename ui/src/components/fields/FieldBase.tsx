@@ -8,6 +8,7 @@ import {
   TempAny,
 } from "../../utils/types";
 import MoreDiv from "../pages/parts/MoreDiv";
+import { TFunction } from "i18next";
 
 interface FieldPropsDisplay {
   /** contains resource path */
@@ -27,7 +28,7 @@ interface FieldPropsDisplay {
   values: FieldValuesType;
 
   /** translation function */
-  t: any;
+  t: TFunction;
 }
 
 interface FieldPropsValidate extends FieldPropsDisplay {
@@ -70,7 +71,7 @@ export interface FieldProps extends FieldPropsValidate {
 
   op: "edit" | "view" | "validate";
 
-  t: any;
+  t: TFunction;
 }
 
 /** validate field and set error state
@@ -129,7 +130,7 @@ export function FieldBase_display(props: FieldProps): ReactNode {
   return getRecursiveValue(getValue(values, prefix), props.t);
 }
 
-export function getRecursiveValue(value: TempAny, t: any) {
+export function getRecursiveValue(value: TempAny, t: TFunction) {
   if (value === undefined || value === null) {
     return "";
   }

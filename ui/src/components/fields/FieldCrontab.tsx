@@ -32,8 +32,8 @@ export default function FieldCrontab(props: FieldProps): ReactNode {
       required,
       t,
     } = props;
-    let error = (errors && prefix in errors && errors[prefix]) || "";
-    let value = getValue(values, prefix) || "";
+    const error = (errors && prefix in errors && errors[prefix]) || "";
+    const value = getValue(values, prefix) || "";
     const parts = value.split(" ");
     let frequency = "";
     const isOther = parts.length !== 1;
@@ -44,8 +44,8 @@ export default function FieldCrontab(props: FieldProps): ReactNode {
     }
 
     function setPart(index: number, partValue: string) {
-      let v = { ...values };
-      let parts = value.split(" ");
+      const v = { ...values };
+      const parts = value.split(" ");
       parts[index] = partValue;
       setValue(v, prefix, parts.join(" "));
       setValues(v);
@@ -69,7 +69,7 @@ export default function FieldCrontab(props: FieldProps): ReactNode {
           required={required}
           autoFocus={autoFocus}
           onChange={(e: any) => {
-            let v = { ...values };
+            const v = { ...values };
             if (e.target.value === "other") {
               setValue(v, prefix, "* * * * *");
             } else {

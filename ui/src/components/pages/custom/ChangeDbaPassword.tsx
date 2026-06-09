@@ -9,11 +9,12 @@ import { Rest } from "../parts/Rest";
 import axios from "axios";
 import Dialog from "../parts/Dialog";
 import DialogContent from "@mui/material/DialogContent";
+import { TFunction } from "i18next";
 
 type ChangeDbaPasswordProps = {
   path: string;
   data: any;
-  t: any;
+  t: TFunction;
 };
 
 export default function ChangeDbaPassword({
@@ -47,7 +48,7 @@ export default function ChangeDbaPassword({
       return { ...errors, [name]: t("dialog.databasePassword.noMatch") };
     }
 
-    let newErrors = { ...errors };
+    const newErrors = { ...errors };
     delete newErrors[name];
     return newErrors;
   }

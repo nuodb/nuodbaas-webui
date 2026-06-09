@@ -44,14 +44,14 @@ export default function SqlRegisterUser({
       setRoles({});
       return;
     }
-    let sql = "SELECT r.schema, r.rolename FROM system.roles r";
+    const sql = "SELECT r.schema, r.rolename FROM system.roles r";
     conn.runCommand("EXECUTE_QUERY", [sql]).then((sqlResponse) => {
       if (
         sqlResponse.status === "SUCCESS" &&
         sqlResponse.columns &&
         sqlResponse.rows
       ) {
-        let roles: { [key: string]: RolesType } = {};
+        const roles: { [key: string]: RolesType } = {};
         sqlResponse.rows.forEach((row) => {
           roles[row.values[0] + "." + row.values[1]] = "disabled";
         });
@@ -130,7 +130,7 @@ export default function SqlRegisterUser({
           <Button
             data-testid={"dialog_button_login"}
             onClick={async () => {
-              let socket = SqlSocket(
+              const socket = SqlSocket(
                 organization,
                 project,
                 database,
@@ -138,7 +138,7 @@ export default function SqlRegisterUser({
                 adminUsername,
                 adminPassword,
               );
-              let checkUser = await socket.runCommand("EXECUTE_QUERY", [
+              const checkUser = await socket.runCommand("EXECUTE_QUERY", [
                 "SELECT * FROM system.users WHERE username = " +
                   sqlString(newDbUser),
               ]);

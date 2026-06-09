@@ -105,7 +105,7 @@ function ListResource(props: PageProps) {
   }
 
   useInterval(() => {
-    let currentPath = getCurrentPath();
+    const currentPath = getCurrentPath();
     Rest.get(getFilteredUrl())
       .then(async (data: any) => {
         if (!data.items) {
@@ -150,8 +150,8 @@ function ListResource(props: PageProps) {
       return newItems;
     }
 
-    let beforeItems: DataType[] = [];
-    let afterItems: DataType[] = [];
+    const beforeItems: DataType[] = [];
+    const afterItems: DataType[] = [];
     let foundFirst = false;
     for (let i = 0; i < origItems.length; i++) {
       if (newItems.find((ni) => ni["$ref"] === origItems[i]["$ref"])) {

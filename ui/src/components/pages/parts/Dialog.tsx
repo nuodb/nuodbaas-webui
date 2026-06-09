@@ -7,6 +7,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import { TempAny } from "../../../utils/types";
 import { Component, ReactNode } from "react";
+import { TFunction } from "i18next";
 
 let s_instance: Dialog | null = null;
 
@@ -45,7 +46,7 @@ export default class Dialog extends Component<
   static confirm = (
     title: string,
     body: ReactNode,
-    t: any,
+    t: TFunction,
     maxWidth?: MaxWidthType,
   ) => {
     return Dialog.show(
@@ -63,7 +64,7 @@ export default class Dialog extends Component<
   static okCancel = (
     title: string,
     body: ReactNode,
-    t: any,
+    t: TFunction,
     maxWidth?: MaxWidthType,
   ) => {
     return Dialog.show(
@@ -81,7 +82,7 @@ export default class Dialog extends Component<
   static ok = (
     title: string,
     body: ReactNode,
-    t: any,
+    t: TFunction,
     maxWidth?: MaxWidthType,
   ) => {
     return Dialog.show(
@@ -97,7 +98,7 @@ export default class Dialog extends Component<
     title: string,
     body: ReactNode,
     buttons: ButtonProps[],
-    t: any,
+    t: TFunction,
     maxWidth?: MaxWidthType,
   ) => {
     return new Promise((resolve, reject) => {
@@ -122,7 +123,7 @@ export default class Dialog extends Component<
   };
 
   handleClose(button: string) {
-    let dialogs = [...this.state.dialogs];
+    const dialogs = [...this.state.dialogs];
     const lastItem: TempAny = dialogs.pop();
     this.setState({ dialogs });
     lastItem.resolve(button);

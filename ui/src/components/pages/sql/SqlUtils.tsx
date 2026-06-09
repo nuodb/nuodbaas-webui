@@ -11,7 +11,7 @@ export function sqlIdentifier(value: string): string {
   if (value === null) {
     return "NULL";
   }
-  let parts = (value || "").split(".");
+  const parts = (value || "").split(".");
   for (let i = 0; i < parts.length; i++) {
     parts[i] = '"' + parts[i].replace('"', '""') + '"';
   }

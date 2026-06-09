@@ -91,7 +91,7 @@ export default function SqlSocket(
     args: any[],
     timeout?: number,
   ): Promise<SqlResponse> {
-    let request: SqlRequest = {
+    const request: SqlRequest = {
       operation: operation.toString(),
       args,
       requestId: String(nextTransactionId),

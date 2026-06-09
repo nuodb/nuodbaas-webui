@@ -295,7 +295,7 @@ function SqlFilter({ columns, filter, setFilter }: SqlFilterProps) {
                     id={column.name}
                     value={editFilter[column.name]?.type || ""}
                     onChange={(event: ChangeEvent<HTMLSelectElement>) => {
-                      let f = { ...editFilter };
+                      const f = { ...editFilter };
                       f[column.name] = { ...f[column.name] };
                       f[column.name].type = event.target.value;
                       setEditFilter(f);
@@ -313,7 +313,7 @@ function SqlFilter({ columns, filter, setFilter }: SqlFilterProps) {
                       label=""
                       value={editFilter[column.name]?.value || ""}
                       onChange={(event: ChangeEvent<HTMLSelectElement>) => {
-                        let f = { ...editFilter };
+                        const f = { ...editFilter };
                         f[column.name] = { ...f[column.name] };
                         f[column.name].value = event.target.value;
                         setEditFilter(f);
@@ -339,7 +339,7 @@ function SqlFilter({ columns, filter, setFilter }: SqlFilterProps) {
                           HTMLInputElement | HTMLTextAreaElement
                         >,
                       ) => {
-                        let f = { ...editFilter };
+                        const f = { ...editFilter };
                         f[column.name] = { ...f[column.name] };
                         f[column.name].value = event.currentTarget.value;
                         setEditFilter(f);

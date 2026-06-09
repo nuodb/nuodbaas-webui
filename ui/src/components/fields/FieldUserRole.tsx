@@ -15,7 +15,7 @@ function getPathVariables(path: string) {
   if (!path) {
     return [];
   }
-  let ret: string[] = [];
+  const ret: string[] = [];
   const parts = path.split("{");
   for (let i = 1; i < parts.length; i++) {
     ret.push(parts[i].split("}")[0]);
@@ -32,7 +32,7 @@ export default function FieldUserRole(props: FieldProps): ReactNode {
       "/cluster/roletemplates?listAccessible=true&expand=true&limit=1000",
     ).then((roleTemplates: any) => {
       if (roleTemplates.items && roleTemplates.items.length > 0) {
-        let parameters: { [key: string]: string[] } = {};
+        const parameters: { [key: string]: string[] } = {};
         roleTemplates.items.forEach((item: any) => {
           if (item.name && item.spec) {
             let variables: string[] = [];
@@ -79,10 +79,10 @@ export default function FieldUserRole(props: FieldProps): ReactNode {
       });
     }
 
-    let ret = [];
+    const ret = [];
 
-    let prefixName = prefix ? prefix + ".name" : "name";
-    let defaultName = getDefaultValue(
+    const prefixName = prefix ? prefix + ".name" : "name";
+    const defaultName = getDefaultValue(
       properties.name,
       values && getValue(values, prefixName),
     );
@@ -94,7 +94,7 @@ export default function FieldUserRole(props: FieldProps): ReactNode {
         {Field({
           ...props,
           setValues: (values) => {
-            let v = JSON.parse(JSON.stringify(values));
+            const v = JSON.parse(JSON.stringify(values));
             if (props.values.roles.length <= v.roles.length) {
               for (let i = 0; i < v.roles.length; i++) {
                 if (
@@ -123,8 +123,8 @@ export default function FieldUserRole(props: FieldProps): ReactNode {
     );
 
     if (defaultName) {
-      let prefixParams = prefix ? prefix + ".params" : "params";
-      let defaultParams = getDefaultValue(
+      const prefixParams = prefix ? prefix + ".params" : "params";
+      const defaultParams = getDefaultValue(
         properties.params,
         values && getValue(values, prefixParams),
       );
@@ -132,9 +132,9 @@ export default function FieldUserRole(props: FieldProps): ReactNode {
         setValue(values, prefixParams, defaultParams);
       }
       if (defaultParams && Object.keys(defaultParams).length > 0) {
-        let allValues = JSON.parse(JSON.stringify(values));
+        const allValues = JSON.parse(JSON.stringify(values));
         for (let i = 0; i < allValues.roles.length; i++) {
-          let role = allValues.roles[i];
+          const role = allValues.roles[i];
           const variables = parametersByTemplate
             ? parametersByTemplate[role.name] || []
             : [];

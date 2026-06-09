@@ -130,7 +130,7 @@ function Automation(props: PageProps) {
   );
 
   function getCurlCommands(log: RestLogEntry[]): string[] {
-    let ret: string[] = [];
+    const ret: string[] = [];
     ret.push('AUTH_TOKEN="' + (token || "") + '"');
     let pathPrefix = Auth.getNuodbCpRestUrl("");
     while (pathPrefix.startsWith("/")) {
@@ -152,7 +152,7 @@ function Automation(props: PageProps) {
         body["resourceVersion"] &&
         convertUpdateToPatch
       ) {
-        let patch: JsonType[] = [];
+        const patch: JsonType[] = [];
         Object.keys(body).forEach((key) => {
           if (key !== "resourceVersion") {
             patch.push({ op: "add", path: "/" + key, value: body[key] });
@@ -199,7 +199,7 @@ function Automation(props: PageProps) {
           <ContentCopyOutlinedIcon
             className="NuoCopyButton"
             onClick={() => {
-              navigator.clipboard.writeText(lines.join("\n")).then(() => {
+              navigator.clipboard.writeText(lines.join("\r\n")).then(() => {
                 setCopiedField(summary);
                 if (copiedTimeout) {
                   clearTimeout(copiedTimeout);
