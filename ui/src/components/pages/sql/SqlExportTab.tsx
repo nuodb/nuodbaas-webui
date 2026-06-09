@@ -345,14 +345,14 @@ function SqlExportTab({ tasks, setTasks, sqlConnection }: SqlExportTabProps) {
             />
             <div className="NuoRow">
               <div className="NuoColumnFixed">
-                {tables.map((table, index) => (
+                {tables.map((table) => (
                   <Checkbox
                     id={table}
                     checked={
                       exportTables === undefined || exportTables.includes(table)
                     }
                     label={table}
-                    onChange={(event) => {
+                    onChange={() => {
                       let newTables =
                         exportTables === undefined
                           ? [...tables]
@@ -371,7 +371,7 @@ function SqlExportTab({ tasks, setTasks, sqlConnection }: SqlExportTabProps) {
                 ))}
               </div>
               <div className="NuoColumn">
-                {tables.map((table, index) => (
+                {tables.map((table) => (
                   <div className="NuoFieldContainer">
                     <TextField
                       id={"outputTable_" + table}

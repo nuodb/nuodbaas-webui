@@ -248,7 +248,7 @@ Defines row action menu entries shown in the resource popup menu.
 Supported menu item properties:
 
 - `label`: menu label, usually an i18n key
-- `icon` (optional): icon name rendered via the shared `Icon` component
+- `icon` (optional): icon name rendered via the shared `Icon` component. Available icon names can be found [here](https://fonts.google.com/icons). Make the name lowercase and replace spaces with underscores.
 - `patch` (optional): JSON Patch payload sent to the REST API
 - `writeAccessRequired` (optional): requires `PUT` access in addition to any other checks
 - `visible` (optional): formula controlling whether the item is shown

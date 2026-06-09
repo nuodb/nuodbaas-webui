@@ -176,52 +176,6 @@ function ListResource(props: PageProps) {
     return [...filterValues];
   }
 
-  /* compares both values. value2 can have asterisks ("*") at the beginning, end or both as wildcards.
-       - "value1" or "value2" can be string, null or undefined values
-       - if "value1" or "value2" are objects or arrays, they are converted to JSON text and then used for comparison
-       - the match is case-insensitive
-    */
-  function isMatch(value1: any, value2: any) {
-    if (
-      (value1 === null && value2 === null) ||
-      (value1 === undefined && value2 === undefined)
-    ) {
-      return true;
-    }
-    if (
-      value1 === null ||
-      value2 === null ||
-      value1 === undefined ||
-      value2 === undefined
-    ) {
-      return false;
-    }
-
-    if (typeof value1 === "object") {
-      value1 = JSON.stringify(value1);
-    }
-    if (typeof value2 === "object") {
-      value2 = JSON.stringify(value2);
-    }
-
-    value1 = String(value1).trim().toUpperCase();
-    value2 = String(value2).trim().toUpperCase();
-
-    if (value2 === "*") {
-      return true;
-    } else if (value2.startsWith("*")) {
-      if (value2.endsWith("*")) {
-        return value1.includes(value2.substring(1, value2.length - 1));
-      } else {
-        return value1.endsWith(value2.substring(1));
-      }
-    } else if (value2.endsWith("*")) {
-      return value1.startsWith(value2.substring(0, value2.length - 1));
-    } else {
-      return value1 === value2;
-    }
-  }
-
   function toString(value: any, toUpper: boolean): string {
     let ret;
     if (!value) {

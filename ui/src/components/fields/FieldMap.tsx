@@ -82,7 +82,7 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
    * @returns
    */
   function edit(): ReactNode {
-    const { prefix, values, errors, setValues, readonly, parameter, t } = props;
+    const { prefix, values, errors, setValues, parameter, t } = props;
 
     const valueKeys = Object.keys(getValue(values, prefix) || {});
     const rows = [];

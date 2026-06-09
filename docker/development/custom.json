@@ -22,7 +22,7 @@
             "menu-append": [
                 {
                     "label": "ExternalUrl",
-                    "icon": "Info",
+                    "icon": "link",
                     "link": "https://www.example.com/{organization}/{project}/{name}/{tier}/{labels.ds.com/abc}",
                     "linkTarget": "_blank"
                 }

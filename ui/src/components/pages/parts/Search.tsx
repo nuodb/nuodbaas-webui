@@ -130,7 +130,7 @@ function getFieldsByPath(schema: TempAny, path: string) {
   return fields;
 }
 
-function Search({ path, search, setSearch, fieldNames, t }: SearchProps) {
+function Search({ path, search, setSearch }: SearchProps) {
   const [editIndexOrNewField, setEditIndexOrNewField] = useState<
     string | number | null
   >(null);

@@ -3,7 +3,6 @@
 import axios from "axios";
 import { TempAny } from "./types";
 import { getValue } from "../components/fields/utils";
-import { matchesPath } from "./schema";
 import React, { JSX, useEffect, useState } from "react";
 import Auth from "./auth";
 
@@ -332,7 +331,7 @@ export default function Customizations(
       hasSqlEditorService = (
         (await axios.get(Auth.getNuodbSqlRestUrl("/"))).data || ""
       ).includes("NuoDB SQL service");
-    } catch (ex) {
+    } catch {
       hasSqlEditorService = false;
     }
 
