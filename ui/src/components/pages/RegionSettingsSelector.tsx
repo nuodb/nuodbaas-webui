@@ -64,7 +64,7 @@ function RegionSelectorSettings(props: PageProps) {
   }
 
   async function validate(field: string): Promise<boolean> {
-    let newErrors = { ...errors };
+    const newErrors = { ...errors };
     if (field === "" || field === "name") {
       delete newErrors.name;
       if ((fields.name || "").trim().length === 0) {
@@ -169,7 +169,7 @@ function RegionSelectorSettings(props: PageProps) {
               const sql = removeSlashPostfix((fields.sql || "").trim());
 
               // save regions
-              let regions: RegionSettings = Auth.getRegions();
+              const regions: RegionSettings = Auth.getRegions();
               if (isNew) {
                 regions.push({ name: fields.name, cp, sql });
               } else {
@@ -199,7 +199,7 @@ function RegionSelectorSettings(props: PageProps) {
               data-testid="button.delete"
               className="deleteButton"
               onClick={() => {
-                let regions = Auth.getRegions();
+                const regions = Auth.getRegions();
                 regions.splice(showEntry, 1);
                 Auth.setRegions(regions);
                 closeDialog();
@@ -213,7 +213,7 @@ function RegionSelectorSettings(props: PageProps) {
       </DialogMaterial>
     );
   }
-  let settings: RegionSettings = Auth.getRegions();
+  const settings: RegionSettings = Auth.getRegions();
 
   return (
     <PageLayout {...props}>

@@ -126,7 +126,7 @@ function MenuItems({
   dndOver,
   dndStart,
 }: MenuItemsProps) {
-  let refs = items.map(() => React.createRef<HTMLDivElement | null>());
+  const refs = items.map(() => React.createRef<HTMLDivElement | null>());
 
   useEffect(() => {
     if (items.length > 0) {
@@ -183,7 +183,7 @@ function MenuItems({
             return;
           }
           if (e.metaKey && setItems) {
-            let newItems = [...items];
+            const newItems = [...items];
             newItems[index] = items[index + 1];
             newItems[index + 1] = items[index];
             setItems(newItems);
@@ -195,7 +195,7 @@ function MenuItems({
             return;
           }
           if (e.metaKey && setItems) {
-            let newItems = [...items];
+            const newItems = [...items];
             newItems[index] = items[index - 1];
             newItems[index - 1] = items[index];
             setItems(newItems);
@@ -293,7 +293,7 @@ export function PopupMenu(props: PopupMenuProps) {
     if (!target?.parentNode?.children) {
       return;
     }
-    let newItems: MenuItemProps[] = [];
+    const newItems: MenuItemProps[] = [];
     Array.from(target.parentNode.children).forEach((child: any) => {
       const newItem = props.items.find(
         (item: MenuItemProps) => item.id === child.getAttribute("id"),

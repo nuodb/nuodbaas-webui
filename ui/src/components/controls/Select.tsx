@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import InfoPopup from "./InfoPopup";
 import { withTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 
 export type SelectProps = {
   "data-testid"?: string;
@@ -23,7 +24,7 @@ export type SelectProps = {
   disabled?: boolean;
   onChange?: (event: any) => void;
   onBlur?: (event: any) => void;
-  t: any;
+  t: TFunction;
 };
 
 export type SelectOptionProps = {

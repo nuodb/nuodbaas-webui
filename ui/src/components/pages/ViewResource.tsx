@@ -21,7 +21,7 @@ function ViewResource(props: PageProps) {
   const [error, setError] = useState<any>(undefined);
 
   useEffect(() => {
-    let resourceByPath = getResourceByPath(schema, path);
+    const resourceByPath = getResourceByPath(schema, path);
     if ("get" in resourceByPath) {
       getResourceEvents(
         schema,

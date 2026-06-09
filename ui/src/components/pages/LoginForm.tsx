@@ -45,7 +45,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
   const [authHeader, setAuthHeader] = useState("");
   const [showLoginForm, setShowLoginForm] = useState(false);
   // Specify redirect URL so that provider name is supplied as query parameter
-  let queryRedirect =
+  const queryRedirect =
     queryParams.get("redirect") || queryParams.get("redirectUrl") || "";
   const redirectUrl = encodeURIComponent(
     window.location.protocol +

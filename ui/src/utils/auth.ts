@@ -247,11 +247,11 @@ export default class Auth {
   }
 
   static getAvatarText() {
-    let credentials = this.getCredentials();
+    const credentials = this.getCredentials();
     if (credentials) {
-      let parts = credentials.username.split("/");
+      const parts = credentials.username.split("/");
       if (parts.length > 0) {
-        let name = parts[parts.length - 1];
+        const name = parts[parts.length - 1];
         if (name.length > 0) {
           return name[0].toUpperCase();
         }
@@ -289,7 +289,7 @@ export default class Auth {
   }
 
   static getHeaders(): TempAny {
-    let credentials = this.getCredentials();
+    const credentials = this.getCredentials();
     if (!credentials) {
       return {};
     } else {

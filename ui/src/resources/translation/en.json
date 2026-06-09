@@ -25,7 +25,7 @@
     "show.backups": "Show Backups",
     "settings": "Settings",
     "automation": "Automation",
-    "logout": "Logout",
+    "logout": "Logout ({{name}})",
     "copy": "Copy",
     "copied": "Copied!",
     "dismiss": "Dismiss",

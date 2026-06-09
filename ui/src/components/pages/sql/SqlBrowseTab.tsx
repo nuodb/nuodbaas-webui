@@ -1,6 +1,7 @@
 // (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { withTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 import { SqlResponse, SqlType } from "../../../utils/SqlSocket";
 import SqlResultsRender from "./SqlResultsRender";
 import Pagination from "../../controls/Pagination";
@@ -14,7 +15,7 @@ import SqlFilter, {
 type SqlBrowseTabProps = {
   sqlConnection: SqlType;
   table: string;
-  t: any;
+  t: TFunction;
 };
 
 type SqlResponseState = {
@@ -69,7 +70,7 @@ function SqlBrowseTab({ sqlConnection, table }: SqlBrowseTabProps) {
     const sqlResponse = await sqlConnection.runCommand("EXECUTE_QUERY", [
       sqlQueryWithLimit,
     ]);
-    let newState: SqlResponseState = {
+    const newState: SqlResponseState = {
       ...args,
       sqlResponse,
     };
@@ -94,7 +95,7 @@ function SqlBrowseTab({ sqlConnection, table }: SqlBrowseTabProps) {
       newState.lastPage = 1;
     }
     if (sqlResponse.columns && filter !== undefined) {
-      let initFilter: SqlFilterType = {};
+      const initFilter: SqlFilterType = {};
       sqlResponse.columns.forEach((column) => {
         if (column.name in filter) {
           initFilter[column.name] = { ...filter[column.name] };

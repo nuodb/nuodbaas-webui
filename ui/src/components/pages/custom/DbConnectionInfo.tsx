@@ -170,15 +170,17 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
             data-testid={"copy-" + fieldname}
             className="NuoCopyButton"
             onClick={() => {
-              navigator.clipboard.writeText(value).then(() => {
-                setCopiedField(fieldname);
-                if (copiedTimeout) {
-                  clearTimeout(copiedTimeout);
-                }
-                copiedTimeout = setTimeout(() => {
-                  setCopiedField("");
-                }, 2000);
-              });
+              navigator.clipboard
+                .writeText(value.replace(/\n/g, "\r\n"))
+                .then(() => {
+                  setCopiedField(fieldname);
+                  if (copiedTimeout) {
+                    clearTimeout(copiedTimeout);
+                  }
+                  copiedTimeout = setTimeout(() => {
+                    setCopiedField("");
+                  }, 2000);
+                });
             }}
           />
         </Tooltip>
@@ -187,7 +189,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
             name={fieldname}
             data-testid={"value-" + fieldname}
             disabled={true}
-            value={value}
+            value={value.replace(/\n/g, "\r\n")}
           ></Textarea>
         ) : (
           <input
@@ -217,7 +219,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
             data-testid={"copy-" + dataTestid}
             className="NuoCopyButton"
             onClick={() => {
-              navigator.clipboard.writeText(lines.join("\n")).then(() => {
+              navigator.clipboard.writeText(lines.join("\r\n")).then(() => {
                 setCopiedField(summary);
                 if (copiedTimeout) {
                   clearTimeout(copiedTimeout);
@@ -240,7 +242,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
   }
 
   function processMarkdownLinks(text: string): React.ReactNode {
-    let ret: React.ReactNode[] = [];
+    const ret: React.ReactNode[] = [];
     while (text) {
       const posBetween = text.indexOf("](");
       if (posBetween === -1) {

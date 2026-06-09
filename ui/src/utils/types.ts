@@ -2,6 +2,7 @@
 
 import { ReactNode } from "react";
 import { BackgroundTaskType } from "./BackgroundTasks";
+import { TFunction } from "i18next";
 
 // the TempAny type allows us to temporarily declare variables as "any" type,
 // so we can easily find them in source control and fix in future PR's
@@ -90,7 +91,7 @@ export interface PageProps {
   orgs: string[];
   tasks: BackgroundTaskType[];
   setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>;
-  t: any;
+  t: TFunction;
 }
 
 export type SortColumnDirectionType = {

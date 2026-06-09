@@ -40,7 +40,7 @@ export default class Toast extends Component<
     });
     setTimeout(() => {
       if (s_instance) {
-        let messages = s_instance.state.messages.slice(1);
+        const messages = s_instance.state.messages.slice(1);
         s_instance.setState({ messages });
       }
     }, 5000);

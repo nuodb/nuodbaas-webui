@@ -114,7 +114,7 @@ function getFieldsByPath(schema: TempAny, path: string) {
     });
   }
 
-  let fields: { [key: string]: string } = {};
+  const fields: { [key: string]: string } = {};
   const resource = getResourceByPath(schema, getCreatePath(schema, path));
   if (resource["put"]) {
     const formParams = getChild(resource["get"], [

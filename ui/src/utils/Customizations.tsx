@@ -108,7 +108,7 @@ function isNumericOrPeriod(ch: string) {
  */
 export function splitFormulaIntoParts(formula: string): string[] | null {
   let name = "";
-  let ret: any[] = [];
+  const ret: any[] = [];
 
   function pushElement(element: string | null) {
     if (name !== "") {
@@ -245,7 +245,7 @@ export function evaluate(data: TempAny, formula: string): TempAny {
     return hasSqlEditorService;
   }
 
-  let parts = splitFormulaIntoParts(formula);
+  const parts = splitFormulaIntoParts(formula);
   if (parts === null) {
     console.log("invalid formula: " + formula);
     return "";
@@ -336,7 +336,7 @@ export default function Customizations(
     }
 
     // merge configuration files together
-    let merged = baseJson;
+    const merged = baseJson;
     mergeRecursive(merged, customConfig);
     mergeRecursive(merged, userJson);
     mergedJson = merged;

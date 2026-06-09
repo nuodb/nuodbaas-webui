@@ -75,7 +75,7 @@ function Table(props: TableProps) {
   const [columns, setColumns] = useState<MenuItemProps[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [slaByPath, setSlaByPath] = useState<{ [path: string]: string }>({});
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const schemaPath = getSchemaPath(schema, path);
   let lastSchemaPathElement = "/" + schemaPath;
   lastSchemaPathElement = lastSchemaPathElement.substring(
@@ -101,8 +101,8 @@ function Table(props: TableProps) {
       }
     }
 
-    let resourcesByPath = getResourceByPath(schema, path);
-    let methodSchema = resourcesByPath["get"];
+    const resourcesByPath = getResourceByPath(schema, path);
+    const methodSchema = resourcesByPath["get"];
     if (!methodSchema || !data) {
       return;
     }
@@ -147,7 +147,7 @@ function Table(props: TableProps) {
     Rest.get(
       projPath + "?listAccessible=true&expand=true&offset=0&limit=1000",
     ).then((projects: any) => {
-      let newSlaByPath: { [path: string]: string } = {};
+      const newSlaByPath: { [path: string]: string } = {};
       projects.items.forEach((proj: any) => {
         const key =
           "/" +
@@ -170,7 +170,7 @@ function Table(props: TableProps) {
   };
 
   function getTableLabels(): TableLabelsType {
-    let ret: TableLabelsType = {};
+    const ret: TableLabelsType = {};
     const cv = getCustomizationsView(path);
     columns.forEach((column) => {
       if (
@@ -214,7 +214,7 @@ function Table(props: TableProps) {
         t,
       ))
     ) {
-      let promises = await Promise.allSettled(
+      const promises = await Promise.allSettled(
         editDeletePaths.map((dPath: any) => Rest.delete(dPath)),
       );
       promises.forEach((result, index) => {
@@ -411,7 +411,7 @@ function Table(props: TableProps) {
                 selected.size !== 0 && selected.size === deletableRefs.length
               }
               onChange={() => {
-                let allSelected =
+                const allSelected =
                   selected.size ===
                   data.filter((d: any) => canDelete(d)).length;
                 if (allSelected) {
@@ -471,7 +471,7 @@ function Table(props: TableProps) {
   }
 
   const tableLabels = getTableLabels();
-  let visibleColumns = moveNameColumnToFront(
+  const visibleColumns = moveNameColumnToFront(
     columns.filter(
       (col) => col.selected && !schemaPath?.includes("{" + col.id + "}"),
     ),
@@ -523,7 +523,7 @@ function Table(props: TableProps) {
                     checked={selected.has(row["$ref"])}
                     disabled={!canDelete(row)}
                     onChange={() => {
-                      let tmpSelected = new Set(selected);
+                      const tmpSelected = new Set(selected);
                       if (tmpSelected.has(row["$ref"])) {
                         tmpSelected.delete(row["$ref"]);
                       } else {

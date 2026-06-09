@@ -6,11 +6,12 @@ import { JSX, ReactNode, useState } from "react";
 import TextField from "../controls/TextField";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import Dialog from "../pages/parts/Dialog";
+import { TFunction } from "i18next";
 
 type CalendarPopupProps = {
   value: string;
   setValue: (value: Date) => void;
-  t: any;
+  t: TFunction;
 };
 
 function arrayFromTo(from: number, to: number) {
@@ -62,14 +63,14 @@ function CalendarPopup(props: CalendarPopupProps): JSX.Element {
       : selectedDate.getMinutes();
   }
   function setHours(hour: number) {
-    let newDate = new Date(selectedDate);
+    const newDate = new Date(selectedDate);
     if (selectedTimezone === "utc") newDate.setUTCHours(hour);
     else newDate.setHours(hour);
     setSelectedDate(newDate);
     props.setValue(newDate);
   }
   function setMinutes(minute: number) {
-    let newDate = new Date(selectedDate);
+    const newDate = new Date(selectedDate);
     if (selectedTimezone === "utc") newDate.setUTCMinutes(minute);
     else newDate.setMinutes(minute);
     setSelectedDate(newDate);
@@ -319,12 +320,12 @@ export default function FieldDateTime(props: FieldProps): ReactNode {
       parameter,
       t,
     } = props;
-    let value = getValue(values, prefix);
+    const value = getValue(values, prefix);
     let editValue = getValue(values, "_" + prefix);
     if (editValue === null) {
       editValue = value === null ? "" : new Date(value).toLocaleString();
     }
-    let error = (errors && prefix in errors && errors[prefix]) || "";
+    const error = (errors && prefix in errors && errors[prefix]) || "";
     return (
       <TextField
         key={prefix}
@@ -352,7 +353,7 @@ export default function FieldDateTime(props: FieldProps): ReactNode {
               t,
             ))
           ) {
-            let v = { ...values };
+            const v = { ...values };
             selectedValue.setMilliseconds(0);
             setValue(
               v,
@@ -365,12 +366,12 @@ export default function FieldDateTime(props: FieldProps): ReactNode {
           }
         }}
         onChange={({ currentTarget: input }) => {
-          let v = { ...values };
+          const v = { ...values };
           setValue(v, "_" + prefix, input.value);
           setValues(v);
         }}
         onBlur={() => {
-          let v = { ...values };
+          const v = { ...values };
           if (editValue === "") {
             setValue(v, prefix, null);
             setValue(v, "_" + prefix, null);
@@ -402,7 +403,7 @@ export default function FieldDateTime(props: FieldProps): ReactNode {
    */
   function validate(): boolean {
     const { prefix, values, updateErrors } = props;
-    let editValue = getValue(values, "_" + prefix);
+    const editValue = getValue(values, "_" + prefix);
     if (editValue !== null) {
       updateErrors(
         prefix,
@@ -419,7 +420,7 @@ export default function FieldDateTime(props: FieldProps): ReactNode {
       return value;
     }
 
-    let date = new Date(value);
+    const date = new Date(value);
     if (!isNaN(date.getTime())) {
       return date.toLocaleString();
     }

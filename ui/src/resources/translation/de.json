@@ -23,7 +23,7 @@
     "show.backups": "Sicherungen anzeigen",
     "settings": "Einstellungen",
     "automation": "Automatisierung",
-    "logout": "Ausloggen",
+    "logout": "Ausloggen ({{name}})",
     "copy": "Kopieren",
     "copied": "Kopiert!",
     "dismiss": "Schließen",

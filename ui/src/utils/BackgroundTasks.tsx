@@ -2,6 +2,7 @@
 
 import React, { ReactNode } from "react";
 import { withTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 
 export type StatusType =
   | "not_started"
@@ -33,7 +34,7 @@ export type BackgroundTasksContextType = {
 type BackgroundTasksProps = {
   tasks: BackgroundTaskType[];
   setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>;
-  t: any;
+  t: TFunction;
 };
 
 export function isTaskFinished(task: BackgroundTaskType) {
@@ -79,7 +80,7 @@ export function launchNextBackgroundTask(
           if (task.status === "in_progress") {
             task.status = "complete";
           }
-          let newTasks = [...previousTasks];
+          const newTasks = [...previousTasks];
           const taskIndex = newTasks.findIndex((t) => t.id === task.id);
           if (taskIndex != -1) {
             newTasks[taskIndex] = task;
@@ -113,7 +114,7 @@ export function updateOrAddTask(
   task: BackgroundTaskType,
 ) {
   setTasks((previousTasks) => {
-    let tasks = [...previousTasks];
+    const tasks = [...previousTasks];
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].id === task.id) {
         tasks[i] = task;

@@ -35,7 +35,7 @@ type SectionFormParameterType = {
 
 // returns the last portion of the items list
 function getItemsLastPart(listResponse: any): string[] {
-  let values: string[] = [];
+  const values: string[] = [];
   if (listResponse && listResponse.items && Array.isArray(listResponse.items)) {
     listResponse.items.forEach((item: string) => {
       const parts = item.split("/");
@@ -47,7 +47,7 @@ function getItemsLastPart(listResponse: any): string[] {
 
 // returns the first portion of the items list
 function getItemsFirstPart(listResponse: any): string[] {
-  let values: string[] = [];
+  const values: string[] = [];
   if (listResponse && listResponse.items && Array.isArray(listResponse.items)) {
     listResponse.items.forEach((item: string) => {
       values.push(item.split("/")[0]);
@@ -91,7 +91,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
     let data = restCache.get(url);
     if (!data) {
       data = await Rest.get(url);
-      let newRestCache = new Map(restCache);
+      const newRestCache = new Map(restCache);
       newRestCache.set(url, data);
       setRestCache(newRestCache);
     }
@@ -106,7 +106,9 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
     data: TempAny,
     sections: SectionFormParameterType[],
   ): Promise<SectionFormParameterType[]> {
-    let ret: SectionFormParameterType[] = JSON.parse(JSON.stringify(sections));
+    const ret: SectionFormParameterType[] = JSON.parse(
+      JSON.stringify(sections),
+    );
 
     for (let i = 0; i < ret.length; i++) {
       if (ret[i].params["organization"]) {
@@ -155,7 +157,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
       data: TempAny,
     ) {
       Object.keys(params).forEach((key) => {
-        let defaultValue = getDefaultValue(params[key], data && data[key]);
+        const defaultValue = getDefaultValue(params[key], data && data[key]);
         if (defaultValue !== null) {
           const param = params[key];
           if (param.type === "object" && param.properties) {
@@ -211,7 +213,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
       let fieldName: string | null = null;
 
       Object.keys(params).forEach((key) => {
-        let parameter = params[key];
+        const parameter = params[key];
         if (parameter && fieldName === null && key in values) {
           if (
             !Field({
@@ -373,10 +375,10 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
     }
     const putOrGetResource = resource["put"] || resource["get"];
 
-    let urlParams = arrayToObject(putOrGetResource["parameters"], "name");
+    const urlParams = arrayToObject(putOrGetResource["parameters"], "name");
     setUrlParameters(urlParams);
 
-    let remainingFormParams = cloneRecursive(formParams);
+    const remainingFormParams = cloneRecursive(formParams);
     let sectionFormParams: TempAny = [{ params: formParams }];
 
     const customForm = getCustomForm(path);
@@ -384,13 +386,13 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
       sectionFormParams = [];
       customForm.sections.forEach((section: TempAny, index: number) => {
         if (section.fields) {
-          let params = {};
+          const params = {};
           let hasWildcard = false;
           Object.keys(section.fields).forEach((key) => {
             if (key === "*") {
               hasWildcard = true;
             } else {
-              let fieldParameters = cloneRecursive(
+              const fieldParameters = cloneRecursive(
                 getFieldParameters(formParams, key),
               );
               if (fieldParameters) {
@@ -406,7 +408,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
           });
           if (hasWildcard) {
             Object.keys(remainingFormParams).forEach((key) => {
-              let fieldParameters = cloneRecursive(
+              const fieldParameters = cloneRecursive(
                 getFieldParameters(remainingFormParams, key),
               );
               if (fieldParameters) {
@@ -422,7 +424,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
       });
     }
 
-    let v = {};
+    const v = {};
     setDefaultValues(v, null, formParams, data);
     setUrlValues(v, path, createPath);
     setValues(v);
@@ -443,7 +445,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
       [];
 
     if (queryParameters.length > 0) {
-      let params: any = {};
+      const params: any = {};
       queryParameters.forEach((qp: any) => {
         if (qp.name && qp.schema) {
           params[qp.name] = qp.schema;
@@ -478,7 +480,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
   }, [values]);
 
   function getParentPath(path: string) {
-    let lastSlash = path.lastIndexOf("/");
+    const lastSlash = path.lastIndexOf("/");
     if (lastSlash > 0) {
       return path.substring(0, lastSlash);
     } else {
@@ -487,7 +489,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
   }
 
   function getErrorFields() {
-    let errs = { ...errors };
+    const errs = { ...errors };
     delete errs._error;
     delete errs._errorDetail;
     function updateErrors_(key: string, value: string | null) {
@@ -500,7 +502,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
     }
 
     Object.keys(formParameters).forEach((key: string) => {
-      let parameter: TempAny = formParameters[key];
+      const parameter: TempAny = formParameters[key];
       Field({
         op: "validate",
         path,
@@ -547,9 +549,9 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
   }
 
   function getTabIndexesWithErrors(): number[] {
-    let errs = { ...errors };
+    const errs = { ...errors };
 
-    let ret: number[] = [];
+    const ret: number[] = [];
     Object.keys(errs).forEach((field: string) => {
       const index = findTabIndex(field);
       if (index >= 0 && !ret.includes(index)) {
@@ -611,7 +613,7 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
     // Handle special case where we need to add "?allowCrossOrganizationAccess=true" to the URL
     // if a user resource is created / updated with access rules outside their org.
     // We skip the prompt if no accessRule changes took place.
-    let submitValues = { ...values };
+    const submitValues = { ...values };
     if (hasOutOfOrgUserRules()) {
       let accessRuleUnchanged = false;
       if (data) {
@@ -769,14 +771,14 @@ function CreateEditEntry({ schema, path, data, readonly, t }: TempAny) {
     }
   }
 
-  let badges: { [key: number]: number } = {};
+  const badges: { [key: number]: number } = {};
   if (!readonly) {
     getTabIndexesWithErrors().forEach((index) => {
       badges[index] = -1;
     });
   }
 
-  let sectionsWithStatus = sectionFormParameters.map((section) => {
+  const sectionsWithStatus = sectionFormParameters.map((section) => {
     return showSectionFields(section);
   });
   if (values.status && readonly) {

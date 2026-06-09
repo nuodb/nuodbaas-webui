@@ -12,8 +12,8 @@ import PageLayout from "./parts/PageLayout";
 function Settings(props: PageProps) {
   const { t } = props;
   const navigate = useNavigate();
-  let [settings, setSettings] = useState("");
-  let [error, setError] = useState("");
+  const [settings, setSettings] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const lSettings = localStorage.getItem(LOCAL_USER_SETTINGS);
@@ -49,7 +49,7 @@ function Settings(props: PageProps) {
                 window.location.href = "/ui";
               }
               try {
-                let jsonSettings = JSON.parse(settings);
+                const jsonSettings = JSON.parse(settings);
                 localStorage.setItem(
                   LOCAL_USER_SETTINGS,
                   JSON.stringify(jsonSettings, null, 2),

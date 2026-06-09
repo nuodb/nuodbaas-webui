@@ -12,7 +12,6 @@ export default defineConfig(
   ...tseslint.configs.recommended,
   {
     rules: {
-      "prefer-const": "warn",
       "@typescript-eslint/no-explicit-any": "warn",
       "no-useless-assignment": "warn",
       "@typescript-eslint/no-wrapper-object-types": "warn",

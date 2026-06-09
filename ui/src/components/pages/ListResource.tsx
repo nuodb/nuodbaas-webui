@@ -51,7 +51,7 @@ function ListResource(props: PageProps) {
   const navigate = useNavigate();
 
   function makeFieldnameList(prefix: string, items: any): string[] {
-    let list: Set<string> = new Set<string>();
+    const list: Set<string> = new Set<string>();
 
     if (typeof items === "object") {
       if (Array.isArray(items)) {
@@ -80,7 +80,7 @@ function ListResource(props: PageProps) {
       return;
     }
 
-    let resourcesByPath_ = getResourceByPath(schema, path);
+    const resourcesByPath_ = getResourceByPath(schema, path);
     if (!resourcesByPath_) {
       navigate("/ui/notfound");
       return;
@@ -166,7 +166,7 @@ function ListResource(props: PageProps) {
     if (!getFilterField(schema, path)) {
       return [];
     }
-    let filterValues = new Set<string>();
+    const filterValues = new Set<string>();
     allItems.forEach((item: string) => {
       const parts = item.split("/");
       if (parts.length > 1) {

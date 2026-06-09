@@ -45,7 +45,7 @@ function TableSettingsColumns(props: TempAny) {
   const { path, columns, setColumns, t } = props;
 
   function handleSelection(index: number) {
-    let cols = [...columns];
+    const cols = [...columns];
     cols[index].selected = !cols[index].selected;
     saveColumns(cols, path);
     setColumns(cols);

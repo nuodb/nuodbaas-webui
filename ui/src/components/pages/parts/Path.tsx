@@ -1,6 +1,7 @@
 // (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { withTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 import { useNavigate } from "react-router-dom";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Select, { SelectOption } from "../../controls/Select";
@@ -17,7 +18,7 @@ type PathProps = {
   postfixLabel?: string;
   filterValues?: string[];
   org?: string;
-  t: any;
+  t: TFunction;
 };
 function Path({
   schema,
@@ -85,9 +86,11 @@ function Path({
     );
   }
 
-  let filterField = getFilterField(schema, path);
+  const filterField = getFilterField(schema, path);
 
-  let pathParts = (path.startsWith("/") ? path.substring(1) : path).split("/");
+  const pathParts = (path.startsWith("/") ? path.substring(1) : path).split(
+    "/",
+  );
   let pathPrefix = "";
   if (pathParts[0] === "cluster") {
     pathParts.shift();
@@ -146,7 +149,7 @@ function Path({
               schemaPath != null &&
               !schemaPath.endsWith("}")
             ) {
-              let subPath =
+              const subPath =
                 "/ui/resource/view/" +
                 pathPrefix +
                 pathParts.slice(0, index + 1).join("/");
@@ -165,7 +168,7 @@ function Path({
                 </Link>
               );
             } else {
-              let subPath =
+              const subPath =
                 "/ui/resource/list/" +
                 pathPrefix +
                 pathParts.slice(0, index + 1).join("/");

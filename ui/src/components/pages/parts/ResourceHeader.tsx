@@ -1,6 +1,7 @@
 // (C) Copyright 2025-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { withTranslation } from "react-i18next";
+import { TFunction } from "i18next";
 import Button from "../../controls/Button";
 import Path from "./Path";
 import { SchemaType } from "../../../utils/types";
@@ -22,7 +23,7 @@ type ResourceHeaderProps = {
   type: "list" | "create" | "view" | "edit" | "not_found";
   onAction: () => void;
   filterValues?: string[];
-  t: any;
+  t: TFunction;
 };
 
 function ResourceHeader({
