@@ -20,6 +20,12 @@ if [ "${NUODB_SQL_REST_URL}" != "" ] ; then
     done
 fi
 
+if [ "${NUODB_MULTI_INSTANCE_URL}" != "" ] ; then
+    find /usr/share/nginx/html -type f ! -name "custom.json" | while read line; do
+        sed -i "s#___NUODB_DIRECTORY_SERVER_URL___#${NUODB_MULTI_INSTANCE_URL}#g" ${line}
+    done
+fi
+
 if [ -f /usr/share/nginx/html/theme/custom.json ] ; then
     cp /usr/share/nginx/html/theme/custom.json /usr/share/nginx/html/ui/theme/custom.json
 fi
