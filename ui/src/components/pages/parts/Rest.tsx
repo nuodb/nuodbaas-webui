@@ -6,6 +6,7 @@ import axios from "axios";
 import Auth from "../../../utils/auth";
 import { JsonType, RestLogEntry, RestMethodType } from "../../../utils/types";
 import Dialog from "./Dialog";
+import i18next from "i18next";
 
 let instance: Rest | null = null;
 
@@ -180,7 +181,8 @@ export class Rest extends React.Component<{
                   label: "Reset to default",
                 },
               ],
-              "",
+              i18next.t,
+              undefined,
             );
             if (button === "redirect") {
               // redirect to base URL with hard coded "/ui" subpath. This is the default except for 3DS sites - and those redirect the "/ui" to the real one.
@@ -338,7 +340,7 @@ export class Rest extends React.Component<{
   // note that the user might not have access to some resources (resulting in a 401), so we
   // check if the user has at least access to the "/api/openapi" spec.
   static async process401(error: any): Promise<boolean> {
-    if (error.response.status === 401) {
+    if (error.response?.status === 401) {
       if (Auth.getCredentials()?.username) {
         axios
           .get(Auth.getNuodbCpRestUrl("/openapi"), {

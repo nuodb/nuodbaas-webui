@@ -314,15 +314,18 @@ function Table(props: TableProps) {
     // provide link to view entry
     if (fieldName === "name") {
       return (
-        <button
-          key={row["$ref"]}
-          onClick={(event) => {
-            event.preventDefault();
-            navigate("/ui/resource/view" + path + "/" + row["$ref"]);
-          }}
-        >
-          {value}
-        </button>
+        <>
+          {row["$isNew"] && <span className="NuoNewLabel">New</span>}
+          <button
+            key={row["$ref"]}
+            onClick={(event) => {
+              event.preventDefault();
+              navigate("/ui/resource/view" + path + "/" + row["$ref"]);
+            }}
+          >
+            {value}
+          </button>
+        </>
       );
     }
 

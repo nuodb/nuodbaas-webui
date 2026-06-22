@@ -18,7 +18,6 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogTitle from "@mui/material/DialogTitle";
 import { t } from "i18next";
 import Checkboxes from "../controls/Checkboxes";
-import { Feature } from "../../utils/schema";
 
 const filterOptions = [
   "search",
@@ -39,11 +38,67 @@ export type FilterCondition = (typeof filterOptions)[number];
 export type SearchType = {
   field: string; //field name. "[]" postfix indicates an array field, ".*" postfix indicates a map
   condition: FilterCondition; // comparator
-  key: string; // used for a "map" field to search keys
   value: string; // value to search for. Unused for "exists" and "notExists" conditions
+  key: string; // used for a "map" field to search keys
   ignoreCase: boolean; // ignore case
   label?: string; // stores the label shown in the list of the react-select control
 };
+
+/* makeFieldFilterUrl() and parseFieldFilterUrl() are used to encode/decode SearchType[]
+   into a string which reduces length and voids encoding quotes, braces twice
+   - the length is a base62 encoded two digit number (giving it a maximum length of 62*62 = 3844 bytes)
+   Format:
+   1. hard coded length of 5 (field count)
+   2. length + value of field "field"
+   3. length + value of field "condition"
+   4. length + value of field "key"
+   5. length + value of field "value"
+   6. length of 1 + value of field "ignoreCase" ("T" for true, "F" for false)
+   7. repeat items 2-7 for each additional search field
+*/
+
+function escape(str: string) {
+  if (typeof str !== "string") str = String(str);
+  return str.replace(/!/g, "!!").replace(/_/g, "!_").replace(/~/g, "!~");
+}
+
+function unescape(str: string) {
+  return str.replace(/!~/g, "~").replace(/!_/g, "_").replace(/!!/g, "!");
+}
+
+export function makeFieldFilterUrl(search: SearchType[]) {
+  return search
+    .map((s) => {
+      return [s.field, s.condition, s.value, s.key, s.ignoreCase ? "T" : "F"]
+        .map((val) => escape(val))
+        .join("_");
+    })
+    .join("~");
+}
+
+export function parseFieldFilterUrl(ff: string | null): SearchType[] {
+  const rowRegex = /(?<!!)~/g; // unescaped tilde
+  const valRegex = /(?<!!)_/g; // unescaped underscores
+  if (!ff) {
+    return [];
+  }
+  const rows = ff.split(rowRegex);
+
+  const ret = rows.map((row) => {
+    const vals = row.split(valRegex).map((r) => unescape(r));
+    while (vals.length < 5) {
+      vals.push("");
+    }
+    return {
+      field: vals[0],
+      condition: vals[1] as FilterCondition,
+      value: vals[2],
+      key: vals[3],
+      ignoreCase: vals[4] === "T" ? true : false,
+    };
+  });
+  return ret;
+}
 
 export function isSameSearch(s1: SearchType, s2: SearchType): boolean {
   if (s1.field !== s2.field) return false;
@@ -182,10 +237,7 @@ function ListResourceFilter({
   }
 
   function renderCondition() {
-    let conditions = [...filterOptions];
-    if (!Feature.FILTER_ON_SERVER) {
-      conditions = filterOptions.filter((fo) => fo !== "raw" && fo !== "~");
-    }
+    const conditions = [...filterOptions];
     return (
       <TableRow>
         <TableCell>{t("dialog.searchFilter.label.condition")}</TableCell>

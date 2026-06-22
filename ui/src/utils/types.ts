@@ -105,3 +105,11 @@ export type RegionSettings = {
   cp: string;
   sql: string;
 }[];
+
+export type DataType = {
+  [key: string]: any;
+};
+
+export type ResourcesType = {
+  items: DataType[];
+};
