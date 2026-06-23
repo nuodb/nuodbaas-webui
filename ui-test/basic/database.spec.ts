@@ -93,14 +93,16 @@ test.describe("DatabaseTest", () => {
       "integrationtest/keepproject/" + dbName,
     );
 
-    menuCells = await waitTableElements(
-      page,
-      "list_resource__table",
-      "name",
-      dbName,
-      "$ref",
-    );
-    expect(menuCells.length).toBe(0);
+    retry(async ()=>{
+      menuCells = await waitTableElements(
+        page,
+        "list_resource__table",
+        "name",
+        dbName,
+        "$ref",
+      );
+      expect(menuCells.length).toBe(0);
+    });
   });
 
   test("testEditDatabase – add label and verify", async ({

@@ -172,7 +172,7 @@ function ListResource(props: PageProps) {
 
   useEffect(() => {
     reloadResource();
-  }, [page, path, schema, search]);
+  }, [page, path, schema, search, sort]);
 
   useEffect(() => {
     setPage(1);
