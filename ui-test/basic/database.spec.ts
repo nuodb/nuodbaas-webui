@@ -93,7 +93,7 @@ test.describe("DatabaseTest", () => {
       "integrationtest/keepproject/" + dbName,
     );
 
-    retry(async ()=>{
+    retry(async () => {
       menuCells = await waitTableElements(
         page,
         "list_resource__table",
