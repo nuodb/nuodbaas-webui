@@ -44,29 +44,35 @@ export type SearchType = {
   label?: string; // stores the label shown in the list of the react-select control
 };
 
-/* makeFieldFilterUrl() and parseFieldFilterUrl() are used to encode/decode SearchType[]
-   into a string which reduces length and voids encoding quotes, braces twice
-   - the length is a base62 encoded two digit number (giving it a maximum length of 62*62 = 3844 bytes)
-   Format:
-   1. hard coded length of 5 (field count)
-   2. length + value of field "field"
-   3. length + value of field "condition"
-   4. length + value of field "key"
-   5. length + value of field "value"
-   6. length of 1 + value of field "ignoreCase" ("T" for true, "F" for false)
-   7. repeat items 2-7 for each additional search field
-*/
-
-function escape(str: string) {
-  if (typeof str !== "string") str = String(str);
-  return str.replace(/!/g, "!!").replace(/_/g, "!_").replace(/~/g, "!~");
-}
-
-function unescape(str: string) {
-  return str.replace(/!~/g, "~").replace(/!_/g, "_").replace(/!!/g, "!");
-}
-
+/**
+ * Encode an array of {@link SearchType} objects into a compact URL string.
+ *
+ * The UI stores the current list‑resource filter in the browser URL so that
+ * the filter can be bookmarked or shared.  Each `SearchType` entry is turned
+ * into a series of five fields:
+ *
+ *   field_condition_value_key_T|F
+ *
+ * where the last element is `"T"` for `ignoreCase === true` and `"F"` otherwise.
+ *
+ * Because the separator characters (`_` for fields and `~` for rows) may appear
+ * in the raw values, they are escaped:
+ *   - `!`  → `!!`
+ *   - `_`  → `!_`
+ *   - `~`  → `!~`
+ *
+ * After escaping, the fields are joined with `_` and the rows are joined with
+ * `~`.  The resulting string can safely be placed in a URL query parameter.
+ *
+ * @param search - Array of filter specifications to encode.
+ * @returns A URL‑safe string representing the filter set.
+ */
 export function makeFieldFilterUrl(search: SearchType[]) {
+  function escape(str: string) {
+    if (typeof str !== "string") str = String(str);
+    return str.replace(/!/g, "!!").replace(/_/g, "!_").replace(/~/g, "!~");
+  }
+
   return search
     .map((s) => {
       return [s.field, s.condition, s.value, s.key, s.ignoreCase ? "T" : "F"]
@@ -76,7 +82,29 @@ export function makeFieldFilterUrl(search: SearchType[]) {
     .join("~");
 }
 
+/**
+ * Decode a URL‑encoded filter string back into an array of {@link SearchType}.
+ *
+ * This is the inverse of {@link makeFieldFilterUrl}.  It splits the input on
+ * unescaped tildes (`~`) to obtain rows, then on unescaped underscores (`_`)
+ * to obtain the five fields per row.  Escaped characters are restored:
+ *   - `!~` → `~`
+ *   - `!_` → `_`
+ *   - `!!` → `!`
+ *
+ * If a row contains fewer than five values, the missing entries are padded
+ * with empty strings so that the resulting objects always have the expected
+ * shape.  The `ignoreCase` flag is derived from the fifth field (`"T"` → true,
+ * otherwise false).
+ *
+ * @param ff - The URL‑encoded filter string, or `null`/`undefined` if none.
+ * @returns An array of {@link SearchType} objects representing the filter.
+ */
 export function parseFieldFilterUrl(ff: string | null): SearchType[] {
+  function unescape(str: string) {
+    return str.replace(/!~/g, "~").replace(/!_/g, "_").replace(/!!/g, "!");
+  }
+
   const rowRegex = /(?<!!)~/g; // unescaped tilde
   const valRegex = /(?<!!)_/g; // unescaped underscores
   if (!ff) {
