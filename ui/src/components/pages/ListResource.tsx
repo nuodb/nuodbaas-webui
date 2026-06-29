@@ -59,12 +59,7 @@ function ListResource(props: PageProps) {
     column: "",
     direction: "none",
   });
-  const [resourceUpdates, setResourceUpdates] = useState<
-    {
-      path: string;
-      state: string;
-    }[]
-  >([]);
+  const [showReloadButton, setShowReloadButton] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -104,10 +99,10 @@ function ListResource(props: PageProps) {
       return;
     }
     if ("get" in resourcesByPath_) {
-      setResourceUpdates([]);
       Rest.get(path + "?listAccessible=true")
         .then((data: TempAny) => {
           setAllItems(data.items);
+          setShowReloadButton(false);
           let url =
             path +
             "?listAccessible=true&watchAll=true&expand=true&offset=" +
@@ -125,34 +120,15 @@ function ListResource(props: PageProps) {
             getResourceEvents(
               schema,
               url,
-              (
-                data: ResourcesType,
-                type?: "created" | "updated" | "deleted",
-                entry?: DataType,
-              ) => {
+              (data: ResourcesType) => {
                 if (data.items) {
+                  if (data.items.length > 0 && data.items[0]["$isNew"]) {
+                    setShowReloadButton(true);
+                  }
                   setItemsAndPath({ items: data.items, path });
                   setAllFieldNames(makeFieldnameList("", data.items));
                 } else {
                   setItemsAndPath({ items: [], path });
-                }
-                if (type && entry) {
-                  setResourceUpdates((resourceUpdates) => {
-                    resourceUpdates = resourceUpdates.filter(
-                      (item, index) =>
-                        item.path !== entry["$ref"] && index < 50,
-                    );
-                    if (type === "created" || type === "updated") {
-                      resourceUpdates = [
-                        {
-                          path: entry["$ref"],
-                          state: entry.status?.state,
-                        },
-                        ...resourceUpdates,
-                      ];
-                    }
-                    return resourceUpdates;
-                  });
                 }
               },
               (error: TempAny) => {
@@ -160,7 +136,9 @@ function ListResource(props: PageProps) {
                 Toast.show("Error retrieving entry", error);
                 setItemsAndPath({ items: [], path });
               },
-              1000,
+              () => {
+                setShowReloadButton(true);
+              },
             ),
           );
         })
@@ -230,50 +208,50 @@ function ListResource(props: PageProps) {
         />
         <div className="NuoTableContainer">
           <div className="NuoTableOptions">
-            <Search
-              path={path}
-              fieldNames={allFieldNames}
-              search={search}
-              setSearch={(search: SearchType[]) => {
-                setPage(1);
-                setSearch(search);
-                navigate(
-                  window.location.pathname +
-                    "?ff=" +
-                    encodeURIComponent(makeFieldFilterUrl(search)),
-                  { replace: true },
-                );
-              }}
-            />
-          </div>
-          {resourceUpdates.length > 0 && (
-            <div className="NuoResourceUpdateContainer">
-              <Button
-                data-testid="resource-reload"
-                variant="outlined"
-                onClick={() => {
-                  reloadResource();
+            <div className="NuoRow" style={{ gap: "10px" }}>
+              <Search
+                path={path}
+                fieldNames={allFieldNames}
+                search={search}
+                setSearch={(search: SearchType[]) => {
+                  setPage(1);
+                  setSearch(search);
+                  navigate(
+                    window.location.pathname +
+                      "?ff=" +
+                      encodeURIComponent(makeFieldFilterUrl(search)),
+                    { replace: true },
+                  );
                 }}
-              >
-                <RefreshIcon />
-              </Button>
-              <div className="NuoNewLabel">New</div>
-              {resourceUpdates.map((entry) => {
-                return (
-                  <div
-                    data-testid={"resource-update-" + path}
-                    key={entry.path}
-                    className="NuoResourceUpdate"
-                    onClick={() => {
-                      navigate("/ui/resource/view" + path + "/" + entry.path);
-                    }}
-                  >
-                    {entry.path + (entry.state ? " (" + entry.state + ")" : "")}
-                  </div>
-                );
-              })}
+              />
+              {showReloadButton && (
+                <Button
+                  data-testid="resource-reload"
+                  variant="outlined"
+                  onClick={() => {
+                    setShowReloadButton(false);
+                    reloadResource();
+                  }}
+                >
+                  <RefreshIcon />
+                </Button>
+              )}
             </div>
-          )}
+          </div>
+          <Button
+            onClick={() => {
+              // TODO remove this button before pushing PR
+              const username = "epoch" + String(new Date().getTime());
+              Rest.put("/users/acme/" + username, {
+                organization: "acme",
+                name: username,
+                password: "pass",
+                accessRule: { allow: ["all:acme"] },
+              });
+            }}
+          >
+            Create random ACME user
+          </Button>
           <div className="NuoColumn NuoTableScrollWrapper">
             <Table
               data-testid="list_resource__table"

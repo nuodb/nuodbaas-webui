@@ -21,6 +21,7 @@ import {
 import { Rest } from "./Rest";
 import Dialog from "./Dialog";
 import {
+  DataType,
   MenuItemProps,
   PageProps,
   SortColumnDirectionType,
@@ -32,7 +33,7 @@ import {
   getCustomizationsView,
 } from "../../../utils/Customizations";
 import TableSettingsColumns from "./TableSettingsColumns";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { getRecursiveValue } from "../../fields/FieldBase";
 import Toast from "../../controls/Toast";
@@ -40,6 +41,7 @@ import ResourcePopupMenu from "./ResourcePopupMenu";
 import { Field } from "../../fields/Field";
 import Auth from "../../../utils/auth";
 import SortIcon from "../../controls/SortIcon";
+import Button from "../../controls/Button";
 
 function getFlattenedKeys(obj: TempAny, prefix?: string): string[] {
   let ret: string[] = [];
@@ -75,6 +77,7 @@ function Table(props: TableProps) {
   const [columns, setColumns] = useState<MenuItemProps[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [slaByPath, setSlaByPath] = useState<{ [path: string]: string }>({});
+  const [maxNewResources, setMaxNewResources] = useState<number>(5);
   const navigate = useNavigate();
   const schemaPath = getSchemaPath(schema, path);
   let lastSchemaPathElement = "/" + schemaPath;
@@ -314,10 +317,9 @@ function Table(props: TableProps) {
     // provide link to view entry
     if (fieldName === "name") {
       return (
-        <>
+        <React.Fragment key={row["$ref"]}>
           {row["$isNew"] && <span className="NuoNewLabel">New</span>}
           <button
-            key={row["$ref"]}
             onClick={(event) => {
               event.preventDefault();
               navigate("/ui/resource/view" + path + "/" + row["$ref"]);
@@ -325,7 +327,7 @@ function Table(props: TableProps) {
           >
             {value}
           </button>
-        </>
+        </React.Fragment>
       );
     }
 
@@ -479,6 +481,9 @@ function Table(props: TableProps) {
       (col) => col.selected && !schemaPath?.includes("{" + col.id + "}"),
     ),
   );
+  const newRowsCount = data.filter(
+    (row: DataType) => row["$isNew"] === true,
+  ).length;
   return (
     <TableCustom data-testid={props["data-testid"]}>
       <TableHead>
@@ -515,42 +520,119 @@ function Table(props: TableProps) {
         )}
       </TableHead>
       <TableBody>
-        {data.map((row: TempAny, index: number) => {
-          return (
-            <TableRow key={row["$ref"] || index}>
-              <TableCell key="__selected__" className="NuoStickyLeft">
-                <div className="NuoTableCheckbox">
-                  <input
-                    type="checkbox"
-                    data-testid={"check_" + index}
-                    checked={selected.has(row["$ref"])}
-                    disabled={!canDelete(row)}
-                    onChange={() => {
-                      const tmpSelected = new Set(selected);
-                      if (tmpSelected.has(row["$ref"])) {
-                        tmpSelected.delete(row["$ref"]);
-                      } else {
-                        tmpSelected.add(row["$ref"]);
-                      }
-                      setSelected(tmpSelected);
-                    }}
-                  />
-                  {visibleColumns
-                    .filter((_, index) => index === 0)
-                    .map((column) => renderDataCell(column.id, row))}
-                </div>
-              </TableCell>
-              {visibleColumns
-                .filter((_, index) => index > 0)
-                .map((column) => (
-                  <TableCell key={column.id}>
-                    {renderDataCell(column.id, row)}
-                  </TableCell>
-                ))}
-              {renderMenuCell(row, 1000 + data.length - 1 - index, getSla(row))}
-            </TableRow>
-          );
-        })}
+        {data
+          .filter(
+            (row: TempAny, index: number) =>
+              !row["$isNew"] || index < maxNewResources,
+          )
+          .map((row: TempAny, index: number) => {
+            const isLastNewRow =
+              index + 1 === Math.min(newRowsCount, maxNewResources);
+
+            const renderedRow = (
+              <TableRow key={row["$ref"] || index}>
+                <TableCell key="__selected__" className="NuoStickyLeft">
+                  <div className="NuoTableCheckbox">
+                    <input
+                      type="checkbox"
+                      data-testid={"check_" + index}
+                      checked={selected.has(row["$ref"])}
+                      disabled={!canDelete(row)}
+                      onChange={() => {
+                        const tmpSelected = new Set(selected);
+                        if (tmpSelected.has(row["$ref"])) {
+                          tmpSelected.delete(row["$ref"]);
+                        } else {
+                          tmpSelected.add(row["$ref"]);
+                        }
+                        setSelected(tmpSelected);
+                      }}
+                    />
+                    {visibleColumns
+                      .filter((_, index) => index === 0)
+                      .map((column) => renderDataCell(column.id, row))}
+                  </div>
+                </TableCell>
+                {visibleColumns
+                  .filter((_, index) => index > 0)
+                  .map((column) => (
+                    <TableCell key={column.id}>
+                      {renderDataCell(column.id, row)}
+                    </TableCell>
+                  ))}
+                {renderMenuCell(
+                  row,
+                  1000 + data.length - 1 - index,
+                  getSla(row),
+                )}
+              </TableRow>
+            );
+            if (isLastNewRow) {
+              return (
+                <>
+                  {renderedRow}
+                  {newRowsCount > maxNewResources && (
+                    <TableRow>
+                      <TableCell className="NuoStickyLeft">
+                        <Button
+                          variant="outlined"
+                          onClick={() => {
+                            setMaxNewResources(maxNewResources + 10);
+                          }}
+                        >
+                          {maxNewResources + 10 >= newRowsCount
+                            ? t("text.showRemaining", {
+                                remaining: String(
+                                  newRowsCount - maxNewResources,
+                                ),
+                              })
+                            : t("text.showNext10of", {
+                                remaining: String(
+                                  newRowsCount - maxNewResources,
+                                ),
+                              })}
+                        </Button>
+                      </TableCell>
+                      {visibleColumns
+                        .filter((_, index) => index > 0)
+                        .map(() => (
+                          <TableCell></TableCell>
+                        ))}
+                      <TableCell className="NuoStickyRight"></TableCell>
+                    </TableRow>
+                  )}
+                  <TableRow>
+                    <TableCell
+                      className="NuoStickyLeft"
+                      style={{
+                        borderBottom: "solid 1px lightgray",
+                        padding: 0,
+                      }}
+                    ></TableCell>
+                    {visibleColumns
+                      .filter((_, index) => index > 0)
+                      .map(() => (
+                        <TableCell
+                          style={{
+                            borderBottom: "solid 1px lightgray",
+                            padding: 0,
+                          }}
+                        ></TableCell>
+                      ))}
+                    <TableCell
+                      className="NuoStickyRight"
+                      style={{
+                        borderBottom: "solid 1px lightgray",
+                        padding: 0,
+                      }}
+                    ></TableCell>
+                  </TableRow>
+                </>
+              );
+            } else {
+              return renderedRow;
+            }
+          })}
         {data.length === 0 && (
           <tr>
             <td>

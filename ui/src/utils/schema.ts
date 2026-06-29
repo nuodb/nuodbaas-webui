@@ -439,7 +439,7 @@ export function hasActiveStream(): boolean {
  * @param {*} path
  * @param {*} multiResolve - returns response
  * @param {*} multiReject - returns error
- * @param {*} retryIntervalMS - milliseconds for the next retry (which will be doubled each time). Set to <= 0 to disable retries.
+ * @param {*} multiAbort - notification if connection was aborted / canceled
  * @returns AbortController - use ret.abort() to abort
  */
 export function getResourceEvents(
@@ -451,7 +451,7 @@ export function getResourceEvents(
     resource?: DataType,
   ) => void,
   multiReject: TempAny,
-  retryIntervalMS: number = 0,
+  multiAbort: () => void,
   transactionNumber: number = -1,
 ) {
   //only one event stream is supported - close prior one if it exists.
@@ -522,8 +522,11 @@ export function getResourceEvents(
                 (item: DataType) => item["$ref"] === id,
               );
               if (foundIndex !== -1) {
-                mergedData.items[foundIndex] = JSON.parse(data);
-                mergedData.items[foundIndex]["$ref"] = id;
+                mergedData.items[foundIndex] = {
+                  ...JSON.parse(data),
+                  ["$isNew"]: mergedData.items[foundIndex]["$isNew"],
+                  ["$ref"]: id,
+                };
                 multiResolve(mergedData);
               } else {
                 multiResolve(mergedData, "updated", {
@@ -545,17 +548,8 @@ export function getResourceEvents(
               data = JSON.parse(data);
               data["$ref"] = id;
               data["$isNew"] = true;
-              if (
-                path.includes("&fieldFilter=") ||
-                mergedData.items.length >= 20
-              ) {
-                // show above view as news feed (either it's filtered or page is full)
-                multiResolve(mergedData, "created", data);
-              } else {
-                // show inside view (since there is no filter and there is room on the page)
-                mergedData.items = [data, ...mergedData.items];
-                multiResolve(mergedData);
-              }
+              mergedData.items = [data, ...mergedData.items];
+              multiResolve(mergedData);
             } else {
               console.log(
                 "Ignoring event " + event + ", id=" + id + ", data=" + data,
@@ -583,27 +577,11 @@ export function getResourceEvents(
           .catch((reason) => multiReject(reason));
       } else if (error.status === 400) {
         multiReject(error);
+      } else if (error.code === "ERR_CANCELED") {
+        // noop - canceled due to new request
       } else {
-        // request failed. Retry incrementally.
-        if (retryIntervalMS > 0) {
-          // reconnect - server/proxy might disconnect due to a timeout
-          setTimeout(() => {
-            if (
-              monitored &&
-              monitored.transactionNumber === transactionNumber
-            ) {
-              // only retry if the event stream for the specified path is not superseded by another one
-              getResourceEvents(
-                schema,
-                path,
-                multiResolve,
-                multiReject,
-                retryIntervalMS * 1.3,
-                transactionNumber,
-              ); //retry with a 30% delay (exponential backoff)
-            }
-          }, retryIntervalMS);
-        }
+        // request failed (i.e. network error). Send Abort notification
+        multiAbort();
       }
     });
 
