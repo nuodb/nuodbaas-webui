@@ -441,8 +441,8 @@ prettier:
 
 .PHONY: prettier-check
 prettier-check:
-	cd ui && npm install && npx prettier --check . && cd ..
-	cd ui-test && npm install && npx prettier --check . && cd ..
+	cd ui && npm install && npx prettier --write . && git diff --exit-code && cd ..
+	cd ui-test && npm install && npx prettier --write . && git diff --exit-code && cd ..
 
 .PHONY: eslint-check
 eslint-check:
