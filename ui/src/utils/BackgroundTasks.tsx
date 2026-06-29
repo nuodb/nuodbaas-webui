@@ -5,11 +5,7 @@ import { withTranslation } from "react-i18next";
 import { TFunction } from "i18next";
 
 export type StatusType =
-  | "not_started"
-  | "in_progress"
-  | "complete"
-  | "canceled"
-  | "error";
+  "not_started" | "in_progress" | "complete" | "canceled" | "error";
 export type BackgroundTaskType = {
   id: string;
   label: string;
