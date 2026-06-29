@@ -45,8 +45,13 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
   const [authHeader, setAuthHeader] = useState("");
   const [showLoginForm, setShowLoginForm] = useState(false);
   // Specify redirect URL so that provider name is supplied as query parameter
-  const redirectUrl = window.location.origin + "/ui/login?provider={name}&redirectUrl=" +
-      (new URL(queryParams.get("redirect") || queryParams.get("redirectUrl") || "", window.location.origin)).href;
+  const redirectUrl =
+    window.location.origin +
+    "/ui/login?provider={name}&redirectUrl=" +
+    new URL(
+      queryParams.get("redirect") || queryParams.get("redirectUrl") || "",
+      window.location.origin,
+    ).href;
 
   useEffect(() => {
     handleInitialLoad();

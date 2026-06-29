@@ -457,8 +457,7 @@ export function concatChunks(
 let eventTransaction = 0;
 
 let monitored:
-  | undefined
-  | { abort: AbortController; transactionNumber: number } = undefined;
+  undefined | { abort: AbortController; transactionNumber: number } = undefined;
 export function hasActiveStream(): boolean {
   return !!monitored;
 }
