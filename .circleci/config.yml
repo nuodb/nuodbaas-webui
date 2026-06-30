@@ -62,32 +62,6 @@ jobs:
           name: Run Unit tests (+ coverage)
           command: make run-unit-tests
 
-  integration_tests_cp_released:
-    executor: ubuntu_vm
-    machine:
-      image: ubuntu-2404:2025.09.1
-    resource_class: large
-    steps:
-      - checkout
-      - run:
-          name: Checking if Docker image exists already
-          command: |
-            if [ "$(./build_utils.sh doesImageExist)" == "yes" ] ; then
-                echo "Docker Image exists already - no need to run code coverage tests."
-                circleci-agent step halt
-            else
-              echo "Running Code coverage tests."
-            fi
-      - run:
-          name: Run Integration Tests with Code Coverage
-          command: make run-integration-tests
-      - store_artifacts:
-          path: ui-test/target/coverage-reports
-          destination: code_coverage_report_cpreleased
-      - store_artifacts:
-          path: ui-test/target/playwright-report
-          destination: playwright_report_cpreleased
-
   integration_tests_cp_master:
     executor: ubuntu_vm
     machine:
@@ -298,12 +272,6 @@ workflows:
           name: "Unit Tests"
           context:
             - common-config
-      - integration_tests_cp_released:
-          name: "Integration Tests with Coverage (released CP)"
-          requires:
-            - "Unit Tests"
-          context:
-            - common-config
       - integration_tests_cp_master:
           name: "Integration Tests with Coverage (master CP)"
           requires:
@@ -313,7 +281,6 @@ workflows:
       - deploy_image:
           name: "Deploy Image"
           requires:
-            - "Integration Tests with Coverage (released CP)"
             - "Integration Tests with Coverage (master CP)"
           context:
             - common-config

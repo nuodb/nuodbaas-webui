@@ -34,7 +34,7 @@ UNCOMMITTED := $(shell git status --porcelain)
 
 MVN_TEST ?= ResourcesTest
 
-HELM_CP_SETTINGS := --set cpRest.fullnameOverride=nuodb-cp-rest --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api --set cpRest.extraArgs[0]=-p --set cpRest.extraArgs[1]='com.nuodb.controlplane.server.passthroughLabelKeyPrefixes=ds.com/\,*.ds.com/'
+HELM_CP_SETTINGS := --set cpRest.fullnameOverride=nuodb-cp-rest --set cpRest.ingress.enabled=true --set cpRest.ingress.pathPrefix=api --set cpRest.extraArgs[0]=-p --set cpRest.extraArgs[1]='com.nuodb.controlplane.server.passthroughLabelKeyPrefixes=ds.com/\,*.ds.com/' --set cpRest.extraArgs[2]=-p --set cpRest.extraArgs[3]='com.nuodb.controlplane.server.eventHeartbeatPeriodSec=30'
 HELM_OPERATOR_SETTINGS := --set nuodb-cp-config.nuodb.license.enabled=true --set nuodb-cp-config.nuodb.license.secret.create=true --set nuodb-cp-config.nuodb.license.secret.name=nuodb-license --set nuodb-cp-config.nuodb.license.content="$(shell if [ "${NUODB_LICENSE_CONTENT}" != "" ]; then echo "${NUODB_LICENSE_CONTENT}" | base64 -d > nuodb.lic; fi; if [ -f nuodb.lic ] ; then cat nuodb.lic; else echo ""; fi)"
 
 # The help target prints out all targets with their descriptions organized
@@ -441,8 +441,8 @@ prettier:
 
 .PHONY: prettier-check
 prettier-check:
-	cd ui && npm install && npx prettier --check . && cd ..
-	cd ui-test && npm install && npx prettier --check . && cd ..
+	cd ui && npm install && npx prettier --write . && git diff --exit-code && cd ..
+	cd ui-test && npm install && npx prettier --write . && git diff --exit-code && cd ..
 
 .PHONY: eslint-check
 eslint-check:

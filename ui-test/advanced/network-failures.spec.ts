@@ -6,6 +6,7 @@ import {
   clickMenu,
   retry,
   sleep,
+  waitForTestId,
   waitRestComplete,
   waitTableElements,
 } from "../helpers/ui";
@@ -168,26 +169,12 @@ test.describe("UserTest", () => {
     // simulate temporary network outage (will disconnect the existing SSE connection)
     await stopTcpForwarder(server);
 
-    // delete USER (using REST service)
-    deleteResourceRest("users", TEST_ORGANIZATION + "/" + userName);
-
-    // restart TCP tunnel
-    server = await startTcpForwarder("localhost", 8089, "localhost", 80);
-
-    // wait until the user shows as deleted in the UI (SSE should reconnect)
-    await retry(async () => {
-      cells = await waitTableElements(
-        page,
-        "list_resource__table",
-        "name",
-        userName,
-        "$ref",
-      );
-      expect(cells.length).toBe(0);
-    }, 3);
+    // ensure Reload button shows up
+    await waitForTestId(page, "resource-reload");
 
     // shut down TCP server and set UI back to default host
-    await page.goto("http://localhost/ui/");
-    await stopTcpForwarder(server);
+    await retry(async () => {
+      await page.goto("http://localhost/ui/");
+    });
   });
 });

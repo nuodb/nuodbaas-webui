@@ -1,5 +1,5 @@
 // (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
-import { JSX, ReactNode } from "react";
+import React, { JSX, ReactNode } from "react";
 
 type TableProps = {
   children: JSX.Element[];
@@ -12,6 +12,7 @@ interface ChildProps {
   className?: string;
   "data-testid"?: string;
   zIndex?: number;
+  style?: React.CSSProperties;
 }
 
 interface CellProps extends ChildProps {
@@ -39,7 +40,7 @@ export function TableCell(props: CellProps): JSX.Element {
     <td
       data-testid={props["data-testid"]}
       className={["NuoTableTd", props.className].join(" ")}
-      style={{ zIndex: props.zIndex }}
+      style={{ ...props.style, zIndex: props.zIndex }}
     >
       {props.children}
     </td>
@@ -52,7 +53,7 @@ export function TableTh(props: CellProps): JSX.Element {
       data-testid={props["data-testid"]}
       className={["NuoTableTh", props.className].join(" ")}
       colSpan={props.colSpan}
-      style={{ zIndex: props.zIndex }}
+      style={{ ...props.style, zIndex: props.zIndex }}
     >
       {props.children}
     </th>

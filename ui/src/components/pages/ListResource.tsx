@@ -1,28 +1,39 @@
 // (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Table from "./parts/Table";
 import {
   getResourceEvents,
   getResourceByPath,
   getFilterField,
-  Feature,
 } from "../../utils/schema";
 import { Rest } from "./parts/Rest";
 import PageLayout from "./parts/PageLayout";
 import Auth from "../../utils/auth";
-import { PageProps, SortColumnDirectionType, TempAny } from "../../utils/types";
+import {
+  DataType,
+  PageProps,
+  ResourcesType,
+  SortColumnDirectionType,
+  TempAny,
+} from "../../utils/types";
 import Pagination from "../controls/Pagination";
 import { withTranslation } from "react-i18next";
 import Search from "./parts/Search";
 import ResourceHeader from "./parts/ResourceHeader";
 import Toast from "../controls/Toast";
-import { getValue } from "../fields/utils";
-import { getFieldFilter, SearchType } from "./ListResourceFilter";
+import {
+  getFieldFilter,
+  makeFieldFilterUrl,
+  parseFieldFilterUrl,
+  SearchType,
+} from "./ListResourceFilter";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import Button from "../controls/Button";
 
 type ItemsAndPathProps = {
-  items: [] | null;
+  items: DataType[] | null;
   path: string;
 };
 
@@ -31,6 +42,7 @@ type ItemsAndPathProps = {
  */
 function ListResource(props: PageProps) {
   const { schema } = props;
+  const [searchParams] = useSearchParams();
   const path = "/" + useParams()["*"];
   const pageSize = 20;
 
@@ -47,6 +59,7 @@ function ListResource(props: PageProps) {
     column: "",
     direction: "none",
   });
+  const [showReloadButton, setShowReloadButton] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -75,7 +88,7 @@ function ListResource(props: PageProps) {
     return [...list];
   }
 
-  useEffect(() => {
+  function reloadResource() {
     if (!schema) {
       return;
     }
@@ -89,29 +102,29 @@ function ListResource(props: PageProps) {
       Rest.get(path + "?listAccessible=true")
         .then((data: TempAny) => {
           setAllItems(data.items);
+          setShowReloadButton(false);
           let url =
-            path + "?listAccessible=true&expand=true&offset=0&limit=1000000";
-          if (Feature.FILTER_ON_SERVER) {
-            url =
-              path +
-              "?listAccessible=true&expand=true&offset=" +
-              (page - 1) * pageSize +
-              "&limit=" +
-              pageSize;
-            if (sort.column) {
-              url += "&sortBy=" + encodeURIComponent(sort.column);
-              url += "&reverse=" + String(sort.direction === "desc");
-            }
-            search.forEach((s) => {
-              url += "&fieldFilter=" + encodeURIComponent(getFieldFilter(s));
-            });
+            path +
+            "?listAccessible=true&watchAll=true&expand=true&offset=" +
+            (page - 1) * pageSize +
+            "&limit=" +
+            pageSize;
+          if (sort.column) {
+            url += "&sortBy=" + encodeURIComponent(sort.column);
+            url += "&reverse=" + String(sort.direction === "desc");
           }
+          search.forEach((s) => {
+            url += "&fieldFilter=" + encodeURIComponent(getFieldFilter(s));
+          });
           setAbortController(
             getResourceEvents(
               schema,
               url,
-              (data: TempAny) => {
+              (data: ResourcesType) => {
                 if (data.items) {
+                  if (data.items.length > 0 && data.items[0]["$isNew"]) {
+                    setShowReloadButton(true);
+                  }
                   setItemsAndPath({ items: data.items, path });
                   setAllFieldNames(makeFieldnameList("", data.items));
                 } else {
@@ -123,7 +136,9 @@ function ListResource(props: PageProps) {
                 Toast.show("Error retrieving entry", error);
                 setItemsAndPath({ items: [], path });
               },
-              1000,
+              () => {
+                setShowReloadButton(true);
+              },
             ),
           );
         })
@@ -131,14 +146,18 @@ function ListResource(props: PageProps) {
           Toast.show("Unable to get resource in " + path, reason);
         });
     }
-  }, [page, path, schema, search]);
+  }
+
+  useEffect(() => {
+    reloadResource();
+  }, [page, path, schema, search, sort]);
 
   useEffect(() => {
     setPage(1);
   }, [path, schema, search]);
 
   useEffect(() => {
-    setSearch([]);
+    setSearch(parseFieldFilterUrl(searchParams.get("ff")));
   }, [path, schema]);
 
   useEffect(() => {
@@ -176,117 +195,8 @@ function ListResource(props: PageProps) {
     return [...filterValues];
   }
 
-  function toString(value: any, toUpper: boolean): string {
-    let ret;
-    if (!value) {
-      ret = "";
-    } else if (typeof value === "object") {
-      ret = JSON.stringify(value);
-    } else {
-      ret = String(value);
-    }
-    if (toUpper) {
-      return ret.toUpperCase();
-    } else {
-      return ret;
-    }
-  }
-
-  function getAllValues(obj: any): string[] {
-    if (obj !== null && typeof obj === "object") {
-      return Object.values(obj).flatMap(getAllValues);
-    }
-    if (obj) {
-      return [String(obj)];
-    } else {
-      return [];
-    }
-  }
-
-  /* check if value is in the entry
-   */
-  function includesValue(entry: any, search: SearchType): boolean {
-    const entryValueRaw = getValue(entry, search.field);
-    const entryValue: string = toString(entryValueRaw, search.ignoreCase);
-    const searchValue: string = toString(search.value, search.ignoreCase);
-    switch (search.condition) {
-      case "!=":
-        return entryValue !== searchValue;
-      case "<=":
-        return entryValue <= searchValue;
-      case "=":
-        return entryValue === searchValue;
-      case ">=":
-        return entryValue >= searchValue;
-      case "contains":
-        return entryValue.includes(searchValue);
-      case "startsWith":
-        return entryValue.startsWith(searchValue);
-      case "endsWith":
-        return entryValue.endsWith(searchValue);
-      case "exists":
-        return !!entryValueRaw;
-      case "notExists":
-        return !entryValueRaw;
-      case "search": {
-        const allValues = getAllValues(entry);
-        for (let i = 0; i < allValues.length; i++) {
-          if (search.ignoreCase) {
-            if (
-              allValues[i].toUpperCase().includes(search.value.toUpperCase())
-            ) {
-              return true;
-            }
-          }
-        }
-        return false;
-      }
-    }
-    return false;
-  }
-
   if (itemsAndPath.items) {
-    let searchFiltered: any = undefined;
-    let data = itemsAndPath.items.filter(
-      (d: TempAny) => d.__deleted__ !== true,
-    );
-    if (!Feature.FILTER_ON_SERVER) {
-      const sorted =
-        sort.column && sort.direction !== "none"
-          ? data.sort((item1: any, item2: any) => {
-              const value1 = getValue(item1, sort.column);
-              const value2 = getValue(item2, sort.column);
-              let asc;
-              if (typeof value1 === "number" && typeof value2 === "number") {
-                asc = value1 - value2;
-              } else if (
-                typeof value1 === "object" &&
-                typeof value2 === "object"
-              ) {
-                asc = JSON.stringify(value1).localeCompare(
-                  JSON.stringify(value2),
-                );
-              } else {
-                asc = String(value1).localeCompare(String(value2));
-              }
-              return sort.direction === "asc" ? asc : -asc;
-            })
-          : data;
-
-      searchFiltered = sorted.filter((entry) => {
-        for (let i = 0; i < search.length; i++) {
-          if (search[i] && !includesValue(entry, search[i])) {
-            return false;
-          }
-        }
-        return true;
-      });
-
-      data = searchFiltered.filter(
-        (_: any, index: number) =>
-          index >= (page - 1) * pageSize && index < page * pageSize,
-      );
-    }
+    const data = [...itemsAndPath.items];
     return (
       <PageLayout {...props}>
         <ResourceHeader
@@ -298,15 +208,35 @@ function ListResource(props: PageProps) {
         />
         <div className="NuoTableContainer">
           <div className="NuoTableOptions">
-            <Search
-              path={path}
-              fieldNames={allFieldNames}
-              search={search}
-              setSearch={(search: SearchType[]) => {
-                setPage(1);
-                setSearch(search);
-              }}
-            />
+            <div className="NuoRow" style={{ gap: "10px" }}>
+              <Search
+                path={path}
+                fieldNames={allFieldNames}
+                search={search}
+                setSearch={(search: SearchType[]) => {
+                  setPage(1);
+                  setSearch(search);
+                  navigate(
+                    window.location.pathname +
+                      "?ff=" +
+                      encodeURIComponent(makeFieldFilterUrl(search)),
+                    { replace: true },
+                  );
+                }}
+              />
+              {showReloadButton && (
+                <Button
+                  data-testid="resource-reload"
+                  variant="outlined"
+                  onClick={() => {
+                    setShowReloadButton(false);
+                    reloadResource();
+                  }}
+                >
+                  <RefreshIcon />
+                </Button>
+              )}
+            </div>
           </div>
           <div className="NuoColumn NuoTableScrollWrapper">
             <Table
@@ -317,9 +247,7 @@ function ListResource(props: PageProps) {
               sort={sort}
               setSort={setSort}
             />
-            {renderPaging(
-              searchFiltered ? searchFiltered.length : allItems.length,
-            )}
+            {renderPaging(allItems.length)}
           </div>
         </div>
       </PageLayout>

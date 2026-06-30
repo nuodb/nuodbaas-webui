@@ -230,12 +230,17 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
         .filter((key) => !key.includes("/"))
         .map((key) => {
           return (
-            <div
-              key={key}
-              className={"NuoTableField_" + prefix.replaceAll(".", "_")}
-            >
-              {String(key)}:{" "}
-              {getRecursiveValue(getValue(values, prefix + "." + key), props.t)}
+            <div>
+              <div
+                key={key}
+                className={"NuoTableField_" + prefix.replaceAll(".", "_")}
+              >
+                {String(key)}:{" "}
+                {getRecursiveValue(
+                  getValue(values, prefix + "." + key),
+                  props.t,
+                )}
+              </div>
             </div>
           );
         }),
@@ -251,33 +256,33 @@ export default function FieldMap(props: FieldMapProps): ReactNode {
         key.startsWith(group + "/"),
       );
       ret.push(
-        <div
-          className={"NuoTableField_" + prefix.replaceAll(".", "_")}
-          key={group}
-        >
-          <details>
-            <summary>
-              <div className="NuoSummaryContent">
-                {group}
-                <div className="NuoBadgeLight">{groupKeys.length}</div>
-              </div>
-            </summary>
-            {groupKeys.map((key) => {
-              const label =
-                key.substring(group.length + 1) +
-                ": " +
-                getValue(values, prefix + "." + key);
-              return (
-                <div
-                  className="NuoEllipsis"
-                  style={{ width: "200px" }}
-                  title={label}
-                >
-                  {label}
+        <div key={group}>
+          <div className={"NuoTableField_" + prefix.replaceAll(".", "_")}>
+            <details>
+              <summary>
+                <div className="NuoSummaryContent">
+                  {group}
+                  <div className="NuoBadgeLight">{groupKeys.length}</div>
                 </div>
-              );
-            })}
-          </details>
+              </summary>
+              {groupKeys.map((key) => {
+                const label =
+                  key.substring(group.length + 1) +
+                  ": " +
+                  getValue(values, prefix + "." + key);
+                return (
+                  <div
+                    key={key}
+                    className="NuoEllipsis"
+                    style={{ width: "200px" }}
+                    title={label}
+                  >
+                    {label}
+                  </div>
+                );
+              })}
+            </details>
+          </div>
         </div>,
       );
     });

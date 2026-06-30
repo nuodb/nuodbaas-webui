@@ -406,7 +406,9 @@
     "more": "More",
     "less": "Less",
     "networkError": "Network error",
-    "unableToLoadOtherDomain": "Unable to load resources from other domain. What do you want to do?"
+    "unableToLoadOtherDomain": "Unable to load resources from other domain. What do you want to do?",
+    "showRemaining": "Show remaining {{remaining}}",
+    "showNext10of": "Show next 10 of {{remaining}}"
   },
   "section": {
     "title": {

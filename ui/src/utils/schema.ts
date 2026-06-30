@@ -8,32 +8,11 @@ import {
   TempAny,
   SchemaType,
   FieldParametersType,
+  ResourcesType,
+  DataType,
 } from "./types";
 import { getValue } from "../components/fields/utils";
 let schema: TempAny = null;
-
-export const Feature: { FILTER_ON_SERVER: boolean | undefined } = {
-  FILTER_ON_SERVER: undefined,
-};
-
-function compareSemVer(semver1: string, semver2: string): number | null {
-  semver1 = semver1.split("-")[0].split("+")[0];
-  semver2 = semver2.split("-")[0].split("+")[0];
-  const parts1 = semver1.split(".");
-  const parts2 = semver2.split(".");
-  for (let i = 0; i < parts1.length && i < parts2.length; i++) {
-    const val1 = parseInt(parts1[i]);
-    const val2 = parseInt(parts2[i]);
-    if (isNaN(val1) || isNaN(val2)) {
-      return null;
-    }
-    if (val1 < val2) return -1;
-    if (val1 > val2) return 1;
-  }
-  if (parts1.length < parts2.length) return -1;
-  if (parts1.length > parts2.length) return 1;
-  return 0;
-}
 
 /**
  * Pulls OpenAPI spec schema and parses it
@@ -52,16 +31,8 @@ export async function getSchema() {
         ).data;
       }
       parseSchema(schema, schema, []);
-      const version = schema.info?.version || "1.0.0";
       schema = schema["paths"];
       schema = filterAccessPaths(schema);
-      Feature.FILTER_ON_SERVER =
-        ((compareSemVer(version, "2.12.0") || 0) >= 0 &&
-          schema["/users"]?.get?.parameters?.find(
-            (p: { name: string }) => p.name === "fieldFilter",
-          ) &&
-          true) ||
-        false;
     } catch (error) {
       console.log("ERROR", error);
       Auth.handle401Error(error);
@@ -467,15 +438,19 @@ export function hasActiveStream(): boolean {
  * @param {*} path
  * @param {*} multiResolve - returns response
  * @param {*} multiReject - returns error
- * @param {*} retryIntervalMS - milliseconds for the next retry (which will be doubled each time). Set to <= 0 to disable retries.
+ * @param {*} multiAbort - notification if connection was aborted / canceled
  * @returns AbortController - use ret.abort() to abort
  */
 export function getResourceEvents(
   schema: any,
   path: string,
-  multiResolve: TempAny,
+  multiResolve: (
+    resources: ResourcesType,
+    type?: "created" | "updated" | "deleted",
+    resource?: DataType,
+  ) => void,
   multiReject: TempAny,
-  retryIntervalMS: number = 0,
+  multiAbort: () => void,
   transactionNumber: number = -1,
 ) {
   //only one event stream is supported - close prior one if it exists.
@@ -490,7 +465,7 @@ export function getResourceEvents(
 
   if (!hasEventsAccess) {
     Rest.get(path)
-      .then((data) => multiResolve(data))
+      .then((data) => multiResolve(data as ResourcesType))
       .catch((reason) => multiReject(reason));
     return;
   }
@@ -514,8 +489,8 @@ export function getResourceEvents(
       monitored = { abort: eventsAbortController, transactionNumber };
       let event = null;
       let data = null;
-      let id = null;
-      let mergedData: TempAny = {};
+      let id: string = "";
+      let mergedData: ResourcesType = { items: [] };
       let buffer = Uint8Array.of();
       for await (const chunk of response) {
         buffer = concatChunks(buffer, chunk);
@@ -533,77 +508,46 @@ export function getResourceEvents(
           } else if (line.startsWith("id: ")) {
             id = line.substring("id: ".length);
           } else if (line.length === 0) {
-            if (event === "HEARTBEAT") {
+            if (event === "HEARTBEAT" || !data) {
               // ignore
-            } else if (event === "RESYNC" && data !== null) {
+            } else if (event === "RESYNC") {
               mergedData = JSON.parse(data);
+              mergedData.items = mergedData.items || [];
               multiResolve(mergedData);
-            } else if (
-              event === "UPDATED" &&
-              id !== null &&
-              mergedData.items &&
-              data !== null
-            ) {
-              const newData: TempAny = { ...mergedData };
-              newData.items = [...newData.items];
-              let modified = false;
-              for (let i = 0; i < newData.items.length; i++) {
-                if (id === newData.items[i]["$ref"]) {
-                  newData.items[i] = JSON.parse(data);
-                  newData.items[i]["$ref"] = id;
-                  modified = true;
-                  break;
-                }
-              }
-              if (modified) {
-                mergedData = newData;
+            } else if (!id) {
+              // ignore
+            } else if (event === "UPDATED") {
+              const foundIndex = mergedData.items.findIndex(
+                (item: DataType) => item["$ref"] === id,
+              );
+              if (foundIndex !== -1) {
+                mergedData.items[foundIndex] = {
+                  ...JSON.parse(data),
+                  ["$isNew"]: mergedData.items[foundIndex]["$isNew"],
+                  ["$ref"]: id,
+                };
                 multiResolve(mergedData);
               } else {
-                console.error("item with id " + id + " not found for merging");
+                multiResolve(mergedData, "updated", {
+                  ...JSON.parse(data),
+                  ["$ref"]: id,
+                });
               }
-            } else if (
-              event === "UPDATED" &&
-              data !== null &&
-              !mergedData.items
-            ) {
-              mergedData = JSON.parse(data);
-              multiResolve(mergedData);
-            } else if (event === "DELETED" && id !== null && mergedData.items) {
-              const newData: TempAny = { ...mergedData };
-              newData.items = [...newData.items];
-              let modified = false;
-              for (let i = 0; i < newData.items.length; i++) {
-                if (id === newData.items[i]["$ref"]) {
-                  newData.items[i] = { ...newData.items[i], __deleted__: true };
-                  modified = true;
-                  break;
-                }
-              }
-              if (modified) {
-                mergedData = newData;
+            } else if (event === "DELETED" && id !== null) {
+              const foundIndex = mergedData.items.findIndex(
+                (item: DataType) => item["$ref"] === id,
+              );
+              if (foundIndex !== -1) {
+                mergedData.items.splice(foundIndex, 1);
                 multiResolve(mergedData);
+              } else {
+                multiResolve(mergedData, "deleted", { ["$ref"]: id });
               }
-            } else if (event === "DELETED" && !mergedData.items) {
-              mergedData = {};
-              multiResolve(mergedData);
             } else if (event === "CREATED" && id !== null && data !== null) {
               data = JSON.parse(data);
               data["$ref"] = id;
-              mergedData = { ...mergedData };
-              mergedData.items = [...mergedData.items];
-
-              let found = false;
-              for (let i = 0; i < mergedData.items.length; i++) {
-                if (id === mergedData.items[i]["$ref"]) {
-                  mergedData.items[i] = data;
-                  delete mergedData.items[i]["__deleted__"];
-                  found = true;
-                  break;
-                }
-              }
-              if (!found) {
-                mergedData.items.push(data);
-              }
+              data["$isNew"] = true;
+              mergedData.items = [data, ...mergedData.items];
               multiResolve(mergedData);
             } else {
               console.log(
@@ -614,7 +558,7 @@ export function getResourceEvents(
             //clear out all data
             event = null;
             data = null;
-            id = null;
+            id = "";
           } else {
             console.log("Ignoring line " + line);
           }
@@ -628,31 +572,15 @@ export function getResourceEvents(
       if (error.status === 404) {
         // fall back to non-streaming request
         Rest.get(path)
-          .then((data) => multiResolve(data))
+          .then((data) => multiResolve(data as ResourcesType))
           .catch((reason) => multiReject(reason));
       } else if (error.status === 400) {
         multiReject(error);
+      } else if (error.code === "ERR_CANCELED") {
+        // noop - canceled due to new request
       } else {
-        // request failed. Retry incrementally.
-        if (retryIntervalMS > 0) {
-          // reconnect - server/proxy might disconnect due to a timeout
-          setTimeout(() => {
-            if (
-              monitored &&
-              monitored.transactionNumber === transactionNumber
-            ) {
-              // only retry if the event stream for the specified path is not superseded by another one
-              getResourceEvents(
-                schema,
-                path,
-                multiResolve,
-                multiReject,
-                retryIntervalMS * 1.3,
-                transactionNumber,
-              ); //retry with a 30% delay (exponential backoff)
-            }
-          }, retryIntervalMS);
-        }
+        // request failed (i.e. network error). Send Abort notification
+        multiAbort();
       }
     });
 
