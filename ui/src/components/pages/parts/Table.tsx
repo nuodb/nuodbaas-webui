@@ -176,7 +176,7 @@ function Table(props: TableProps) {
 
   useEffect(() => {
     const dataRefs = new Set(data.map((d: { ["$ref"]: string }) => d["$ref"]));
-    setSelected(new Set([...selected].filter(s => dataRefs.has(s))));
+    setSelected(new Set([...selected].filter((s) => dataRefs.has(s))));
   }, [data]);
 
   type TableLabelsType = {
