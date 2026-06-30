@@ -173,7 +173,8 @@ test.describe("UserTest", () => {
     await waitForTestId(page, "resource-reload");
 
     // shut down TCP server and set UI back to default host
-    await page.goto("http://localhost/ui/");
-    await stopTcpForwarder(server);
+    await retry(async () => {
+      await page.goto("http://localhost/ui/");
+    });
   });
 });
