@@ -140,6 +140,12 @@ function Table(props: TableProps) {
     });
 
     setColumns(cols);
+  }, [data, path, schema, t]);
+
+  useEffect(() => {
+    if (!Auth.hasSlaRules()) {
+      return;
+    }
 
     const pathParts = path.split("/");
     const organization = pathParts.length >= 3 ? pathParts[2] : undefined;
@@ -159,7 +165,7 @@ function Table(props: TableProps) {
       });
       setSlaByPath(newSlaByPath);
     });
-  }, [data, path, schema, t]);
+  }, [path]);
 
   useEffect(() => {
     setSelected(new Set<string>());
