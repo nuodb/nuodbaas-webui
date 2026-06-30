@@ -146,7 +146,7 @@ export function getRecursiveValue(value: TempAny, t: TFunction) {
     } else {
       return (
         <MoreDiv maxHeight={150} t={t}>
-          <dl className="map">
+          <dl className="map NuoMap">
             {Object.keys(value).map((key) => {
               if (
                 typeof value[key] === "object" &&
