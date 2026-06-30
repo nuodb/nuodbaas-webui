@@ -170,7 +170,7 @@ test.describe("UserTest", () => {
     await stopTcpForwarder(server);
 
     // ensure Reload button shows up
-    await waitForTestId(page, "resource-reload")
+    await waitForTestId(page, "resource-reload");
 
     // shut down TCP server and set UI back to default host
     await page.goto("http://localhost/ui/");
