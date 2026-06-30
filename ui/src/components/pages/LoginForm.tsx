@@ -45,18 +45,13 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
   const [authHeader, setAuthHeader] = useState("");
   const [showLoginForm, setShowLoginForm] = useState(false);
   // Specify redirect URL so that provider name is supplied as query parameter
-  const queryRedirect =
-    queryParams.get("redirect") || queryParams.get("redirectUrl") || "";
-  const redirectUrl = encodeURIComponent(
-    window.location.protocol +
-      "//" +
-      window.location.host +
-      "/ui/login?provider={name}&redirectUrl=" +
-      window.location.protocol +
-      "//" +
-      window.location.host +
-      queryRedirect,
-  );
+  const redirectUrl =
+    window.location.origin +
+    "/ui/login?provider={name}&redirectUrl=" +
+    new URL(
+      queryParams.get("redirect") || queryParams.get("redirectUrl") || "",
+      window.location.origin,
+    ).href;
 
   useEffect(() => {
     handleInitialLoad();
@@ -87,7 +82,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
   async function fetchProviders() {
     try {
       const data = (await Rest.get(
-        `/login/providers?redirectUrl=${redirectUrl}`,
+        `/login/providers?redirectUrl=${encodeURIComponent(redirectUrl)}`,
       )) as ProvidersResponse | undefined;
       if (data?.items) {
         setProviders(data.items);
@@ -295,7 +290,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                 data-testid={`login_${provider.name}`}
                 variant="contained"
                 onClick={() =>
-                  (window.location.href = `${provider.url}&redirectUrl=${redirectUrl}`)
+                  (window.location.href = `${provider.url}&redirectUrl=${encodeURIComponent(redirectUrl)}`)
                 }
               >
                 {t("form.login.label.loginWith", {
