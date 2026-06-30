@@ -238,20 +238,6 @@ function ListResource(props: PageProps) {
               )}
             </div>
           </div>
-          <Button
-            onClick={() => {
-              // TODO remove this button before pushing PR
-              const username = "epoch" + String(new Date().getTime());
-              Rest.put("/users/acme/" + username, {
-                organization: "acme",
-                name: username,
-                password: "pass",
-                accessRule: { allow: ["all:acme"] },
-              });
-            }}
-          >
-            Create random ACME user
-          </Button>
           <div className="NuoColumn NuoTableScrollWrapper">
             <Table
               data-testid="list_resource__table"
