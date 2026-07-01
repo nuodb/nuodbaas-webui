@@ -188,7 +188,7 @@ export default function FieldUserRole(props: FieldProps): ReactNode {
       });
     }
     return (
-      <dl className="map">
+      <dl className="map NuoMap">
         {Object.keys(properties).map((key) => {
           const prefixKey = prefix ? prefix + "." + key : key;
           const fieldView = Field({
