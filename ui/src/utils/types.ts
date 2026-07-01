@@ -112,4 +112,5 @@ export type DataType = {
 
 export type ResourcesType = {
   items: DataType[];
+  total: number;
 };
