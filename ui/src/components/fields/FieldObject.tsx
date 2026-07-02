@@ -106,7 +106,7 @@ export default function FieldObject(props: FieldProps): ReactNode {
     }
     return (
       <MoreDiv maxHeight={150} t={props.t}>
-        <dl className="map">
+        <dl className="map NuoMap">
           {Object.keys(properties).map((key) => {
             const prefixKey = prefix ? prefix + "." + key : key;
             const fieldView = Field({
