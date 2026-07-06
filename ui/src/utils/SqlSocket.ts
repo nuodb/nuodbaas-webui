@@ -61,6 +61,7 @@ export type SqlType = {
     timeout?: number,
   ) => Promise<SqlResponse>;
   getDefaultSchema: () => string;
+  setDefaultSchema: (schema_: string) => void;
   sqlImport: (
     file: File,
     progressKey: string,
@@ -115,8 +116,12 @@ export default function SqlSocket(
     }
   }
 
-  function getDefaultSchema() {
+  function getDefaultSchema(): string {
     return schema;
+  }
+
+  function setDefaultSchema(schema_: string) {
+    schema = schema_;
   }
 
   function getOrgProjDbSchemaUrl() {
@@ -198,6 +203,7 @@ export default function SqlSocket(
   return {
     runCommand,
     getDefaultSchema,
+    setDefaultSchema,
     sqlImport,
     sqlSimpleImport,
     getDbUsername,

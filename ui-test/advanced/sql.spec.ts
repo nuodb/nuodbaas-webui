@@ -52,10 +52,29 @@ async function loginSqlEditor(page: Page): Promise<void> {
 
   await replaceInputOrTextareaByName(page, "dbUsername", DB_USERNAME);
   await replaceInputOrTextareaByName(page, "dbPassword", DB_PASSWORD);
-  await replaceInputOrTextareaByName(page, "dbSchema", DB_SCHEMA);
   await page.getByTestId("sql.login.button").click();
   await waitRestComplete(page);
 }
+
+export async function replaceSqlQuery(
+  page: Page,
+  value: string,
+): Promise<void> {
+  const editor = page.locator('.cm-content');
+
+  // Ensure the editor is fully visible and ready
+  await expect(editor).toBeVisible();
+
+  // 3. Clear existing text in CodeMirror
+  // CodeMirror doesn't always clear using standard .fill("") due to internal state tracking
+  await editor.focus();
+  await page.keyboard.press('Control+A'); // Use 'Meta+A' if testing purely on macOS
+  await page.keyboard.press('Backspace');
+
+  // 4. Type text dynamically into CodeMirror
+  await editor.fill(value);
+}
+
 
 /** Verifies the SQL user exists in the table, checks all role options, then deletes it. */
 async function verifyAndDeleteDbUser(page: Page, user: string): Promise<void> {
@@ -112,9 +131,8 @@ test.describe("SqlTests", () => {
 
     // Run DDL + DML + SELECT
     await page.getByTestId("query").click();
-    await replaceInputByName(
+    await replaceSqlQuery(
       page,
-      "sqlQuery",
       "create table table1 (name VARCHAR(80))",
     );
     await page.getByTestId("submitSql").click();
@@ -122,9 +140,8 @@ test.describe("SqlTests", () => {
 
     await page.getByTestId("query").click();
     await sleep(1000); // TODO(agr22)
-    await replaceInputByName(
+    await replaceSqlQuery(
       page,
-      "sqlQuery",
       "insert into table1 (name) values ('abc')",
     );
     await page.getByTestId("submitSql").click();
@@ -132,7 +149,7 @@ test.describe("SqlTests", () => {
 
     await sleep(1000); // TODO(agr22)
     await page.getByTestId("query").click();
-    await replaceInputByName(page, "sqlQuery", "select * from table1");
+    await replaceSqlQuery(page, "select * from table1");
     await page.getByTestId("submitSql").click();
     await waitRestComplete(page);
 

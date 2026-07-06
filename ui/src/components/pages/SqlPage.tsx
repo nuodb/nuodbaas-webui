@@ -96,14 +96,16 @@ function SqlTabs({ dbTable, sqlConnection, tasks, setTasks }: SqlTabsProps) {
   );
 }
 
+let schemasCache: string[] | undefined = undefined;
 let tablesCache: string[] | undefined = undefined;
 
 function SqlPage(props: PageProps) {
   const params = useParams();
-  const [dbTable, setDbTable] = useState("");
   const [sqlConnection, setSqlConnection] = useState<
     SqlType | undefined | void | ""
   >(undefined);
+  const [dbSchema, setDbSchema] = useState("USER");
+  const [dbTable, setDbTable] = useState("");
   const [loginState, setLoginState] = useState<
     "loading" | "login" | "loginWithRegister" | "connected"
   >("loading");
@@ -148,7 +150,6 @@ function SqlPage(props: PageProps) {
   }
 
   useEffect(() => {
-    loadTables(true);
     tryDbaasLogin().then((sqlConnection: SqlType | undefined | void | "") => {
       if (sqlConnection) {
         setSqlConnection(sqlConnection);
@@ -159,31 +160,38 @@ function SqlPage(props: PageProps) {
     });
   }, []);
 
-  async function loadTables(useCache: boolean): Promise<MenuItemProps[]> {
+  useEffect(() => {
+    loadSchemas();
+  }, [sqlConnection]);
+
+  useEffect(() => {
+    loadTables();
+  }, [dbSchema, sqlConnection]);
+
+  async function loadTables(): Promise<MenuItemProps[]> {
     if (!sqlConnection) {
       return new Promise((resolve) => resolve([]));
     }
-    if (!useCache || !tablesCache) {
-      tablesCache = [];
-      const results = await sqlConnection.runCommand("EXECUTE_QUERY", [
-        "SELECT tablename FROM system.tables where type = 'TABLE' and schema = '" +
-          sqlConnection.getDefaultSchema() +
-          "'",
-      ]);
-      if (results.error) {
-        Toast.show(results.error, results);
-        setDbTable("");
-      } else if (results.rows) {
-        tablesCache = results.rows.map((row) => row.values[0]);
-        if (!tablesCache.includes(dbTable)) {
-          if (tablesCache.length > 0) {
-            setDbTable(tablesCache[0]);
-          } else {
-            setDbTable("");
-          }
+    tablesCache = [];
+    const results = await sqlConnection.runCommand("EXECUTE_QUERY", [
+      "SELECT tablename FROM system.tables where type = 'TABLE' and schema = '" +
+        dbSchema +
+        "'",
+    ]);
+    if (results.error) {
+      Toast.show(results.error, results);
+      setDbTable("");
+    } else if (results.rows) {
+      tablesCache = results.rows.map((row) => row.values[0]);
+      if (!tablesCache.includes(dbTable)) {
+        if (tablesCache.length > 0) {
+          setDbTable(tablesCache[0]);
+        } else {
+          setDbTable("");
         }
       }
     }
+
     return new Promise((resolve) =>
       resolve(
         (tablesCache || []).map((table) => {
@@ -192,6 +200,48 @@ function SqlPage(props: PageProps) {
             label: table,
             onClick: () => {
               setDbTable(table);
+              return true;
+            },
+          };
+        }),
+      ),
+    );
+  }
+
+  async function loadSchemas(): Promise<MenuItemProps[]> {
+    if (!sqlConnection) {
+      return new Promise((resolve) => resolve([]));
+    }
+
+    const results = await sqlConnection.runCommand("EXECUTE_QUERY", [
+      "SELECT schema FROM system.schemas",
+    ]);
+    if (results.error) {
+      Toast.show(results.error, results);
+      setDbSchema("USER");
+    } else if (results.rows) {
+      schemasCache = results.rows.map((row) => row.values[0]);
+      schemasCache = schemasCache.filter(
+        (schema) => schema.toUpperCase() !== "SYSTEM",
+      );
+      if (!schemasCache.includes("USER")) {
+        schemasCache.push("USER");
+      }
+      if (!schemasCache.includes(dbSchema)) {
+        schemasCache.push(dbSchema);
+      }
+    }
+
+    return new Promise((resolve) =>
+      resolve(
+        (schemasCache || []).map((schema) => {
+          return {
+            id: schema,
+            label: schema,
+            onClick: () => {
+              setDbSchema(schema);
+              loadTables();
+              sqlConnection.setDefaultSchema(schema);
               return true;
             },
           };
@@ -244,6 +294,33 @@ function SqlPage(props: PageProps) {
     }
   }
 
+  const breadCrumbs = [
+    params.organization,
+    params.project,
+    params.database,
+  ].map((name) => {
+    return (
+      <Typography
+        color="text.primary"
+        style={{ fontSize: "1em", textWrap: "nowrap" }}
+      >
+        {name}
+      </Typography>
+    );
+  });
+  if (sqlConnection) {
+    breadCrumbs.push(
+      <ComboBox loadItems={loadSchemas} selected={dbSchema}>
+        <label>{dbSchema}</label>
+      </ComboBox>,
+    );
+    breadCrumbs.push(
+      <ComboBox loadItems={loadTables} selected={dbTable}>
+        <label>{dbTable}</label>
+      </ComboBox>,
+    );
+  }
+
   return (
     <PageLayout {...props}>
       <div className="NuoListResourceHeader">
@@ -267,23 +344,7 @@ function SqlPage(props: PageProps) {
               flexWrap: "nowrap",
             }}
           >
-            {[params.organization, params.project, params.database].map(
-              (name) => {
-                return (
-                  <Typography
-                    color="text.primary"
-                    style={{ fontSize: "1em", textWrap: "nowrap" }}
-                  >
-                    {name}
-                  </Typography>
-                );
-              },
-            )}
-            {(sqlConnection && (
-              <ComboBox loadItems={loadTables} selected={dbTable}>
-                <label>{dbTable}</label>
-              </ComboBox>
-            )) || <div></div>}
+            {breadCrumbs}
           </StyledBreadcrumbs>
           <div className="NuoRight">
             {(sqlConnection as SqlType)?.getDbUsername() && (

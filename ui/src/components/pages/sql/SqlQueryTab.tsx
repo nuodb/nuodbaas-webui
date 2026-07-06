@@ -8,11 +8,12 @@ import {
   SqlResponse,
   SqlType,
 } from "../../../utils/SqlSocket";
-import TextField from "../../controls/TextField";
 import Button from "../../controls/Button";
 import SqlResultsRender from "./SqlResultsRender";
 import Toast from "../../controls/Toast";
 import Pagination, { pageFilter } from "../../controls/Pagination";
+import CodeMirror, { EditorView } from "@uiw/react-codemirror";
+import { sql } from "@codemirror/lang-sql";
 
 type SqlQueryTabProps = {
   sqlConnection: SqlType;
@@ -42,17 +43,20 @@ function SqlQueryTab({ sqlConnection, dbTable }: SqlQueryTabProps) {
   return (
     <>
       <form>
-        <div className="NuoRow NuoFieldContainer">
-          <TextField
-            disabled={!sqlConnection || executing}
-            required
+        <div className="NuoRow NuoFieldContainer" style={{ gap: "5px" }}>
+          <CodeMirror
+            className="NuoRow"
             data-testid="sqlQuery"
             id="sqlQuery"
-            label="SQL Query"
             value={sqlQuery}
-            onChange={(
-              event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-            ) => setSqlQuery(event.target.value)}
+            width="100%"
+            height="200px"
+            style={{ overflow: "auto" }}
+            extensions={[
+              sql(),
+              EditorView.editable.of(sqlConnection && !executing),
+            ]}
+            onChange={(value) => setSqlQuery(value)}
           />
           <Button
             data-testid="submitSql"
