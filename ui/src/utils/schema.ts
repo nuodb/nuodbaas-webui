@@ -490,7 +490,7 @@ export function getResourceEvents(
       let event = null;
       let data = null;
       let id: string = "";
-      let mergedData: ResourcesType = { items: [] };
+      let mergedData: ResourcesType = { items: [], total: 0 };
       let buffer = Uint8Array.of();
       for await (const chunk of response) {
         buffer = concatChunks(buffer, chunk);
