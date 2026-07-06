@@ -415,7 +415,10 @@ start-dev-remote: setup-nginx-default-conf ## launch WebUI to remote Control Pla
 		; \
 	fi
 	(cd ui && npm install && npm start &)
-	docker run --rm -d --name nuodb-webui-dev -v `pwd`/docker/development/default.conf:/etc/nginx/conf.d/default.conf --network=host -it nginx:stable-alpine
+	docker run --rm -d --name nuodb-webui-dev \
+		-v `pwd`/docker/development/default.conf:/etc/nginx/conf.d/default.conf \
+		-v `pwd`/ui/public/theme/custom.json:/usr/share/nginx/html/theme/custom.json \
+		--network=host -it nginx:stable-alpine
 
 .PHONY: stop-dev-remote ## stop WebUI to remote Controll Plane
 stop-dev-remote:

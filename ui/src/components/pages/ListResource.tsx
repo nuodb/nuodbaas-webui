@@ -35,6 +35,7 @@ import Button from "../controls/Button";
 type ItemsAndPathProps = {
   items: DataType[] | null;
   path: string;
+  itemsTotal: number;
 };
 
 /**
@@ -49,6 +50,7 @@ function ListResource(props: PageProps) {
   const [itemsAndPath, setItemsAndPath] = useState<ItemsAndPathProps>({
     items: null,
     path,
+    itemsTotal: 0,
   });
   const [page, setPage] = useState(1);
   const [allItems, setAllItems] = useState([]);
@@ -125,16 +127,20 @@ function ListResource(props: PageProps) {
                   if (data.items.length > 0 && data.items[0]["$isNew"]) {
                     setShowReloadButton(true);
                   }
-                  setItemsAndPath({ items: data.items, path });
+                  setItemsAndPath({
+                    items: data.items,
+                    path,
+                    itemsTotal: data.total,
+                  });
                   setAllFieldNames(makeFieldnameList("", data.items));
                 } else {
-                  setItemsAndPath({ items: [], path });
+                  setItemsAndPath({ items: [], path, itemsTotal: 0 });
                 }
               },
               (error: TempAny) => {
                 Auth.handle401Error(error);
                 Toast.show("Error retrieving entry", error);
-                setItemsAndPath({ items: [], path });
+                setItemsAndPath({ items: [], path, itemsTotal: 0 });
               },
               () => {
                 setShowReloadButton(true);
@@ -247,7 +253,7 @@ function ListResource(props: PageProps) {
               sort={sort}
               setSort={setSort}
             />
-            {renderPaging(allItems.length)}
+            {renderPaging(itemsAndPath.itemsTotal)}
           </div>
         </div>
       </PageLayout>
