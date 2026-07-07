@@ -83,6 +83,14 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
     "}",
   ];
 
+  const jdbcUrl =
+    "jdbc:com.nuodb://" +
+    encodeURIComponent(sqlEndpoint) +
+    ":443/" +
+    encodeURIComponent(dbName) +
+    "?trustedCertificates=" +
+    encodeURIComponent(caPem);
+
   const jdbcSh = [
     'echo "' + caPem + '" > ' + dbName + ".pem",
     'keytool -import -trustcacerts -alias "' +
@@ -274,6 +282,7 @@ export default function DbConnectionInfo({ data, t }: DbConnectionInfoProps) {
 
   return (
     <div className="NuoDbConnectionInfo">
+      {renderCopyField(t("dialog.dbConnectionInfo.label.databaseUrl"), jdbcUrl)}
       {renderCopyField(t("dialog.dbConnectionInfo.label.database"), dbName)}
       {renderCopyField(
         t("dialog.dbConnectionInfo.label.sqlEndpoint"),

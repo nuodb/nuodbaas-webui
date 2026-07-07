@@ -339,6 +339,7 @@
       "label": {
         "database": "Database",
         "sqlEndpoint": "SQL Endpoint",
+        "databaseUrl": "Database URL",
         "certificate": "Certificate",
         "codeSamples": "Code Samples",
         "description": "Following samples require the NuoDB client library which can be downloaded from [here](https://github.com/nuodb/nuodb-client/releases). Fill in database username + password and run the samples below from within the extracted NuoDB client library directory.",
