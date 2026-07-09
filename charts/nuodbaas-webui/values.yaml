@@ -146,3 +146,10 @@ nuodbaasWebui:
   customConfig: |
     {
     }
+
+  instances:
+    # Comma separated list of allowed UNID's for this instance (typically only one)
+    unids: ""
+
+    # Comma separated list of at least one directory URL (includes one of the UNID's above in the URL)
+    directoryUrls: ""

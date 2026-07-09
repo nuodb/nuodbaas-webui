@@ -22,7 +22,7 @@ fi
 
 if [ "${NUODB_MULTI_INSTANCE_URL}" != "" ] ; then
     find /usr/share/nginx/html -type f ! -name "custom.json" | while read line; do
-        sed -i "s#___NUODB_DIRECTORY_SERVER_URL___#${NUODB_MULTI_INSTANCE_URL}#g" ${line}
+        sed -i "s#___NUODB_MULTI_INSTANCE_URL___#${NUODB_MULTI_INSTANCE_URL}#g" ${line}
     done
 fi
 
@@ -46,5 +46,7 @@ if [ "${NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE}" != "" ] ; then
             && mv "${line}.tmp" "${line}"
     done
 fi
+
+/ui-server -unids "$NUODBAAS_WEBUI_INSTANCES_UNIDS" -hosts "$NUODBAAS_WEBUI_HOSTS" -pathPrefix "$NUODBAAS_WEBUI_PATH_PREFIX" -otherInstances "$NUODBAAS_WEBUI_INSTANCES_DIRECTORY_URLS"
 
 exec nginx -g "daemon off;"

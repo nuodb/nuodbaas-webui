@@ -51,6 +51,15 @@ spec:
               value: {{ .Values.nuodbaasWebui.ingress.pathPrefix }}
             - name: NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE
               value: {{ .Values.nuodbaasWebui.ingress.pathPrefixAlternate }}
+            - name: NUODBAAS_WEBUI_INSTANCES_UNIDS
+              value: {{ .Values.nuodbaasWebui.instances.unids }}
+            - name: NUODBAAS_WEBUI_INSTANCES_DIRECTORY_URLS
+              value: {{ .Values.nuodbaasWebui.instances.directoryUrls }}
+            {{- if .Values.nuodbaasWebui.ingress.tls.hosts }}
+            - name: NUODBAAS_WEBUI_HOSTS
+              value: {{ join "," .Values.nuodbaasWebui.ingress.tls.hosts | quote }}
+            {{- end }}
+
             {{- include "nuodbaas-webui.env" . | nindent 12 }}
           envFrom: []
           livenessProbe:
