@@ -19,7 +19,6 @@ function SqlLogin({ setSqlConnection, showRegistration }: SqlLoginProps) {
   const params = useParams();
   const [dbUsername, setDbUsername] = useState("");
   const [dbPassword, setDbPassword] = useState("");
-  const [dbSchema, setDbSchema] = useState("");
   const [error, setError] = useState<string | undefined>("");
   const [showRegisterUserDialog, setShowRegisterUserDialog] = useState(false);
 
@@ -93,16 +92,6 @@ function SqlLogin({ setSqlConnection, showRegistration }: SqlLoginProps) {
           ) => setDbPassword(event.currentTarget.value)}
         />
       </div>
-      <div className="NuoFieldContainer">
-        <TextField
-          id="dbSchema"
-          label={t("form.sqleditor.label.dbSchema")}
-          value={dbSchema}
-          onChange={(
-            event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-          ) => setDbSchema(event.currentTarget.value)}
-        />
-      </div>
       <div className="NuoFieldContainer NuoButtons">
         <Button
           data-testid="sql.login.button"
@@ -113,14 +102,13 @@ function SqlLogin({ setSqlConnection, showRegistration }: SqlLoginProps) {
               params.project &&
               params.database &&
               dbUsername &&
-              dbPassword &&
-              dbSchema
+              dbPassword
             ) {
               const conn = SqlSocket(
                 params.organization,
                 params.project,
                 params.database,
-                dbSchema,
+                "USER",
                 dbUsername,
                 dbPassword,
               );
