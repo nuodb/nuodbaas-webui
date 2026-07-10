@@ -139,7 +139,12 @@ export default class Dialog extends Component<
   render() {
     return this.state.dialogs.map((dialog: DialogProps, index: number) => {
       return (
-        <DialogMaterial key={index} maxWidth={dialog.maxWidth} open={true}>
+        <DialogMaterial
+          key={index}
+          maxWidth={dialog.maxWidth}
+          fullWidth={dialog.maxWidth === "xl"}
+          open={true}
+        >
           <DialogTitle>{dialog.title}</DialogTitle>
           {dialog.buttons.length > 0 ? (
             <>
