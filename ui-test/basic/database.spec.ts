@@ -10,8 +10,14 @@ import {
   createDatabaseUI,
   sleep,
 } from "../helpers/ui";
-import { createProjectRest, createDatabaseRest } from "../helpers/api";
+import {
+  createProjectRest,
+  createDatabaseRest,
+  shortUnique,
+  deleteResourceRest,
+} from "../helpers/api";
 import { expect } from "@playwright/test";
+import { resourceLimits } from "node:worker_threads";
 
 test.describe("DatabaseTest", () => {
   test("testCreateDatabase", async ({ restPage: page }) => {
@@ -55,6 +61,47 @@ test.describe("DatabaseTest", () => {
         "$ref",
       );
       expect(cells.length).toBe(0);
+    });
+  });
+
+  test("testListWatchAllDatabases", async ({ restPage: page }) => {
+    await clickMenu(page, "databases");
+
+    let menuCells = await waitTableElements(
+      page,
+      "list_resource__table",
+      "name",
+      "keepdb1",
+      "$ref",
+    );
+    expect(menuCells.length).toBe(1);
+
+    const dbName = shortUnique("d");
+    await createDatabaseRest("keepproject", dbName);
+
+    menuCells = await waitTableElements(
+      page,
+      "list_resource__table",
+      "name",
+      dbName,
+      "$ref",
+    );
+    expect(menuCells.length).toBe(1);
+
+    await deleteResourceRest(
+      "databases",
+      "integrationtest/keepproject/" + dbName,
+    );
+
+    retry(async () => {
+      menuCells = await waitTableElements(
+        page,
+        "list_resource__table",
+        "name",
+        dbName,
+        "$ref",
+      );
+      expect(menuCells.length).toBe(0);
     });
   });
 

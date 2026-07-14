@@ -707,6 +707,9 @@ code {
   height: 30px;
 }
 
+.NuoMap {
+  margin: 0;
+}
 .NuoLeftMenuCollapsed > .NuoComboBox,
 .NuoLeftMenuCollapsed * > .NuoComboBox {
   padding: 0 5px;
@@ -1268,4 +1271,17 @@ label.NuoUpload:hover {
 
   /* Support for IE. */
   font-feature-settings: "liga";
+}
+
+.NuoNewLabel {
+  background-color: green;
+  color: white;
+  border-radius: 5px;
+  margin: 5px;
+  padding: 5px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9em;
 }

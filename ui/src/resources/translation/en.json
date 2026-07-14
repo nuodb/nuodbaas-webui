@@ -339,6 +339,7 @@
       "label": {
         "database": "Database",
         "sqlEndpoint": "SQL Endpoint",
+        "databaseUrl": "Database URL",
         "certificate": "Certificate",
         "codeSamples": "Code Samples",
         "description": "Following samples require the NuoDB client library which can be downloaded from [here](https://github.com/nuodb/nuodb-client/releases). Fill in database username + password and run the samples below from within the extracted NuoDB client library directory.",
@@ -406,7 +407,9 @@
     "more": "More",
     "less": "Less",
     "networkError": "Network error",
-    "unableToLoadOtherDomain": "Unable to load resources from other domain. What do you want to do?"
+    "unableToLoadOtherDomain": "Unable to load resources from other domain. What do you want to do?",
+    "showRemaining": "Show remaining {{remaining}}",
+    "showNext10of": "Show next 10 of {{remaining}}"
   },
   "section": {
     "title": {

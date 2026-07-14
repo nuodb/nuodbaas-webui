@@ -18,7 +18,7 @@ import {
   TEST_ADMIN_USER,
 } from "../helpers/api";
 import { expect, Page } from "@playwright/test";
-import { Feature, getSchema } from "../../ui/src/utils/schema";
+import { getSchema } from "../../ui/src/utils/schema";
 import Auth from "../../ui/src/utils/auth";
 import { FilterCondition } from "../../ui/src/components/pages/ListResourceFilter";
 
@@ -261,28 +261,26 @@ test.describe("SearchTest", () => {
       },
     ];
 
-    if (Feature.FILTER_ON_SERVER) {
-      checks.push({
-        items: [
-          {
-            condition: "=",
-            fieldName: "labels.*",
-            ignoreCase: true,
-            key: "label2",
-            value: labelName + "8",
-          },
-          {
-            condition: "~",
-            fieldName: "name",
-            ignoreCase: undefined,
-            key: undefined,
-            value: name + "1.*",
-          },
-        ],
-        expect: 1,
-        message: "label2=labelName8 AND name prefix 1*",
-      });
-    }
+    checks.push({
+      items: [
+        {
+          condition: "=",
+          fieldName: "labels.*",
+          ignoreCase: true,
+          key: "label2",
+          value: labelName + "8",
+        },
+        {
+          condition: "~",
+          fieldName: "name",
+          ignoreCase: undefined,
+          key: undefined,
+          value: name + "1.*",
+        },
+      ],
+      expect: 1,
+      message: "label2=labelName8 AND name prefix 1*",
+    });
 
     for (let c = 0; c < checks.length; c++) {
       const check = checks[c];

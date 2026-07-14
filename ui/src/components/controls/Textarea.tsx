@@ -9,10 +9,13 @@ export type TextareaProps = {
 };
 
 export default function Textarea(props: TextareaProps): JSX.Element {
-  const ref = useRef<any>(null);
+  const ref = useRef<HTMLTextAreaElement>(null);
   const { name, value, disabled } = props;
 
   useEffect(() => {
+    if (!ref.current) {
+      return;
+    }
     const scrollHeight = ref.current.scrollHeight;
     ref.current.style.height = scrollHeight + "px";
   }, [value]);

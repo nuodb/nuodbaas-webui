@@ -281,6 +281,20 @@ export default class Auth {
     return false;
   }
 
+  static hasSlaRules(): boolean {
+    const accessRule = Auth.getAccessRule();
+    const allAccessRules = [
+      ...(accessRule.deny || []),
+      ...(accessRule.allow || []),
+    ];
+    for (let i = 0; i < allAccessRules.length; i++) {
+      if (allAccessRules[i].split(":").length >= 3) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   static logout() {
     this.setCredentials(null);
   }

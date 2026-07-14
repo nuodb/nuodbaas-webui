@@ -8,7 +8,6 @@ import {
   TempAny,
 } from "../../utils/types";
 import MoreDiv from "../pages/parts/MoreDiv";
-import MoreInline from "../pages/parts/MoreInline";
 import { TFunction } from "i18next";
 
 interface FieldPropsDisplay {
@@ -147,7 +146,7 @@ export function getRecursiveValue(value: TempAny, t: TFunction) {
     } else {
       return (
         <MoreDiv maxHeight={150} t={t}>
-          <dl className="map">
+          <dl className="map NuoMap">
             {Object.keys(value).map((key) => {
               if (
                 typeof value[key] === "object" &&
@@ -168,5 +167,33 @@ export function getRecursiveValue(value: TempAny, t: TFunction) {
     }
   }
 
-  return <MoreInline value={value} t={t} />;
+  // add "More" link if content has newlines or are larger than 80 chars
+  let strValue = String(value);
+  let moreValue = "";
+  if (strValue.indexOf("\n") !== -1) {
+    moreValue = strValue.substring(strValue.indexOf("\n"));
+    strValue = strValue.substring(0, strValue.indexOf("\n"));
+  }
+  if (strValue.length > 80) {
+    moreValue = strValue.substring(80) + moreValue;
+    strValue = strValue.substring(0, 80);
+  }
+  if (!moreValue) {
+    return value;
+  }
+  return (
+    <>
+      {strValue}
+      <div
+        className="NuoMoreValue"
+        data-moreValue={moreValue}
+        onClick={(element: React.MouseEvent<HTMLDivElement>) => {
+          element.currentTarget.textContent = moreValue;
+          element.currentTarget.className = "";
+        }}
+      >
+        More
+      </div>
+    </>
+  );
 }

@@ -107,3 +107,12 @@ export type RegionSetting = {
 }
 
 export type RegionSettings = RegionSetting[];
+
+export type DataType = {
+  [key: string]: any;
+};
+
+export type ResourcesType = {
+  items: DataType[];
+  total: number;
+};
