@@ -191,12 +191,7 @@ export class Rest extends React.Component<{
                 "i/";
             } else {
               // reset to the default
-              Auth.setRegions(
-                Auth.getRegions().map((region) => ({
-                  ...region,
-                  active: false,
-                })),
-              );
+              Auth.setCurrentRegion(null);
               window.location.reload();
             }
           } else if (!(await Rest.process401(reason))) {

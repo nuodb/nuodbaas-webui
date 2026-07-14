@@ -10,42 +10,46 @@ import PublicIcon from "@mui/icons-material/Public";
 import CheckIcon from "@mui/icons-material/Check";
 import EditIcon from "@mui/icons-material/Edit";
 import Button from "../controls/Button";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { RegionSettings } from "../../utils/types";
 
-function RegionSettingsMenu({ t }: { t: TFunction }) {
+function RegionSettingsMenu({ t, regions }: { t: TFunction, regions: RegionSettings }) {
   const navigate = useNavigate();
+  const [config, setConfig] = useState<any>({});
 
-  if (!localStorage.getItem("regions")) {
+  useEffect(() => {
+    axios.get("/ui/config.json").then((res) => {
+      if (res) {
+        setConfig(res.data);
+      }
+    });
+  }, [])
+
+  if (!config || !config.multiInstanceUrl) {
     return null;
   }
-
   const items = [
     {
       label: t("form.editRegionSettings.label.defaultRegion"),
-      icon: !Auth.getRegions().find((region) => region.active) ? (
+      icon: !Auth.getCurrentRegion() ? (
         <CheckIcon />
       ) : undefined,
       id: "region.default",
       "data-testid": "region.default",
       onClick: () => {
-        Auth.setRegions(
-          Auth.getRegions().map((region) => ({ ...region, active: false })),
-        );
+        Auth.setCurrentRegion(null);
         window.location.reload();
         return true;
       },
     },
-    ...Auth.getRegions().map((region, index) => ({
+    ...[...regions, ...Auth.getRegions()].map((region) => ({
       label: region.name,
-      icon: region.active ? <CheckIcon /> : undefined,
+      icon: Auth.isCurrentRegion(region) ? <CheckIcon /> : undefined,
       id: region.name,
       "data-testid": region.name,
       onClick: () => {
-        Auth.setRegions(
-          Auth.getRegions().map((region, idx) => ({
-            ...region,
-            active: idx === index,
-          })),
-        );
+        Auth.setCurrentRegion(region);
         window.location.reload();
         return true;
       },

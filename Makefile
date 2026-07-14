@@ -405,6 +405,7 @@ start-dev: stop-dev setup-integration-tests ## launch WebUI/ControlPlane/Proxy f
 	docker run --rm -d --name nuodb-webui-dev \
 		-v `pwd`/docker/development/default.conf:/etc/nginx/conf.d/default.conf \
 		-v `pwd`/docker/development/custom.json:/usr/share/nginx/html/theme/custom.json \
+		-v `pwd`/docker/development/multi-instances.json:/usr/share/nginx/html/multi-instances.json \
 		--network=host -it nginx:stable-alpine
 
 .PHONY: start-dev-remote

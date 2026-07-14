@@ -1,0 +1,7 @@
+[
+    {
+        "name": "Region 1",
+        "cpUrl": "/api",
+        "sqlUrl": "/api/sql"
+    }
+]

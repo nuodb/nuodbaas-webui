@@ -213,7 +213,7 @@ function RegionSelectorSettings(props: PageProps) {
       </DialogMaterial>
     );
   }
-  const settings: RegionSettings = Auth.getRegions();
+  const settings: RegionSettings = [...props.regions, ...Auth.getRegions()];
 
   return (
     <PageLayout {...props}>
@@ -249,19 +249,14 @@ function RegionSelectorSettings(props: PageProps) {
               <TableCell>{Auth.getDefaultCpPrefixPath()}</TableCell>
               <TableCell>{Auth.getNuodbSqlRestUrl("")}</TableCell>
               <TableCell>
-                {!settings.find((setting) => setting.active) ? (
+                {!Auth.getCurrentRegion() ? (
                   t("form.editRegionSettings.label.active")
                 ) : (
                   <button
                     data-testid={"make-active-default"}
                     onClick={(event) => {
                       event.preventDefault();
-                      Auth.setRegions(
-                        Auth.getRegions().map((region) => ({
-                          ...region,
-                          active: false,
-                        })),
-                      );
+                      Auth.setCurrentRegion(null);
                       window.location.reload();
                     }}
                   >
@@ -292,19 +287,14 @@ function RegionSelectorSettings(props: PageProps) {
                   <TableCell>{setting.cp}</TableCell>
                   <TableCell>{setting.sql}</TableCell>
                   <TableCell>
-                    {setting.active ? (
+                    {Auth.isCurrentRegion(setting) ? (
                       t("form.editRegionSettings.label.active")
                     ) : (
                       <button
                         data-testid={"make-active-" + setting.name}
                         onClick={(event) => {
                           event.preventDefault();
-                          Auth.setRegions(
-                            Auth.getRegions().map((region, idx) => ({
-                              ...region,
-                              active: index === idx,
-                            })),
-                          );
+                          Auth.setCurrentRegion(setting);
                           window.location.reload();
                         }}
                       >

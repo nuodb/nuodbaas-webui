@@ -31,6 +31,8 @@ import { TFunction } from "i18next";
 import Redirect from "./components/pages/Redirect";
 import DefaultPage from "./components/pages/DefaultPage";
 import RegionSettingsSelector from "./components/pages/RegionSettingsSelector";
+import { RegionSettings } from "./utils/types";
+import axios from "axios";
 
 /**
  * React Root Application. Sets up dialogs, BrowserRouter and Schema from Control Plane
@@ -45,6 +47,7 @@ function App({ t }: { t: TFunction }) {
   const [org, setOrg] = useState("");
   const [orgs, setOrgs] = useState<string[]>([]);
   const [tasks, setTasks] = useState<BackgroundTaskType[]>([]);
+  const [regions, setRegions] = useState<RegionSettings>([]);
   const pageProps = {
     schema,
     isRecording,
@@ -53,9 +56,17 @@ function App({ t }: { t: TFunction }) {
     orgs,
     tasks,
     setTasks: setTasks,
+    regions
   };
 
   useEffect(() => {
+    axios.get("/config.json").then(response => {
+      if (response.data && response.data.multiInstanceUrl) {
+        axios.get(response.data.multiInstanceUrl).then(resp => {
+          setRegions([...(resp.data || []), ...Auth.getRegions()]);
+        });
+      }
+    })
     if (!isLoggedIn) {
       return;
     }
@@ -173,7 +184,7 @@ function App({ t }: { t: TFunction }) {
                   )}
                   <Route
                     path="/ui/region-selector-settings"
-                    element={<RegionSettingsSelector {...pageProps} />}
+                    element={<RegionSettingsSelector {...pageProps} regions={regions} />}
                   />
                   <Route path="/ui" element={<DefaultPage />} />
                   <Route path="/ui/login" element={<DefaultPage />} />
@@ -186,11 +197,11 @@ function App({ t }: { t: TFunction }) {
               <Routes>
                 <Route
                   path="/ui/region-selector-settings"
-                  element={<RegionSettingsSelector {...pageProps} />}
+                    element={<RegionSettingsSelector {...pageProps} regions={regions} />}
                 />
                 <Route
                   path="/ui/login"
-                  element={<LoginForm setIsLoggedIn={setIsLoggedIn} />}
+                    element={<LoginForm setIsLoggedIn={setIsLoggedIn} regions={regions} />}
                 />
                 <Route
                   path="/ui/error"

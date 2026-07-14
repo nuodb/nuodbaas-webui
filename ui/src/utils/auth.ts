@@ -1,6 +1,6 @@
 // (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 import axios from "axios";
-import { RegionSettings, TempAny } from "./types";
+import { RegionSetting, RegionSettings, TempAny } from "./types";
 
 /**
  * Authenticates users and stores info in localStorage "credentials".
@@ -32,6 +32,49 @@ export default class Auth {
 
   static setRegions(regions: RegionSettings) {
     localStorage.setItem("regions", JSON.stringify(regions));
+  }
+
+  static getCurrentRegion(): RegionSetting | null {
+    const strCurrentRegion = localStorage.getItem("currentRegion");
+    if(!strCurrentRegion) {
+      return null;
+    }
+    try {
+      const currentRegion: RegionSetting = JSON.parse(strCurrentRegion);
+      if(!currentRegion.name || !currentRegion.cp || !currentRegion.sql) {
+        return null;
+      }
+      return currentRegion;
+    }
+    catch {
+      return null;
+    }
+  }
+
+  static setCurrentRegion(region: RegionSetting | null) {
+    if(region === null) {
+      localStorage.removeItem("currentRegion");
+    }
+    else {
+      localStorage.setItem("currentRegion", JSON.stringify(region));
+    }
+  }
+
+  static isCurrentRegion(region: RegionSetting | null) {
+    const currentRegion = Auth.getCurrentRegion();
+    if(currentRegion === null && region === null) {
+      return true;
+    }
+    else if(currentRegion === null || region === null) {
+      return false;
+    }
+
+    if (currentRegion.name === region.name && currentRegion.cp === region.cp && currentRegion.sql === region.sql) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   static getDefaultCpPrefixPath(): string {
@@ -73,9 +116,7 @@ export default class Auth {
   static getNuodbCpRestUrl(path: string) {
     let prefixPath = Auth.getDefaultCpPrefixPath();
 
-    const currentRegion = Auth.getRegions().find(
-      (region) => region.active === true,
-    );
+    const currentRegion = Auth.getCurrentRegion();
     if (currentRegion && currentRegion.cp) {
       prefixPath = currentRegion.cp;
     }
@@ -94,9 +135,7 @@ export default class Auth {
   static getNuodbSqlRestUrl(path: string) {
     let prefixPath = Auth.getDefaultSqlPrefixPath();
 
-    const currentRegion = Auth.getRegions().find(
-      (region) => region.active === true,
-    );
+    const currentRegion = Auth.getCurrentRegion();
     if (currentRegion && currentRegion.sql) {
       prefixPath = currentRegion.sql;
     }

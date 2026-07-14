@@ -37,7 +37,10 @@ nuodbaasWebui:
   replicas: 1
   cpUrl: /nuodb-cp
   sqlUrl: /api/sql
-  multiInstanceUrl: /api/multiinstance
+  multiInstanceName: ""
+  multiInstanceUrl: ""
+  multiInstanceUsername: ""
+  multiInstancePassword: ""
 
   # Pod labels useful for integrating 3rd party products. Map value will pass
   # through to the pod as supplied. String value will be templated and the
@@ -146,10 +149,3 @@ nuodbaasWebui:
   customConfig: |
     {
     }
-
-  instances:
-    # Comma separated list of allowed UNID's for this instance (typically only one)
-    unids: ""
-
-    # Comma separated list of at least one directory URL (includes one of the UNID's above in the URL)
-    directoryUrls: ""

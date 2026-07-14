@@ -8,29 +8,30 @@ if [ "$1" == "tgz_static" ] ; then
     exit $?
 fi
 
-if [ "${NUODB_CP_REST_URL}" != "" ] ; then
-    find /usr/share/nginx/html -type f ! -name "custom.json" | while read line; do
-        sed -i "s#___NUODB_CP_REST_URL___#${NUODB_CP_REST_URL}#g" ${line}
-    done
+if [ "${NUODB_CP_REST_URL}" == "" ] ; then
+    NUODB_CP_REST_URL=/nuodb-cp
 fi
-
-if [ "${NUODB_SQL_REST_URL}" != "" ] ; then
-    find /usr/share/nginx/html -type f ! -name "custom.json" | while read line; do
-        sed -i "s#___NUODB_SQL_REST_URL___#${NUODB_SQL_REST_URL}#g" ${line}
-    done
+if [ "${NUODB_SQL_REST_URL}" == "" ] ; then
+    NUODB_SQL_REST_URL=/api/sql
 fi
-
-if [ "${NUODB_MULTI_INSTANCE_URL}" != "" ] ; then
-    find /usr/share/nginx/html -type f ! -name "custom.json" | while read line; do
-        sed -i "s#___NUODB_MULTI_INSTANCE_URL___#${NUODB_MULTI_INSTANCE_URL}#g" ${line}
-    done
+if [ "${NUODB_MULTI_INSTANCE_NAME}" == "" ] ; then
+    NUODB_MULTI_INSTANCE_NAME=$(echo $NUODBAAS_WEBUI_HOSTS | awk -F , ' { print $1 } ')
 fi
+find /usr/share/nginx/html -type f ! -name "custom.json" | while read line; do
+    sed -i "s#___NUODB_CP_REST_URL___#${NUODB_CP_REST_URL}#g" ${line}
+    sed -i "s#___NUODB_SQL_REST_URL___#${NUODB_SQL_REST_URL}#g" ${line}
+    sed -i "s#___NUODB_MULTI_INSTANCE_URL___#${NUODB_MULTI_INSTANCE_URL}#g" ${line}
+    sed -i "s#___NUODB_MULTI_INSTANCE_NAME___#${NUODB_MULTI_INSTANCE_NAME}#g" ${line}
+done
 
 if [ -f /usr/share/nginx/html/theme/custom.json ] ; then
     cp /usr/share/nginx/html/theme/custom.json /usr/share/nginx/html/ui/theme/custom.json
 fi
 
-if [ "${NUODBAAS_WEBUI_PATH_PREFIX}" != "" ] ; then
+if [ "${NUODBAAS_WEBUI_PATH_PREFIX}" = "" ] ; then
+    NUODBAAS_WEBUI_PATH_PREFIX=ui
+fi
+if [ "${NUODBAAS_WEBUI_PATH_REFIX}" != "/ui" ] ; then
     find /usr/share/nginx/html -type f | while read line; do
         sed "s:\"/ui/:\"/${NUODBAAS_WEBUI_PATH_PREFIX}/:g" "${line}" \
             | sed "s:\"/ui\":\"/${NUODBAAS_WEBUI_PATH_PREFIX}\":g" > "${line}.tmp" \
@@ -47,6 +48,15 @@ if [ "${NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE}" != "" ] ; then
     done
 fi
 
-/ui-server -unids "$NUODBAAS_WEBUI_INSTANCES_UNIDS" -hosts "$NUODBAAS_WEBUI_HOSTS" -pathPrefix "$NUODBAAS_WEBUI_PATH_PREFIX" -otherInstances "$NUODBAAS_WEBUI_INSTANCES_DIRECTORY_URLS"
+updateDirectoryServer() {
+    if [ "$NUODB_MULTI_INSTANCE_URL" != "" ] && [ "$NUODB_MULTI_INSTANCE_NAME" != "" ] && [ "$NUODB_MULTI_INSTANCE_USERNAME" != "" ] && [ "$NUODB_MULTI_INSTANCE_PASSWORD" != "" ] ; then
+        while [ true ] ; do
+            curl -X POST "$NUODB_MULTI_INSTANCE_URL" -u "$NUODB_MULTI_INSTANCE_USERNAME:$NUODB_MULTI_INSTANCE_PASSWORD" --data-binary @/usr/share/nginx/html/${NUODBAAS_WEBUI_PATH_PREFIX}/config.json
+            sleep 300
+        done
+    fi
+}
+
+updateDirectoryServer &
 
 exec nginx -g "daemon off;"
