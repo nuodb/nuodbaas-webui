@@ -45,7 +45,7 @@ spec:
               value: {{ .Values.nuodbaasWebui.cpUrl }}
             - name: NUODB_SQL_REST_URL
               value: {{ .Values.nuodbaasWebui.sqlUrl }}
-            - name: NUODB_MULTI_INSTANCE_URL
+            - name: NUODB_MULTI_INSTANCE_REGISTRY_URL
               value: {{ .Values.nuodbaasWebui.multiInstanceUrl | quote }}
             - name: NUODB_MULTI_INSTANCE_JSON
               value: {{ .Values.nuodbaasWebui.multiInstanceJson | quote }}

@@ -408,7 +408,7 @@ start-dev: stop-dev setup-integration-tests ## launch WebUI/ControlPlane/Proxy f
 		-v `pwd`/docker/development/default.conf:/etc/nginx/conf.d/default.conf \
 		-v `pwd`/docker/development/custom.json:/usr/share/nginx/html/theme/custom.json \
 		-v `pwd`/docker/development/static/:/usr/share/nginx/html/static/ \
-		-e NUODB_MULTI_INSTANCE_URL=/static/multi-instance.json \
+		-e NUODB_MULTI_INSTANCE_REGISTRY_URL=/static/multi-instance.json \
 		--network=host -it nginx:stable-alpine
 
 .PHONY: start-dev-remote

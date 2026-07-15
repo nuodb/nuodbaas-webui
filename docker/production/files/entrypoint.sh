@@ -24,7 +24,7 @@ fi
 find /usr/share/nginx/html -type f ! -name "custom.json" | while read line; do
     sed -i "s#___NUODB_CP_REST_URL___#${NUODB_CP_REST_URL}#g" ${line}
     sed -i "s#___NUODB_SQL_REST_URL___#${NUODB_SQL_REST_URL}#g" ${line}
-    sed -i "s#___NUODB_MULTI_INSTANCE_URL___#${NUODB_MULTI_INSTANCE_URL}#g" ${line}
+    sed -i "s#___NUODB_MULTI_INSTANCE_URL___#${NUODB_MULTI_INSTANCE_REGISTRY_URL}#g" ${line}
     sed -i "s#___NUODB_MULTI_INSTANCE_NAME___#${NUODB_MULTI_INSTANCE_NAME}#g" ${line}
 done
 
@@ -53,9 +53,9 @@ if [ "${NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE}" != "" ] ; then
 fi
 
 updateDirectoryServer() {
-    if [ "$NUODB_MULTI_INSTANCE_URL" != "" ] && [ "$NUODB_MULTI_INSTANCE_NAME" != "" ] && [ "$NUODB_MULTI_INSTANCE_USERNAME" != "" ] && [ "$NUODB_MULTI_INSTANCE_PASSWORD" != "" ] ; then
+    if [ "$NUODB_MULTI_INSTANCE_REGISTRY_URL" != "" ] && [ "$NUODB_MULTI_INSTANCE_NAME" != "" ] && [ "$NUODB_MULTI_INSTANCE_USERNAME" != "" ] && [ "$NUODB_MULTI_INSTANCE_PASSWORD" != "" ] ; then
         while [ true ] ; do
-            curl -X POST "$NUODB_MULTI_INSTANCE_URL" -u "$NUODB_MULTI_INSTANCE_USERNAME:$NUODB_MULTI_INSTANCE_PASSWORD" --data-binary @/usr/share/nginx/html/${NUODBAAS_WEBUI_PATH_PREFIX}/config.json
+            curl -X POST "$NUODB_MULTI_INSTANCE_REGISTRY_URL" -u "$NUODB_MULTI_INSTANCE_USERNAME:$NUODB_MULTI_INSTANCE_PASSWORD" --data-binary @/usr/share/nginx/html/${NUODBAAS_WEBUI_PATH_PREFIX}/config.json
             sleep 300
         done
     fi

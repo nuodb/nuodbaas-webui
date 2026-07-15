@@ -35,17 +35,21 @@ export default class Auth {
   }
 
   static getCurrentRegion(): RegionSetting | null {
-    const strCurrentRegion = localStorage?.getItem("currentRegion"); //localStorage is not be available for Playwright test before a page.goto()
-    if (!strCurrentRegion) {
-      return null;
-    }
     try {
+      const strCurrentRegion = localStorage.getItem("currentRegion");
+      if (!strCurrentRegion) {
+        return null;
+      }
+
       const currentRegion: RegionSetting = JSON.parse(strCurrentRegion);
       if (!currentRegion.name || !currentRegion.cp || !currentRegion.sql) {
         return null;
       }
       return currentRegion;
     } catch {
+      // return null if:
+      // - JSON format is invalid
+      // - localStorage is not be available (i.e. if Playwright test calls it before a page.goto())
       return null;
     }
   }
