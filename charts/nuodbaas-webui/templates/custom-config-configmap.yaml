@@ -9,4 +9,4 @@ metadata:
 
 data:
   custom.json: |
-{{ .Values.nuodbaasWebui.customConfig | indent 4 }}
+    {{- tpl .Values.nuodbaasWebui.customConfig . | nindent 4 }}
