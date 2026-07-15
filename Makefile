@@ -311,6 +311,7 @@ deploy-webui: $(HELM) $(KIND)  pull-dependencies ## deploy WebUI
 			--set image.repository=nuodbaas-webui \
 			--set image.tag=latest \
 			--set-file nuodbaasWebui.customConfig=docker/development/custom.json \
+			--set-file nuodbaasWebui.multiInstanceJson=docker/development/static/multi-instances.json \
 			--set nuodbaasWebui.ingress.enabled=true \
 			--set nuodbaasWebui.cpUrl=/api; \
 	fi
@@ -348,6 +349,7 @@ setup-integration-tests: $(KUBECTL) setup-nginx-default-conf install-crds deploy
 		-X PUT -H \"Content-Type: application/json\" > /dev/null"
 	$(KUBECTL) apply -n default -f selenium-tests/files/cas-idp.yaml
 	$(KUBECTL) apply -n default -f selenium-tests/files/nuodb-cp-image-versions.yaml
+	$(KUBECTL) apply -n default -f selenium-tests/files/api123.yaml
 	@docker ps
 	@if [ "${AWS_REGION}" != "" ] && [ "${AWS_ACCESS_KEY_ID}" != "" ] && [ "${AWS_SECRET_ACCESS_KEY}" != "" ] ; then \
 		${MAKE} deploy-nuodb-to-k8s; \
@@ -405,7 +407,8 @@ start-dev: stop-dev setup-integration-tests ## launch WebUI/ControlPlane/Proxy f
 	docker run --rm -d --name nuodb-webui-dev \
 		-v `pwd`/docker/development/default.conf:/etc/nginx/conf.d/default.conf \
 		-v `pwd`/docker/development/custom.json:/usr/share/nginx/html/theme/custom.json \
-		-v `pwd`/docker/development/multi-instances.json:/usr/share/nginx/html/multi-instances.json \
+		-v `pwd`/docker/development/static/:/usr/share/nginx/html/static/ \
+		-e NUODB_MULTI_INSTANCE_URL=/static/multi-instance.json \
 		--network=host -it nginx:stable-alpine
 
 .PHONY: start-dev-remote
@@ -453,7 +456,7 @@ eslint-check:
 	cd ui && npm install && npx eslint . && cd ..
 
 .PHONY: presubmit-checks
-presubmit-checks: prettier eslint-check
+presubmit-checks: prettier eslint-check copyright
 	@echo "All Checks passed"
 
 $(KIND):

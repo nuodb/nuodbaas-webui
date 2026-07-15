@@ -14,7 +14,13 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { RegionSettings } from "../../utils/types";
 
-function RegionSettingsMenu({ t, regions }: { t: TFunction, regions: RegionSettings }) {
+function RegionSettingsMenu({
+  t,
+  regions,
+}: {
+  t: TFunction;
+  regions: RegionSettings;
+}) {
   const navigate = useNavigate();
   const [config, setConfig] = useState<any>({});
 
@@ -24,7 +30,7 @@ function RegionSettingsMenu({ t, regions }: { t: TFunction, regions: RegionSetti
         setConfig(res.data);
       }
     });
-  }, [])
+  }, []);
 
   if (!config || !config.multiInstanceUrl) {
     return null;
@@ -32,9 +38,7 @@ function RegionSettingsMenu({ t, regions }: { t: TFunction, regions: RegionSetti
   const items = [
     {
       label: t("form.editRegionSettings.label.defaultRegion"),
-      icon: !Auth.getCurrentRegion() ? (
-        <CheckIcon />
-      ) : undefined,
+      icon: !Auth.getCurrentRegion() ? <CheckIcon /> : undefined,
       id: "region.default",
       "data-testid": "region.default",
       onClick: () => {

@@ -39,6 +39,7 @@ nuodbaasWebui:
   sqlUrl: /api/sql
   multiInstanceName: ""
   multiInstanceUrl: ""
+  multiInstanceJson: ""
   multiInstanceUsername: ""
   multiInstancePassword: ""
 

@@ -36,43 +36,43 @@ export default class Auth {
 
   static getCurrentRegion(): RegionSetting | null {
     const strCurrentRegion = localStorage.getItem("currentRegion");
-    if(!strCurrentRegion) {
+    if (!strCurrentRegion) {
       return null;
     }
     try {
       const currentRegion: RegionSetting = JSON.parse(strCurrentRegion);
-      if(!currentRegion.name || !currentRegion.cp || !currentRegion.sql) {
+      if (!currentRegion.name || !currentRegion.cp || !currentRegion.sql) {
         return null;
       }
       return currentRegion;
-    }
-    catch {
+    } catch {
       return null;
     }
   }
 
   static setCurrentRegion(region: RegionSetting | null) {
-    if(region === null) {
+    if (region === null) {
       localStorage.removeItem("currentRegion");
-    }
-    else {
+    } else {
       localStorage.setItem("currentRegion", JSON.stringify(region));
     }
   }
 
   static isCurrentRegion(region: RegionSetting | null) {
     const currentRegion = Auth.getCurrentRegion();
-    if(currentRegion === null && region === null) {
+    if (currentRegion === null && region === null) {
       return true;
-    }
-    else if(currentRegion === null || region === null) {
+    } else if (currentRegion === null || region === null) {
       return false;
     }
 
-    if (currentRegion.name === region.name && currentRegion.cp === region.cp && currentRegion.sql === region.sql) {
+    if (
+      currentRegion.name === region.name &&
+      currentRegion.cp === region.cp &&
+      currentRegion.sql === region.sql
+    ) {
       return true;
-    }
-    else {
+    } else {
       return false;
     }
   }

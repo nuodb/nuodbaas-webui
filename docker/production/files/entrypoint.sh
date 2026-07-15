@@ -17,6 +17,10 @@ fi
 if [ "${NUODB_MULTI_INSTANCE_NAME}" == "" ] ; then
     NUODB_MULTI_INSTANCE_NAME=$(echo $NUODBAAS_WEBUI_HOSTS | awk -F , ' { print $1 } ')
 fi
+if [ "${NUODB_MULTI_INSTANCE_JSON}" != "" ] ; then
+    sed -i "s#___NUODB_MULTI_INSTANCE_URL___#/ui/multiinstance.json#g" /usr/share/nginx/html/ui/config.json
+    echo "${NUODB_MULTI_INSTANCE_JSON}" > /usr/share/nginx/html/ui/multiinstance.json
+fi
 find /usr/share/nginx/html -type f ! -name "custom.json" | while read line; do
     sed -i "s#___NUODB_CP_REST_URL___#${NUODB_CP_REST_URL}#g" ${line}
     sed -i "s#___NUODB_SQL_REST_URL___#${NUODB_SQL_REST_URL}#g" ${line}

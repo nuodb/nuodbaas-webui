@@ -30,7 +30,8 @@ All configurable parameters for each top-level scope are detailed below, organiz
 | `nuodbaasWebui.pathPrefixAlternate` | Specify alternate NuoDBaaS WebUI prefix | `webui` |
 | `nuodbaasWebui.cpUrl` | The URL used to send requests to the Control Plane REST service | `/nuodb-cp` |
 | `nuodbaasWebui.sqlUrl` | The URL used to send requests to the SQL REST service | `/api/sql` |
-| `nuodbaasWebui.multiInstanceUrl` | The URL of the Directory Server | `` |
+| `nuodbaasWebui.multiInstanceUrl` | The URL of the Directory Server (returning Multi-Instance data). Ignored if "multiInstanceJson" is set | `` |
+| `nuodbaasWebui.multiInstanceJson` | JSON content of multi-instance data. If set, it will ignore "multiInstanceUrl" | `` |
 | `nuodbaasWebui.multiInstanceName` | Instance name to share with Multi-Instance server | `` |
 | `nuodbaasWebui.multiInstanceUsername` | Username to use when updating Multi-Instance entries | `` |
 | `nuodbaasWebui.multiInstancePassword` | Password to use when updating Multi-Instance entries | `` |

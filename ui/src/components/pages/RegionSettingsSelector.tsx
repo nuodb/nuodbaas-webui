@@ -20,14 +20,12 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
 import Auth from "../../utils/auth";
-import { useNavigate } from "react-router-dom";
 
 function RegionSelectorSettings(props: PageProps) {
   const { t } = props;
   const [showEntry, setShowEntry] = useState<number>(-1);
   const [fields, setFields] = useState<{ [field: string]: string }>({});
   const [errors, setErrors] = useState<{ [field: string]: string }>({});
-  const navigate = useNavigate();
 
   function closeDialog() {
     setShowEntry(-1);
@@ -115,7 +113,7 @@ function RegionSelectorSettings(props: PageProps) {
   }
 
   function renderDialog(): ReactNode {
-    const isNew = showEntry >= Auth.getRegions().length;
+    const isNew = showEntry >= combinedRegions().length;
     const uiFields = [
       {
         id: "name",
@@ -173,8 +171,8 @@ function RegionSelectorSettings(props: PageProps) {
               if (isNew) {
                 regions.push({ name: fields.name, cp, sql });
               } else {
-                regions[showEntry] = {
-                  ...regions[showEntry],
+                regions[showEntry - props.regions.length] = {
+                  ...regions[showEntry - props.regions.length],
                   name: fields.name,
                   cp,
                   sql,
@@ -194,7 +192,7 @@ function RegionSelectorSettings(props: PageProps) {
           >
             {t("button.cancel")}
           </Button>
-          {!isNew && (
+          {!isNew && showEntry >= props.regions.length && (
             <button
               data-testid="button.delete"
               className="deleteButton"
@@ -213,7 +211,13 @@ function RegionSelectorSettings(props: PageProps) {
       </DialogMaterial>
     );
   }
-  const settings: RegionSettings = [...props.regions, ...Auth.getRegions()];
+
+  function combinedRegions() {
+    return [
+      ...props.regions.map((region) => ({ ...region, custom: false })),
+      ...Auth.getRegions().map((region) => ({ ...region, custom: true })),
+    ];
+  }
 
   return (
     <PageLayout {...props}>
@@ -224,13 +228,6 @@ function RegionSelectorSettings(props: PageProps) {
           style={{ justifyContent: "space-between", alignItems: "center" }}
         >
           <h3>{t("form.editRegionSettings.title")}</h3>
-          <Button
-            onClick={(): void => {
-              navigate(-1);
-            }}
-          >
-            {t("button.close")}
-          </Button>
         </div>
         <Table>
           <TableHead>
@@ -247,7 +244,7 @@ function RegionSelectorSettings(props: PageProps) {
                 {t("form.editRegionSettings.label.defaultRegion")}
               </TableCell>
               <TableCell>{Auth.getDefaultCpPrefixPath()}</TableCell>
-              <TableCell>{Auth.getNuodbSqlRestUrl("")}</TableCell>
+              <TableCell>{Auth.getDefaultSqlPrefixPath()}</TableCell>
               <TableCell>
                 {!Auth.getCurrentRegion() ? (
                   t("form.editRegionSettings.label.active")
@@ -265,23 +262,27 @@ function RegionSelectorSettings(props: PageProps) {
                 )}
               </TableCell>
             </TableRow>
-            {settings.map((setting, index) => {
+            {combinedRegions().map((setting, index) => {
               return (
                 <TableRow key={index}>
                   <TableCell>
                     <div>
-                      <button
-                        onClick={() => {
-                          setFields({
-                            name: setting.name,
-                            cp: setting.cp,
-                            sql: setting.sql,
-                          });
-                          setShowEntry(index);
-                        }}
-                      >
-                        {setting.name}
-                      </button>
+                      {setting.custom ? (
+                        <button
+                          onClick={() => {
+                            setFields({
+                              name: setting.name,
+                              cp: setting.cp,
+                              sql: setting.sql,
+                            });
+                            setShowEntry(index);
+                          }}
+                        >
+                          {setting.name}
+                        </button>
+                      ) : (
+                        setting.name
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>{setting.cp}</TableCell>
@@ -316,7 +317,7 @@ function RegionSelectorSettings(props: PageProps) {
         >
           <Button
             onClick={async () => {
-              setShowEntry(settings.length);
+              setShowEntry(combinedRegions().length);
             }}
           >
             {t("button.add")}

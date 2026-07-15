@@ -56,17 +56,17 @@ function App({ t }: { t: TFunction }) {
     orgs,
     tasks,
     setTasks: setTasks,
-    regions
+    regions,
   };
 
   useEffect(() => {
-    axios.get("/config.json").then(response => {
+    axios.get("/ui/config.json").then((response) => {
       if (response.data && response.data.multiInstanceUrl) {
-        axios.get(response.data.multiInstanceUrl).then(resp => {
-          setRegions([...(resp.data || []), ...Auth.getRegions()]);
+        axios.get(response.data.multiInstanceUrl).then((resp) => {
+          setRegions(resp.data || []);
         });
       }
-    })
+    });
     if (!isLoggedIn) {
       return;
     }
@@ -184,7 +184,12 @@ function App({ t }: { t: TFunction }) {
                   )}
                   <Route
                     path="/ui/region-selector-settings"
-                    element={<RegionSettingsSelector {...pageProps} regions={regions} />}
+                    element={
+                      <RegionSettingsSelector
+                        {...pageProps}
+                        regions={regions}
+                      />
+                    }
                   />
                   <Route path="/ui" element={<DefaultPage />} />
                   <Route path="/ui/login" element={<DefaultPage />} />
@@ -197,11 +202,18 @@ function App({ t }: { t: TFunction }) {
               <Routes>
                 <Route
                   path="/ui/region-selector-settings"
-                    element={<RegionSettingsSelector {...pageProps} regions={regions} />}
+                  element={
+                    <RegionSettingsSelector {...pageProps} regions={regions} />
+                  }
                 />
                 <Route
                   path="/ui/login"
-                    element={<LoginForm setIsLoggedIn={setIsLoggedIn} regions={regions} />}
+                  element={
+                    <LoginForm
+                      setIsLoggedIn={setIsLoggedIn}
+                      regions={regions}
+                    />
+                  }
                 />
                 <Route
                   path="/ui/error"

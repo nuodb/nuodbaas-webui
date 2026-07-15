@@ -104,7 +104,7 @@ export type RegionSetting = {
   name: string;
   cp: string;
   sql: string;
-}
+};
 
 export type RegionSettings = RegionSetting[];
 

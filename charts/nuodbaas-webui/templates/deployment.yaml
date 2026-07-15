@@ -46,13 +46,15 @@ spec:
             - name: NUODB_SQL_REST_URL
               value: {{ .Values.nuodbaasWebui.sqlUrl }}
             - name: NUODB_MULTI_INSTANCE_URL
-              value: {{ .Values.nuodbaasWebui.multiInstanceUrl }}
+              value: {{ .Values.nuodbaasWebui.multiInstanceUrl | quote }}
+            - name: NUODB_MULTI_INSTANCE_JSON
+              value: {{ .Values.nuodbaasWebui.multiInstanceJson | quote }}
             - name: NUODB_MULTI_INSTANCE_NAME
-              value: {{ .Values.nuodbaasWebui.multiInstanceName }}
+              value: {{ .Values.nuodbaasWebui.multiInstanceName | quote }}
             - name: NUODB_MULTI_INSTANCE_USERNAME
-              value: {{ .Values.nuodbaasWebui.multiInstanceUsername }}
+              value: {{ .Values.nuodbaasWebui.multiInstanceUsername | quote }}
             - name: NUODB_MULTI_INSTANCE_PASSWORD
-              value: {{ .Values.nuodbaasWebui.multiInstancePassword }}
+              value: {{ .Values.nuodbaasWebui.multiInstancePassword | quote }}
             - name: NUODBAAS_WEBUI_PATH_PREFIX
               value: {{ .Values.nuodbaasWebui.ingress.pathPrefix }}
             - name: NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE
