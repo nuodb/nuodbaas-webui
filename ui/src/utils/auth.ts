@@ -35,7 +35,7 @@ export default class Auth {
   }
 
   static getCurrentRegion(): RegionSetting | null {
-    const strCurrentRegion = localStorage.getItem("currentRegion");
+    const strCurrentRegion = localStorage?.getItem("currentRegion"); //localStorage is not be available for Playwright test before a page.goto()
     if (!strCurrentRegion) {
       return null;
     }
