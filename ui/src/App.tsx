@@ -63,6 +63,18 @@ function App({ t }: { t: TFunction }) {
     axios.get("/ui/config.json").then((response) => {
       if (response.data && response.data.multiInstanceUrl) {
         axios.get(response.data.multiInstanceUrl).then((resp) => {
+          const currentRegion = Auth.getCurrentRegion();
+          const regions: RegionSettings = resp.data || [];
+          if (
+            !regions.find((region) => Auth.regionEquals(region, currentRegion))
+          ) {
+            regions.push({
+              name: response.data.name,
+              ui: Auth.getDefaultUiPrefixPath(),
+              cp: "",
+              sql: "",
+            });
+          }
           setRegions(resp.data || []);
         });
       }

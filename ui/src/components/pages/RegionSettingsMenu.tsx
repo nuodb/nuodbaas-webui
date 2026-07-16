@@ -12,7 +12,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import Button from "../controls/Button";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { RegionSettings } from "../../utils/types";
+import { RegionSetting, RegionSettings } from "../../utils/types";
 
 function RegionSettingsMenu({
   t,
@@ -35,26 +35,26 @@ function RegionSettingsMenu({
   if (!config || !config.multiInstanceUrl) {
     return null;
   }
+
+  const currentRegion: RegionSetting | null =
+    Auth.getCurrentRegion() || Auth.findRegionFromCurrentUrl(regions) || null;
+
   const items = [
-    {
-      label: t("form.editRegionSettings.label.defaultRegion"),
-      icon: !Auth.getCurrentRegion() ? <CheckIcon /> : undefined,
-      id: "region.default",
-      "data-testid": "region.default",
-      onClick: () => {
-        Auth.setCurrentRegion(null);
-        window.location.reload();
-        return true;
-      },
-    },
     ...[...regions, ...Auth.getRegions()].map((region) => ({
       label: region.name,
-      icon: Auth.isCurrentRegion(region) ? <CheckIcon /> : undefined,
+      icon: Auth.regionEquals(currentRegion, region) ? (
+        <CheckIcon />
+      ) : undefined,
       id: region.name,
       "data-testid": region.name,
       onClick: () => {
-        Auth.setCurrentRegion(region);
-        window.location.reload();
+        if (region.ui) {
+          Auth.setCurrentRegion(null);
+          window.location.href = region.ui;
+        } else {
+          Auth.setCurrentRegion(region);
+          window.location.reload();
+        }
         return true;
       },
     })),
@@ -76,8 +76,7 @@ function RegionSettingsMenu({
       <Tooltip title={t("hint.regionSelector")}>
         <Button variant="text" onClick={() => {}}>
           <PublicIcon fontSize="large" />
-          {items.find((item) => item.icon !== undefined)?.label ||
-            t("form.editRegionSettings.label.defaultRegion")}
+          {currentRegion?.name}
         </Button>
       </Tooltip>
     </Menu>

@@ -102,6 +102,7 @@ export type SortColumnDirectionType = {
 
 export type RegionSetting = {
   name: string;
+  ui: string;
   cp: string;
   sql: string;
 };
