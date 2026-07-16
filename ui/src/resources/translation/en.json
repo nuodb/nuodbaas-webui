@@ -322,14 +322,14 @@
       "title": "Edit Regions",
       "label": {
         "name": "Name",
+        "uiBaseUrl": "UI Base URL",
         "cpBaseUrl": "CP Base URL",
         "sqlBaseUrl": "SQL Base URL",
         "makeActive": "Make active",
         "active": "Active",
         "editRegionEntry": "Edit region entry",
         "addRegionEntry": "Add Region Entry",
-        "editRegions": "Edit Regions",
-        "defaultRegion": "Default"
+        "editRegions": "Edit Regions"
       }
     }
   },

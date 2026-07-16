@@ -1,0 +1,8 @@
+{
+    "copyright": "(C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.",
+    "name": "Main Region",
+    "uiUrl": "/ui",
+    "cpUrl": "/api",
+    "sqlUrl": "/api/sql",
+    "multiInstanceUrl": "/static/multi-instances.json"
+}

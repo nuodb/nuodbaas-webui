@@ -8,6 +8,7 @@ RUN npm install
 RUN npm run build
 
 FROM nginx:alpine
+RUN apk add curl
 COPY --from=build-ui /app/build /usr/share/nginx/html/ui/
 RUN cp /usr/share/nginx/html/ui/index.html /usr/share/nginx/html/
 COPY docker/production/files/ /

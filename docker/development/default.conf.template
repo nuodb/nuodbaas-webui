@@ -13,6 +13,22 @@ server {
     alias /usr/share/nginx/html/theme/custom.json;
   }
 
+  location /ui/config.json {
+    alias /usr/share/nginx/html/static/config.json;
+  }
+
+  location /static {
+    alias /usr/share/nginx/html/static;
+  }
+
+  location /api1/ {
+    proxy_pass %%%NUODB_CP_URL_BASE%%%/;
+  }
+
+  location /api2/ {
+    proxy_pass %%%NUODB_CP_URL_BASE%%%/;
+  }
+
   location /nuodb-cp/ {
     proxy_pass %%%NUODB_CP_URL_BASE%%%/;
   }

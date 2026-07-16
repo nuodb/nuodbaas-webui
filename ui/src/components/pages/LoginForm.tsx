@@ -9,13 +9,14 @@ import Button from "../controls/Button";
 import TextField from "../controls/TextField";
 import BuildNumber from "./parts/BuildNumber";
 import { withTranslation } from "react-i18next";
-import { TempAny } from "../../utils/types";
+import { RegionSettings, TempAny } from "../../utils/types";
 import { Rest } from "./parts/Rest";
 import axios from "axios";
 import RegionSettingsMenu from "./RegionSettingsMenu";
 
 interface Props {
   setIsLoggedIn: (isLoggedIn: boolean) => void;
+  regions: RegionSettings;
   t: TempAny;
 }
 interface Provider {
@@ -31,7 +32,7 @@ interface ProvidersResponse {
  * Provides Login form storing credentials (currently username/password) in "credentials" local storage
  * @returns
  */
-function LoginForm({ setIsLoggedIn, t }: Props) {
+function LoginForm({ setIsLoggedIn, regions, t }: Props) {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const queryParams = new URLSearchParams(window.location.search);
@@ -304,7 +305,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
 
   return (
     <>
-      <RegionSettingsMenu />
+      <RegionSettingsMenu regions={regions} />
       <div className="NuoLoginForm">
         <img alt="" />
         {progressMessage ? (
