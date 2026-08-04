@@ -202,7 +202,8 @@ function App({ t }: { t: TFunction }) {
                     <Navigate
                       to={
                         "/ui/login?redirectUrl=" +
-                        encodeURIComponent(window.location.href) + "&autoLogin=true"
+                        encodeURIComponent(window.location.href) +
+                        "&autoLogin=true"
                       }
                     />
                   }
