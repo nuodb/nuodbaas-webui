@@ -43,9 +43,9 @@ var loginTmpl = template.Must(template.New("login").Parse(`
 <h2>CAS Login</h2>
 <form method="post" action="/cas-server/login">
   <input type="hidden" name="service" value="{{.Service}}" />
-  <label>Username: <input name="username" /></label><br/>
-  <label>Password: <input type="password" name="password" /></label><br/>
-  <button id="login-button" type="submit">Login</button>
+  <label>Username: <input name="username" data-testid="username"/></label><br/>
+  <label>Password: <input type="password" name="password" data-testid="password" /></label><br/>
+  <button id="login-button" type="submit" data-testid="submit-button">Login</button>
   </form>
 </body></html>
 `))
