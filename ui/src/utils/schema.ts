@@ -12,6 +12,7 @@ import {
   DataType,
 } from "./types";
 import { getValue } from "../components/fields/utils";
+import Toast from "../components/controls/Toast";
 let schema: TempAny = null;
 
 /**
@@ -34,8 +35,10 @@ export async function getSchema() {
       schema = schema["paths"];
       schema = filterAccessPaths(schema);
     } catch (error) {
-      console.log("ERROR", error);
-      Auth.handle401Error(error);
+      if (!Auth.handle401Error(error)) {
+        console.log("ERROR", error);
+        Toast.show("Unable to get schema", error);
+      }
     }
   }
   return schema;
