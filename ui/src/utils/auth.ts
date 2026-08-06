@@ -424,14 +424,16 @@ export default class Auth {
     }
   }
 
-  static handle401Error(error: TempAny) {
+  static handle401Error(error: TempAny): boolean {
     if (error.response && error.response.status === 401) {
       Auth.logout();
       if (isBrowser()) {
         window.location.href =
           "/ui/login?redirect=" + encodeURIComponent(window.location.pathname);
       }
+      return true;
     }
+    return false;
   }
 
   static getAccessRule(): { allow: string[]; deny: string[] } {
