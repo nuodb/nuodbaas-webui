@@ -15,11 +15,11 @@ import { expect, TestInfo, type Page } from "@playwright/test";
 async function createAndDeleteUser(page: Page) {
   // check REST API is still functional by creating and deleting a user
   const userName = await createUserUI(page);
-  await clickMenu(page, "projects");
-  await clickMenu(page, "users");
 
   // Delete User via popup menu
   await retry(async () => {
+    await clickMenu(page, "projects");
+    await clickMenu(page, "users");
     const menuCells = await waitTableElements(
       page,
       "list_resource__table",
@@ -81,5 +81,33 @@ test.describe("Region Selector Tests", () => {
         "Unable to connect: AxiosError: Request failed with status code 404",
       ),
     ).toHaveCount(2);
+  });
+
+  test("test region popup menu", async ({ restPage: page }) => {
+    // track URL requests
+    let urls: string[] = [];
+    page.on("request", (request) => {
+      urls.push(request.url());
+    });
+
+    // change to /api1 and validate usage
+    let regionMenuButton = page
+      .getByTestId("region.menu")
+      .getByRole("button")
+      .first();
+    await regionMenuButton.click();
+    await page.getByTestId("Region 1").click();
+    await clickMenu(page, "databases");
+    expect(urls).toContain("http://localhost/api1/openapi");
+
+    // change to /api2 and validate usage
+    regionMenuButton = page
+      .getByTestId("region.menu")
+      .getByRole("button")
+      .first();
+    await regionMenuButton.click();
+    await page.getByTestId("Region 2").click();
+    await clickMenu(page, "databases");
+    expect(urls).toContain("http://localhost/api2/openapi");
   });
 });

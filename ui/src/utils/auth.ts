@@ -1,6 +1,6 @@
 // (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 import axios from "axios";
-import { RegionSettings, TempAny } from "./types";
+import { RegionSetting, RegionSettings, TempAny } from "./types";
 
 /**
  * Authenticates users and stores info in localStorage "credentials".
@@ -17,6 +17,33 @@ export function isBrowser() {
   return typeof window !== "undefined";
 }
 
+function getCookieValue(cookieName: string) {
+  const cookies = document.cookie.split(";");
+  const match = cookies
+    .map((c) => c.trim())
+    .find((c) => c.startsWith(`${cookieName}=`));
+  return match ? decodeURIComponent(match.split("=")[1]) : null;
+}
+
+function setCookieValue(cookieName: string, cookieValue: string | null) {
+  const maxAge = cookieValue === null ? 0 : 400 * 24 * 3600; //browsers cap cookie lifespan to 400 days. Note: Apple Safari's Intelligent Tracking Prevention can restrict certain client-side cookies to just 7 days or even 24 hours to protect user privacy.
+  const domainLastTwoParts = window.location.hostname
+    .split(".")
+    .slice(-2)
+    .join(".");
+  document.cookie =
+    cookieName +
+    "=" +
+    encodeURIComponent(cookieValue || "") +
+    "; max-age=" +
+    String(maxAge) +
+    "; path=/" +
+    "; domain=." +
+    domainLastTwoParts +
+    "; Secure" +
+    "; SameSite=Lax";
+}
+
 export default class Auth {
   static isLoggedIn(): boolean {
     return this.getCredentials() ? true : false;
@@ -24,14 +51,104 @@ export default class Auth {
 
   static getRegions(): RegionSettings {
     try {
-      return JSON.parse(localStorage.getItem("regions") || "[]");
+      return JSON.parse(getCookieValue("nuodbaasRegions") || "[]");
     } catch {
       return [];
     }
   }
 
   static setRegions(regions: RegionSettings) {
-    localStorage.setItem("regions", JSON.stringify(regions));
+    setCookieValue("nuodbaasRegions", JSON.stringify(regions));
+  }
+
+  static regionEquals(
+    region1: RegionSetting | null,
+    region2: RegionSetting | null,
+  ) {
+    if (region1 === null && region2 === null) {
+      return true;
+    }
+    if (region1 === null || region2 === null) {
+      return false;
+    }
+    return (
+      region1.ui === region2.ui &&
+      region1.cp === region2.cp &&
+      region1.sql == region2.sql &&
+      region1.name === region2.name
+    );
+  }
+
+  static getCurrentRegion(): RegionSetting | null {
+    try {
+      const strCurrentRegion = getCookieValue("nuodbaasCurrentRegion");
+      if (strCurrentRegion) {
+        const currentRegion: RegionSetting = JSON.parse(strCurrentRegion);
+        if (
+          currentRegion.name &&
+          (currentRegion.ui || currentRegion.cp || currentRegion.sql)
+        ) {
+          return currentRegion;
+        }
+      }
+    } catch {
+      // we run into this if
+      // - JSON format is invalid
+      // - localStorage is not be available (i.e. if Playwright test calls it before a page.goto())
+      return null;
+    }
+
+    return null;
+  }
+
+  static findRegionFromCurrentUrl(
+    regions: RegionSettings,
+  ): RegionSetting | undefined {
+    const hrefLower = window.location.href.toLowerCase();
+    const pathLower = window.location.pathname.toLowerCase();
+
+    return regions.find((region) => {
+      const uiLower = region.ui?.toLowerCase();
+      if (hrefLower === uiLower || hrefLower.startsWith(uiLower + "/")) {
+        return true;
+      }
+      if (pathLower === uiLower || pathLower.startsWith(uiLower + "/")) {
+        return true;
+      }
+      return false;
+    });
+  }
+
+  static setCurrentRegion(region: RegionSetting | null) {
+    if (region === null) {
+      setCookieValue("nuodbaasCurrentRegion", null);
+    } else {
+      setCookieValue("nuodbaasCurrentRegion", JSON.stringify(region));
+    }
+  }
+
+  static isCurrentRegion(region: RegionSetting | null) {
+    const currentRegion = Auth.getCurrentRegion();
+    console.log("currentRegion", currentRegion);
+    if (currentRegion === null && region === null) {
+      return true;
+    } else if (currentRegion === null || region === null) {
+      return false;
+    }
+
+    if (
+      currentRegion.name === region.name &&
+      currentRegion.cp === region.cp &&
+      currentRegion.sql === region.sql
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  static getDefaultUiPrefixPath(): string {
+    return "/ui";
   }
 
   static getDefaultCpPrefixPath(): string {
@@ -73,9 +190,7 @@ export default class Auth {
   static getNuodbCpRestUrl(path: string) {
     let prefixPath = Auth.getDefaultCpPrefixPath();
 
-    const currentRegion = Auth.getRegions().find(
-      (region) => region.active === true,
-    );
+    const currentRegion = Auth.getCurrentRegion();
     if (currentRegion && currentRegion.cp) {
       prefixPath = currentRegion.cp;
     }
@@ -94,9 +209,7 @@ export default class Auth {
   static getNuodbSqlRestUrl(path: string) {
     let prefixPath = Auth.getDefaultSqlPrefixPath();
 
-    const currentRegion = Auth.getRegions().find(
-      (region) => region.active === true,
-    );
+    const currentRegion = Auth.getCurrentRegion();
     if (currentRegion && currentRegion.sql) {
       prefixPath = currentRegion.sql;
     }
