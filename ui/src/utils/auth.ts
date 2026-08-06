@@ -320,6 +320,7 @@ export default class Auth {
           encodeURIComponent(window.location.href);
         return true;
       }
+      return true;
     }
     return false;
   }
