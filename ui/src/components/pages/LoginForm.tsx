@@ -42,17 +42,14 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
   const [error, setError] = useState("");
   const [providers, setProviders] = useState<Provider[] | undefined>(undefined);
   const [progressMessage, setProgressMessage] = useState("");
-  const [authHeader, setAuthHeader] = useState("");
   const [showLoginForm, setShowLoginForm] = useState(false);
   // Specify redirect URL so that provider name is supplied as query parameter
   const redirectUrl =
     window.location.origin +
     "/ui/login?provider={name}&redirectUrl=" +
-    new URL(
-      queryParams.get("redirect") || queryParams.get("redirectUrl") || "",
-      window.location.origin,
-    ).href;
-
+    encodeURIComponent(
+      queryParams.get("redirectUrl") || window.location.origin + "/ui",
+    );
   useEffect(() => {
     handleInitialLoad();
   }, []);
@@ -74,21 +71,54 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
         loginFailed(error);
       }
     } else {
-      fetchProviders();
-      fetchAuthHeader();
+      const hasBasicAndProviders = await Promise.all([
+        fetchHasBasicAuth(),
+        fetchProviders(),
+      ]);
+      const basicProviders = hasBasicAndProviders[0]
+        ? [{ name: "basic", description: "", url: "" }]
+        : [];
+      const idpProviders = hasBasicAndProviders[1];
+      const autoLogin = urlParams.get("autoLogin");
+      if (idpProviders.length > 0 && autoLogin) {
+        let provider = undefined;
+        if (autoLogin === "true" && idpProviders.length === 1) {
+          provider = idpProviders[0];
+        } else {
+          provider = idpProviders.find(
+            (provider) => provider.name === autoLogin,
+          );
+        }
+        if (provider?.url) {
+          window.location.href = provider.url;
+          return;
+        }
+      }
+      setProviders([...basicProviders, ...idpProviders]);
     }
   }
 
-  async function fetchProviders() {
+  async function fetchProviders(): Promise<Provider[]> {
     try {
       const data = (await Rest.get(
         `/login/providers?redirectUrl=${encodeURIComponent(redirectUrl)}`,
       )) as ProvidersResponse | undefined;
       if (data?.items) {
-        setProviders(data.items);
+        return data.items.map((provider) => {
+          if (provider.url) {
+            //replace hard coded keycloak URL with origin
+            provider.url = provider.url.replaceAll(
+              "http://ingress-nginx-controller.ingress-nginx.svc.cluster.local",
+              window.location.origin,
+            );
+          }
+          return provider;
+        });
       }
+      return [];
     } catch (err: any) {
       console.error("Failed to fetch providers", err);
+      return [];
     }
   }
 
@@ -97,7 +127,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
    * and then capture the www-authenticate header from the response.
    * Ensure that the auth Header contains the "Basic" authentication method to render local login form.
    * */
-  async function fetchAuthHeader() {
+  async function fetchHasBasicAuth(): Promise<boolean> {
     try {
       await axios.post(
         Auth.getNuodbCpRestUrl("login"),
@@ -109,9 +139,13 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
       );
     } catch (error: any) {
       if (error.response?.headers["www-authenticate"]) {
-        setAuthHeader(error.response.headers["www-authenticate"]);
+        return error.response.headers["www-authenticate"]
+          .split(",")
+          .map((part: string) => part.trim().toLowerCase())
+          .includes("basic");
       }
     }
+    return false;
   }
 
   function isSafeRedirect(url: string): boolean {
@@ -133,8 +167,11 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
         accessRule: data.accessRule,
       }),
     );
-    const redirect = queryParams.get("redirectUrl") || "/ui";
-    window.location.href = isSafeRedirect(redirect) ? redirect : "/ui";
+    const redirectUrl =
+      queryParams.get("redirectUrl") || window.location.origin + "/ui";
+    window.location.href = isSafeRedirect(redirectUrl)
+      ? redirectUrl
+      : window.location.origin + "/ui";
   }
 
   function loginFailed(err: any) {
@@ -155,7 +192,7 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
     const err = await Auth.login(`${organization}/${username}`, password);
     if (!err) {
       setIsLoggedIn(true);
-      navigate(searchParams.get("redirect") || "/ui");
+      navigate(searchParams.get("redirectUrl") || "/ui");
     } else {
       loginFailed(err);
     }
@@ -266,20 +303,23 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
   function renderLoginButtons() {
     return (
       <>
-        {authHeader.split(",").includes("Basic") && !showLoginForm && (
-          <Button
-            data-testid="show_login_button"
-            variant="contained"
-            onClick={() => setShowLoginForm(true)}
-          >
-            {t("form.login.label.login")}
-          </Button>
-        )}
+        {providers &&
+          providers.find((provider) => provider.name === "basic") &&
+          !showLoginForm && (
+            <Button
+              data-testid="show_login_button"
+              variant="contained"
+              onClick={() => setShowLoginForm(true)}
+            >
+              {t("form.login.label.login")}
+            </Button>
+          )}
 
         {providers &&
           providers
             .filter(
               (provider) =>
+                provider.name !== "basic" &&
                 provider.description &&
                 (provider.url?.toLowerCase().startsWith("https://") || //prevents XSS by preventing a "javascript:" URL
                   provider.url?.toLowerCase().startsWith("http://")),
@@ -289,9 +329,12 @@ function LoginForm({ setIsLoggedIn, t }: Props) {
                 key={provider.name}
                 data-testid={`login_${provider.name}`}
                 variant="contained"
-                onClick={() =>
-                  (window.location.href = `${provider.url}&redirectUrl=${encodeURIComponent(redirectUrl)}`)
-                }
+                onClick={() => {
+                  if (!provider.url) {
+                    return;
+                  }
+                  window.location.href = `${provider.url}&redirectUrl=${encodeURIComponent(redirectUrl)}`;
+                }}
               >
                 {t("form.login.label.loginWith", {
                   providerDesc: provider.description,

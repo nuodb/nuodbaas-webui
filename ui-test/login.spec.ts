@@ -63,6 +63,29 @@ test.describe("LoginTest", () => {
     await expect(btnSimple).toHaveText("Login With CAS Simple");
   });
 
+  test("testIdp – Login via CAS IdP", async ({ page }) => {
+    await page.goto("/ui/login");
+    const btnSimple = page.getByTestId("login_cas-simple");
+    await expect(btnSimple).toBeVisible();
+    await expect(btnSimple).toHaveText("Login With CAS Simple");
+    await btnSimple.click();
+    await page.getByTestId("username").fill("user1");
+    await page.getByTestId("password").fill("passw0rd");
+    await page.getByTestId("submit-button").click();
+    await page.getByTestId("user-menu").click();
+    await page.getByTestId("logout").click();
+    await expect(page.getByTestId("show_login_button")).toBeVisible();
+  });
+
+  test("testIdp – Login DIRECTLY via CAS IdP", async ({ page }) => {
+    await page.goto("/ui/login?autoLogin=cas-simple");
+    await page.getByTestId("username").fill("user1");
+    await page.getByTestId("password").fill("passw0rd");
+    await page.getByTestId("submit-button").click();
+    await page.getByTestId("user-menu").click();
+    await page.getByTestId("logout").click();
+  });
+
   test("testNonExistentIdp – unknown provider shows error", async ({
     page,
   }) => {

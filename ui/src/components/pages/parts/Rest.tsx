@@ -347,13 +347,7 @@ export class Rest extends React.Component<{
             headers: Auth.getHeaders(),
           })
           .catch((error2) => {
-            if (error2.response.status === 401) {
-              Auth.logout();
-              window.location.href =
-                "/ui/login?redirect=" +
-                encodeURIComponent(window.location.href);
-              return true;
-            }
+            return Auth.handle401Error(error2);
           });
       }
     }

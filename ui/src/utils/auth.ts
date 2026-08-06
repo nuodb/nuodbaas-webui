@@ -316,7 +316,9 @@ export default class Auth {
       Auth.logout();
       if (isBrowser()) {
         window.location.href =
-          "/ui/login?redirect=" + encodeURIComponent(window.location.pathname);
+          "/ui/login?autoLogin=true&redirectUrl=" +
+          encodeURIComponent(window.location.href);
+        return true;
       }
       return true;
     }
