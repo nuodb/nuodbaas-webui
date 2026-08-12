@@ -70,7 +70,7 @@ func main() {
     prefix := os.Getenv("NUODBAAS_WEBUI_PATH_PREFIX")
     prefix = strings.Trim(prefix, "/")
     prefixAlternate := os.Getenv("NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE")
-    prefixAlternate = strings.Trim(prefix, "/")
+    prefixAlternate = strings.Trim(prefixAlternate, "/")
     cpRestUrl := os.Getenv("NUODB_CP_REST_URL")
     sqlRestUrl := os.Getenv("NUODB_SQL_REST_URL")
 
