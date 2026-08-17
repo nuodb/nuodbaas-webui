@@ -14,6 +14,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { RegionSetting, RegionSettings } from "../../utils/types";
 
+type ConfigType = {
+  multiInstanceUrl?: string;
+};
+
 function RegionSettingsMenu({
   t,
   regions,
@@ -22,7 +26,7 @@ function RegionSettingsMenu({
   regions: RegionSettings;
 }) {
   const navigate = useNavigate();
-  const [config, setConfig] = useState<any>({});
+  const [config, setConfig] = useState<ConfigType>({});
 
   useEffect(() => {
     axios.get("/ui/config.json").then((res) => {
@@ -47,12 +51,11 @@ function RegionSettingsMenu({
       ) : undefined,
       id: region.name,
       "data-testid": region.name,
-      onClick: () => {
+      onClick: async () => {
+        await Auth.setCurrentRegion(region);
         if (region.ui) {
-          Auth.setCurrentRegion(null);
           window.location.href = region.ui;
         } else {
-          Auth.setCurrentRegion(region);
           window.location.reload();
         }
         return true;

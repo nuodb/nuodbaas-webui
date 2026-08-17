@@ -17,6 +17,10 @@ server {
     alias /usr/share/nginx/html/static/config.json;
   }
 
+  location /ui-instances/ {
+    proxy_pass http://localhost/ui-instances/;
+  }
+
   location /static {
     alias /usr/share/nginx/html/static;
   }

@@ -1,6 +1,7 @@
 // (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 import axios from "axios";
 import { RegionSetting, RegionSettings, TempAny } from "./types";
+import { remoteStorage } from "../components/controls/RemoteStorage";
 
 /**
  * Authenticates users and stores info in localStorage "credentials".
@@ -10,38 +11,14 @@ interface Credentials {
   token: string;
   expiresAtTime: string;
   username: string;
-  accessRule?: any;
+  accessRule?: {
+    deny?: string[];
+    allow?: string[];
+  }
 }
 
 export function isBrowser() {
   return typeof window !== "undefined";
-}
-
-function getCookieValue(cookieName: string) {
-  const cookies = document.cookie.split(";");
-  const match = cookies
-    .map((c) => c.trim())
-    .find((c) => c.startsWith(`${cookieName}=`));
-  return match ? decodeURIComponent(match.split("=")[1]) : null;
-}
-
-function setCookieValue(cookieName: string, cookieValue: string | null) {
-  const maxAge = cookieValue === null ? 0 : 400 * 24 * 3600; //browsers cap cookie lifespan to 400 days. Note: Apple Safari's Intelligent Tracking Prevention can restrict certain client-side cookies to just 7 days or even 24 hours to protect user privacy.
-  const domainLastTwoParts = window.location.hostname
-    .split(".")
-    .slice(-2)
-    .join(".");
-  document.cookie =
-    cookieName +
-    "=" +
-    encodeURIComponent(cookieValue || "") +
-    "; max-age=" +
-    String(maxAge) +
-    "; path=/" +
-    "; domain=." +
-    domainLastTwoParts +
-    "; Secure" +
-    "; SameSite=Lax";
 }
 
 export default class Auth {
@@ -51,14 +28,18 @@ export default class Auth {
 
   static getRegions(): RegionSettings {
     try {
-      return JSON.parse(getCookieValue("nuodbaasRegions") || "[]");
+      return JSON.parse(remoteStorage.get("nuodbaasRegions") || "[]");
     } catch {
       return [];
     }
   }
 
+  static async refreshRegions() {
+    return await remoteStorage.fillCache("nuodbaasRegions");
+  }
+
   static setRegions(regions: RegionSettings) {
-    setCookieValue("nuodbaasRegions", JSON.stringify(regions));
+    remoteStorage.set("nuodbaasRegions", JSON.stringify(regions));
   }
 
   static regionEquals(
@@ -81,7 +62,7 @@ export default class Auth {
 
   static getCurrentRegion(): RegionSetting | null {
     try {
-      const strCurrentRegion = getCookieValue("nuodbaasCurrentRegion");
+      const strCurrentRegion = remoteStorage.get("nuodbaasCurrentRegion");
       if (strCurrentRegion) {
         const currentRegion: RegionSetting = JSON.parse(strCurrentRegion);
         if (
@@ -95,6 +76,7 @@ export default class Auth {
       // we run into this if
       // - JSON format is invalid
       // - localStorage is not be available (i.e. if Playwright test calls it before a page.goto())
+      console.log("Unable to retrieve current region. JSON format invalid on the \"nuodbaasCurrentRegion\" Cookie?")
       return null;
     }
 
@@ -119,17 +101,16 @@ export default class Auth {
     });
   }
 
-  static setCurrentRegion(region: RegionSetting | null) {
+  static async setCurrentRegion(region: RegionSetting | null) {
     if (region === null) {
-      setCookieValue("nuodbaasCurrentRegion", null);
+      await remoteStorage.set("nuodbaasCurrentRegion", null);
     } else {
-      setCookieValue("nuodbaasCurrentRegion", JSON.stringify(region));
+      await remoteStorage.set("nuodbaasCurrentRegion", JSON.stringify(region));
     }
   }
 
   static isCurrentRegion(region: RegionSetting | null) {
     const currentRegion = Auth.getCurrentRegion();
-    console.log("currentRegion", currentRegion);
     if (currentRegion === null && region === null) {
       return true;
     } else if (currentRegion === null || region === null) {
@@ -302,6 +283,8 @@ export default class Auth {
         if (specifierParts.length > pathParts.length) {
           return false;
         }
+
+        /* eslint-disable security/detect-object-injection */
         for (let i = 0; i < specifierParts.length; i++) {
           if (specifierParts[i] === "*") {
             return true;
@@ -312,6 +295,7 @@ export default class Auth {
             return false;
           }
         }
+        /* eslint-enable security/detect-object-injection */
         return true;
       } else {
         const pathParts = path.startsWith("/events/")
@@ -323,6 +307,7 @@ export default class Auth {
         ) {
           return false;
         }
+        /* eslint-disable security/detect-object-injection */
         for (let i = 0; i < specifierParts.length; i++) {
           if (specifierParts[i] === "*") {
             return true;
@@ -337,18 +322,19 @@ export default class Auth {
             return false;
           }
         }
+        /* eslint-enable security/detect-object-injection */
         return true;
       }
     }
 
     const accessRule = Auth.getAccessRule();
-    for (let i = 0; i < accessRule.deny.length; i++) {
-      if (isMatch(accessRule.deny[i])) {
+    for (const deny of accessRule.deny) {
+      if (isMatch(deny)) {
         return false;
       }
     }
-    for (let i = 0; i < accessRule.allow.length; i++) {
-      if (isMatch(accessRule.allow[i])) {
+    for (const allow of accessRule.allow) {
+      if (isMatch(allow)) {
         return true;
       }
     }
@@ -361,8 +347,8 @@ export default class Auth {
       ...(accessRule.deny || []),
       ...(accessRule.allow || []),
     ];
-    for (let i = 0; i < allAccessRules.length; i++) {
-      if (allAccessRules[i].split(":").length >= 3) {
+    for (const allAccessRule of allAccessRules) {
+      if (allAccessRule.split(":").length >= 3) {
         return true;
       }
     }

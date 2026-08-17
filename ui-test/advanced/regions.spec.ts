@@ -8,6 +8,7 @@ import {
   waitTableElements,
   retry,
   createUserUI,
+  sleep,
 } from "../helpers/ui";
 import { shortUnique } from "../helpers/api";
 import { expect, TestInfo, type Page } from "@playwright/test";
@@ -52,6 +53,8 @@ test.describe("Region Selector Tests", () => {
 
     // make active
     await page.getByTestId("make-active-" + defaultLabel).click();
+
+    await sleep(1000); // wait for the click to sync region to localStorage via message queue
 
     //verify REST service is still functional by creating/deleting a user
     await createAndDeleteUser(page);
@@ -98,6 +101,7 @@ test.describe("Region Selector Tests", () => {
     await regionMenuButton.click();
     await page.getByTestId("Region 1").click();
     await clickMenu(page, "databases");
+    await sleep(5000);
     expect(urls).toContain("http://localhost/api1/openapi");
 
     // change to /api2 and validate usage
@@ -108,6 +112,7 @@ test.describe("Region Selector Tests", () => {
     await regionMenuButton.click();
     await page.getByTestId("Region 2").click();
     await clickMenu(page, "databases");
+    await sleep(5000);
     expect(urls).toContain("http://localhost/api2/openapi");
   });
 });

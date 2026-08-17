@@ -206,19 +206,29 @@ function RegionSelectorSettings(props: PageProps) {
               const sql = removeSlashPostfix((fields.sql || "").trim());
 
               // save regions
-              const regions: RegionSettings = Auth.getRegions();
               if (isNew) {
+                Auth.refreshRegions();
+                const regions: RegionSettings = Auth.getRegions();
                 regions.push({ name: fields.name, ui, cp, sql });
+                Auth.setRegions(regions);
               } else {
-                regions[showEntry - props.regions.length] = {
-                  ...regions[showEntry - props.regions.length],
-                  name: fields.name,
-                  ui,
-                  cp,
-                  sql,
-                };
+                const cachedRegions: RegionSettings = Auth.getRegions();
+                const cachedRegion = cachedRegions[showEntry - props.regions.length];
+                Auth.refreshRegions();
+                const latestRegions: RegionSettings = Auth.getRegions();
+                const latestRegion = latestRegions.find(region =>
+                  region.name === cachedRegion.name
+                  && region.ui === cachedRegion.ui
+                  && region.cp === cachedRegion.cp
+                  && region.sql === cachedRegion.sql);
+                if (latestRegion) {
+                  latestRegion.name = fields.name;
+                  latestRegion.ui = ui;
+                  latestRegion.cp = cp;
+                  latestRegion.sql = sql;
+                  Auth.setRegions(latestRegions);
+                }
               }
-              Auth.setRegions(regions);
               closeDialog();
             }}
           >
@@ -313,9 +323,9 @@ function RegionSelectorSettings(props: PageProps) {
                     ) : (
                       <button
                         data-testid={"make-active-" + setting.name}
-                        onClick={(event) => {
+                          onClick={async (event) => {
                           event.preventDefault();
-                          Auth.setCurrentRegion(setting);
+                          await Auth.setCurrentRegion(setting);
                           if (setting.ui) {
                             window.location.href = setting.ui;
                           } else {

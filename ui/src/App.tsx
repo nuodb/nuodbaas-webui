@@ -88,7 +88,7 @@ function App({ t }: { t: TFunction }) {
       Rest.get("/users?listAccessible=true"),
       Rest.get("/projects?listAccessible=true"),
     ]).then((usersAndProjects: any[]) => {
-      const data: any = [
+      const data: string[] = [
         ...usersAndProjects[0].items,
         ...usersAndProjects[1].items,
       ];
