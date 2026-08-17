@@ -51,10 +51,20 @@ spec:
               value: {{ .Values.nuodbaasWebui.multiInstanceJson | quote }}
             - name: NUODB_MULTI_INSTANCE_NAME
               value: {{ .Values.nuodbaasWebui.multiInstanceName | quote }}
+            {{- if .Values.nuodbaasWebui.multiInstanceUsername }}
+            {{- if .Values.nuodbaasWebui.multiInstancePassword }}
             - name: NUODB_MULTI_INSTANCE_USERNAME
-              value: {{ .Values.nuodbaasWebui.multiInstanceUsername | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: nuodbaas-webui-multi-instance
+                  key: username
             - name: NUODB_MULTI_INSTANCE_PASSWORD
-              value: {{ .Values.nuodbaasWebui.multiInstancePassword | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: nuodbaas-webui-multi-instance
+                  key: password
+            {{- end }}
+            {{- end }}
             - name: NUODBAAS_WEBUI_PATH_PREFIX
               value: {{ .Values.nuodbaasWebui.ingress.pathPrefix }}
             - name: NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE
