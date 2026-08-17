@@ -14,7 +14,7 @@ interface Credentials {
   accessRule?: {
     deny?: string[];
     allow?: string[];
-  }
+  };
 }
 
 export function isBrowser() {
@@ -76,7 +76,9 @@ export default class Auth {
       // we run into this if
       // - JSON format is invalid
       // - localStorage is not be available (i.e. if Playwright test calls it before a page.goto())
-      console.log("Unable to retrieve current region. JSON format invalid on the \"nuodbaasCurrentRegion\" Cookie?")
+      console.log(
+        'Unable to retrieve current region. JSON format invalid on the "nuodbaasCurrentRegion" Cookie?',
+      );
       return null;
     }
 

@@ -1,57 +1,68 @@
 <!-- (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved. -->
 <html>
-    <body>
-        <script>
-            function getRootDomain(url) {
-                const parts = url.toLowerCase().split('.');
-                if (parts.length <= 2) return url;
-                return parts.slice(-2).join('.');
-            }
+  <body>
+    <script>
+      function getRootDomain(url) {
+        const parts = url.toLowerCase().split(".");
+        if (parts.length <= 2) return url;
+        return parts.slice(-2).join(".");
+      }
 
-            function isSameDomain(domain) {
-                const currentDomain = getRootDomain(window.location.host);
-                const remoteDomain = getRootDomain(domain) || domain;
-                return remoteDomain && currentDomain === remoteDomain;
-            }
+      function isSameDomain(domain) {
+        const currentDomain = getRootDomain(window.location.host);
+        const remoteDomain = getRootDomain(domain) || domain;
+        return remoteDomain && currentDomain === remoteDomain;
+      }
 
-            function handleGetRequest(event) {
-                const { transactionId, key } = event.data;
-                const storedValue = localStorage.getItem(key);
-                event.source?.postMessage({ transactionId, action: "remoteStorageGetResponse", data: storedValue });
-            }
+      function handleGetRequest(event) {
+        const { transactionId, key } = event.data;
+        const storedValue = localStorage.getItem(key);
+        event.source?.postMessage({
+          transactionId,
+          action: "remoteStorageGetResponse",
+          data: storedValue,
+        });
+      }
 
-            function handleSetRequest(event) {
-                const { transactionId, key, value} = event.data;
+      function handleSetRequest(event) {
+        const { transactionId, key, value } = event.data;
 
-                if(value === null) {
-                    localStorage.removeItem(key);
-                }
-                else {
-                    localStorage.setItem(key, value);
-                }
-                event.source?.postMessage({ transactionId, action: "remoteStorageSetResponse", data: "success" });
-            }
+        if (value === null) {
+          localStorage.removeItem(key);
+        } else {
+          localStorage.setItem(key, value);
+        }
+        event.source?.postMessage({
+          transactionId,
+          action: "remoteStorageSetResponse",
+          data: "success",
+        });
+      }
 
-            function handleEvents(event) {
-                if (!event.source?.postMessage) {
-                    return;
-                }
+      function handleEvents(event) {
+        if (!event.source?.postMessage) {
+          return;
+        }
 
-                if (!isSameDomain(new URL(event.origin).host)) {
-                    return;
-                }
+        if (!isSameDomain(new URL(event.origin).host)) {
+          return;
+        }
 
-                if (!event.data?.action) {
-                    return;
-                }
+        if (!event.data?.action) {
+          return;
+        }
 
-                switch(event.data.action) {
-                    case "remoteStorageGet": handleGetRequest(event); break;
-                    case "remoteStorageSet": handleSetRequest(event); break;
-                }
-            }
+        switch (event.data.action) {
+          case "remoteStorageGet":
+            handleGetRequest(event);
+            break;
+          case "remoteStorageSet":
+            handleSetRequest(event);
+            break;
+        }
+      }
 
-            window.addEventListener('message', handleEvents);
-        </script>
-    </body>
+      window.addEventListener("message", handleEvents);
+    </script>
+  </body>
 </html>

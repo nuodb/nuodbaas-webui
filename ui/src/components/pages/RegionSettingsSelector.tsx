@@ -213,14 +213,17 @@ function RegionSelectorSettings(props: PageProps) {
                 Auth.setRegions(regions);
               } else {
                 const cachedRegions: RegionSettings = Auth.getRegions();
-                const cachedRegion = cachedRegions[showEntry - props.regions.length];
+                const cachedRegion =
+                  cachedRegions[showEntry - props.regions.length];
                 Auth.refreshRegions();
                 const latestRegions: RegionSettings = Auth.getRegions();
-                const latestRegion = latestRegions.find(region =>
-                  region.name === cachedRegion.name
-                  && region.ui === cachedRegion.ui
-                  && region.cp === cachedRegion.cp
-                  && region.sql === cachedRegion.sql);
+                const latestRegion = latestRegions.find(
+                  (region) =>
+                    region.name === cachedRegion.name &&
+                    region.ui === cachedRegion.ui &&
+                    region.cp === cachedRegion.cp &&
+                    region.sql === cachedRegion.sql,
+                );
                 if (latestRegion) {
                   latestRegion.name = fields.name;
                   latestRegion.ui = ui;
@@ -323,7 +326,7 @@ function RegionSelectorSettings(props: PageProps) {
                     ) : (
                       <button
                         data-testid={"make-active-" + setting.name}
-                          onClick={async (event) => {
+                        onClick={async (event) => {
                           event.preventDefault();
                           await Auth.setCurrentRegion(setting);
                           if (setting.ui) {
