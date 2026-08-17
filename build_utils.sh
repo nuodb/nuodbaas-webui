@@ -77,7 +77,7 @@ function createHelmPackage() {
 
     echo "Create tgz file from static files"
     mkdir -p build/static_files
-    docker run --entrypoint tar nuodbaas-webui -czf - ui-server static > build/static_files/${REPOSITORY}-html-${SNAPSHOT}.tgz
+    docker run --entrypoint tar nuodbaas-webui -czf - ui-server-arm64 ui-server-amd64 static > build/static_files/${REPOSITORY}-html-${SNAPSHOT}.tgz
 }
 
 function uploadHelmPackage() {
