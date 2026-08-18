@@ -39,6 +39,18 @@ export const test = base.extend<Fixtures>({
   },
 
   restPage: async ({ page }, use) => {
+    // Listen for any console message from the browser
+    page.on("console", (msg) => {
+      console.log(
+        `[Browser Console] ${msg.type().toUpperCase()}: ${msg.text()}`,
+      );
+    });
+
+    // Listen for uncaught page exceptions/errors
+    page.on("pageerror", (err) => {
+      console.log(`[Browser Error]: ${err.message}`);
+    });
+
     await loginRest(page);
     await use(page);
     // Clean up all non-keep, non-admin resources created during the test

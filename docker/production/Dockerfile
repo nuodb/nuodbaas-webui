@@ -32,6 +32,7 @@ RUN ARCH=$(uname -m) && \
 FROM alpine
 COPY --from=build-ui /app/build /static/ui/
 COPY --from=build-server /ui-server /
+COPY docker/production/files/ /
 HEALTHCHECK --interval=1s --timeout=3s --start-period=5s --retries=3 CMD [ "curl", "http://localhost/" ]
 EXPOSE 8080
 ENTRYPOINT [ "/entrypoint.sh" ]

@@ -1,0 +1,26 @@
+# (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api123
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /api1(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: nuodb-cp-rest
+            port:
+              number: 8080
+      - path: /api2(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: nuodb-cp-rest
+            port:
+              number: 8080

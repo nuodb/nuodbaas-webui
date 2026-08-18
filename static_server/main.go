@@ -63,6 +63,11 @@ func main() {
         log.Fatalf("static directory %s does not exist", staticDir)
     }
 
+	mime.AddExtensionType(".js", "text/javascript")
+	mime.AddExtensionType(".ts", "text/typescript")
+	mime.AddExtensionType(".tsx", "text/tsx")
+	mime.AddExtensionType(".jsx", "text/jsx")
+
     cache := newFileCache()
     prefix := os.Getenv("NUODBAAS_WEBUI_PATH_PREFIX")
     prefix = strings.Trim(prefix, "/")
@@ -70,6 +75,16 @@ func main() {
     prefixAlternate = strings.Trim(prefixAlternate, "/")
     cpRestUrl := os.Getenv("NUODB_CP_REST_URL")
     sqlRestUrl := os.Getenv("NUODB_SQL_REST_URL")
+    multiInstanceJson := os.Getenv("NUODB_MULTI_INSTANCE_JSON")
+    multiInstanceRegistryUrl := os.Getenv("NUODB_MULTI_INSTANCE_REGISTRY_URL")
+    if multiInstanceJson != "" {
+        multiInstanceRegistryUrl = "/ui/multiinstance.json"
+        cache.Set(filepath.Join(staticDir, "ui/multiinstance.json"), []byte(multiInstanceJson))
+    }
+    multiInstanceName := os.Getenv("NUODB_MULTI_INSTANCE_NAME")
+    if multiInstanceName == "" {
+        multiInstanceName = strings.Split(os.Getenv("NUODBAAS_WEBUI_HOSTS"), ",")[0]
+    }
 
     handler := func(w http.ResponseWriter, r *http.Request) {
         if r.Method != http.MethodGet && r.Method != http.MethodHead && r.Method != http.MethodOptions {
@@ -128,6 +143,8 @@ func main() {
             data = replace(data, "/webui/", "/" + prefixAlternate + "/")
             data = replace(data, "___NUODB_CP_REST_URL___", cpRestUrl)
             data = replace(data, "___NUODB_SQL_REST_URL___", sqlRestUrl)
+            data = replace(data, "___NUODB_MULTI_INSTANCE_REGISTRY_URL___", multiInstanceRegistryUrl)
+            data = replace(data, "___NUODB_MULTI_INSTANCE_NAME___", multiInstanceName)
         }
 
         if cacheFile {
