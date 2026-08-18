@@ -110,7 +110,7 @@ function Banner(props: Props) {
               </IconButton>
             </Tooltip>
           </Menu>
-          <RegionSettingsMenu />
+          <RegionSettingsMenu regions={props.regions} />
         </div>
       </div>
       {showMobileMenu && (

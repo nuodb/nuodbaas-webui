@@ -1,6 +1,7 @@
 // (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 import axios from "axios";
-import { RegionSettings, TempAny } from "./types";
+import { RegionSetting, RegionSettings, TempAny } from "./types";
+import { remoteStorage } from "../components/controls/RemoteStorage";
 
 /**
  * Authenticates users and stores info in localStorage "credentials".
@@ -10,7 +11,10 @@ interface Credentials {
   token: string;
   expiresAtTime: string;
   username: string;
-  accessRule?: any;
+  accessRule?: {
+    deny?: string[];
+    allow?: string[];
+  };
 }
 
 export function isBrowser() {
@@ -24,14 +28,110 @@ export default class Auth {
 
   static getRegions(): RegionSettings {
     try {
-      return JSON.parse(localStorage.getItem("regions") || "[]");
+      return JSON.parse(remoteStorage.get("nuodbaasRegions") || "[]");
     } catch {
       return [];
     }
   }
 
+  static async refreshRegions() {
+    return await remoteStorage.fillCache("nuodbaasRegions");
+  }
+
   static setRegions(regions: RegionSettings) {
-    localStorage.setItem("regions", JSON.stringify(regions));
+    remoteStorage.set("nuodbaasRegions", JSON.stringify(regions));
+  }
+
+  static regionEquals(
+    region1: RegionSetting | null,
+    region2: RegionSetting | null,
+  ) {
+    if (region1 === null && region2 === null) {
+      return true;
+    }
+    if (region1 === null || region2 === null) {
+      return false;
+    }
+    return (
+      region1.ui === region2.ui &&
+      region1.cp === region2.cp &&
+      region1.sql == region2.sql &&
+      region1.name === region2.name
+    );
+  }
+
+  static getCurrentRegion(): RegionSetting | null {
+    try {
+      const strCurrentRegion = remoteStorage.get("nuodbaasCurrentRegion");
+      if (strCurrentRegion) {
+        const currentRegion: RegionSetting = JSON.parse(strCurrentRegion);
+        if (
+          currentRegion.name &&
+          (currentRegion.ui || currentRegion.cp || currentRegion.sql)
+        ) {
+          return currentRegion;
+        }
+      }
+    } catch {
+      // we run into this if
+      // - JSON format is invalid
+      // - localStorage is not be available (i.e. if Playwright test calls it before a page.goto())
+      console.log(
+        'Unable to retrieve current region. JSON format invalid on the "nuodbaasCurrentRegion" Cookie?',
+      );
+      return null;
+    }
+
+    return null;
+  }
+
+  static findRegionFromCurrentUrl(
+    regions: RegionSettings,
+  ): RegionSetting | undefined {
+    const hrefLower = window.location.href.toLowerCase();
+    const pathLower = window.location.pathname.toLowerCase();
+
+    return regions.find((region) => {
+      const uiLower = region.ui?.toLowerCase();
+      if (hrefLower === uiLower || hrefLower.startsWith(uiLower + "/")) {
+        return true;
+      }
+      if (pathLower === uiLower || pathLower.startsWith(uiLower + "/")) {
+        return true;
+      }
+      return false;
+    });
+  }
+
+  static async setCurrentRegion(region: RegionSetting | null) {
+    if (region === null) {
+      await remoteStorage.set("nuodbaasCurrentRegion", null);
+    } else {
+      await remoteStorage.set("nuodbaasCurrentRegion", JSON.stringify(region));
+    }
+  }
+
+  static isCurrentRegion(region: RegionSetting | null) {
+    const currentRegion = Auth.getCurrentRegion();
+    if (currentRegion === null && region === null) {
+      return true;
+    } else if (currentRegion === null || region === null) {
+      return false;
+    }
+
+    if (
+      currentRegion.name === region.name &&
+      currentRegion.cp === region.cp &&
+      currentRegion.sql === region.sql
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  static getDefaultUiPrefixPath(): string {
+    return "/ui";
   }
 
   static getDefaultCpPrefixPath(): string {
@@ -73,9 +173,7 @@ export default class Auth {
   static getNuodbCpRestUrl(path: string) {
     let prefixPath = Auth.getDefaultCpPrefixPath();
 
-    const currentRegion = Auth.getRegions().find(
-      (region) => region.active === true,
-    );
+    const currentRegion = Auth.getCurrentRegion();
     if (currentRegion && currentRegion.cp) {
       prefixPath = currentRegion.cp;
     }
@@ -94,9 +192,7 @@ export default class Auth {
   static getNuodbSqlRestUrl(path: string) {
     let prefixPath = Auth.getDefaultSqlPrefixPath();
 
-    const currentRegion = Auth.getRegions().find(
-      (region) => region.active === true,
-    );
+    const currentRegion = Auth.getCurrentRegion();
     if (currentRegion && currentRegion.sql) {
       prefixPath = currentRegion.sql;
     }
@@ -189,6 +285,8 @@ export default class Auth {
         if (specifierParts.length > pathParts.length) {
           return false;
         }
+
+        /* eslint-disable security/detect-object-injection */
         for (let i = 0; i < specifierParts.length; i++) {
           if (specifierParts[i] === "*") {
             return true;
@@ -199,6 +297,7 @@ export default class Auth {
             return false;
           }
         }
+        /* eslint-enable security/detect-object-injection */
         return true;
       } else {
         const pathParts = path.startsWith("/events/")
@@ -210,6 +309,7 @@ export default class Auth {
         ) {
           return false;
         }
+        /* eslint-disable security/detect-object-injection */
         for (let i = 0; i < specifierParts.length; i++) {
           if (specifierParts[i] === "*") {
             return true;
@@ -224,18 +324,19 @@ export default class Auth {
             return false;
           }
         }
+        /* eslint-enable security/detect-object-injection */
         return true;
       }
     }
 
     const accessRule = Auth.getAccessRule();
-    for (let i = 0; i < accessRule.deny.length; i++) {
-      if (isMatch(accessRule.deny[i])) {
+    for (const deny of accessRule.deny) {
+      if (isMatch(deny)) {
         return false;
       }
     }
-    for (let i = 0; i < accessRule.allow.length; i++) {
-      if (isMatch(accessRule.allow[i])) {
+    for (const allow of accessRule.allow) {
+      if (isMatch(allow)) {
         return true;
       }
     }
@@ -248,8 +349,8 @@ export default class Auth {
       ...(accessRule.deny || []),
       ...(accessRule.allow || []),
     ];
-    for (let i = 0; i < allAccessRules.length; i++) {
-      if (allAccessRules[i].split(":").length >= 3) {
+    for (const allAccessRule of allAccessRules) {
+      if (allAccessRule.split(":").length >= 3) {
         return true;
       }
     }

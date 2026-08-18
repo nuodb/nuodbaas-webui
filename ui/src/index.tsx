@@ -9,13 +9,16 @@ import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
+import { RemoteStorageBoundary } from "./components/controls/RemoteStorage";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Failed to find the root element");
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <App />
+    <RemoteStorageBoundary>
+      <App />
+    </RemoteStorageBoundary>
   </React.StrictMode>,
 );
 

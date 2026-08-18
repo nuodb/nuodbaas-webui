@@ -23,6 +23,7 @@
     "react-router-dom": "^7.6.0",
     "react-select": "^5.10.2",
     "stacktrace-js": "^2.0.2",
+    "tldts": "^7.4.9",
     "typescript": "^5.9.3",
     "web-vitals": "^5.0.0"
   },

@@ -20,14 +20,12 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
 import Auth from "../../utils/auth";
-import { useNavigate } from "react-router-dom";
 
 function RegionSelectorSettings(props: PageProps) {
   const { t } = props;
   const [showEntry, setShowEntry] = useState<number>(-1);
   const [fields, setFields] = useState<{ [field: string]: string }>({});
   const [errors, setErrors] = useState<{ [field: string]: string }>({});
-  const navigate = useNavigate();
 
   function closeDialog() {
     setShowEntry(-1);
@@ -65,31 +63,55 @@ function RegionSelectorSettings(props: PageProps) {
 
   async function validate(field: string): Promise<boolean> {
     const newErrors = { ...errors };
+
     if (field === "" || field === "name") {
       delete newErrors.name;
       if ((fields.name || "").trim().length === 0) {
         newErrors.name = "Required";
       }
     }
+    if (field === "" || field === "ui") {
+      delete newErrors.ui;
+      fields.ui = (fields.ui || "").trim();
+      if (fields.ui !== "") {
+        if (!isValidUrl(fields.ui)) {
+          newErrors.ui = "Must be valid URL";
+        } else {
+          try {
+            const uiResponse = await axios.get(
+              removeSlashPostfix(fields.ui) + "/config.json",
+            );
+            if (!uiResponse.data || !uiResponse.data.uiUrl) {
+              newErrors.ui = "URL is not a NuoDBaaS WebUI";
+            }
+          } catch (ex) {
+            console.log("EX", ex);
+            newErrors.ui = "Unable to connect: " + ex;
+          }
+        }
+      }
+    }
     if (field === "" || field === "cp") {
       delete newErrors.cp;
-      if ((fields.cp || "").trim().length === 0) {
-        newErrors.cp = "Required";
-      } else if (!isValidUrl(fields.cp)) {
-        newErrors.cp = "Must be valid URL";
-      } else {
-        try {
-          await axios.get(
-            removeSlashPostfix(fields.cp.trim()) + "/login/providers",
-          );
-        } catch (ex) {
-          newErrors.cp = "Unable to connect: " + ex;
+      fields.cp = (fields.cp || "").trim();
+      if (fields.cp !== "") {
+        if (!isValidUrl(fields.cp)) {
+          newErrors.cp = "Must be valid URL";
+        } else {
+          try {
+            await axios.get(
+              removeSlashPostfix(fields.cp.trim()) + "/login/providers",
+            );
+          } catch (ex) {
+            newErrors.cp = "Unable to connect: " + ex;
+          }
         }
       }
     }
     if (field === "" || field === "sql") {
       delete newErrors.sql;
-      if (fields.sql) {
+      fields.sql = (fields.sql || "").trim();
+      if (fields.sql !== "") {
         if (!isValidUrl(fields.sql)) {
           newErrors.sql = "Must be valid URL";
         } else {
@@ -108,6 +130,15 @@ function RegionSelectorSettings(props: PageProps) {
         }
       }
     }
+    delete newErrors._;
+    if (
+      field === "" &&
+      fields.ui === "" &&
+      fields.cp === "" &&
+      fields.sql === ""
+    ) {
+      newErrors._ = "At least one of the URL fields need to be filled out";
+    }
 
     setErrors(newErrors);
 
@@ -115,11 +146,15 @@ function RegionSelectorSettings(props: PageProps) {
   }
 
   function renderDialog(): ReactNode {
-    const isNew = showEntry >= Auth.getRegions().length;
+    const isNew = showEntry >= combinedRegions().length;
     const uiFields = [
       {
         id: "name",
         label: t("form.editRegionSettings.label.name"),
+      },
+      {
+        id: "ui",
+        label: t("form.editRegionSettings.label.uiBaseUrl"),
       },
       {
         id: "cp",
@@ -155,6 +190,7 @@ function RegionSelectorSettings(props: PageProps) {
               />
             </div>
           ))}
+          <div style={{ color: "red" }}>{errors._}</div>
         </DialogContent>
         <DialogActions>
           <Button
@@ -165,22 +201,37 @@ function RegionSelectorSettings(props: PageProps) {
               }
 
               // remove backslash at end of base URL's
+              const ui = removeSlashPostfix((fields.ui || "").trim());
               const cp = removeSlashPostfix((fields.cp || "").trim());
               const sql = removeSlashPostfix((fields.sql || "").trim());
 
               // save regions
-              const regions: RegionSettings = Auth.getRegions();
               if (isNew) {
-                regions.push({ name: fields.name, cp, sql });
+                Auth.refreshRegions();
+                const regions: RegionSettings = Auth.getRegions();
+                regions.push({ name: fields.name, ui, cp, sql });
+                Auth.setRegions(regions);
               } else {
-                regions[showEntry] = {
-                  ...regions[showEntry],
-                  name: fields.name,
-                  cp,
-                  sql,
-                };
+                const cachedRegions: RegionSettings = Auth.getRegions();
+                const cachedRegion =
+                  cachedRegions[showEntry - props.regions.length];
+                Auth.refreshRegions();
+                const latestRegions: RegionSettings = Auth.getRegions();
+                const latestRegion = latestRegions.find(
+                  (region) =>
+                    region.name === cachedRegion.name &&
+                    region.ui === cachedRegion.ui &&
+                    region.cp === cachedRegion.cp &&
+                    region.sql === cachedRegion.sql,
+                );
+                if (latestRegion) {
+                  latestRegion.name = fields.name;
+                  latestRegion.ui = ui;
+                  latestRegion.cp = cp;
+                  latestRegion.sql = sql;
+                  Auth.setRegions(latestRegions);
+                }
               }
-              Auth.setRegions(regions);
               closeDialog();
             }}
           >
@@ -194,13 +245,13 @@ function RegionSelectorSettings(props: PageProps) {
           >
             {t("button.cancel")}
           </Button>
-          {!isNew && (
+          {!isNew && showEntry >= props.regions.length && (
             <button
               data-testid="button.delete"
               className="deleteButton"
               onClick={() => {
                 const regions = Auth.getRegions();
-                regions.splice(showEntry, 1);
+                regions.splice(showEntry - props.regions.length, 1);
                 Auth.setRegions(regions);
                 closeDialog();
               }}
@@ -213,7 +264,13 @@ function RegionSelectorSettings(props: PageProps) {
       </DialogMaterial>
     );
   }
-  const settings: RegionSettings = Auth.getRegions();
+
+  function combinedRegions() {
+    return [
+      ...props.regions.map((region) => ({ ...region, custom: false })),
+      ...Auth.getRegions().map((region) => ({ ...region, custom: true })),
+    ];
+  }
 
   return (
     <PageLayout {...props}>
@@ -224,88 +281,59 @@ function RegionSelectorSettings(props: PageProps) {
           style={{ justifyContent: "space-between", alignItems: "center" }}
         >
           <h3>{t("form.editRegionSettings.title")}</h3>
-          <Button
-            onClick={(): void => {
-              navigate(-1);
-            }}
-          >
-            {t("button.close")}
-          </Button>
         </div>
         <Table>
           <TableHead>
             <TableRow>
               <TableTh>{t("form.editRegionSettings.label.name")}</TableTh>
+              <TableTh>{t("form.editRegionSettings.label.uiBaseUrl")}</TableTh>
               <TableTh>{t("form.editRegionSettings.label.cpBaseUrl")}</TableTh>
               <TableTh>{t("form.editRegionSettings.label.sqlBaseUrl")}</TableTh>
               <TableTh></TableTh>
             </TableRow>
           </TableHead>
           <TableBody>
-            <TableRow>
-              <TableCell>
-                {t("form.editRegionSettings.label.defaultRegion")}
-              </TableCell>
-              <TableCell>{Auth.getDefaultCpPrefixPath()}</TableCell>
-              <TableCell>{Auth.getNuodbSqlRestUrl("")}</TableCell>
-              <TableCell>
-                {!settings.find((setting) => setting.active) ? (
-                  t("form.editRegionSettings.label.active")
-                ) : (
-                  <button
-                    data-testid={"make-active-default"}
-                    onClick={(event) => {
-                      event.preventDefault();
-                      Auth.setRegions(
-                        Auth.getRegions().map((region) => ({
-                          ...region,
-                          active: false,
-                        })),
-                      );
-                      window.location.reload();
-                    }}
-                  >
-                    {t("form.editRegionSettings.label.makeActive")}
-                  </button>
-                )}
-              </TableCell>
-            </TableRow>
-            {settings.map((setting, index) => {
+            {combinedRegions().map((setting, index) => {
               return (
                 <TableRow key={index}>
                   <TableCell>
                     <div>
-                      <button
-                        onClick={() => {
-                          setFields({
-                            name: setting.name,
-                            cp: setting.cp,
-                            sql: setting.sql,
-                          });
-                          setShowEntry(index);
-                        }}
-                      >
-                        {setting.name}
-                      </button>
+                      {setting.custom ? (
+                        <button
+                          onClick={() => {
+                            setFields({
+                              name: setting.name,
+                              ui: setting.ui,
+                              cp: setting.cp,
+                              sql: setting.sql,
+                            });
+                            setShowEntry(index);
+                          }}
+                        >
+                          {setting.name}
+                        </button>
+                      ) : (
+                        setting.name
+                      )}
                     </div>
                   </TableCell>
+                  <TableCell>{setting.ui}</TableCell>
                   <TableCell>{setting.cp}</TableCell>
                   <TableCell>{setting.sql}</TableCell>
                   <TableCell>
-                    {setting.active ? (
+                    {Auth.isCurrentRegion(setting) ? (
                       t("form.editRegionSettings.label.active")
                     ) : (
                       <button
                         data-testid={"make-active-" + setting.name}
-                        onClick={(event) => {
+                        onClick={async (event) => {
                           event.preventDefault();
-                          Auth.setRegions(
-                            Auth.getRegions().map((region, idx) => ({
-                              ...region,
-                              active: index === idx,
-                            })),
-                          );
-                          window.location.reload();
+                          await Auth.setCurrentRegion(setting);
+                          if (setting.ui) {
+                            window.location.href = setting.ui;
+                          } else {
+                            window.location.reload();
+                          }
                         }}
                       >
                         {t("form.editRegionSettings.label.makeActive")}
@@ -326,7 +354,7 @@ function RegionSelectorSettings(props: PageProps) {
         >
           <Button
             onClick={async () => {
-              setShowEntry(settings.length);
+              setShowEntry(combinedRegions().length);
             }}
           >
             {t("button.add")}

@@ -17,9 +17,28 @@ server {
     proxy_pass http://localhost/cas-server/;
   }
 
-
   location /keycloak/ {
     proxy_pass http://localhost/keycloak/;
+  }
+  
+  location /ui/config.json {
+    alias /usr/share/nginx/html/static/config.json;
+  }
+
+  location /ui-instances/ {
+    proxy_pass http://localhost/ui-instances/;
+  }
+
+  location /static {
+    alias /usr/share/nginx/html/static;
+  }
+
+  location /api1/ {
+    proxy_pass %%%NUODB_CP_URL_BASE%%%/;
+  }
+
+  location /api2/ {
+    proxy_pass %%%NUODB_CP_URL_BASE%%%/;
   }
 
   location /nuodb-cp/ {
