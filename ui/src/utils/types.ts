@@ -91,6 +91,7 @@ export interface PageProps {
   orgs: string[];
   tasks: BackgroundTaskType[];
   setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>;
+  regions: RegionSettings;
   t: TFunction;
 }
 
@@ -99,12 +100,14 @@ export type SortColumnDirectionType = {
   direction: "none" | "asc" | "desc";
 };
 
-export type RegionSettings = {
-  active?: boolean;
+export type RegionSetting = {
   name: string;
+  ui: string;
   cp: string;
   sql: string;
-}[];
+};
+
+export type RegionSettings = RegionSetting[];
 
 export type DataType = {
   [key: string]: any;

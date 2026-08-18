@@ -1,0 +1,13 @@
+[
+    {
+        "copyright": "# (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.",
+        "name": "Region 1",
+        "cp": "/api1",
+        "sql": "/api1/sql"
+    },
+    {
+        "name": "Region 2",
+        "cp": "/api2",
+        "sql": "/api2/sql"
+    }
+]

@@ -141,7 +141,7 @@ function MenuItems({
   return items.map((item: MenuItemProps, index: number) => (
     <div
       style={{
-        zIndex: 102,
+        zIndex: 2002,
         borderTop: item.hasSeparator ? "2px solid lightgray" : undefined,
       }}
       id={item.id}
@@ -347,7 +347,7 @@ export function PopupMenu(props: PopupMenuProps) {
           overflowY: "auto",
           padding: "2px 0",
           margin: "0",
-          zIndex: 102,
+          zIndex: 2002,
         }}
       >
         <MenuItems
