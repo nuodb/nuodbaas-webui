@@ -2,6 +2,8 @@
 package main
 
 import (
+    "crypto/md5"
+    "fmt"
     "io"
     "log"
     "mime"
@@ -36,13 +38,8 @@ func (c *fileCache) Set(path string, data []byte) {
 }
 
 func isTextFile(filename string) bool {
-    ext := filepath.Ext(filename)
-    switch ext {
-    case ".html", ".css", ".js",".json",".txt":
-        return true
-    default:
-        return false
-    }
+    mimeType := mime.TypeByExtension(filepath.Ext(filename))
+    return strings.HasPrefix(mimeType, "text/") || mimeType == "application/json"
 }
 
 func replace(data []byte, old string, new string) []byte {
@@ -75,11 +72,7 @@ func main() {
     sqlRestUrl := os.Getenv("NUODB_SQL_REST_URL")
 
     handler := func(w http.ResponseWriter, r *http.Request) {
-        if r.Method == http.MethodHead || r.Method == http.MethodOptions {
-            w.WriteHeader(http.StatusNoContent)
-            return;
-        }
-        if r.Method != http.MethodGet {
+        if r.Method != http.MethodGet && r.Method != http.MethodHead && r.Method != http.MethodOptions {
             http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
             return
         }
@@ -95,7 +88,7 @@ func main() {
 
         // Serve from cache if present
         if data, ok := cache.Get(filePath); ok {
-            serveData(w, filePath, data)
+            serveData(r, w, filePath, data)
             return
         }
 
@@ -112,7 +105,7 @@ func main() {
 
             filePath = filepath.Join(staticDir, "ui/index.html")
             if data, ok := cache.Get(filePath); ok {
-                serveData(w, filePath, data)
+                serveData(r, w, filePath, data)
                 return
             }
 
@@ -140,7 +133,7 @@ func main() {
         if cacheFile {
             cache.Set(filePath, data)
         }
-        serveData(w, filePath, data)
+        serveData(r, w, filePath, data)
     }
 
     http.HandleFunc("/", handler)
@@ -148,7 +141,34 @@ func main() {
     log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func serveData(w http.ResponseWriter, filePath string, data []byte) {
+func checkIfNoneMatch(r *http.Request, currentETag string) bool {
+	ifNoneMatch := r.Header.Get("If-None-Match")
+	if ifNoneMatch == "" {
+		return false
+	}
+
+	// Wildcard match means any cached version is acceptable
+	if ifNoneMatch == "*" {
+		return true
+	}
+
+	// Handle comma-separated lists and trim weak ETag prefixes
+	etags := strings.Split(ifNoneMatch, ",")
+	cleanCurrent := strings.TrimPrefix(currentETag, "W/")
+
+	for _, etag := range etags {
+		clientETag := strings.TrimSpace(etag)
+		clientETag = strings.TrimPrefix(clientETag, "W/")
+
+		if clientETag == cleanCurrent {
+			return true
+		}
+	}
+
+	return false
+}
+
+func serveData(r *http.Request, w http.ResponseWriter, filePath string, data []byte) {
     ext := filepath.Ext(filePath)
     mimeType := mime.TypeByExtension(ext)
     if mimeType != "" {
@@ -156,6 +176,29 @@ func serveData(w http.ResponseWriter, filePath string, data []byte) {
     } else {
         w.Header().Set("Content-Type", "application/octet-stream")
     }
-    w.WriteHeader(http.StatusOK)
+
+    if strings.HasPrefix(filePath, "static/ui/assets/") {
+        // preventing Browser from re-requesting asset files for the next 24 hours
+        // The filename has a hash of the file content, so no need for the browser to load the file the next time
+        w.Header().Set("Cache-Control", "public, max-age=86400");
+    }
+
+    etag := fmt.Sprintf(`"%x"`, md5.Sum(data))
+    w.Header().Set("ETag", etag)
+    if checkIfNoneMatch(r, etag) {
+        w.WriteHeader(http.StatusNotModified)
+        return
+    }
+
+    if len(data) == 0 {
+        w.WriteHeader(http.StatusNoContent)
+    } else {
+        w.WriteHeader(http.StatusOK)
+    }
+
+    if r.Method == http.MethodHead || r.Method == http.MethodOptions {
+        return;
+    }
+
     w.Write(data)
 }
