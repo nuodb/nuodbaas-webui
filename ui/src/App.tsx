@@ -203,11 +203,12 @@ function App({ t }: { t: TFunction }) {
                       />
                     }
                   />
-                  <Route path="/ui" element={<DefaultPage />} />
                   <Route path="/ui/login" element={<DefaultPage />} />
+                  <Route path="/ui" element={<DefaultPage />} />
+                  <Route path="/ui/*" element={<NotFound {...pageProps} />} />
                   <Route path="/webui" element={<Navigate to="/ui" />} />
                   <Route path="/webui/*" element={<Redirect baseUrl="/ui" />} />
-                  <Route path="/*" element={<NotFound {...pageProps} />} />
+                  <Route path="*" element={<NotFound {...pageProps} />} />
                 </Routes>
               </React.Fragment>
             ) : (

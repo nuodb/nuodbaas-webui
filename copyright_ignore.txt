@@ -25,3 +25,5 @@
 \./tmp/
 \./ui\/build\/
 \./nuodb.lic
+\./static_server/go.mod
+\./build/

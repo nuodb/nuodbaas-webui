@@ -61,6 +61,7 @@ all: run-integration-tests copyright ## build, test + deploy everything
 .PHONY: build-image
 build-image:  ## build UI and create Docker image
 	@docker build -t "${IMG_REPO}:latest" --build-arg "REACT_APP_GIT_SHA=${VERSION_SHA}" -f docker/production/Dockerfile .
+	@docker build --target build-server-multiplatform -t "nuodbaas-webui:build-server-multiplatform" -f docker/production/Dockerfile .
 
 .PHONY: build-coverage
 build-coverage:  ## build code coverage UI and create Docker image
@@ -456,7 +457,7 @@ eslint-check:
 	cd ui && npm install && npx eslint . && cd ..
 
 .PHONY: presubmit-checks
-presubmit-checks: prettier eslint-check copyright
+presubmit-checks: copyright prettier eslint-check
 	@echo "All Checks passed"
 
 $(KIND):
