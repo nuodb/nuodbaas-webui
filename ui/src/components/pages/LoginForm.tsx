@@ -67,19 +67,18 @@ function LoginForm({ setIsLoggedIn, regions, t }: Props) {
             window.location.search
           }`,
         );
-        handleLoginSuccess(data);
+        handleLoginSuccess(data, provider);
       } catch (error: any) {
         loginFailed(error);
       }
     } else {
-      const hasBasicAndProviders = await Promise.all([
+      const [hasBasicProviders, idpProviders] = await Promise.all([
         fetchHasBasicAuth(),
         fetchProviders(),
       ]);
-      const basicProviders = hasBasicAndProviders[0]
+      const basicProviders = hasBasicProviders
         ? [{ name: "basic", description: "", url: "" }]
         : [];
-      const idpProviders = hasBasicAndProviders[1];
       const autoLogin = urlParams.get("autoLogin");
       if (idpProviders.length > 0 && autoLogin) {
         let provider = undefined;
@@ -158,7 +157,7 @@ function LoginForm({ setIsLoggedIn, regions, t }: Props) {
     }
   }
 
-  function handleLoginSuccess(data: TempAny) {
+  function handleLoginSuccess(data: TempAny, provider: string | null) {
     localStorage.setItem(
       "credentials",
       JSON.stringify({
@@ -166,6 +165,7 @@ function LoginForm({ setIsLoggedIn, regions, t }: Props) {
         expiresAtTime: data.expiresAtTime,
         username: data.username,
         accessRule: data.accessRule,
+        provider: provider,
       }),
     );
     const redirectUrl =

@@ -2,6 +2,7 @@
 import axios from "axios";
 import { RegionSetting, RegionSettings, TempAny } from "./types";
 import { remoteStorage } from "../components/controls/RemoteStorage";
+import { runtimeConcat } from "./utils";
 
 /**
  * Authenticates users and stores info in localStorage "credentials".
@@ -15,6 +16,7 @@ interface Credentials {
     deny?: string[];
     allow?: string[];
   };
+  provider?: string | null;
 }
 
 export function isBrowser() {
@@ -144,8 +146,7 @@ export default class Auth {
     // dependent on the current time (it will always be after January 1, 1970)
     let prefixPath = "/nuodb-cp";
     if (
-      "___NUODB_CP_REST_URL___" !==
-      "___NUODB_CP" + (Date.now() > 0 ? "_REST_URL___" : "")
+      "___NUODB_CP_REST_URL___" !== runtimeConcat("___NUODB_CP", "_REST_URL___")
     ) {
       prefixPath = "___NUODB_CP_REST_URL___";
     }
@@ -163,7 +164,7 @@ export default class Auth {
     let prefixPath = "/api/sql";
     if (
       "___NUODB_SQL_REST_URL___" !==
-      "___NUODB_SQL" + (Date.now() > 0 ? "_REST_URL___" : "")
+      runtimeConcat("___NUODB_SQL", "_REST_URL___")
     ) {
       prefixPath = "___NUODB_SQL_REST_URL___";
     }
@@ -375,6 +376,11 @@ export default class Auth {
     return null;
   }
 
+  static getCurrentProvider(): string | null {
+    const credentials = this.getCredentials();
+    return credentials?.provider || null;
+  }
+
   static inMemoryCredentials: Credentials | null = null;
 
   static getCredentials(): Credentials | null {
@@ -414,10 +420,13 @@ export default class Auth {
 
   static handle401Error(error: TempAny): boolean {
     if (error.response && error.response.status === 401) {
+      const currentProvider = Auth.getCurrentProvider();
       Auth.logout();
       if (isBrowser()) {
         window.location.href =
-          "/ui/login?autoLogin=true&redirectUrl=" +
+          "/ui/login?autoLogin=" +
+          (currentProvider || "true") +
+          "&redirectUrl=" +
           encodeURIComponent(window.location.href);
         return true;
       }

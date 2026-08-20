@@ -238,7 +238,8 @@ function App({ t }: { t: TFunction }) {
                       to={
                         "/ui/login?redirectUrl=" +
                         encodeURIComponent(window.location.href) +
-                        "&autoLogin=true"
+                        "&autoLogin=" +
+                        (Auth.getCurrentProvider() || "true")
                       }
                     />
                   }
