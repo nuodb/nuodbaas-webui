@@ -2,6 +2,7 @@
 package main
 
 import (
+    "bytes"
     "crypto/md5"
     "errors"
     "fmt"
@@ -14,6 +15,7 @@ import (
     "path/filepath"
     "strings"
     "sync"
+    "time"
 )
 
 type fileCache struct {
@@ -57,11 +59,51 @@ func isDirectory(path string) bool {
 	return fileInfo.IsDir()
 }
 
+const STATIC_DIR = "static"
+
+// updateDirectoryServer periodically posts the config.json to the multi-instance registry.
+func updateDirectoryServerThread() {
+    registryURL := os.Getenv("NUODB_MULTI_INSTANCE_REGISTRY_URL")
+    username := os.Getenv("NUODB_MULTI_INSTANCE_USERNAME")
+    password := os.Getenv("NUODB_MULTI_INSTANCE_PASSWORD")
+    if registryURL == "" || username == "" || password == "" {
+        return
+    }
+
+    prefix := strings.Trim(os.Getenv("NUODBAAS_WEBUI_PATH_PREFIX"), "/")
+    configPath := filepath.Join(STATIC_DIR, prefix, "config.json")
+
+    go func() {
+        for {
+            data, err := os.ReadFile(configPath)
+            if err != nil {
+                log.Printf("Failed to read config file %s: %v", configPath, err)
+            } else {
+                req, err := http.NewRequest(http.MethodPost, registryURL, bytes.NewReader(data))
+                if err != nil {
+                    log.Printf("Failed to create request for %s: %v", registryURL, err)
+                } else {
+                    req.SetBasicAuth(username, password)
+                    client := &http.Client{}
+                    resp, err := client.Do(req)
+                    if err != nil {
+                        log.Printf("Error posting to %s: %v", registryURL, err)
+                    } else {
+                        // Drain and close body to reuse connections.
+                        io.Copy(io.Discard, resp.Body)
+                        resp.Body.Close()
+                    }
+                }
+            }
+            time.Sleep(300 * time.Second)
+        }
+    }()
+}
+
 func main() {
     // Directory where static files are located (relative to the binary)
-    staticDir := "static"
-    if _, err := os.Stat(staticDir); os.IsNotExist(err) {
-        log.Fatalf("static directory %s does not exist", staticDir)
+    if _, err := os.Stat(STATIC_DIR); os.IsNotExist(err) {
+        log.Fatalf("static directory %s does not exist", STATIC_DIR)
     }
 
 	mime.AddExtensionType(".js", "text/javascript")
@@ -80,7 +122,7 @@ func main() {
     multiInstanceRegistryUrl := os.Getenv("NUODB_MULTI_INSTANCE_REGISTRY_URL")
     if multiInstanceJson != "" {
         multiInstanceRegistryUrl = "/ui/multiinstance.json"
-        cache.Set(filepath.Join(staticDir, "ui/multiinstance.json"), []byte(multiInstanceJson))
+        cache.Set(filepath.Join(STATIC_DIR, "ui/multiinstance.json"), []byte(multiInstanceJson))
     }
     multiInstanceName := os.Getenv("NUODB_MULTI_INSTANCE_NAME")
     if multiInstanceName == "" {
@@ -100,7 +142,7 @@ func main() {
         }
         // Clean the path to avoid directory traversal attacks
         p = path.Clean(p)
-        filePath := filepath.Join(staticDir, p)
+        filePath := filepath.Join(STATIC_DIR, p)
 
         // Serve from cache if present
         if data, ok := cache.Get(filePath); ok {
@@ -125,7 +167,7 @@ func main() {
                 return
             }
 
-            filePath = filepath.Join(staticDir, "ui/index.html")
+            filePath = filepath.Join(STATIC_DIR, "ui/index.html")
             if data, ok := cache.Get(filePath); ok {
                 serveData(r, w, filePath, data)
                 return
@@ -169,6 +211,8 @@ func main() {
         }
         serveData(r, w, filePath, data)
     }
+
+    updateDirectoryServerThread()
 
     http.HandleFunc("/", handler)
     log.Println("Serving static files on :8080")

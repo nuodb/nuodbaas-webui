@@ -20,9 +20,13 @@ server {
   location /keycloak/ {
     proxy_pass http://localhost/keycloak/;
   }
-  
+
   location /ui/config.json {
     alias /usr/share/nginx/html/static/config.json;
+  }
+
+  location /ui/multiinstance.json {
+    proxy_pass http://localhost/ui/multiinstance.json;
   }
 
   location /ui-instances/ {
