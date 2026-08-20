@@ -3,6 +3,7 @@ package main
 
 import (
     "crypto/md5"
+    "errors"
     "fmt"
     "io"
     "log"
@@ -118,6 +119,12 @@ func main() {
             // not a static file, serve index.html
             cacheFile = false
 
+            if !errors.Is(err, os.ErrNotExist) {
+                log.Println("Error opening file \"%s\": %v", filePath, err)
+                http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+                return
+            }
+
             filePath = filepath.Join(staticDir, "ui/index.html")
             if data, ok := cache.Get(filePath); ok {
                 serveData(r, w, filePath, data)
@@ -125,6 +132,12 @@ func main() {
             }
 
             if f, err = os.Open(filePath); err != nil {
+                if !errors.Is(err, os.ErrNotExist) {
+                    log.Println("Error opening file \"%s\": %v", filePath, err)
+                    http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+                    return
+                }
+
                 http.Error(w, "Not Found", http.StatusNotFound)
                 return
             }
@@ -137,10 +150,14 @@ func main() {
         }
 
         if isTextFile(filePath) {
-            data = replace(data, "/ui\"", "/" + prefix + "\"")
-            data = replace(data, "/ui/", "/" + prefix + "/")
-            data = replace(data, "/webui\"", "/" + prefixAlternate + "\"")
-            data = replace(data, "/webui/", "/" + prefixAlternate + "/")
+            if prefix != "" {
+                data = replace(data, "/ui\"", "/" + prefix + "\"")
+                data = replace(data, "/ui/", "/" + prefix + "/")
+            }
+            if prefixAlternate != "" {
+                data = replace(data, "/webui\"", "/" + prefixAlternate + "\"")
+                data = replace(data, "/webui/", "/" + prefixAlternate + "/")
+            }
             data = replace(data, "___NUODB_CP_REST_URL___", cpRestUrl)
             data = replace(data, "___NUODB_SQL_REST_URL___", sqlRestUrl)
             data = replace(data, "___NUODB_MULTI_INSTANCE_REGISTRY_URL___", multiInstanceRegistryUrl)

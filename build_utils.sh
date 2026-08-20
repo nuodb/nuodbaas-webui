@@ -67,7 +67,7 @@ function createHelmPackage() {
         fi
     elif [ "${BRANCH}" != "main" ] ; then
         echo "Not a main or v* branch - ${BRANCH} - not publishing chart"
-        #return 0
+        return 0
     fi
 
     SNAPSHOT="${VERSION}-${GIT_HASH}"

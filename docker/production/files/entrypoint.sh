@@ -1,4 +1,5 @@
 #!/bin/sh
+# (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 updateDirectoryServer() {
     if [ "$NUODB_MULTI_INSTANCE_REGISTRY_URL" != "" ] && [ "$NUODB_MULTI_INSTANCE_USERNAME" != "" ] && [ "$NUODB_MULTI_INSTANCE_PASSWORD" != "" ] ; then
         while [ true ] ; do
