@@ -1,4 +1,4 @@
-// (C) Copyright 026 Dassault Systemes SE.  All Rights Reserved.
+// (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 
 // Concatenates strings during runtime - preventing Webpack from optimizing the code during compile time.
 // This is typically used when passing in constant strings which are being replaced during runtime.
