@@ -31,7 +31,7 @@ async function createAndDeleteUser(page: Page) {
     expect(menuCells.length).toBe(1);
     await clickPopupMenu(page, menuCells[0], "delete_button");
     await page.getByTestId("dialog_button_yes").click();
-  });
+  }, 10, 1_000);
   await waitRestComplete(page);
 }
 

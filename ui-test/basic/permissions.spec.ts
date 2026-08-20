@@ -16,6 +16,7 @@ import {
   sleep,
   loginRest,
   loginViaUI,
+  retry,
 } from "../helpers/ui";
 import {
   createResourceRest,
@@ -36,8 +37,10 @@ async function createAndLoginUser(
 ): Promise<string> {
   await loginRest(page);
   const user = await createUserUI(page, { allow0, allow1, deny0, deny1 });
-  await clickUserMenu(page, "logout");
-  await loginViaUI(page, TEST_ORGANIZATION, user, TEST_ADMIN_PASSWORD);
+  retry(async () => {
+    await clickUserMenu(page, "logout");
+    await loginViaUI(page, TEST_ORGANIZATION, user, TEST_ADMIN_PASSWORD);
+  });
   return user;
 }
 
