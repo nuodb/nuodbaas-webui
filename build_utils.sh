@@ -77,7 +77,7 @@ function createHelmPackage() {
 
     echo "Create tgz file from static files"
     mkdir -p build/static_files
-    docker run nuodbaas-webui tgz_static > build/static_files/${REPOSITORY}-html-${SNAPSHOT}.tgz
+    docker run --entrypoint tar nuodbaas-webui:build-server-multiplatform -czf - ui-server-arm64 ui-server-amd64 static > build/static_files/${REPOSITORY}-html-${SNAPSHOT}.tgz
 }
 
 function uploadHelmPackage() {
@@ -166,6 +166,9 @@ if [ "$1" == "createAndUploadHelmPackage" ] ; then
 
     createHelmPackage && uploadHelmPackage
     exit $?
+elif [ "$1" == "createHelmPackage" ] ; then
+    createHelmPackage
+    exit $?
 fi
 
 if [ "$1" == "createRelease" ] && [ "$2" != "" ] ; then
@@ -224,6 +227,7 @@ if [ "$1" != "" ] ; then
 fi
 
 echo "$0 doesImageExist"
+echo "$0 createHelmPackage"
 echo "$0 createAndUploadHelmPackage"
 echo "$0 deployDockerImages"
 echo "$0 createRelease <version number>"
