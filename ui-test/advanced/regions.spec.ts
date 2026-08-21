@@ -18,20 +18,24 @@ async function createAndDeleteUser(page: Page) {
   const userName = await createUserUI(page);
 
   // Delete User via popup menu
-  await retry(async () => {
-    await clickMenu(page, "projects");
-    await clickMenu(page, "users");
-    const menuCells = await waitTableElements(
-      page,
-      "list_resource__table",
-      "name",
-      userName,
-      "$ref",
-    );
-    expect(menuCells.length).toBe(1);
-    await clickPopupMenu(page, menuCells[0], "delete_button");
-    await page.getByTestId("dialog_button_yes").click();
-  });
+  await retry(
+    async () => {
+      await clickMenu(page, "projects");
+      await clickMenu(page, "users");
+      const menuCells = await waitTableElements(
+        page,
+        "list_resource__table",
+        "name",
+        userName,
+        "$ref",
+      );
+      expect(menuCells.length).toBe(1);
+      await clickPopupMenu(page, menuCells[0], "delete_button");
+      await page.getByTestId("dialog_button_yes").click();
+    },
+    10,
+    1_000,
+  );
   await waitRestComplete(page);
 }
 

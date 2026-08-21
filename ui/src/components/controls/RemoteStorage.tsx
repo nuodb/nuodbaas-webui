@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { getDomain } from "tldts";
+import { runtimeConcat } from "../../utils/utils";
 
 // check if it is same domain (ignoring subdomains)
 function isSameDomain(domain: string) {
@@ -74,13 +75,13 @@ export function RemoteStorageBoundary({
 
   const iframeMemo = useMemo(() => {
     let remoteStorageUrl = "/ui/remoteStorage.html";
-    const multiInstanceRegistryUrl =
-      Date.now() > 0
-        ? "___NUODB_MULTI_INSTANCE_REGISTRY_URL___"
-        : "never occurs";
+    const multiInstanceRegistryUrl = runtimeConcat(
+      "___NUODB_MULTI_INSTANCE_REGISTRY_URL___",
+    );
     if (
       !multiInstanceRegistryUrl.endsWith(".json") &&
-      multiInstanceRegistryUrl
+      multiInstanceRegistryUrl &&
+      multiInstanceRegistryUrl !== "___NUODB_MULTI_INSTANCE_REGISTRY_URL___"
     ) {
       remoteStorageUrl = multiInstanceRegistryUrl + "/remoteStorage.html";
     }

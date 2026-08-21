@@ -7,6 +7,7 @@ import Auth from "../../../utils/auth";
 import { JsonType, RestLogEntry, RestMethodType } from "../../../utils/types";
 import Dialog from "./Dialog";
 import i18next from "i18next";
+import { runtimeConcat } from "../../../utils/utils";
 
 let instance: Rest | null = null;
 
@@ -188,9 +189,7 @@ export class Rest extends React.Component<{
               // redirect to base URL with hard coded "/ui" subpath. This is the default except for 3DS sites - and those redirect the "/ui" to the real one.
               window.location.href =
                 url.split("/").slice(0, 3).join("/") +
-                "/u" +
-                (new Date().getTime() > 0 ? "" : "never_occurs") +
-                "i/";
+                runtimeConcat("/u", "i/");
             } else {
               // reset to the default
               await Auth.setCurrentRegion(null);
@@ -342,13 +341,7 @@ export class Rest extends React.Component<{
             headers: Auth.getHeaders(),
           })
           .catch((error2) => {
-            if (error2.response.status === 401) {
-              Auth.logout();
-              window.location.href =
-                "/ui/login?redirect=" +
-                encodeURIComponent(window.location.href);
-              return true;
-            }
+            return Auth.handle401Error(error2);
           });
       }
     }

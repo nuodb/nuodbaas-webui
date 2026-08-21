@@ -4,5 +4,5 @@
     "uiUrl": "/ui",
     "cpUrl": "/api",
     "sqlUrl": "/api/sql",
-    "multiInstanceUrl": "/ui/multi-instances-test.json"
+    "multiInstanceUrl": "/ui/multiinstance.json"
 }

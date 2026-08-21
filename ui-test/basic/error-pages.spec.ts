@@ -50,7 +50,7 @@ test.describe("ErrorPagesTest", () => {
     await page.goto(url);
     await page.getByTestId("show_login_button").waitFor({ state: "visible" });
     const expectedUrl = new URL(
-      `/ui/login?redirect=${encodeURIComponent(url)}`,
+      `/ui/login?redirectUrl=${encodeURIComponent("http://localhost" + url) + "&autoLogin=true"}`,
       page.url(),
     );
     expect(page.url()).toBe(expectedUrl.toString());

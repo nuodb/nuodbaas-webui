@@ -94,6 +94,7 @@ jobs:
           command: |
             mkdir -p circleci_workspace
             docker image save -o "circleci_workspace/nuodbaas-webui" "nuodbaas-webui:latest"
+            docker image save -o "circleci_workspace/nuodbaas-webui-multiplatform" "nuodbaas-webui:build-server-multiplatform"
       - persist_to_workspace:
           root: .
           paths:
@@ -132,6 +133,7 @@ jobs:
           name: Load Docker Image from workspace
           command: |
             docker image load < "circleci_workspace/nuodbaas-webui"
+            docker image load < "circleci_workspace/nuodbaas-webui-multiplatform"
       - run:
           name: Check that AWS environment variables were supplied
           command: |

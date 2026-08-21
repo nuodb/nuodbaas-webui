@@ -98,7 +98,7 @@ function Banner(props: Props) {
                 "data-testid": "logout",
                 onClick: () => {
                   Auth.logout();
-                  window.location.href = "/ui";
+                  window.location.href = "/ui/login";
                   return true;
                 },
               },
