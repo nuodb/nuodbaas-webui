@@ -9,6 +9,7 @@ import {
   retry,
   selectMuiCombo,
   getInputOrTextareaByName,
+  loginRest,
 } from "../helpers/ui";
 import {
   createResourceRest,
@@ -16,6 +17,7 @@ import {
   TEST_ORGANIZATION,
   TEST_ADMIN_PASSWORD,
   TEST_ADMIN_USER,
+  createUserRest,
 } from "../helpers/api";
 import { expect, Page } from "@playwright/test";
 import { getSchema } from "../../ui/src/utils/schema";
@@ -109,7 +111,7 @@ async function expectCount(
   });
 }
 
-test.describe("SearchTest", () => {
+test.describe("SearchTest Admin", () => {
   test("testSearch – various search patterns return expected row counts", async ({
     restPage: page,
   }) => {
@@ -118,150 +120,153 @@ test.describe("SearchTest", () => {
       TEST_ORGANIZATION + "/" + TEST_ADMIN_USER,
       TEST_ADMIN_PASSWORD,
     );
-    await getSchema();
+    await search(page);
+  });
+});
 
-    const name = await create90Users();
+test.describe("SearchTest Readonly", () => {
+  test("testSearch Readonly – various search patterns return expected row counts", async ({
+    restPage: page,
+  }) => {
+    test.setTimeout(60_000);
+    const user = await createUserRest({
+      allow0: "read:" + TEST_ORGANIZATION,
+    });
+    await loginRest(page, TEST_ORGANIZATION, user, TEST_ADMIN_PASSWORD);
+    await search(page);
+  });
+});
 
-    await clickMenu(page, "users");
-    await waitRestComplete(page);
+async function search(page: Page) {
+  await getSchema();
 
-    await expectCount(page, 20, "expecting full page");
+  const name = await create90Users();
 
-    const labelName = "l" + name.substring(1);
-    let checks: SearchQueryType[] = [
-      {
-        items: [
-          {
-            condition: "startsWith",
-            fieldName: "name",
-            ignoreCase: true,
-            key: undefined,
-            value: name + "1",
-          },
-        ],
-        expect: 10,
-        message: "name prefix 1*",
-      },
-      {
-        items: [
-          {
-            condition: "startsWith",
-            fieldName: "name",
-            ignoreCase: false,
-            key: undefined,
-            value: name,
-          },
-        ],
-        expect: 20,
-        message: "name=name* (full page)",
-      },
-      {
-        items: [
-          {
-            condition: "search",
-            fieldName: name + "1",
-            ignoreCase: false,
-            key: undefined,
-            value: name + "1",
-          },
-        ],
-        expect: 10,
-        message: "name1*",
-      },
-      {
-        items: [
-          {
-            condition: "contains",
-            fieldName: "name",
-            ignoreCase: false,
-            key: undefined,
-            value: name.substring(1) + "1",
-          },
-        ],
-        expect: 10,
-        message: "name=*suffix1*",
-      },
-      {
-        items: [
-          {
-            condition: "endsWith",
-            fieldName: "name",
-            ignoreCase: false,
-            key: undefined,
-            value: name.substring(2) + "19",
-          },
-        ],
-        expect: 1,
-        message: "name=endsWith name19",
-      },
-      {
-        items: [
-          {
-            condition: "=",
-            fieldName: "name",
-            ignoreCase: false,
-            key: undefined,
-            value: name + "19",
-          },
-        ],
-        expect: 1,
-        message: "name=exact name19",
-      },
-      {
-        items: [
-          {
-            condition: "=",
-            fieldName: "name",
-            ignoreCase: true,
-            key: undefined,
-            value: name.toUpperCase() + "19",
-          },
-        ],
-        expect: 1,
-        message: "name=exact name 19 uppercase",
-      },
-      {
-        items: [
-          {
-            condition: "=",
-            fieldName: "name",
-            ignoreCase: false,
-            key: undefined,
-            value: name + "invalid",
-          },
-        ],
-        expect: 0,
-        message: "name=invalid",
-      },
-      {
-        items: [
-          {
-            condition: "exists",
-            fieldName: "labels.*",
-            ignoreCase: undefined,
-            key: "label1",
-            value: undefined,
-          },
-        ],
-        expect: 20,
-        message: "label1 existence (full page)",
-      },
-      {
-        items: [
-          {
-            condition: "=",
-            fieldName: "labels.*",
-            ignoreCase: true,
-            key: "label2",
-            value: labelName + "8",
-          },
-        ],
-        expect: 9,
-        message: "label2=labelName8",
-      },
-    ];
+  await clickMenu(page, "users");
+  await waitRestComplete(page);
 
-    checks.push({
+  await expectCount(page, 20, "expecting full page");
+
+  const labelName = "l" + name.substring(1);
+  let checks: SearchQueryType[] = [
+    {
+      items: [
+        {
+          condition: "startsWith",
+          fieldName: "name",
+          ignoreCase: true,
+          key: undefined,
+          value: name + "1",
+        },
+      ],
+      expect: 10,
+      message: "name prefix 1*",
+    },
+    {
+      items: [
+        {
+          condition: "startsWith",
+          fieldName: "name",
+          ignoreCase: false,
+          key: undefined,
+          value: name,
+        },
+      ],
+      expect: 20,
+      message: "name=name* (full page)",
+    },
+    {
+      items: [
+        {
+          condition: "search",
+          fieldName: name + "1",
+          ignoreCase: false,
+          key: undefined,
+          value: name + "1",
+        },
+      ],
+      expect: 10,
+      message: "name1*",
+    },
+    {
+      items: [
+        {
+          condition: "contains",
+          fieldName: "name",
+          ignoreCase: false,
+          key: undefined,
+          value: name.substring(1) + "1",
+        },
+      ],
+      expect: 10,
+      message: "name=*suffix1*",
+    },
+    {
+      items: [
+        {
+          condition: "endsWith",
+          fieldName: "name",
+          ignoreCase: false,
+          key: undefined,
+          value: name.substring(2) + "19",
+        },
+      ],
+      expect: 1,
+      message: "name=endsWith name19",
+    },
+    {
+      items: [
+        {
+          condition: "=",
+          fieldName: "name",
+          ignoreCase: false,
+          key: undefined,
+          value: name + "19",
+        },
+      ],
+      expect: 1,
+      message: "name=exact name19",
+    },
+    {
+      items: [
+        {
+          condition: "=",
+          fieldName: "name",
+          ignoreCase: true,
+          key: undefined,
+          value: name.toUpperCase() + "19",
+        },
+      ],
+      expect: 1,
+      message: "name=exact name 19 uppercase",
+    },
+    {
+      items: [
+        {
+          condition: "=",
+          fieldName: "name",
+          ignoreCase: false,
+          key: undefined,
+          value: name + "invalid",
+        },
+      ],
+      expect: 0,
+      message: "name=invalid",
+    },
+    {
+      items: [
+        {
+          condition: "exists",
+          fieldName: "labels.*",
+          ignoreCase: undefined,
+          key: "label1",
+          value: undefined,
+        },
+      ],
+      expect: 20,
+      message: "label1 existence (full page)",
+    },
+    {
       items: [
         {
           condition: "=",
@@ -270,34 +275,44 @@ test.describe("SearchTest", () => {
           key: "label2",
           value: labelName + "8",
         },
-        {
-          condition: "~",
-          fieldName: "name",
-          ignoreCase: undefined,
-          key: undefined,
-          value: name + "1.*",
-        },
       ],
-      expect: 1,
-      message: "label2=labelName8 AND name prefix 1*",
-    });
+      expect: 9,
+      message: "label2=labelName8",
+    },
+  ];
 
-    for (let c = 0; c < checks.length; c++) {
-      const check = checks[c];
-      console.log(
-        "[" +
-          String(c + 1) +
-          "/" +
-          String(checks.length) +
-          "] Running check for " +
-          check.message,
-      );
-      await setSearchQuery(page, check);
-      expectCount(
-        page,
-        check.expect,
-        "Invalid row count for: " + check.message,
-      );
-    }
+  checks.push({
+    items: [
+      {
+        condition: "=",
+        fieldName: "labels.*",
+        ignoreCase: true,
+        key: "label2",
+        value: labelName + "8",
+      },
+      {
+        condition: "~",
+        fieldName: "name",
+        ignoreCase: undefined,
+        key: undefined,
+        value: name + "1.*",
+      },
+    ],
+    expect: 1,
+    message: "label2=labelName8 AND name prefix 1*",
   });
-});
+
+  for (let c = 0; c < checks.length; c++) {
+    const check = checks[c];
+    console.log(
+      "[" +
+        String(c + 1) +
+        "/" +
+        String(checks.length) +
+        "] Running check for " +
+        check.message,
+    );
+    await setSearchQuery(page, check);
+    expectCount(page, check.expect, "Invalid row count for: " + check.message);
+  }
+}

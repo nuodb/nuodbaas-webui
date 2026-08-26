@@ -5,7 +5,7 @@ import { withTranslation } from "react-i18next";
 import { TempAny } from "../../../utils/types";
 import {
   getChild,
-  getCreatePath,
+  getEntryPath,
   getResourceByPath,
   getSchema,
 } from "../../../utils/schema";
@@ -115,8 +115,8 @@ function getFieldsByPath(schema: TempAny, path: string) {
   }
 
   const fields: { [key: string]: string } = {};
-  const resource = getResourceByPath(schema, getCreatePath(schema, path));
-  if (resource["put"]) {
+  const resource = getResourceByPath(schema, getEntryPath(schema, path));
+  if (resource["get"]) {
     const formParams = getChild(resource["get"], [
       "responses",
       "200",

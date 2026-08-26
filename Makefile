@@ -296,10 +296,10 @@ pull-dependencies:
 	@if [ ! -f ui/public/images/material-icons.woff ] ; then \
 		curl https://cdn.jsdelivr.net/fontsource/fonts/material-icons@latest/latin-400-normal.woff -o ui/public/images/material-icons.woff; \
 	fi
-	@if [ ! -f ui/public/images/material-icons.woff ] ; then \
+	@if [ ! -f ui/public/images/material-icons.woff2 ] ; then \
 		curl https://cdn.jsdelivr.net/fontsource/fonts/material-icons@latest/latin-400-normal.woff2 -o ui/public/images/material-icons.woff2; \
 	fi
-	@if [ ! -f ui/public/images/material-icons.woff ] ; then \
+	@if [ ! -f ui/public/images/material-icons.ttf ] ; then \
 		curl https://cdn.jsdelivr.net/fontsource/fonts/material-icons@latest/latin-400-normal.ttf -o ui/public/images/material-icons.ttf; \
 	fi
 
