@@ -24,6 +24,7 @@ import {
   TEST_ADMIN_PASSWORD as ADMIN_PWD,
   TEST_ORGANIZATION,
   TEST_ADMIN_PASSWORD,
+  createUserRest,
 } from "../helpers/api";
 import { expect, type Page } from "@playwright/test";
 
@@ -41,6 +42,20 @@ async function createAndLoginUser(
     await clickUserMenu(page, "logout");
     await loginViaUI(page, TEST_ORGANIZATION, user, TEST_ADMIN_PASSWORD);
   });
+  return user;
+}
+
+/** Creates a limited user via UI then logs in as that user. */
+async function createAndLoginUserRest(
+  page: Page,
+  allow0?: string,
+  allow1?: string,
+  deny0?: string,
+  deny1?: string,
+): Promise<string> {
+  await loginRest(page);
+  const user = await createUserRest({ allow0, allow1, deny0, deny1 });
+  await loginRest(page, TEST_ORGANIZATION, user, TEST_ADMIN_PASSWORD);
   return user;
 }
 
@@ -110,7 +125,7 @@ test.describe("PermissionsTest", () => {
   test("testReadEverythingWriteUsers – can create users but not projects", async ({
     restPage: page,
   }) => {
-    await createAndLoginUser(
+    await createAndLoginUserRest(
       page,
       `read:${TEST_ORGANIZATION}`,
       `write:/users/${TEST_ORGANIZATION}`,
@@ -126,7 +141,7 @@ test.describe("PermissionsTest", () => {
   test("testWriteEverythingExceptUsers – all:org with deny users write", async ({
     restPage: page,
   }) => {
-    await createAndLoginUser(
+    await createAndLoginUserRest(
       page,
       `all:${TEST_ORGANIZATION}`,
       undefined,
