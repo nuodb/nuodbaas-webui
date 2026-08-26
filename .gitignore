@@ -4,7 +4,7 @@ ui/node_modules
 ui/package-lock.json
 ui/build
 ui/coverage
-ui/public/images/material-icons.woff2
+ui/public/images/material-icons.woff
 ui/public/images/material-icons.woff2
 ui/public/images/material-icons.ttf
 ui-test/node_modules
