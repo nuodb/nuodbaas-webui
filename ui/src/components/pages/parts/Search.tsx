@@ -56,7 +56,7 @@ function getFieldsByPath(schema: TempAny, path: string) {
             );
           }
         } else if (definition[key].properties) {
-          getFields(definition[key].properties, key + ".", outFields);
+          getFields(definition[key].properties, prefix + key + ".", outFields);
         } else {
           console.log("INVALID OBJECT", definition, prefix, path);
         }
