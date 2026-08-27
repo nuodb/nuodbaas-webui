@@ -390,6 +390,7 @@ function Table(props: TableProps) {
         <div>{data.length > 0 && tableLabels[column.id]}</div>
         {props.sort !== undefined && (
           <SortIcon
+            id={column.id}
             sort={
               props.sort.column !== column.id
                 ? "none"

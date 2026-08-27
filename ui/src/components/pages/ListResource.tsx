@@ -20,7 +20,7 @@ import {
 } from "../../utils/types";
 import Pagination from "../controls/Pagination";
 import { withTranslation } from "react-i18next";
-import Search from "./parts/Search";
+import Search, { getFieldsByPath } from "./parts/Search";
 import ResourceHeader from "./parts/ResourceHeader";
 import Toast from "../controls/Toast";
 import {
@@ -112,7 +112,16 @@ function ListResource(props: PageProps) {
             "&limit=" +
             pageSize;
           if (sort.column) {
-            url += "&sortBy=" + encodeURIComponent(sort.column);
+            let sortBy = sort.column;
+
+            // special case: if sortBy is derived from a map type field (i.e. sortBy = "label.key" and field name is "label.*", then reformat it to '{label["key"]}'
+            const mapField = Object.keys(getFieldsByPath(schema, path)).find(field => field.endsWith(".*") && sort.column.startsWith(field.substring(0, field.length - 1)));
+            if (mapField) {
+              sortBy = "{" + mapField.substring(0, mapField.length - 2) + "[\"" + sort.column.substring(mapField.length - 1) + "\"]}";
+              console.log("sortBy", sortBy, sort.column, mapField);
+            }
+
+            url += "&sortBy=" + encodeURIComponent(sortBy);
             url += "&reverse=" + String(sort.direction === "desc");
           }
           search.forEach((s) => {
