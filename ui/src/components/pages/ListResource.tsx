@@ -115,9 +115,18 @@ function ListResource(props: PageProps) {
             let sortBy = sort.column;
 
             // special case: if sortBy is derived from a map type field (i.e. sortBy = "label.key" and field name is "label.*", then reformat it to '{label["key"]}'
-            const mapField = Object.keys(getFieldsByPath(schema, path)).find(field => field.endsWith(".*") && sort.column.startsWith(field.substring(0, field.length - 1)));
+            const mapField = Object.keys(getFieldsByPath(schema, path)).find(
+              (field) =>
+                field.endsWith(".*") &&
+                sort.column.startsWith(field.substring(0, field.length - 1)),
+            );
             if (mapField) {
-              sortBy = "{" + mapField.substring(0, mapField.length - 2) + "[\"" + sort.column.substring(mapField.length - 1) + "\"]}";
+              sortBy =
+                "{" +
+                mapField.substring(0, mapField.length - 2) +
+                '["' +
+                sort.column.substring(mapField.length - 1) +
+                '"]}';
               console.log("sortBy", sortBy, sort.column, mapField);
             }
 

@@ -8,7 +8,11 @@ export type SortIconProps = {
   setSort: (sort: "asc" | "desc") => void;
 };
 
-export default function SortIcon({ id, sort, setSort }: SortIconProps): ReactNode {
+export default function SortIcon({
+  id,
+  sort,
+  setSort,
+}: SortIconProps): ReactNode {
   return (
     <div
       data-testid={"sortButton_" + id}
