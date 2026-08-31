@@ -16,6 +16,7 @@ export default function SortIcon({
   return (
     <div
       data-testid={"sortButton_" + id}
+      data-sort={sort}
       className="NuoRow"
       style={{ alignItems: "center" }}
       onClick={(event) => {

@@ -127,7 +127,6 @@ function ListResource(props: PageProps) {
                 '["' +
                 sort.column.substring(mapField.length - 1) +
                 '"]}';
-              console.log("sortBy", sortBy, sort.column, mapField);
             }
 
             url += "&sortBy=" + encodeURIComponent(sortBy);
