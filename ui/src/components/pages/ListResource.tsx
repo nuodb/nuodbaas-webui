@@ -114,7 +114,21 @@ function ListResource(props: PageProps) {
           if (sort.column) {
             let sortBy = sort.column;
 
-            // special case: if sortBy is derived from a map type field (i.e. sortBy = "label.key" and field name is "label.*", then reformat it to '{label["key"]}'
+            /**
+             * Special case handling for map‑type fields.
+             *
+             * When the column to sort by comes from a map (e.g. the user selects
+             * `labels.key`), the underlying field definition is expressed as a wildcard in the UI
+             * (`labels.*`).  In that situation we need to rewrite the sort expression so
+             * that the query language can resolve the specific map entry.
+             *
+             * The transformation below converts:
+             *   sortBy = "labels.key"
+             *   field definition = "labels.*"
+             * into the query‑compatible form:
+             *   sortBy = `{labels["key"]}`
+             *
+             */
             const mapField = Object.keys(getFieldsByPath(schema, path)).find(
               (field) =>
                 field.endsWith(".*") &&
