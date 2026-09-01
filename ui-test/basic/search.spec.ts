@@ -24,7 +24,7 @@ import { getSchema } from "../../ui/src/utils/schema";
 import Auth from "../../ui/src/utils/auth";
 import { FilterCondition } from "../../ui/src/components/pages/ListResourceFilter";
 
-type SearchQueryType = {
+export type SearchQueryType = {
   items: {
     condition: FilterCondition;
     fieldName: string;
@@ -35,7 +35,7 @@ type SearchQueryType = {
   expect: number;
   message: string;
 };
-async function setSearchQuery(page: Page, search: SearchQueryType) {
+export async function setSearchQuery(page: Page, search: SearchQueryType) {
   const select = page.locator("#select-search");
 
   //clear out all search queries

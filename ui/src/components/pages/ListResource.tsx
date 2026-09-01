@@ -20,7 +20,7 @@ import {
 } from "../../utils/types";
 import Pagination from "../controls/Pagination";
 import { withTranslation } from "react-i18next";
-import Search from "./parts/Search";
+import Search, { getFieldsByPath } from "./parts/Search";
 import ResourceHeader from "./parts/ResourceHeader";
 import Toast from "../controls/Toast";
 import {
@@ -112,7 +112,38 @@ function ListResource(props: PageProps) {
             "&limit=" +
             pageSize;
           if (sort.column) {
-            url += "&sortBy=" + encodeURIComponent(sort.column);
+            let sortBy = sort.column;
+
+            /**
+             * Special case handling for map‑type fields.
+             *
+             * When the column to sort by comes from a map (e.g. the user selects
+             * `labels.key`), the underlying field definition is expressed as a wildcard in the UI
+             * (`labels.*`).  In that situation we need to rewrite the sort expression so
+             * that the query language can resolve the specific map entry.
+             *
+             * The transformation below converts:
+             *   sortBy = "labels.key"
+             *   field definition = "labels.*"
+             * into the query‑compatible form:
+             *   sortBy = `{labels["key"]}`
+             *
+             */
+            const mapField = Object.keys(getFieldsByPath(schema, path)).find(
+              (field) =>
+                field.endsWith(".*") &&
+                sort.column.startsWith(field.substring(0, field.length - 1)),
+            );
+            if (mapField) {
+              sortBy =
+                "{" +
+                mapField.substring(0, mapField.length - 2) +
+                '["' +
+                sort.column.substring(mapField.length - 1) +
+                '"]}';
+            }
+
+            url += "&sortBy=" + encodeURIComponent(sortBy);
             url += "&reverse=" + String(sort.direction === "desc");
           }
           search.forEach((s) => {

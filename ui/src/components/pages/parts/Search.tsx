@@ -30,7 +30,7 @@ type SearchProps = {
   t: TempAny;
 };
 
-function getFieldsByPath(schema: TempAny, path: string) {
+export function getFieldsByPath(schema: TempAny, path: string) {
   function getFields(
     definition: any,
     prefix: string,

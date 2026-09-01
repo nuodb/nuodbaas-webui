@@ -3,13 +3,20 @@
 import { ReactNode } from "react";
 
 export type SortIconProps = {
+  id: string;
   sort: "none" | "asc" | "desc";
   setSort: (sort: "asc" | "desc") => void;
 };
 
-export default function SortIcon({ sort, setSort }: SortIconProps): ReactNode {
+export default function SortIcon({
+  id,
+  sort,
+  setSort,
+}: SortIconProps): ReactNode {
   return (
     <div
+      data-testid={"sortButton_" + id}
+      data-sort={sort}
       className="NuoRow"
       style={{ alignItems: "center" }}
       onClick={(event) => {
