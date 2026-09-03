@@ -117,9 +117,9 @@ func fetchEnvironments(prometheusUrl string, username string, password string) (
 }
 
 func Populate3DS(cache *fileCache) {
-    environments := strings.Split(os.Getenv("POPULATE_3DS_ENVIRONMENTS"), ",")
-    username := os.Getenv("MULTI_INSTANCE_POPULATE_3DS_PROMETHEUS_USERNAME")
-    password := os.Getenv("MULTI_INSTANCE_POPULATE_3DS_PROMETHEUS_PASSWORD")
+    environments := strings.Split(os.Getenv("POPULATE_DS_ENVIRONMENTS"), ",")
+    username := os.Getenv("MULTI_INSTANCE_POPULATE_DS_PROMETHEUS_USERNAME")
+    password := os.Getenv("MULTI_INSTANCE_POPULATE_DS_PROMETHEUS_PASSWORD")
 
     if username == "" || password == "" || (len(environments) == 1 && environments[0] == "") {
         log.Println("3DS population disabled")

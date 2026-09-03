@@ -35,9 +35,9 @@ All configurable parameters for each top-level scope are detailed below, organiz
 | `nuodbaasWebui.multiInstance.name` | Instance name to share with Multi-Instance server | `` |
 | `nuodbaasWebui.multiInstance.username` | Username to use when updating Multi-Instance entries | `` |
 | `nuodbaasWebui.multiInstance.password` | Password to use when updating Multi-Instance entries | `` |
-| `nuodbaasWebui.multiInstance.populate.3ds.environments` | Environments to pull multii-instance data | `stg,ppd,prd` |
-| `nuodbaasWebui.multiInstance.populate.3ds.prometheus_username` | Prometheus Username to retrieve 3DS clusters | `svc_nuodb_automation` |
-| `nuodbaasWebui.multiInstance.populate.3ds.prometheus_password` | Prometheus Password to retrieve 3DS clusters | `` |
+| `nuodbaasWebui.multiInstance.populate.ds.environments` | Environments to pull multii-instance data | `stg,ppd,prd` |
+| `nuodbaasWebui.multiInstance.populate.ds.prometheus_username` | Prometheus Username to retrieve 3DS clusters | `svc_nuodb_automation` |
+| `nuodbaasWebui.multiInstance.populate.ds.prometheus_password` | Prometheus Password to retrieve 3DS clusters | `` |
 | `nuodbaasWebui.ephemeralVolume.enabled` |  Whether to create a generic ephemeral volume rather than emptyDir for any storage that does not outlive the pod | `false` |
 | `nuodbaasWebui.ephemeralVolume.size` |  The size of the generic ephemeral volume to create | `1Gi` |
 | `nuodbaasWebui.ephemeralVolume.storageClass` |  The storage class to use for the generic ephemeral volume | `""` |

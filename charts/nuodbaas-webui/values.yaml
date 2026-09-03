@@ -47,7 +47,7 @@ nuodbaasWebui:
 
       # Automatically populate instance data when run in a specific environment
     populate:
-      3ds:
+      ds:
         environments: "stg,ppd,prd"
         prometheus_username: svc_nuodb_automation
         prometheus_password: ""
