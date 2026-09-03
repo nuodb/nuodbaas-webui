@@ -60,12 +60,14 @@ func isDirectory(path string) bool {
 }
 
 const STATIC_DIR = "static"
+const MULTI_INSTANCE_JSON = STATIC_DIR + "/ui/multiinstance.json"
+const POLL_INTERVAL = 5*time.Minute
 
 // updateDirectoryServer periodically posts the config.json to the multi-instance registry.
 func updateDirectoryServerThread() {
-    registryURL := os.Getenv("NUODB_MULTI_INSTANCE_REGISTRY_URL")
-    username := os.Getenv("NUODB_MULTI_INSTANCE_USERNAME")
-    password := os.Getenv("NUODB_MULTI_INSTANCE_PASSWORD")
+    registryURL := os.Getenv("MULTI_INSTANCE_REGISTRY_URL")
+    username := os.Getenv("MULTI_INSTANCE_USERNAME")
+    password := os.Getenv("MULTI_INSTANCE_PASSWORD")
     if registryURL == "" || username == "" || password == "" {
         return
     }
@@ -118,13 +120,13 @@ func main() {
     prefixAlternate = strings.Trim(prefixAlternate, "/")
     cpRestUrl := os.Getenv("NUODB_CP_REST_URL")
     sqlRestUrl := os.Getenv("NUODB_SQL_REST_URL")
-    multiInstanceJson := os.Getenv("NUODB_MULTI_INSTANCE_JSON")
-    multiInstanceRegistryUrl := os.Getenv("NUODB_MULTI_INSTANCE_REGISTRY_URL")
+    multiInstanceJson := os.Getenv("MULTI_INSTANCE_JSON")
+    multiInstanceRegistryUrl := os.Getenv("MULTI_INSTANCE_REGISTRY_URL")
     if multiInstanceJson != "" {
         multiInstanceRegistryUrl = "/ui/multiinstance.json"
-        cache.Set(filepath.Join(STATIC_DIR, "ui/multiinstance.json"), []byte(multiInstanceJson))
+        cache.Set(MULTI_INSTANCE_JSON, []byte(multiInstanceJson))
     }
-    multiInstanceName := os.Getenv("NUODB_MULTI_INSTANCE_NAME")
+    multiInstanceName := os.Getenv("MULTI_INSTANCE_NAME")
     if multiInstanceName == "" {
         multiInstanceName = strings.Split(os.Getenv("NUODBAAS_WEBUI_HOSTS"), ",")[0]
     }
@@ -202,8 +204,8 @@ func main() {
             }
             data = replace(data, "___NUODB_CP_REST_URL___", cpRestUrl)
             data = replace(data, "___NUODB_SQL_REST_URL___", sqlRestUrl)
-            data = replace(data, "___NUODB_MULTI_INSTANCE_REGISTRY_URL___", multiInstanceRegistryUrl)
-            data = replace(data, "___NUODB_MULTI_INSTANCE_NAME___", multiInstanceName)
+            data = replace(data, "___MULTI_INSTANCE_REGISTRY_URL___", multiInstanceRegistryUrl)
+            data = replace(data, "___MULTI_INSTANCE_NAME___", multiInstanceName)
         }
 
         if cacheFile {
@@ -213,6 +215,8 @@ func main() {
     }
 
     updateDirectoryServerThread()
+
+    go Populate3DS(cache)
 
     http.HandleFunc("/", handler)
     log.Println("Serving static files on :8080")
