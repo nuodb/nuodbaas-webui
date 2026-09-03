@@ -28,11 +28,7 @@ type PrometheusResponse struct {
 }
 
 func isValidEnvironment(environment string) bool {
-    if environment == "stg" || environment == "ppd" || environment == "prd" {
-		return true
-	} else {
-		return false
-	}
+    return environment == "stg" || environment == "ppd" || environment == "prd"
 }
 
 func getSubDomain(environment string) string {
@@ -106,7 +102,7 @@ func fetchEnvironments(prometheusUrl string, username string, password string) (
     // Read and unmarshal the JSON response.
     var result PrometheusResponse
     if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-        log.Printf("failed to decode Prometheus response");
+        log.Printf("failed to decode Prometheus response")
         return nil, err
     }
 
@@ -120,33 +116,31 @@ func fetchEnvironments(prometheusUrl string, username string, password string) (
     return environments, nil
 }
 
-func Populate3DS(cache * fileCache) {
+func Populate3DS(cache *fileCache) {
     environments := strings.Split(os.Getenv("POPULATE_3DS_ENVIRONMENTS"), ",")
     username := os.Getenv("MULTI_INSTANCE_POPULATE_3DS_PROMETHEUS_USERNAME")
     password := os.Getenv("MULTI_INSTANCE_POPULATE_3DS_PROMETHEUS_PASSWORD")
 
     if username == "" || password == "" || (len(environments) == 1 && environments[0] == "") {
-        log.Printf("3DS population disabled")
+        log.Println("3DS population disabled")
         return
     } else {
-        log.Printf("3DS population started")
+        log.Println("3DS population started")
     }
 
-    ticker := time.NewTicker(POLL_INTERVAL)
-    defer ticker.Stop()
     for {
 		entries := make([]Entry, 0, 10)
         count := 0
         for _, environment := range(environments) {
             environment = strings.TrimSpace(environment)
             if !isValidEnvironment(environment) {
-                log.Printf("Invalid environment: %q - ignoring.\n", environment)
+                log.Printf("Invalid environment: %q - ignoring", environment)
                 continue
             }
 
             envs, err := fetchEnvironments(getPrometheusUrl(environment), username, password)
             if err != nil {
-                log.Printf("Error fetching: %v\n", err)
+                log.Printf("Error fetching: %v", err)
                 continue
             }
 
@@ -163,8 +157,8 @@ func Populate3DS(cache * fileCache) {
                 }
 
                 var entry Entry
-                entry.Name = getClusterName(environment, cluster, datacenter)
-                hostUrl := getClusterUrl(environment, cluster, datacenter)
+                entry.Name = getClusterName(environment, datacenter, cluster)
+                hostUrl := getClusterUrl(environment, datacenter, cluster)
                 entry.URL = hostUrl + "/nuodbaas"
                 entry.CpUrl = hostUrl + "/api"
                 entry.SqlUrl = hostUrl + "/api/sql"
@@ -176,7 +170,7 @@ func Populate3DS(cache * fileCache) {
 
 		jsonEntries, err := json.Marshal(entries)
 		if err != nil {
-			fmt.Println("Error marshaling multi-instance entries:", err)
+			log.Println("Error marshaling multi-instance entries:", err)
 		} else {
 	        cache.Set(MULTI_INSTANCE_JSON, []byte(jsonEntries))
 		}
