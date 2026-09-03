@@ -63,9 +63,9 @@ func getClusterUrl(environment string, datacenter string, cluster string) string
 
 type Entry struct {
     Name string `json:"name"`
-    URL  string `json:"url"`
-    SqlUrl string `json:"sqlUrl"`
-    CpUrl string `json:"cpUrl"`
+    Ui  string `json:"ui"`
+    Sql string `json:"sql"`
+    Cp string `json:"cp"`
     // internal timestamp, omitted from JSON responses
     expires time.Time `json:"-"`
 }
@@ -117,7 +117,7 @@ func fetchEnvironments(prometheusUrl string, username string, password string) (
 }
 
 func Populate3DS(cache *fileCache) {
-    environments := strings.Split(os.Getenv("POPULATE_DS_ENVIRONMENTS"), ",")
+    environments := strings.Split(os.Getenv("MULTI_INSTANCE_POPULATE_DS_ENVIRONMENTS"), ",")
     username := os.Getenv("MULTI_INSTANCE_POPULATE_DS_PROMETHEUS_USERNAME")
     password := os.Getenv("MULTI_INSTANCE_POPULATE_DS_PROMETHEUS_PASSWORD")
 
@@ -159,9 +159,9 @@ func Populate3DS(cache *fileCache) {
                 var entry Entry
                 entry.Name = getClusterName(environment, datacenter, cluster)
                 hostUrl := getClusterUrl(environment, datacenter, cluster)
-                entry.URL = hostUrl + "/nuodbaas"
-                entry.CpUrl = hostUrl + "/api"
-                entry.SqlUrl = hostUrl + "/api/sql"
+                entry.Ui = hostUrl + "/nuodbaas"
+                entry.Cp = hostUrl + "/api"
+                entry.Sql = hostUrl + "/api/sql"
 				entries = append(entries, entry)
 
                 count++

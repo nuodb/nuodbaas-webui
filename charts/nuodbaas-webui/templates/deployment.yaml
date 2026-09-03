@@ -52,11 +52,11 @@ spec:
             - name: MULTI_INSTANCE_NAME
               value: {{ .Values.nuodbaasWebui.multiInstance.name | quote }}
             - name: MULTI_INSTANCE_POPULATE_DS_ENVIRONMENTS
-              value: {{ .Values.nuodbaasMultiInstance.populate.ds.environments }}
+              value: {{ .Values.nuodbaasWebui.multiInstance.populate.ds.environments }}
             - name: MULTI_INSTANCE_POPULATE_DS_PROMETHEUS_USERNAME
-              value: {{ .Values.nuodbaasMultiInstance.populate.ds.prometheus_username }}
+              value: {{ .Values.nuodbaasWebui.multiInstance.populate.ds.prometheus_username }}
             - name: MULTI_INSTANCE_POPULATE_DS_PROMETHEUS_PASSWORD
-              value: {{ .Values.nuodbaasMultiInstance.populate.ds.prometheus_password }}
+              value: {{ .Values.nuodbaasWebui.multiInstance.populate.ds.prometheus_password }}
             {{- if .Values.nuodbaasWebui.multiInstanceUsername }}
             {{- if .Values.nuodbaasWebui.multiInstancePassword }}
             - name: MULTI_INSTANCE_USERNAME
