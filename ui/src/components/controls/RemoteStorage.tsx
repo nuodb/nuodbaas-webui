@@ -76,12 +76,12 @@ export function RemoteStorageBoundary({
   const iframeMemo = useMemo(() => {
     let remoteStorageUrl = "/ui/remoteStorage.html";
     const multiInstanceRegistryUrl = runtimeConcat(
-      "___NUODB_MULTI_INSTANCE_REGISTRY_URL___",
+      "___MULTI_INSTANCE_REGISTRY_URL___",
     );
     if (
       !multiInstanceRegistryUrl.endsWith(".json") &&
       multiInstanceRegistryUrl &&
-      multiInstanceRegistryUrl !== "___NUODB_MULTI_INSTANCE_REGISTRY_URL___"
+      multiInstanceRegistryUrl !== "___MULTI_INSTANCE_REGISTRY_URL___"
     ) {
       remoteStorageUrl = multiInstanceRegistryUrl + "/remoteStorage.html";
     }

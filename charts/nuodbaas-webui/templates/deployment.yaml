@@ -45,20 +45,26 @@ spec:
               value: {{ .Values.nuodbaasWebui.cpUrl }}
             - name: NUODB_SQL_REST_URL
               value: {{ .Values.nuodbaasWebui.sqlUrl }}
-            - name: NUODB_MULTI_INSTANCE_REGISTRY_URL
-              value: {{ .Values.nuodbaasWebui.multiInstanceUrl | quote }}
-            - name: NUODB_MULTI_INSTANCE_JSON
-              value: {{ .Values.nuodbaasWebui.multiInstanceJson | quote }}
-            - name: NUODB_MULTI_INSTANCE_NAME
-              value: {{ .Values.nuodbaasWebui.multiInstanceName | quote }}
+            - name: MULTI_INSTANCE_REGISTRY_URL
+              value: {{ .Values.nuodbaasWebui.multiInstance.url | quote }}
+            - name: MULTI_INSTANCE_JSON
+              value: {{ .Values.nuodbaasWebui.multiInstance.json | quote }}
+            - name: MULTI_INSTANCE_NAME
+              value: {{ .Values.nuodbaasWebui.multiInstance.name | quote }}
+            - name: MULTI_INSTANCE_POPULATE_DS_ENVIRONMENTS
+              value: {{ .Values.nuodbaasWebui.multiInstance.populate.ds.environments }}
+            - name: MULTI_INSTANCE_POPULATE_DS_PROMETHEUS_USERNAME
+              value: {{ .Values.nuodbaasWebui.multiInstance.populate.ds.prometheus_username }}
+            - name: MULTI_INSTANCE_POPULATE_DS_PROMETHEUS_PASSWORD
+              value: {{ .Values.nuodbaasWebui.multiInstance.populate.ds.prometheus_password }}
             {{- if .Values.nuodbaasWebui.multiInstanceUsername }}
             {{- if .Values.nuodbaasWebui.multiInstancePassword }}
-            - name: NUODB_MULTI_INSTANCE_USERNAME
+            - name: MULTI_INSTANCE_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: nuodbaas-webui-multi-instance
                   key: username
-            - name: NUODB_MULTI_INSTANCE_PASSWORD
+            - name: MULTI_INSTANCE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: nuodbaas-webui-multi-instance

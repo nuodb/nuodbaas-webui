@@ -1,7 +1,6 @@
 # (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
 
 ui/node_modules
-ui/package-lock.json
 ui/build
 ui/coverage
 ui/public/images/material-icons.woff

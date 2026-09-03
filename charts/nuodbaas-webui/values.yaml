@@ -37,11 +37,20 @@ nuodbaasWebui:
   replicas: 1
   cpUrl: /nuodb-cp
   sqlUrl: /api/sql
-  multiInstanceName: ""
-  multiInstanceUrl: ""
-  multiInstanceJson: ""
-  multiInstanceUsername: ""
-  multiInstancePassword: ""
+
+  multiInstance:
+    name: ""
+    url: ""
+    json: ""
+    username: ""
+    password: ""
+
+      # Automatically populate instance data when run in a specific environment
+    populate:
+      ds:
+        environments: "stg,ppd,prd"
+        prometheus_username: svc_nuodb_automation
+        prometheus_password: ""
 
   # Pod labels useful for integrating 3rd party products. Map value will pass
   # through to the pod as supplied. String value will be templated and the

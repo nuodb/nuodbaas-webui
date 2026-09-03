@@ -308,13 +308,23 @@ deploy-webui: $(HELM) $(KIND)  pull-dependencies ## deploy WebUI
 	@if [ -d charts/nuodbaas-webui ] ; then \
 		${MAKE} build-image && \
 		$(KIND) load docker-image nuodbaas-webui:latest && \
-		$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui \
-			--set image.repository=nuodbaas-webui \
-			--set image.tag=latest \
-			--set-file nuodbaasWebui.customConfig=docker/development/custom.json \
-			--set-file nuodbaasWebui.multiInstanceJson=docker/development/static/multiinstance.json \
-			--set nuodbaasWebui.ingress.enabled=true \
-			--set nuodbaasWebui.cpUrl=/api; \
+		if [ "$$MULTI_INSTANCE_POPULATE_DS_PROMETHEUS_PASSWORD" == "" ] ; then \
+			$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui \
+				--set image.repository=nuodbaas-webui \
+				--set image.tag=latest \
+				--set-file nuodbaasWebui.customConfig=docker/development/custom.json \
+				--set-file nuodbaasWebui.multiInstanceJson=docker/development/static/multiinstance.json \
+				--set nuodbaasWebui.ingress.enabled=true \
+				--set nuodbaasWebui.cpUrl=/api; \
+		else \
+			$(HELM) upgrade --install --wait -n default nuodbaas-webui charts/nuodbaas-webui \
+				--set image.repository=nuodbaas-webui \
+				--set image.tag=latest \
+				--set-file nuodbaasWebui.customConfig=docker/development/custom.json \
+				--set "nuodbaasWebui.multiInstance.populate.ds.prometheus_password=$$MULTI_INSTANCE_PROMETHEUS_PASSWORD" \
+				--set nuodbaasWebui.ingress.enabled=true \
+				--set nuodbaasWebui.cpUrl=/api; \
+		fi; \
 	fi
 
 .PHONY: undeploy-webui

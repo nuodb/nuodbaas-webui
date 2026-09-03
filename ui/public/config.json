@@ -1,8 +1,8 @@
 {
   "copyright": "(C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.",
-  "name": "___NUODB_MULTI_INSTANCE_NAME___",
+  "name": "___MULTI_INSTANCE_NAME___",
   "uiUrl": "/ui",
   "cpUrl": "___NUODB_CP_REST_URL___",
   "sqlUrl": "___NUODB_SQL_REST_URL___",
-  "multiInstanceUrl": "___NUODB_MULTI_INSTANCE_REGISTRY_URL___"
+  "multiInstanceUrl": "___MULTI_INSTANCE_REGISTRY_URL___"
 }
