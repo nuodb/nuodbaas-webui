@@ -40,20 +40,23 @@ function SqlQueryTab({ sqlConnection, dbTable }: SqlQueryTabProps) {
     pagedResults.rows = [...pageFilter(pagedResults.rows, page, pageSize)];
   }
 
-  const NuoDbTypes = "array bigint binary blob boolean bytes char clob date double float integer number numeric smallint string time timestamp varchar varying with without zone";
-  const NuoDbKeywords = "all and as between bits both break by call cascade case catch collate column constraint containing create current current_date current_time current_timestamp default "
-    + "delete describe distinct else else_if end end_for end_function end_if end_procedure end_trigger end_try end_while enum escape execute exists false fetch following for foreign from full "
-    + "generated group groups having identity if in inner inout insert into is join key leading left like limit natural nchar nclob next next_value not null numeric nvarchar octets off offset "
-    + "on only or order out primary real record_batching record_number references replace restrict return right rollback rows select set show smallint starting then throw to trailing true try "
-    + "unbounded union unique unknown update using var ver when where while with _record_id _record_partitionid _record_sequence _record_transaction";
-  const NuoDbBuiltin = "abs acos asin atan2 atan bit_length cast ceiling character_length coalesce concat convert_tz cos cot current_user date date_add date_sub dayofweek day degrees extract "
-    + "floor greatest hour ifnull least locate lower ltrim minute mod month msleep now nullif octet_length optional_field pi position power radians rand replace round rtrim second sin sort "
-    + "substring_index substr tan trim upper user year";
+  const NuoDbTypes =
+    "array bigint binary blob boolean bytes char clob date double float integer number numeric smallint string time timestamp varchar varying with without zone";
+  const NuoDbKeywords =
+    "all and as between bits both break by call cascade case catch collate column constraint containing create current current_date current_time current_timestamp default " +
+    "delete describe distinct else else_if end end_for end_function end_if end_procedure end_trigger end_try end_while enum escape execute exists false fetch following for foreign from full " +
+    "generated group groups having identity if in inner inout insert into is join key leading left like limit natural nchar nclob next next_value not null numeric nvarchar octets off offset " +
+    "on only or order out primary real record_batching record_number references replace restrict return right rollback rows select set show smallint starting then throw to trailing true try " +
+    "unbounded union unique unknown update using var ver when where while with _record_id _record_partitionid _record_sequence _record_transaction";
+  const NuoDbBuiltin =
+    "abs acos asin atan2 atan bit_length cast ceiling character_length coalesce concat convert_tz cos cot current_user date date_add date_sub dayofweek day degrees extract " +
+    "floor greatest hour ifnull least locate lower ltrim minute mod month msleep now nullif octet_length optional_field pi position power radians rand replace round rtrim second sin sort " +
+    "substring_index substr tan trim upper user year";
 
   const nuoDbDialect = SQLDialect.define({
     keywords: NuoDbKeywords,
     builtin: NuoDbBuiltin,
-    types: NuoDbTypes
+    types: NuoDbTypes,
   });
 
   return (
