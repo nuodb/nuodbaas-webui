@@ -69,11 +69,14 @@ spec:
               value: {{ .Values.nuodbaasWebui.ingress.pathPrefix }}
             - name: NUODBAAS_WEBUI_PATH_PREFIX_ALTERNATE
               value: {{ .Values.nuodbaasWebui.ingress.pathPrefixAlternate }}
-            {{- if .Values.nuodbaasWebui.ingress.tls }}
-            {{- if .Values.nuodbaasWebui.ingress.tls.hosts }}
+            {{- if .Values.nuodbaasWebui.ingress.hosts }}
             - name: NUODBAAS_WEBUI_HOSTS
-              value: {{ join "," .Values.nuodbaasWebui.ingress.tls.hosts | quote }}
-            {{- end }}
+              value: >-
+                {{ $hosts := list -}}
+                {{- range .Values.nuodbaasWebui.ingress.hosts -}}
+                  {{- $hosts = append $hosts .host -}}
+                {{- end -}}
+                {{- join "," $hosts -}}
             {{- end }}
 
             {{- include "nuodbaas-webui.env" . | nindent 12 }}

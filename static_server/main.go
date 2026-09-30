@@ -4,6 +4,8 @@ package main
 import (
     "bytes"
     "crypto/md5"
+    "crypto/rand"
+    "encoding/hex"
     "errors"
     "fmt"
     "io"
@@ -18,26 +20,34 @@ import (
     "time"
 )
 
+type cacheEntry struct {
+    data []byte
+    hasNonce bool
+}
+
 type fileCache struct {
     mu    sync.RWMutex
-    files map[string][]byte
+    files map[string]cacheEntry
 }
 
 func newFileCache() *fileCache {
-    return &fileCache{files: make(map[string][]byte)}
+    return &fileCache{files: make(map[string]cacheEntry)}
 }
 
 func (c *fileCache) Get(path string) ([]byte, bool) {
     c.mu.RLock()
     defer c.mu.RUnlock()
-    data, ok := c.files[path]
-    return data, ok
+    entry, ok := c.files[path]
+    if !ok {
+        return nil, false
+    }
+    return entry.data, entry.hasNonce
 }
 
-func (c *fileCache) Set(path string, data []byte) {
+func (c *fileCache) Set(path string, data []byte, hasNonce bool) {
     c.mu.Lock()
     defer c.mu.Unlock()
-    c.files[path] = data
+    c.files[path] = cacheEntry{data, hasNonce}
 }
 
 func isTextFile(filename string) bool {
@@ -122,7 +132,7 @@ func main() {
     multiInstanceRegistryUrl := os.Getenv("NUODB_MULTI_INSTANCE_REGISTRY_URL")
     if multiInstanceJson != "" {
         multiInstanceRegistryUrl = "/ui/multiinstance.json"
-        cache.Set(filepath.Join(STATIC_DIR, "ui/multiinstance.json"), []byte(multiInstanceJson))
+        cache.Set(filepath.Join(STATIC_DIR, "ui/multiinstance.json"), []byte(multiInstanceJson), false)
     }
     multiInstanceName := os.Getenv("NUODB_MULTI_INSTANCE_NAME")
     if multiInstanceName == "" {
@@ -145,8 +155,8 @@ func main() {
         filePath := filepath.Join(STATIC_DIR, p)
 
         // Serve from cache if present
-        if data, ok := cache.Get(filePath); ok {
-            serveData(r, w, filePath, data)
+        if data, hasNonce := cache.Get(filePath); data != nil {
+            serveData(r, w, filePath, data, hasNonce)
             return
         }
 
@@ -168,8 +178,8 @@ func main() {
             }
 
             filePath = filepath.Join(STATIC_DIR, "ui/index.html")
-            if data, ok := cache.Get(filePath); ok {
-                serveData(r, w, filePath, data)
+            if data, hasNonce := cache.Get(filePath); data != nil {
+                serveData(r, w, filePath, data, hasNonce)
                 return
             }
 
@@ -191,6 +201,8 @@ func main() {
             return
         }
 
+        hasNonce := false
+
         if isTextFile(filePath) {
             if prefix != "" {
                 data = replace(data, "/ui\"", "/" + prefix + "\"")
@@ -204,12 +216,13 @@ func main() {
             data = replace(data, "___NUODB_SQL_REST_URL___", sqlRestUrl)
             data = replace(data, "___NUODB_MULTI_INSTANCE_REGISTRY_URL___", multiInstanceRegistryUrl)
             data = replace(data, "___NUODB_MULTI_INSTANCE_NAME___", multiInstanceName)
+            hasNonce = bytes.Contains(data, []byte("___NONCE___"))
         }
 
         if cacheFile {
-            cache.Set(filePath, data)
+            cache.Set(filePath, data, hasNonce)
         }
-        serveData(r, w, filePath, data)
+        serveData(r, w, filePath, data, hasNonce)
     }
 
     updateDirectoryServerThread()
@@ -246,7 +259,15 @@ func checkIfNoneMatch(r *http.Request, currentETag string) bool {
 	return false
 }
 
-func serveData(r *http.Request, w http.ResponseWriter, filePath string, data []byte) {
+func createNonce() string {
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(b)
+}
+
+func serveData(r *http.Request, w http.ResponseWriter, filePath string, data []byte, hasNonce bool) {
     ext := filepath.Ext(filePath)
     mimeType := mime.TypeByExtension(ext)
     if mimeType != "" {
@@ -254,6 +275,51 @@ func serveData(r *http.Request, w http.ResponseWriter, filePath string, data []b
     } else {
         w.Header().Set("Content-Type", "application/octet-stream")
     }
+
+    nonceExpression := "'none'"
+
+    if hasNonce {
+        nonce := createNonce();
+        nonceExpression = "'nonce-" + nonce + "'";
+        data = bytes.ReplaceAll(data, []byte("___NONCE___"), []byte(nonce))
+    }
+
+    hosts := strings.Split(os.Getenv("NUODBAAS_WEBUI_HOSTS"), ",")
+    selfExpression := ""
+    for _, host := range hosts {
+        if host != "" {
+            selfExpression = "https://" + host + "/ "
+        }
+    }
+    if selfExpression == "" {
+        selfExpression = "'self'";
+    }
+
+    registryURL := os.Getenv("NUODB_MULTI_INSTANCE_REGISTRY_URL")
+
+    w.Header().Set("Content-Security-Policy",
+        "default-src 'none'; " +
+        "script-src " + nonceExpression + "; " +
+        "script-src-elem " + nonceExpression + "; " +
+        "script-src-attr 'none'; " +
+        "style-src " + selfExpression + " " + nonceExpression + "; " +
+        "child-src 'none'; " +
+        "connect-src " + selfExpression + "; " +
+        "fenced-frame-src 'none'; " +
+        "font-src data: " + selfExpression + "; " +
+        "frame-src " + selfExpression + " " + registryURL + "; " +
+        "img-src " + selfExpression + "; " +
+        "manifest-src " + selfExpression + "; " +
+        "media-src 'none'; " +
+        "object-src 'none'; " +
+        "worker-src 'none'; " +
+        "base-uri " + selfExpression + "; " +
+        "form-action 'none'; " +
+        "frame-ancestors " + selfExpression + "; " +
+        "require-trusted-types-for 'script'; " +
+        "trusted-types * 'allow-duplicates';" +
+        "upgrade-insecure-requests; " +
+        "")
 
     if strings.HasPrefix(filePath, "static/ui/assets/") {
         // preventing Browser from re-requesting asset files for the next 24 hours
