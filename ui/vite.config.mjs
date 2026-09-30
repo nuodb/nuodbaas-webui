@@ -11,7 +11,7 @@ export default defineConfig({
   },
   html: {
     // Vite will inject this token everywhere during compilation
-    cspNonce: '___NONCE___',
+    cspNonce: "___NONCE___",
   },
   server: {
     open: true,

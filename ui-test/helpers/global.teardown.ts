@@ -7,6 +7,7 @@ const { Readable } = require("stream");
 const { finished } = require("stream/promises");
 
 test.describe("global teardown", () => {
+  test.setTimeout(90000);
   test("teardown coverage", async () => {
     const mcr = MCR({
       name: "Coverage Report",
