@@ -316,7 +316,7 @@ deploy-webui: $(HELM) $(KIND)  pull-dependencies ## deploy WebUI
 			--set nuodbaasWebui.ingress.enabled=true \
 			--set nuodbaasWebui.cpUrl=/api; \
 	fi
-# 			--set "nuodbaasWebui.ingress.hosts[0].host=1e88d43566e21793fb45-agoelzer-931-82.nuodev34.dsone.3ds.com" \
+# 			--set "nuodbaasWebui.ingress.hosts[0].host=hostname.com" \
 # 			--set "nuodbaasWebui.ingress.hosts[0].paths[0].pathType=Prefix" \
 # 			--set "nuodbaasWebui.ingress.hosts[0].paths[0].path=/ui" \
 

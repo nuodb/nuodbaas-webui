@@ -70,8 +70,6 @@ server {
   }
 }
 
-# (C) Copyright 2024-2026 Dassault Systemes SE.  All Rights Reserved.
-
 server {
   listen 82;
 
