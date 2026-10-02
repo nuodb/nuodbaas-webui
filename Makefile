@@ -316,6 +316,9 @@ deploy-webui: $(HELM) $(KIND)  pull-dependencies ## deploy WebUI
 			--set nuodbaasWebui.ingress.enabled=true \
 			--set nuodbaasWebui.cpUrl=/api; \
 	fi
+# 			--set "nuodbaasWebui.ingress.hosts[0].host=hostname.com" \
+# 			--set "nuodbaasWebui.ingress.hosts[0].paths[0].pathType=Prefix" \
+# 			--set "nuodbaasWebui.ingress.hosts[0].paths[0].path=/ui" \
 
 .PHONY: undeploy-webui
 undeploy-webui: $(KIND) $(HELM)
@@ -376,7 +379,7 @@ teardown-integration-tests: $(KIND) undeploy-sql undeploy-webui undeploy-seleniu
 .PHONY: run-integration-tests-only
 run-integration-tests-only: ## integration tests without setup/teardown
 	@cd ui && npm install && cd ..
-	@cd ui-test && npm install && npx playwright install && npm run e2e -- --workers 1 && cd ..
+	@cd ui-test && npm install && npx playwright install chromium && npm run e2e -- --workers 1 && cd ..
 
 .PHONY: run-unit-tests
 run-unit-tests: ## run unit tests

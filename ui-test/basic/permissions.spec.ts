@@ -38,7 +38,7 @@ async function createAndLoginUser(
 ): Promise<string> {
   await loginRest(page);
   const user = await createUserUI(page, { allow0, allow1, deny0, deny1 });
-  retry(async () => {
+  await retry(async () => {
     await clickUserMenu(page, "logout");
     await loginViaUI(page, TEST_ORGANIZATION, user, TEST_ADMIN_PASSWORD);
   });
@@ -86,16 +86,18 @@ test.describe("PermissionsTest", () => {
     await hasNotElement(page, "list_resource__create_button_projects", 1_000);
 
     // In the projects list: no Edit popup, View popup present
-    const menuCells = await waitTableElements(
-      page,
-      "list_resource__table",
-      "name",
-      project,
-      "$ref",
-    );
-    expect(menuCells.length).toBe(1);
-    await hasNotPopupMenu(page, menuCells[0], "edit_button");
-    await clickPopupMenu(page, menuCells[0], "view_button");
+    await retry(async () => {
+      const menuCells = await waitTableElements(
+        page,
+        "list_resource__table",
+        "name",
+        project,
+        "$ref",
+      );
+      expect(menuCells.length).toBe(1);
+      await hasNotPopupMenu(page, menuCells[0], "edit_button");
+      await clickPopupMenu(page, menuCells[0], "view_button");
+    });
 
     // In the view popup: show.databases present, edit absent
     await sleep(100); // TODO(agr22)

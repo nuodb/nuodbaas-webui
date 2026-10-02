@@ -9,6 +9,10 @@ export default defineConfig({
     outDir: "build",
     sourcemap: true,
   },
+  html: {
+    // Vite will inject this token everywhere during compilation
+    cspNonce: "___NONCE___",
+  },
   server: {
     open: true,
     port: 3000,

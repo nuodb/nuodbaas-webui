@@ -58,16 +58,18 @@
   },
   "homepage": "/",
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.58.2",
     "@types/node": "^25.5.0",
     "@vitejs/plugin-react": "^4.4.1",
     "@vitest/coverage-v8": "^4.0.16",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "eslint-plugin-security": "^4.0.0",
     "globals": "^17.6.0",
-    "nyc": "^17.1.0",
+    "nyc": "^18.0.0",
     "prettier": "3.9.1",
     "ts-node": "^10.9.2",
     "typescript-eslint": "^8.59.4",
@@ -86,5 +88,8 @@
       "html"
     ],
     "all": true
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
   }
 }
