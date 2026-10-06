@@ -12,7 +12,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import Button from "../controls/Button";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { RegionSetting, RegionSettings } from "../../utils/types";
+import { RegionSetting } from "../../utils/types";
 
 type ConfigType = {
   multiInstanceUrl?: string;
@@ -20,10 +20,8 @@ type ConfigType = {
 
 function RegionSettingsMenu({
   t,
-  regions,
 }: {
-  t: TFunction;
-  regions: RegionSettings;
+    t: TFunction;
 }) {
   const navigate = useNavigate();
   const [config, setConfig] = useState<ConfigType>({});
@@ -40,21 +38,19 @@ function RegionSettingsMenu({
     return null;
   }
 
-  const currentRegion: RegionSetting | null =
-    Auth.getCurrentRegion() || Auth.findRegionFromCurrentUrl(regions) || null;
+  const currentRegion: RegionSetting = Auth.getRegions()[0];
 
   const items = [
-    ...[...regions, ...Auth.getRegions()].map((region) => ({
+    ...[...Auth.getRegions()].map((region, index) => ({
       label: region.name,
-      icon: Auth.regionEquals(currentRegion, region) ? (
+      icon: index === 0 ? (
         <CheckIcon />
       ) : undefined,
       id: region.name,
       "data-testid": region.name,
       onClick: async () => {
-        await Auth.setCurrentRegion(region);
-        if (region.ui) {
-          window.location.href = region.ui;
+        if (region.uiUrl) {
+          window.location.href = region.uiUrl + "?region=" + region.id;
         } else {
           window.location.reload();
         }
@@ -67,7 +63,7 @@ function RegionSettingsMenu({
       id: "edit.region.selector",
       "data-testid": "edit.region.selector",
       hasSeparator: true,
-      onClick: () => {
+      onClick: async () => {
         navigate("/ui/region-selector-settings");
         return true;
       },
@@ -79,7 +75,7 @@ function RegionSettingsMenu({
       <Tooltip title={t("hint.regionSelector")}>
         <Button variant="text" onClick={() => {}}>
           <PublicIcon fontSize="large" />
-          {currentRegion?.name}
+          {currentRegion.name || window.location.host}
         </Button>
       </Tooltip>
     </Menu>

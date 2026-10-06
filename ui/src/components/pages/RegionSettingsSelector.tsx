@@ -20,6 +20,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
 import Auth from "../../utils/auth";
+import { generateRandom } from "../../utils/BackgroundTasks";
 
 function RegionSelectorSettings(props: PageProps) {
   const { t } = props;
@@ -70,16 +71,16 @@ function RegionSelectorSettings(props: PageProps) {
         newErrors.name = "Required";
       }
     }
-    if (field === "" || field === "ui") {
-      delete newErrors.ui;
-      fields.ui = (fields.ui || "").trim();
-      if (fields.ui !== "") {
-        if (!isValidUrl(fields.ui)) {
+    if (field === "" || field === "uiUrl") {
+      delete newErrors.uiUrl;
+      fields.uiUrl = (fields.uiUrl || "").trim();
+      if (fields.uiUrl !== "") {
+        if (!isValidUrl(fields.uiUrl)) {
           newErrors.ui = "Must be valid URL";
         } else {
           try {
             const uiResponse = await axios.get(
-              removeSlashPostfix(fields.ui) + "/config.json",
+              removeSlashPostfix(fields.uiUrl) + "/config.json",
             );
             if (!uiResponse.data || !uiResponse.data.uiUrl) {
               newErrors.ui = "URL is not a NuoDBaaS WebUI";
@@ -91,41 +92,41 @@ function RegionSelectorSettings(props: PageProps) {
         }
       }
     }
-    if (field === "" || field === "cp") {
-      delete newErrors.cp;
-      fields.cp = (fields.cp || "").trim();
-      if (fields.cp !== "") {
-        if (!isValidUrl(fields.cp)) {
-          newErrors.cp = "Must be valid URL";
+    if (field === "" || field === "cpUrl") {
+      delete newErrors.cpUrl;
+      fields.cpUrl = (fields.cpUrl || "").trim();
+      if (fields.cpUrl !== "") {
+        if (!isValidUrl(fields.cpUrl)) {
+          newErrors.cpUrl = "Must be valid URL";
         } else {
           try {
             await axios.get(
-              removeSlashPostfix(fields.cp.trim()) + "/login/providers",
+              removeSlashPostfix(fields.cpUrl.trim()) + "/login/providers",
             );
           } catch (ex) {
-            newErrors.cp = "Unable to connect: " + ex;
+            newErrors.cpUrl = "Unable to connect: " + ex;
           }
         }
       }
     }
-    if (field === "" || field === "sql") {
-      delete newErrors.sql;
-      fields.sql = (fields.sql || "").trim();
-      if (fields.sql !== "") {
-        if (!isValidUrl(fields.sql)) {
-          newErrors.sql = "Must be valid URL";
+    if (field === "" || field === "sqlUrl") {
+      delete newErrors.sqlUrl;
+      fields.sqlUrl = (fields.sqlUrl || "").trim();
+      if (fields.sqlUrl !== "") {
+        if (!isValidUrl(fields.sqlUrl)) {
+          newErrors.sqlUrl = "Must be valid URL";
         } else {
-          const sql = fields.sql.endsWith("/") ? fields.sql : fields.sql + "/";
+          const sqlUrl = fields.sqlUrl.endsWith("/") ? fields.sqlUrl : fields.sqlUrl + "/";
           try {
-            const sqlResponse = await axios.get(sql);
+            const sqlResponse = await axios.get(sqlUrl);
             if (
               !sqlResponse.data ||
               !sqlResponse.data.includes("NuoDB SQL service")
             ) {
-              newErrors.sql = "Backend URL is not an SQL service";
+              newErrors.sqlUrl = "Backend URL is not an SQL service";
             }
           } catch (ex) {
-            newErrors.sql = "Unable to connect: " + ex;
+            newErrors.sqlUrl = "Unable to connect: " + ex;
           }
         }
       }
@@ -133,9 +134,9 @@ function RegionSelectorSettings(props: PageProps) {
     delete newErrors._;
     if (
       field === "" &&
-      fields.ui === "" &&
-      fields.cp === "" &&
-      fields.sql === ""
+      fields.uiUrl === "" &&
+      fields.cpUrl === "" &&
+      fields.sqlUrl === ""
     ) {
       newErrors._ = "At least one of the URL fields need to be filled out";
     }
@@ -153,15 +154,15 @@ function RegionSelectorSettings(props: PageProps) {
         label: t("form.editRegionSettings.label.name"),
       },
       {
-        id: "ui",
+        id: "uiUrl",
         label: t("form.editRegionSettings.label.uiBaseUrl"),
       },
       {
-        id: "cp",
+        id: "cpUrl",
         label: t("form.editRegionSettings.label.cpBaseUrl"),
       },
       {
-        id: "sql",
+        id: "sqlUrl",
         label: t("form.editRegionSettings.label.sqlBaseUrl"),
       },
     ];
@@ -180,6 +181,7 @@ function RegionSelectorSettings(props: PageProps) {
                 id={uiField.id}
                 label={uiField.label}
                 value={fields[uiField.id] || ""}
+                disabled={fields["manual"] === "false" && uiField.id !== "name"}
                 onChange={({ currentTarget }) => {
                   setFields({ ...fields, [uiField.id]: currentTarget.value });
                 }}
@@ -201,34 +203,31 @@ function RegionSelectorSettings(props: PageProps) {
               }
 
               // remove backslash at end of base URL's
-              const ui = removeSlashPostfix((fields.ui || "").trim());
-              const cp = removeSlashPostfix((fields.cp || "").trim());
-              const sql = removeSlashPostfix((fields.sql || "").trim());
+              const uiUrl = removeSlashPostfix((fields.uiUrl || "").trim());
+              const cpUrl = removeSlashPostfix((fields.cpUrl || "").trim());
+              const sqlUrl = removeSlashPostfix((fields.sqlUrl || "").trim());
 
               // save regions
               if (isNew) {
-                Auth.refreshRegions();
+                await Auth.refreshRegions();
                 const regions: RegionSettings = Auth.getRegions();
-                regions.push({ name: fields.name, ui, cp, sql });
+                regions.push({ name: fields.name, id: generateRandom(), manual: true, uiUrl, cpUrl, sqlUrl });
                 Auth.setRegions(regions);
               } else {
                 const cachedRegions: RegionSettings = Auth.getRegions();
                 const cachedRegion =
-                  cachedRegions[showEntry - props.regions.length];
-                Auth.refreshRegions();
+                  cachedRegions[showEntry];
+                await Auth.refreshRegions();
                 const latestRegions: RegionSettings = Auth.getRegions();
                 const latestRegion = latestRegions.find(
                   (region) =>
-                    region.name === cachedRegion.name &&
-                    region.ui === cachedRegion.ui &&
-                    region.cp === cachedRegion.cp &&
-                    region.sql === cachedRegion.sql,
+                    region.id === cachedRegion.id,
                 );
                 if (latestRegion) {
                   latestRegion.name = fields.name;
-                  latestRegion.ui = ui;
-                  latestRegion.cp = cp;
-                  latestRegion.sql = sql;
+                  latestRegion.uiUrl = uiUrl;
+                  latestRegion.cpUrl = cpUrl;
+                  latestRegion.sqlUrl = sqlUrl;
                   Auth.setRegions(latestRegions);
                 }
               }
@@ -245,13 +244,13 @@ function RegionSelectorSettings(props: PageProps) {
           >
             {t("button.cancel")}
           </Button>
-          {!isNew && showEntry >= props.regions.length && (
+          {!isNew && (
             <button
               data-testid="button.delete"
               className="deleteButton"
               onClick={() => {
                 const regions = Auth.getRegions();
-                regions.splice(showEntry - props.regions.length, 1);
+                regions.splice(showEntry, 1);
                 Auth.setRegions(regions);
                 closeDialog();
               }}
@@ -267,7 +266,6 @@ function RegionSelectorSettings(props: PageProps) {
 
   function combinedRegions() {
     return [
-      ...props.regions.map((region) => ({ ...region, custom: false })),
       ...Auth.getRegions().map((region) => ({ ...region, custom: true })),
     ];
   }
@@ -303,9 +301,10 @@ function RegionSelectorSettings(props: PageProps) {
                           onClick={() => {
                             setFields({
                               name: setting.name,
-                              ui: setting.ui,
-                              cp: setting.cp,
-                              sql: setting.sql,
+                              manual: setting.manual ? "true" : "false",
+                              uiUrl: setting.uiUrl,
+                              cpUrl: setting.cpUrl,
+                              sqlUrl: setting.sqlUrl,
                             });
                             setShowEntry(index);
                           }}
@@ -317,20 +316,19 @@ function RegionSelectorSettings(props: PageProps) {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>{setting.ui}</TableCell>
-                  <TableCell>{setting.cp}</TableCell>
-                  <TableCell>{setting.sql}</TableCell>
+                  <TableCell>{setting.uiUrl}</TableCell>
+                  <TableCell>{setting.cpUrl}</TableCell>
+                  <TableCell>{setting.sqlUrl}</TableCell>
                   <TableCell>
-                    {Auth.isCurrentRegion(setting) ? (
+                    {index === 0 ? (
                       t("form.editRegionSettings.label.active")
                     ) : (
                       <button
                         data-testid={"make-active-" + setting.name}
                         onClick={async (event) => {
                           event.preventDefault();
-                          await Auth.setCurrentRegion(setting);
-                          if (setting.ui) {
-                            window.location.href = setting.ui;
+                          if (setting.uiUrl) {
+                            window.location.href = setting.uiUrl + "?region=" + setting.id;
                           } else {
                             window.location.reload();
                           }

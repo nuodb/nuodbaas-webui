@@ -1,8 +1,8 @@
 {
     "copyright": "(C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.",
-    "name": "Main Region",
+    "name": "",
     "uiUrl": "/ui",
-    "cpUrl": "/api",
+    "cpUrl": "/nuodb-cp",
     "sqlUrl": "/api/sql",
     "multiInstanceUrl": "/ui/multiinstance.json"
 }

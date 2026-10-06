@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import "./utils/i18n";
-import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
+import { Routes, Route, BrowserRouter, Navigate, useParams } from "react-router-dom";
 import LoginForm from "./components/pages/LoginForm";
 import ListResource from "./components/pages/ListResource";
 import CreateResource from "./components/pages/CreateResource";
@@ -25,13 +25,13 @@ import {
 } from "./components/pages/parts/Rest";
 import { getOrgFromPath } from "./utils/schema";
 import Toast from "./components/controls/Toast";
-import BackgroundTasks, { BackgroundTaskType } from "./utils/BackgroundTasks";
+import BackgroundTasks, { BackgroundTaskType, generateRandom } from "./utils/BackgroundTasks";
 import { withTranslation } from "react-i18next";
 import { TFunction } from "i18next";
 import Redirect from "./components/pages/Redirect";
 import DefaultPage from "./components/pages/DefaultPage";
 import RegionSettingsSelector from "./components/pages/RegionSettingsSelector";
-import { RegionSettings } from "./utils/types";
+import { RegionSetting, RegionSettings } from "./utils/types";
 import axios from "axios";
 
 /**
@@ -39,6 +39,7 @@ import axios from "axios";
  * @returns
  */
 function App({ t }: { t: TFunction }) {
+  const { region } = useParams();
   const [schema, setSchema] = useState<any>();
   const [isLoggedIn, setIsLoggedIn] = useState(Auth.isLoggedIn());
   const [isRecording, setIsRecording] = useState(
@@ -47,7 +48,6 @@ function App({ t }: { t: TFunction }) {
   const [org, setOrg] = useState("");
   const [orgs, setOrgs] = useState<string[]>([]);
   const [tasks, setTasks] = useState<BackgroundTaskType[]>([]);
-  const [regions, setRegions] = useState<RegionSettings>([]);
   const pageProps = {
     schema,
     isRecording,
@@ -56,29 +56,61 @@ function App({ t }: { t: TFunction }) {
     orgs,
     tasks,
     setTasks: setTasks,
-    regions,
   };
 
-  useEffect(() => {
-    axios.get("/ui/config.json").then((response) => {
-      if (response.data && response.data.multiInstanceUrl) {
-        axios.get(response.data.multiInstanceUrl).then((resp) => {
-          const currentRegion = Auth.getCurrentRegion();
-          const regions: RegionSettings = resp.data || [];
-          if (
-            !regions.find((region) => Auth.regionEquals(region, currentRegion))
-          ) {
-            regions.push({
-              name: response.data.name,
-              ui: Auth.getDefaultUiPrefixPath(),
-              cp: "",
-              sql: "",
-            });
-          }
-          setRegions(resp.data || []);
-        });
+  async function getRegionFromUrl() {
+    let currentRegion: RegionSetting = {
+      name: window.location.host,
+      manual: false,
+      id: generateRandom(),
+      uiUrl: Auth.getDefaultUiPrefixPath(),
+      cpUrl: Auth.getDefaultCpPrefixPath(),
+      sqlUrl: Auth.getDefaultSqlPrefixPath(),
+    };
+
+    try {
+      currentRegion = {
+        ...currentRegion,
+        ...(await axios.get(window.location.origin + "/ui/config.json")).data
       }
-    });
+      currentRegion.name = currentRegion.name || window.location.host;
+    }
+    catch (ex) {
+      console.log("ERROR: unable to load /ui/config.json. Setting to default URL's.", ex);
+    }
+
+    if (currentRegion.uiUrl.startsWith("/")) {
+      currentRegion.uiUrl = window.location.origin + currentRegion.uiUrl;
+    }
+    if (currentRegion.cpUrl.startsWith("/")) {
+      currentRegion.cpUrl = window.location.origin + currentRegion.cpUrl;
+    }
+    if (currentRegion.sqlUrl.startsWith("/")) {
+      currentRegion.sqlUrl = window.location.origin + currentRegion.sqlUrl;
+    }
+
+    return currentRegion;
+  }
+
+  useEffect(() => {
+    Auth.refreshRegions().then(async strRegions => {
+      console.log("RefreshRegion", region);
+      let regions: RegionSettings = JSON.parse(strRegions as any) || [];
+      const currentRegion: RegionSetting = region && regions.find(r => r.id === region) || await getRegionFromUrl();
+
+      const matchedRegionIndex = regions.findIndex(region => region.uiUrl === currentRegion.uiUrl && region.cpUrl === currentRegion.cpUrl && region.sqlUrl === currentRegion.sqlUrl);
+      console.log("matchedRegionIndex", matchedRegionIndex, regions, currentRegion);
+      if (matchedRegionIndex === -1) {
+        regions = [currentRegion, ...regions];
+      }
+      else {
+        regions = [regions[matchedRegionIndex], ...regions.filter((_, index) => index !== matchedRegionIndex)];
+      }
+      Auth.setRegions(regions);
+    })
+  }, [])
+
+  useEffect(() => {
     if (!isLoggedIn) {
       return;
     }
@@ -199,7 +231,6 @@ function App({ t }: { t: TFunction }) {
                     element={
                       <RegionSettingsSelector
                         {...pageProps}
-                        regions={regions}
                       />
                     }
                   />
@@ -216,7 +247,7 @@ function App({ t }: { t: TFunction }) {
                 <Route
                   path="/ui/region-selector-settings"
                   element={
-                    <RegionSettingsSelector {...pageProps} regions={regions} />
+                    <RegionSettingsSelector {...pageProps} />
                   }
                 />
                 <Route
@@ -224,7 +255,6 @@ function App({ t }: { t: TFunction }) {
                   element={
                     <LoginForm
                       setIsLoggedIn={setIsLoggedIn}
-                      regions={regions}
                     />
                   }
                 />

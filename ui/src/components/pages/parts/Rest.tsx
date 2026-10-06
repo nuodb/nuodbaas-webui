@@ -192,7 +192,6 @@ export class Rest extends React.Component<{
                 runtimeConcat("/u", "i/");
             } else {
               // reset to the default
-              await Auth.setCurrentRegion(null);
               window.location.reload();
             }
           } else if (!(await Rest.process401(reason))) {

@@ -57,7 +57,7 @@ export type MenuItemProps = {
   selected?: boolean;
   disabled?: boolean;
   hasSeparator?: boolean;
-  onClick?: () => boolean;
+  onClick?: () => Promise<boolean>;
   onKeyDown?: (event: React.KeyboardEvent<HTMLDivElement>) => void;
 };
 
@@ -91,7 +91,6 @@ export interface PageProps {
   orgs: string[];
   tasks: BackgroundTaskType[];
   setTasks: React.Dispatch<React.SetStateAction<BackgroundTaskType[]>>;
-  regions: RegionSettings;
   t: TFunction;
 }
 
@@ -102,9 +101,11 @@ export type SortColumnDirectionType = {
 
 export type RegionSetting = {
   name: string;
-  ui: string;
-  cp: string;
-  sql: string;
+  id: string;
+  manual: boolean;
+  uiUrl: string;
+  cpUrl: string;
+  sqlUrl: string;
 };
 
 export type RegionSettings = RegionSetting[];

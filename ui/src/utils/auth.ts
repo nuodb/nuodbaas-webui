@@ -55,9 +55,9 @@ export default class Auth {
       return false;
     }
     return (
-      region1.ui === region2.ui &&
-      region1.cp === region2.cp &&
-      region1.sql == region2.sql &&
+      region1.uiUrl === region2.uiUrl &&
+      region1.cpUrl === region2.cpUrl &&
+      region1.sqlUrl == region2.sqlUrl &&
       region1.name === region2.name
     );
   }
@@ -69,7 +69,7 @@ export default class Auth {
         const currentRegion: RegionSetting = JSON.parse(strCurrentRegion);
         if (
           currentRegion.name &&
-          (currentRegion.ui || currentRegion.cp || currentRegion.sql)
+          (currentRegion.uiUrl || currentRegion.cpUrl || currentRegion.sqlUrl)
         ) {
           return currentRegion;
         }
@@ -94,7 +94,7 @@ export default class Auth {
     const pathLower = window.location.pathname.toLowerCase();
 
     return regions.find((region) => {
-      const uiLower = region.ui?.toLowerCase();
+      const uiLower = region.uiUrl?.toLowerCase();
       if (hrefLower === uiLower || hrefLower.startsWith(uiLower + "/")) {
         return true;
       }
@@ -103,14 +103,6 @@ export default class Auth {
       }
       return false;
     });
-  }
-
-  static async setCurrentRegion(region: RegionSetting | null) {
-    if (region === null) {
-      await remoteStorage.set("nuodbaasCurrentRegion", null);
-    } else {
-      await remoteStorage.set("nuodbaasCurrentRegion", JSON.stringify(region));
-    }
   }
 
   static isCurrentRegion(region: RegionSetting | null) {
@@ -123,8 +115,8 @@ export default class Auth {
 
     if (
       currentRegion.name === region.name &&
-      currentRegion.cp === region.cp &&
-      currentRegion.sql === region.sql
+      currentRegion.cpUrl === region.cpUrl &&
+      currentRegion.sqlUrl === region.sqlUrl
     ) {
       return true;
     } else {
@@ -175,8 +167,8 @@ export default class Auth {
     let prefixPath = Auth.getDefaultCpPrefixPath();
 
     const currentRegion = Auth.getCurrentRegion();
-    if (currentRegion && currentRegion.cp) {
-      prefixPath = currentRegion.cp;
+    if (currentRegion && currentRegion.cpUrl) {
+      prefixPath = currentRegion.cpUrl;
     }
 
     while (prefixPath.endsWith("/")) {
@@ -194,8 +186,8 @@ export default class Auth {
     let prefixPath = Auth.getDefaultSqlPrefixPath();
 
     const currentRegion = Auth.getCurrentRegion();
-    if (currentRegion && currentRegion.sql) {
-      prefixPath = currentRegion.sql;
+    if (currentRegion && currentRegion.sqlUrl) {
+      prefixPath = currentRegion.sqlUrl;
     }
 
     while (prefixPath.endsWith("/")) {

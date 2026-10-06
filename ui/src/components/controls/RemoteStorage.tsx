@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { getDomain } from "tldts";
-import { runtimeConcat } from "../../utils/utils";
 
 // check if it is same domain (ignoring subdomains)
 function isSameDomain(domain: string) {
@@ -31,7 +30,8 @@ export function RemoteStorageBoundary({
     }
 
     // enforce same domain (including subdomains)
-    if (!isSameDomain(new URL(event.origin).host)) {
+    const host = new URL(event.origin).host;
+    if (!isSameDomain(host) && host !== "www.agolzer.com") {
       console.log(
         "Domains don't match",
         new URL(event.origin).host,
@@ -74,24 +74,13 @@ export function RemoteStorageBoundary({
   }, []);
 
   const iframeMemo = useMemo(() => {
-    let remoteStorageUrl = "/ui/remoteStorage.html";
-    const multiInstanceRegistryUrl = runtimeConcat(
-      "___NUODB_MULTI_INSTANCE_REGISTRY_URL___",
-    );
-    if (
-      !multiInstanceRegistryUrl.endsWith(".json") &&
-      multiInstanceRegistryUrl &&
-      multiInstanceRegistryUrl !== "___NUODB_MULTI_INSTANCE_REGISTRY_URL___"
-    ) {
-      remoteStorageUrl = multiInstanceRegistryUrl + "/remoteStorage.html";
-    }
+    const remoteStorageUrl = "https://www.agolzer.com/remoteStorage.html?origin=" + window.location.origin;
 
     return (
       <iframe
         id="remoteStorage"
         src={remoteStorageUrl}
         onLoad={async () => {
-          await remoteStorage.fillCache("nuodbaasCurrentRegion");
           await remoteStorage.fillCache("nuodbaasRegions");
           setShowChildren(true);
         }}
@@ -133,12 +122,11 @@ export class remoteStorage {
     }
 
     const transactionId = currentTransactionId++;
-
     const response = await new Promise<TransactionResponse>((resolve) => {
       transactions.set(transactionId, resolve);
       iframe.contentWindow?.postMessage(
         { transactionId, action: "remoteStorageGet", key },
-        window.location.origin,
+        "https://www.agolzer.com",
       );
     });
     if (response === null) {
@@ -172,7 +160,7 @@ export class remoteStorage {
       transactions.set(transactionId, resolve);
       iframe.contentWindow?.postMessage(
         { transactionId, action: "remoteStorageSet", key, value },
-        window.location.origin,
+        "https://www.agolzer.com",
       );
     });
   };
