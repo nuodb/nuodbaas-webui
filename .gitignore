@@ -6,6 +6,7 @@ ui/coverage
 ui/public/images/material-icons.woff
 ui/public/images/material-icons.woff2
 ui/public/images/material-icons.ttf
+ui/.env
 ui-test/node_modules
 ui-test/target
 ui-test/test-results
