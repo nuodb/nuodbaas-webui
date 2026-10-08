@@ -1,7 +1,7 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { test } from "@playwright/test";
-const fs = require("fs");
+import fs from "fs";
 
 test.describe("global setup", () => {
   test("setup coverage", async ({ page }) => {

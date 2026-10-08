@@ -222,7 +222,10 @@ export default class Auth {
           { expiresIn: "24h" },
           {
             auth: { username, password },
-            headers: { "Content-Type": "application/json", ...this.getHeaders() },
+            headers: {
+              "Content-Type": "application/json",
+              ...this.getHeaders(),
+            },
           },
         )
         .then((response) => {
@@ -403,10 +406,9 @@ export default class Auth {
         localStorage.setItem("credentials", JSON.stringify(credentials));
       } else {
         localStorage.removeItem("credentials");
-        Rest.post("/logout", {})
-          .catch(() => {
-            //TODO(agr22): Ignore errors until it is guaranteed that all control plane servers support the /logout operation
-          });
+        Rest.post("/logout", {}).catch(() => {
+          //TODO(agr22): Ignore errors until it is guaranteed that all control plane servers support the /logout operation
+        });
       }
     } else {
       // fallback for non-browser environments (i.e. Playwright tests)
@@ -416,16 +418,14 @@ export default class Auth {
 
   static getHeaders(): TempAny {
     const ret = {
-        "X-Client-Version": import.meta.env.REACT_APP_VERSION
+      "X-Client-Version": import.meta.env.REACT_APP_VERSION,
     };
 
     const credentials = this.getCredentials();
     if (!credentials || !credentials.token || credentials.token === "cookie") {
       return ret;
     } else {
-      return {...ret,
-        Authorization: "Bearer " + credentials.token
-      };
+      return { ...ret, Authorization: "Bearer " + credentials.token };
     }
   }
 

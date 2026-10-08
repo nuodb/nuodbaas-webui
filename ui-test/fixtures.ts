@@ -2,7 +2,7 @@
 import { test as base, type Page } from "@playwright/test";
 import { cleanupResources } from "./helpers/api";
 import { loginRest, loginViaUI } from "./helpers/ui";
-const fs = require("fs");
+import fs from "fs";
 
 // ---------------------------------------------------------------------------
 // Extended test fixtures
