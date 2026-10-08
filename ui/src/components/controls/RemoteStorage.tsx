@@ -90,12 +90,17 @@ export function RemoteStorageBoundary({
       <iframe
         id="remoteStorage"
         src={remoteStorageUrl}
-        onLoad={async () => {
-          await remoteStorage.fillCache("nuodbaasCurrentRegion");
-          await remoteStorage.fillCache("nuodbaasRegions");
-          setShowChildren(true);
-        }}
         style={{ display: "none" }}
+        nonce="___NONCE___"
+        onLoad={async () => {
+          try {
+            await remoteStorage.fillCache("nuodbaasCurrentRegion");
+            await remoteStorage.fillCache("nuodbaasRegions");
+            setShowChildren(true);
+          } catch (error) {
+            console.error("Failed to fill cache:", error);
+          }
+        }}
       ></iframe>
     );
   }, []);
