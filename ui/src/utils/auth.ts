@@ -418,7 +418,7 @@ export default class Auth {
 
   static getHeaders(): TempAny {
     const ret = {
-      "X-Client-Version": import.meta.env.REACT_APP_VERSION,
+      "X-Client-Version": import.meta.env?.REACT_APP_VERSION || "Unknown",
     };
 
     const credentials = this.getCredentials();
