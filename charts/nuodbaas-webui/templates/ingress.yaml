@@ -37,7 +37,7 @@ spec:
     {{- range .Values.nuodbaasWebui.ingress.tls }}
     - hosts:
         {{- range .hosts }}
-        - {{ . | quote }}
+        - {{ tpl . $ | quote }}
         {{- end }}
       secretName: {{ .secretName }}
     {{- end }}
@@ -64,7 +64,7 @@ spec:
               {{- include "nuodbaas-webui.ingress.backend" $ | nindent 14 }}
           {{- end }}
     {{- range .Values.nuodbaasWebui.ingress.hosts }}
-    - host: {{ .host | quote }}
+    - host: {{ tpl .host $ | quote }}
       http:
         paths:
           {{- range .paths }}
