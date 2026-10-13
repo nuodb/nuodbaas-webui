@@ -218,7 +218,7 @@ export default class Auth {
     return new Promise((resolve) => {
       axios
         .post(
-          Auth.getNuodbCpRestUrl("login"),
+          Auth.getNuodbCpRestUrl("login?useCookie=true"),
           { expiresIn: "24h" },
           {
             auth: { username, password },
@@ -418,6 +418,7 @@ export default class Auth {
 
   static getHeaders(): TempAny {
     const ret = {
+      "X-Client-Name": "NuoDBaaS-WebUI",
       "X-Client-Version": import.meta.env?.REACT_APP_VERSION || "Unknown",
     };
 
