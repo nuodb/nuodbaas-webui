@@ -423,7 +423,7 @@ export default class Auth {
     };
 
     const credentials = this.getCredentials();
-    if (!credentials || !credentials.token || credentials.token === "cookie") {
+    if (!credentials || !credentials.token) {
       return ret;
     } else {
       return { ...ret, Authorization: "Bearer " + credentials.token };
