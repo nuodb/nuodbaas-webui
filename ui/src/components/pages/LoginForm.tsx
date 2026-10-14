@@ -64,7 +64,7 @@ function LoginForm({ setIsLoggedIn, regions, t }: Props) {
       try {
         const data = await Rest.get(
           `/login/providers/${encodeURIComponent(provider)}/token${
-            window.location.search
+            window.location.search + "&useCookie=true"
           }`,
         );
         handleLoginSuccess(data, provider);
