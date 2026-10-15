@@ -229,11 +229,7 @@ export default class Auth {
           },
         )
         .then((response) => {
-          if (
-            response.data &&
-            response.data.token &&
-            response.data.expiresAtTime
-          ) {
+          if (response.data && response.data.expiresAtTime) {
             this.setCredentials({
               token: response.data.token,
               expiresAtTime: response.data.expiresAtTime,
