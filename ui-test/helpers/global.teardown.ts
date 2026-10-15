@@ -1,10 +1,10 @@
 // (C) Copyright 2026 Dassault Systemes SE.  All Rights Reserved.
 
 import { test } from "@playwright/test";
-const fs = require("fs");
-const MCR = require("monocart-coverage-reports");
-const { Readable } = require("stream");
-const { finished } = require("stream/promises");
+import fs from "fs";
+import MCR from "monocart-coverage-reports";
+import { Readable } from "stream";
+import { finished } from "stream/promises";
 
 test.describe("global teardown", () => {
   test.setTimeout(90000);

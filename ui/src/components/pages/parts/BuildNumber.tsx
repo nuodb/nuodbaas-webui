@@ -7,7 +7,7 @@ export default function BuildNumber({ className }: BuildNumberProps) {
   return (
     <div className={className}>
       Build:&nbsp;
-      {import.meta.env.REACT_APP_GIT_SHA && import.meta.env.REACT_APP_GIT_SHA}
+      {import.meta.env?.REACT_APP_VERSION}-{import.meta.env?.REACT_APP_GIT_SHA}
       &nbsp;/&nbsp;
       {BUILD_DATE}
     </div>

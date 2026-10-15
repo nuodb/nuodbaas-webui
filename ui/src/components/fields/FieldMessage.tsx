@@ -20,7 +20,7 @@ export default function FieldMessage(props: FieldProps): ReactNode {
   function edit(): ReactNode {
     const { prefix, parameter } = props;
     console.error("ERROR: Invalid object", prefix, parameter);
-    if (import.meta.env.PROD === false) {
+    if (import.meta.env?.PROD === false) {
       return <h1 key={props.prefix}>{props.message}</h1>;
     } else {
       return null;

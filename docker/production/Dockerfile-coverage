@@ -2,6 +2,7 @@
 
 FROM node:18-alpine AS build-ui
 WORKDIR /app/
+ARG REACT_APP_VERSION
 ARG REACT_APP_GIT_SHA
 COPY ui/ /app/
 RUN npm install

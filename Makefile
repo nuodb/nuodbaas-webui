@@ -28,8 +28,7 @@ PREVIOUS_CONTEXT := $(shell pwd)/tmp/previous-context
 
 IMG_REPO := nuodbaas-webui
 VERSION := $(shell grep -e "^appVersion:" charts/nuodbaas-webui/Chart.yaml | cut -d \" -f 2 | cut -d - -f 1)
-SHA := $(shell git rev-parse --short HEAD)
-VERSION_SHA ?= ${VERSION}-${SHA}
+GIT_SHA := $(shell git rev-parse --short HEAD)
 UNCOMMITTED := $(shell git status --porcelain)
 
 MVN_TEST ?= ResourcesTest
@@ -60,12 +59,12 @@ all: run-integration-tests copyright ## build, test + deploy everything
 
 .PHONY: build-image
 build-image:  ## build UI and create Docker image
-	@docker build -t "${IMG_REPO}:latest" --build-arg "REACT_APP_GIT_SHA=${VERSION_SHA}" -f docker/production/Dockerfile .
+	@docker build -t "${IMG_REPO}:latest" --build-arg "REACT_APP_VERSION=${VERSION}" --build-arg "REACT_APP_GIT_SHA=${GIT_SHA}" -f docker/production/Dockerfile .
 	@docker build --target build-server-multiplatform -t "nuodbaas-webui:build-server-multiplatform" -f docker/production/Dockerfile .
 
 .PHONY: build-coverage
 build-coverage:  ## build code coverage UI and create Docker image
-	@docker build -t "${IMG_REPO}:coverage" --build-arg "REACT_APP_GIT_SHA=${VERSION_SHA}" -f docker/production/Dockerfile-coverage .
+	@docker build -t "${IMG_REPO}:coverage" --build-arg "REACT_APP_VERSION=${VERSION}" --build-arg "REACT_APP_GIT_SHA=${GIT_SHA}" -f docker/production/Dockerfile-coverage .
 
 .PHONY: copyright
 copyright: ### check copyrights
@@ -407,6 +406,8 @@ run-integration-tests: build-image setup-integration-tests ## run integration te
 
 .PHONY: start-dev
 start-dev: stop-dev setup-integration-tests ## launch WebUI/ControlPlane/Proxy for development environment
+	echo "REACT_APP_VERSION=${VERSION}" > ui/.env
+	echo "REACT_APP_GIT_SHA=${GIT_SHA}" >> ui/.env
 	(cd ui && npm install && npm start &)
 	docker run --rm -d --name nuodb-webui-dev \
 		-v `pwd`/docker/development/default.conf:/etc/nginx/conf.d/default.conf \

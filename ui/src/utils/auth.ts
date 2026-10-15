@@ -3,6 +3,7 @@ import axios from "axios";
 import { RegionSetting, RegionSettings, TempAny } from "./types";
 import { remoteStorage } from "../components/controls/RemoteStorage";
 import { runtimeConcat } from "./utils";
+import { Rest } from "../components/pages/parts/Rest";
 
 /**
  * Authenticates users and stores info in localStorage "credentials".
@@ -217,19 +218,18 @@ export default class Auth {
     return new Promise((resolve) => {
       axios
         .post(
-          Auth.getNuodbCpRestUrl("login"),
+          Auth.getNuodbCpRestUrl("login?useCookie=true"),
           { expiresIn: "24h" },
           {
             auth: { username, password },
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              ...this.getHeaders(),
+            },
           },
         )
         .then((response) => {
-          if (
-            response.data &&
-            response.data.token &&
-            response.data.expiresAtTime
-          ) {
+          if (response.data && response.data.expiresAtTime) {
             this.setCredentials({
               token: response.data.token,
               expiresAtTime: response.data.expiresAtTime,
@@ -402,6 +402,9 @@ export default class Auth {
         localStorage.setItem("credentials", JSON.stringify(credentials));
       } else {
         localStorage.removeItem("credentials");
+        Rest.post("/logout", {}).catch(() => {
+          //TODO(agr22): Ignore errors until it is guaranteed that all control plane servers support the /logout operation
+        });
       }
     } else {
       // fallback for non-browser environments (i.e. Playwright tests)
@@ -410,11 +413,16 @@ export default class Auth {
   }
 
   static getHeaders(): TempAny {
+    const ret = {
+      "X-Client-Name": "NuoDBaaS-WebUI",
+      "X-Client-Version": import.meta.env?.REACT_APP_VERSION || "Unknown",
+    };
+
     const credentials = this.getCredentials();
-    if (!credentials) {
-      return {};
+    if (!credentials || !credentials.token) {
+      return ret;
     } else {
-      return { Authorization: "Bearer " + credentials.token };
+      return { ...ret, Authorization: "Bearer " + credentials.token };
     }
   }
 

@@ -3,6 +3,7 @@
   "name": "rest-ui",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "dependencies": {
     "monocart-coverage-reports": "^2.12.9",
     "typescript": "^5.9.3",
@@ -35,7 +36,7 @@
   "homepage": "/",
   "devDependencies": {
     "@playwright/test": "^1.63.0",
-    "@types/node": "^25.5.2",
+    "@types/node": "^25.9.9",
     "prettier": "^3.8.3"
   },
   "nyc": {
