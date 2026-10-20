@@ -157,7 +157,7 @@ export default function SqlSocket(
     try {
       const response = await axios.post(
         Auth.getNuodbSqlRestUrl(
-          "/import/sql/" +
+          "/import/sql" +
             getOrgProjDbSchemaUrl() +
             "?progressKey=" +
             progressKey,
@@ -185,7 +185,7 @@ export default function SqlSocket(
   async function sqlSimpleImport(body: string): Promise<SqlImportResponseType> {
     try {
       const response = await axios.post(
-        Auth.getNuodbSqlRestUrl("/import/sql/" + getOrgProjDbSchemaUrl()),
+        Auth.getNuodbSqlRestUrl("/import/sql" + getOrgProjDbSchemaUrl()),
         body,
         {
           headers: {
