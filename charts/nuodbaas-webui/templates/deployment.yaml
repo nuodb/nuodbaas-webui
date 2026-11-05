@@ -74,7 +74,7 @@ spec:
               value: >-
                 {{ $hosts := list -}}
                 {{- range .Values.nuodbaasWebui.ingress.hosts -}}
-                  {{- $hosts = append $hosts .host -}}
+                  {{- $hosts = append $hosts (tpl .host $) -}}
                 {{- end -}}
                 {{- join "," $hosts -}}
             {{- end }}
